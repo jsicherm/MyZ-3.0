@@ -3,7 +3,6 @@
  */
 package myz.mobs.pathing;
 
-import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityCreature;
 import net.minecraft.server.v1_6_R3.EntityLiving;
 import net.minecraft.server.v1_6_R3.MathHelper;
@@ -27,69 +26,72 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 
 	public PathfinderGoalZombieAttack(EntityCreature entitycreature, Class<? extends EntityLiving> oclass, double d0, boolean flag) {
 		this(entitycreature, d0, flag);
-		this.g = oclass;
+		g = oclass;
 	}
 
 	public PathfinderGoalZombieAttack(EntityCreature entitycreature, double d0, boolean flag) {
-		this.b = entitycreature;
-		this.a = entitycreature.world;
-		this.d = d0;
-		this.e = flag;
+		b = entitycreature;
+		a = entitycreature.world;
+		d = d0;
+		e = flag;
 		this.a(3);
 	}
 
+	@Override
 	public boolean a() {
-		EntityLiving entityliving = this.b.getGoalTarget();
+		EntityLiving entityliving = b.getGoalTarget();
 
-		if (entityliving == null) {
+		if (entityliving == null)
 			return false;
-		} else if (!entityliving.isAlive()) {
+		else if (!entityliving.isAlive())
 			return false;
-		} else if (this.g != null && !this.g.isAssignableFrom(entityliving.getClass())) {
+		else if (g != null && !g.isAssignableFrom(entityliving.getClass()))
 			return false;
-		} else {
-			this.f = this.b.getNavigation().a(entityliving);
-			return this.f != null;
+		else {
+			f = b.getNavigation().a(entityliving);
+			return f != null;
 		}
 	}
 
+	@Override
 	public boolean b() {
-		EntityLiving entityliving = this.b.getGoalTarget();
+		EntityLiving entityliving = b.getGoalTarget();
 
-		return entityliving == null ? false : (!entityliving.isAlive() ? false : (!this.e ? !this.b.getNavigation().g() : this.b.b(
-				MathHelper.floor(entityliving.locX), MathHelper.floor(entityliving.locY), MathHelper.floor(entityliving.locZ))));
+		return entityliving == null ? false : !entityliving.isAlive() ? false : !e ? !b.getNavigation().g() : b.b(
+				MathHelper.floor(entityliving.locX), MathHelper.floor(entityliving.locY), MathHelper.floor(entityliving.locZ));
 	}
 
+	@Override
 	public void c() {
-		this.b.getNavigation().a(this.f, this.d);
-		this.h = 0;
+		b.getNavigation().a(f, d);
+		h = 0;
 	}
 
+	@Override
 	public void d() {
-		this.b.getNavigation().h();
+		b.getNavigation().h();
 	}
 
+	@Override
 	public void e() {
-		EntityLiving entityliving = this.b.getGoalTarget();
+		EntityLiving entityliving = b.getGoalTarget();
 
-		this.b.getControllerLook().a(entityliving, 30.0F, 30.0F);
-		if ((this.e || this.b.getEntitySenses().canSee(entityliving)) && --this.h <= 0) {
-			this.h = 4 + this.b.aD().nextInt(7);
-			this.b.getNavigation().a((Entity) entityliving, this.d);
+		b.getControllerLook().a(entityliving, 30.0F, 30.0F);
+		if ((e || b.getEntitySenses().canSee(entityliving)) && --h <= 0) {
+			h = 4 + b.aD().nextInt(7);
+			b.getNavigation().a(entityliving, d);
 		}
 
-		this.c = Math.max(this.c - 1, 0);
-		double d0 = (double) (this.b.width * 2.0F * this.b.width * 2.0F + entityliving.width);
+		c = Math.max(c - 1, 0);
+		double d0 = b.width * 2.0F * b.width * 2.0F + entityliving.width;
 
-		if (this.b.e(entityliving.locX, entityliving.boundingBox.b, entityliving.locZ) <= d0) {
-			if (this.c <= 0) {
-				this.c = 20;
-				if (this.b.aZ() != null) {
-					this.b.aV();
-				}
+		if (b.e(entityliving.locX, entityliving.boundingBox.b, entityliving.locZ) <= d0)
+			if (c <= 0) {
+				c = 20;
+				if (b.aZ() != null)
+					b.aV();
 
-				this.b.m(entityliving);
+				b.m(entityliving);
 			}
-		}
 	}
 }

@@ -8,6 +8,8 @@ import java.util.List;
 
 import myz.MyZ;
 import myz.API.PlayerFriendEvent;
+import myz.Scheduling.Sync;
+import myz.Support.Messenger;
 import myz.Support.PlayerData;
 
 import org.bukkit.Bukkit;
@@ -182,5 +184,18 @@ public class Utilities {
 				if (p.getLocation().distanceSquared(player.getLocation()) <= d2)
 					players.add(p);
 		return players;
+	}
+
+	/**
+	 * Begin a safe logout sequence for the specified player.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+	public static void startSafeLogout(Player player) {
+		if (!Sync.getSafeLogoutPlayers().containsKey(player.getName())) {
+			Messenger.sendConfigMessage(player, "safe_logout.beginning");
+			Sync.addSafeLogoutPlayer(player);
+		}
 	}
 }

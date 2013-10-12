@@ -74,9 +74,8 @@ public class PathingSupport {
 			}
 		}
 
-		if (entity instanceof EntityInsentient) {
+		if (entity instanceof EntityInsentient)
 			((EntityInsentient) entity).setGoalTarget(entityhuman);
-		}
 		return entityhuman;
 	}
 

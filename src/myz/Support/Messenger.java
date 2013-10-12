@@ -91,12 +91,13 @@ public class Messenger {
 	 */
 	public static String getConfigMessage(String uncolored_config_message, Object... variables) {
 		String message = MyZ.instance.getConfig().getString("localizable." + uncolored_config_message);
-		try {
-			message = String.format(message, variables);
-		} catch (MissingFormatArgumentException exc) {
-			sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat.");
-			message = message.replaceAll("%s", "");
-		}
+		if (variables != null)
+			try {
+				message = String.format(message, variables);
+			} catch (MissingFormatArgumentException exc) {
+				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat.");
+				message = message.replaceAll("%s", "");
+			}
 		return ChatColor.translateAlternateColorCodes('&', message);
 	}
 }

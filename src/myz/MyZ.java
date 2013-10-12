@@ -30,11 +30,13 @@ import myz.Listeners.ConsumeFood;
 import myz.Listeners.EntityHurtPlayer;
 import myz.Listeners.EntitySpawn;
 import myz.Listeners.JoinQuit;
+import myz.Listeners.Movement;
 import myz.Listeners.PlayerDeath;
 import myz.Listeners.PlayerHurtEntity;
 import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
 import myz.Listeners.ThrowProjectile;
+import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
@@ -109,7 +111,8 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * Register threads.
 		 */
-		getServer().getScheduler().runTaskTimer(this, new aSync(), 20L, 20L);
+		getServer().getScheduler().runTaskTimerAsynchronously(this, new aSync(), 20L, 20L);
+		getServer().getScheduler().runTaskTimer(this, new Sync(), 20L, 20L);
 
 		/*
 		 * Register all listeners.
@@ -129,6 +132,7 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new PlayerSummonGiant(), this);
 		p.registerEvents(new Chat(), this);
 		p.registerEvents(new CancelPlayerEvents(), this);
+		p.registerEvents(new Movement(), this);
 
 		/*
 		 * Register all commands.

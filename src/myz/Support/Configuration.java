@@ -36,11 +36,11 @@ public class Configuration {
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name,
 			radio_color_override, to_prefix, from_prefix;
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
-			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance;
+			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time;
 	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, bandage_heal, food_heal, poison_damage, water_damage,
 			bleed_damage, zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage, pigman_damage;
 	private static List<String> spawnpoints = new ArrayList<String>(), spawn_potion_effects = new ArrayList<String>();
-	private static ItemStack bandage, radio;
+	private static ItemStack bandage, radio, safe_logout_item;
 
 	private static Map<Integer, String> rank_prefix = new HashMap<Integer, String>();
 	private static Map<Integer, ItemStack> ranked_helmet = new HashMap<Integer, ItemStack>();
@@ -67,6 +67,8 @@ public class Configuration {
 		from_prefix = config.getString("localizable.private.from_prefix");
 		radio_name = config.getString("localizable.radio_name");
 		radio = config.getItemStack("radio.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
+		safe_logout_time = config.getInt("safe_logout.time");
+		safe_logout_item = config.getItemStack("safe_logout.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
 		zombie_damage = config.getDouble("mobs.zombie.damage");
 		pigman_damage = config.getDouble("mobs.pigman.damage");
 		giant_damage = config.getDouble("mobs.giant.damage");
@@ -174,6 +176,10 @@ public class Configuration {
 			config.set("localizable.private.from_prefix", "&7From %s:");
 		if (!config.contains("radio.itemstack"))
 			config.set("radio.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
+		if (!config.contains("safe_logout.itemstack"))
+			config.set("safe_logout.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
+		if (!config.contains("safe_logout.time"))
+			config.set("safe_logout.time", 15);
 		if (!config.contains("datastorage.use_server_specific"))
 			config.set("datastorage.use_server_specific", true);
 		if (!config.contains("performance.use_prelogin_kickban"))
@@ -248,6 +254,8 @@ public class Configuration {
 			config.set("localizable.damage.poison_end", "Ah, much better!");
 		if (!config.contains("localizable.kick.come_back"))
 			config.set("localizable.kick.come_back", "&4Grab a drink. Come back in %s seconds.");
+		if (!config.contains("localizable.kick.safe_logout"))
+			config.set("localizable.kick.safe_logout", "&eYou have been safely logged out.");
 		if (!config.contains("localizable.kick.recur"))
 			config.set("localizable.kick.recur", "&4Stop stressing. %s seconds to go.");
 		if (!config.contains("localizable.command.spawn.unable_to_spawn"))
@@ -260,6 +268,10 @@ public class Configuration {
 			config.set("localizable.command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
 		if (!config.contains("localizable.private.no_player"))
 			config.set("localizable.private.no_player", "&4The player could not be found.");
+		if (!config.contains("localizable.safe_logout.cancelled"))
+			config.set("localizable.safe_logout.cancelled", "&4Safe logout cancelled due to movement.");
+		if (!config.contains("localizable.safe_logout.beginning"))
+			config.set("localizable.safe_logout.beginning", "&2Safe logout will occur in:");
 		if (!config.contains("localizable.private.many_players"))
 			config.set("localizable.private.many_players", "&4More than one player was found.");
 		if (!config.contains("localizable.command.spawn.requires_rank"))
@@ -383,6 +395,8 @@ public class Configuration {
 		config.set("spawn.numbered_requires_rank", numbered_spawn_requires_rank);
 
 		config.set("radio.itemstack", radio);
+		config.set("safe_logout.time", safe_logout_time);
+		config.set("safe_logout.itemstack", safe_logout_item);
 		config.set("spawn.default_kit.helmet", ranked_helmet.get(0));
 		config.set("spawn.default_kit.chestplate", ranked_chestplate.get(0));
 		config.set("spawn.default_kit.leggings", ranked_leggings.get(0));
@@ -1090,5 +1104,19 @@ public class Configuration {
 	 */
 	public static int getLocalChatDistance() {
 		return local_chat_distance;
+	}
+
+	/**
+	 * @return the safe_logout_item
+	 */
+	public static ItemStack getSafeLogoutItem() {
+		return safe_logout_item;
+	}
+
+	/**
+	 * @return the safe_logout_time
+	 */
+	public static int getSafeLogoutTime() {
+		return safe_logout_time;
 	}
 }

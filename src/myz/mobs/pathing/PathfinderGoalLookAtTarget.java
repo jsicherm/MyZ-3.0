@@ -24,53 +24,56 @@ public class PathfinderGoalLookAtTarget extends PathfinderGoal {
 	private Class<? extends EntityLiving> f;
 
 	public PathfinderGoalLookAtTarget(EntityInsentient entityinsentient, Class<? extends EntityLiving> oclass, float f) {
-		this.b = entityinsentient;
+		b = entityinsentient;
 		this.f = oclass;
-		this.c = f;
-		this.e = 0.02F;
+		c = f;
+		e = 0.02F;
 		this.a(2);
 	}
 
 	public PathfinderGoalLookAtTarget(EntityInsentient entityinsentient, Class<? extends EntityLiving> oclass, float f, float f1) {
-		this.b = entityinsentient;
+		b = entityinsentient;
 		this.f = oclass;
-		this.c = f;
-		this.e = f1;
+		c = f;
+		e = f1;
 		this.a(2);
 	}
 
+	@Override
 	public boolean a() {
-		if (this.b.aD().nextFloat() >= this.e) {
+		if (b.aD().nextFloat() >= e)
 			return false;
-		} else {
-			if (this.b.getGoalTarget() != null) {
-				this.a = this.b.getGoalTarget();
-			}
+		else {
+			if (b.getGoalTarget() != null)
+				a = b.getGoalTarget();
 
-			if (this.f == EntityHuman.class) {
-				this.a = PathingSupport.findNearbyVulnerablePlayer(this.b);
-			} else {
-				this.a = this.b.world.a(this.f, this.b.boundingBox.grow((double) this.c, 3.0D, (double) this.c), (Entity) this.b);
-			}
+			if (f == EntityHuman.class)
+				a = PathingSupport.findNearbyVulnerablePlayer(b);
+			else
+				a = b.world.a(f, b.boundingBox.grow(c, 3.0D, c), b);
 
-			return this.a != null;
+			return a != null;
 		}
 	}
 
+	@Override
 	public boolean b() {
-		return !this.a.isAlive() ? false : (this.b.e(this.a) > (double) (this.c * this.c) ? false : this.d > 0);
+		return !a.isAlive() ? false : b.e(a) > c * c ? false : d > 0;
 	}
 
+	@Override
 	public void c() {
-		this.d = 40 + this.b.aD().nextInt(40);
+		d = 40 + b.aD().nextInt(40);
 	}
 
+	@Override
 	public void d() {
-		this.a = null;
+		a = null;
 	}
 
+	@Override
 	public void e() {
-		this.b.getControllerLook().a(this.a.locX, this.a.locY + (double) this.a.getHeadHeight(), this.a.locZ, 10.0F, (float) this.b.bp());
-		--this.d;
+		b.getControllerLook().a(a.locX, a.locY + a.getHeadHeight(), a.locZ, 10.0F, b.bp());
+		--d;
 	}
 }

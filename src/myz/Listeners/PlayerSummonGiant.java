@@ -12,7 +12,6 @@ import net.minecraft.server.v1_6_R3.World;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -57,11 +56,10 @@ public class PlayerSummonGiant implements Listener {
 						World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
 						CustomEntityGiantZombie zombie = new CustomEntityGiantZombie(world);
 						zombie.setPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ());
-						boolean b = world.addEntity(zombie);
+						world.addEntity(zombie);
 						// Entity ent = e.getBlockPlaced().getWorld()
 						// .spawnEntity(e.getBlockPlaced().getLocation().add(0,
 						// 3, 0), EntityType.GIANT);
-						System.out.println(b);
 					}
 				}, 10 * 20L);
 			}

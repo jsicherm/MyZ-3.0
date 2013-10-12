@@ -38,7 +38,7 @@ public class BossBar {
 	@SuppressWarnings("deprecation")
 	private static Packet24MobSpawn getMobPacket(String text, Location loc) {
 		Packet24MobSpawn mobPacket = new Packet24MobSpawn();
-		mobPacket.a = (int) ENTITY_ID; // Entity ID
+		mobPacket.a = ENTITY_ID; // Entity ID
 		mobPacket.b = (byte) EntityType.WITHER.getTypeId(); // Mob type (ID: 64)
 		mobPacket.c = (int) Math.floor(loc.getBlockX() * 32.0D); // X position
 		mobPacket.d = (int) Math.floor(loc.getBlockY() * 32.0D); // Y position
@@ -68,7 +68,7 @@ public class BossBar {
 
 	private static Packet40EntityMetadata getMetadataPacket(DataWatcher watcher) {
 		Packet40EntityMetadata metaPacket = new Packet40EntityMetadata();
-		metaPacket.a = (int) ENTITY_ID;
+		metaPacket.a = ENTITY_ID;
 		try {
 			Field b = Packet40EntityMetadata.class.getDeclaredField("b");
 			b.setAccessible(true);
@@ -82,8 +82,8 @@ public class BossBar {
 	private static DataWatcher getWatcher(String text, int health) {
 		DataWatcher watcher = new DataWatcher();
 		watcher.a(0, (Byte) (byte) 0x20); // Flags, 0x20 = invisible
-		watcher.a(6, (Float) (float) health);
-		watcher.a(10, (String) text); // Entity name
+		watcher.a(6, (float) health);
+		watcher.a(10, text); // Entity name
 		watcher.a(11, (Byte) (byte) 1); // Show name, 1 = show, 0 = don't show
 		// watcher.a(16, (Integer) (int) health); //Wither health, 300 = full
 		// health
@@ -111,21 +111,20 @@ public class BossBar {
 		sendPacket(player, mobPacket);
 		hasHealthBar.put(player.getName(), true);
 		new BukkitRunnable() {
-			int health = (loadUp ? 0 : 300);
+			int health = loadUp ? 0 : 300;
 
 			@Override
 			public void run() {
-				if ((loadUp ? health < 300 : health > 0)) {
+				if (loadUp ? health < 300 : health > 0) {
 					DataWatcher watcher = getWatcher(text, health);
 					Packet40EntityMetadata metaPacket = getMetadataPacket(watcher);
 					sendPacket(player, metaPacket);
-					if (loadUp) {
+					if (loadUp)
 						health += healthAdd;
-					} else {
+					else
 						health -= healthAdd;
-					}
 				} else {
-					DataWatcher watcher = getWatcher(text, (loadUp ? 300 : 0));
+					DataWatcher watcher = getWatcher(text, loadUp ? 300 : 0);
 					Packet40EntityMetadata metaPacket = getMetadataPacket(watcher);
 					Packet29DestroyEntity destroyEntityPacket = getDestroyEntityPacket();
 					sendPacket(player, metaPacket);
@@ -146,7 +145,7 @@ public class BossBar {
 							hasHealthBar.put(player.getName(), false);
 						}
 					}.runTaskLater(MyZ.instance, 40L);
-					this.cancel();
+					cancel();
 				}
 			}
 		}.runTaskTimer(MyZ.instance, delay, delay);
