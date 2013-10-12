@@ -53,6 +53,7 @@
         <version>2.3.1</version>
         <configuration>
           <finalName>MyZ 3</finalName>
+          <outputDirectory>D:/Users/Jordan/Minecraft/Server/plugins/</outputDirectory>
         </configuration>
       </plugin>
       <plugin>

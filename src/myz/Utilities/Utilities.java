@@ -4,6 +4,7 @@
 package myz.Utilities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import myz.MyZ;
@@ -11,12 +12,16 @@ import myz.API.PlayerFriendEvent;
 import myz.Scheduling.Sync;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.mobs.CustomEntityZombie;
+import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -197,5 +202,41 @@ public class Utilities {
 			Messenger.sendConfigMessage(player, "safe_logout.beginning");
 			Sync.addSafeLogoutPlayer(player);
 		}
+	}
+
+	/**
+	 * Spawn in a zombified version of a player.
+	 * 
+	 * @param player
+	 *            The player to zombify.
+	 */
+	public static void spawnPlayerZombie(Player player) {
+		ItemStack head = playerSkull(player.getName());
+
+		World world = ((CraftWorld) player.getWorld()).getHandle();
+		CustomEntityZombie zombie = new CustomEntityZombie(world);
+		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
+		world.addEntity(zombie);
+		
+		zombie.setBaby(false);
+		zombie.setVillager(false);
+		((Zombie) zombie.getBukkitEntity()).setRemoveWhenFarAway(true);
+		zombie.setCustomName(player.getName());
+		((Zombie) zombie.getBukkitEntity()).setCanPickupItems(false);
+
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setHelmet(head);
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setHelmetDropChance(0f);
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setChestplate(player.getEquipment().getChestplate());
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setChestplateDropChance(1f);
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setLeggings(player.getEquipment().getLeggings());
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setLeggingsDropChance(1f);
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setBoots(player.getEquipment().getBoots());
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setBootsDropChance(1f);
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setItemInHand(player.getEquipment().getItemInHand());
+		((Zombie) zombie.getBukkitEntity()).getEquipment().setItemInHandDropChance(0f);
+
+		List<ItemStack> inventory = new ArrayList<ItemStack>(Arrays.asList(player.getInventory().getContents()));
+		inventory.add(player.getEquipment().getHelmet());
+		zombie.setInventory(inventory);
 	}
 }

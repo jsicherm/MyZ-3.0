@@ -4,6 +4,8 @@
 package myz.mobs;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import myz.Support.Configuration;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
@@ -37,6 +39,8 @@ import org.bukkit.craftbukkit.v1_6_R3.util.UnsafeList;
  * 
  */
 public class CustomEntityZombie extends EntityZombie {
+
+	protected List<org.bukkit.inventory.ItemStack> inventory = new ArrayList<org.bukkit.inventory.ItemStack>();
 
 	public CustomEntityZombie(World world) {
 		super(world);
@@ -157,5 +161,36 @@ public class CustomEntityZombie extends EntityZombie {
 		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
 
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
+	}
+
+	/**
+	 * Set this zombie's inventory contents. Generally contains a player's
+	 * inventory plus their helmet and subtract their item in hand.
+	 * 
+	 * @param inventory
+	 *            The list of items to set.
+	 */
+	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
+		this.inventory = inventory;
+	}
+
+	private void emptyInventory() {
+		for (org.bukkit.inventory.ItemStack item : inventory) {
+			if (item != null)
+				getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
+		}
+		inventory.clear();
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		super.die(source);
+		emptyInventory();
+	}
+
+	@Override
+	public void die() {
+		super.die();
+		emptyInventory();
 	}
 }

@@ -53,6 +53,8 @@ public class PlayerSummonGiant implements Listener {
 					@Override
 					public void run() {
 						e.getBlockPlaced().setType(Material.AIR);
+						// TODO Replace with non-NMS code if
+						// possible.
 						World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
 						CustomEntityGiantZombie zombie = new CustomEntityGiantZombie(world);
 						zombie.setPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ());

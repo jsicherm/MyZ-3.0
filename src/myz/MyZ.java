@@ -99,12 +99,15 @@ public class MyZ extends JavaPlugin {
 			addPlayer(player);
 			PlayerData data = null;
 			if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
-				if (data == null)
+				if (data == null && Configuration.usePlayerData()) {
 					PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(), 0,
 							Configuration.getMaxThirstLevel());
-				if (sql.isConnected() && !sql.isIn(player.getName()))
+					putPlayerAtSpawn(player, false);
+				}
+				if (sql.isConnected() && !sql.isIn(player.getName())) {
 					sql.add(player);
-				putPlayerAtSpawn(player, false);
+					putPlayerAtSpawn(player, false);
+				}
 			}
 		}
 
@@ -334,12 +337,14 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * Add the player to the dataset if they're not in it yet. If they weren't in it, put them at the spawn.
 		 */
-		if (playerdata == null || sql.isConnected() && !sql.isIn(player.getName())) {
+		if (playerdata == null && Configuration.usePlayerData()) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
 					new ArrayList<String>(), 0, 20);
 			putPlayerAtSpawn(player, false);
-			if (sql.isConnected())
-				sql.add(player.getName());
+		}
+		if (sql.isConnected() && !sql.isIn(player.getName())) {
+			sql.add(player);
+			putPlayerAtSpawn(player, false);
 		}
 
 		setThirst(player);
@@ -352,7 +357,7 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * Teleport the player back to the world spawn if they were killed by an NPC logout.
 		 */
-		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getName(), "wasKilledNPC"))
+		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getName(), "wasNPCKilled"))
 			putPlayerAtSpawn(player, true);
 	}
 
@@ -395,7 +400,7 @@ public class MyZ extends JavaPlugin {
 				data.setAutosave(true, true);
 			}
 			if (sql.isConnected()) {
-				sql.set(player.getName(), "friends", "");
+				sql.set(player.getName(), "friends", "''");
 				sql.set(player.getName(), "deaths", 0);
 				sql.set(player.getName(), "giant_kills", 0);
 				sql.set(player.getName(), "giant_kills_life", 0);
@@ -427,6 +432,7 @@ public class MyZ extends JavaPlugin {
 		wipeBuffs(player);
 
 		if (wasDeath) {
+			BossBar.
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null)
 				data.setDeaths(data.getDeaths() + 1);
@@ -436,7 +442,7 @@ public class MyZ extends JavaPlugin {
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
 			if (Configuration.isKickBan())
-				if (data != null && data.getRank() > 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") > 0) {
+				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0) {
 					removePlayer(player);
 					if (data != null)
 						data.setTimeOfKickban(System.currentTimeMillis());
