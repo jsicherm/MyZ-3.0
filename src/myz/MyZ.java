@@ -101,9 +101,9 @@ public class MyZ extends JavaPlugin {
 			if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 				if (data == null)
 					PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(), 0,
-							20);
+							Configuration.getMaxThirstLevel());
 				if (sql.isConnected() && !sql.isIn(player.getName()))
-					sql.add(player.getName());
+					sql.add(player);
 				putPlayerAtSpawn(player, false);
 			}
 		}
@@ -366,9 +366,11 @@ public class MyZ extends JavaPlugin {
 	 */
 	public boolean removePlayer(Player player) {
 		PlayerData data = PlayerData.getDataFor(player);
-		data.setBleeding(false);
-		data.setPoisoned(false);
-		data.setThirst(20);
+		if (data != null) {
+			data.setBleeding(false);
+			data.setPoisoned(false);
+			data.setThirst(20);
+		}
 		if (sql.isConnected()) {
 			sql.set(player.getName(), "isBleeding", false);
 			sql.set(player.getName(), "isPoisoned", false);

@@ -35,7 +35,7 @@ public class aSync implements Runnable {
 		ticks++;
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (player.getGameMode() == GameMode.CREATIVE)
+			if (player.getGameMode() == GameMode.CREATIVE || Configuration.isInLobby(player))
 				continue;
 
 			player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);

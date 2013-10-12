@@ -96,7 +96,7 @@ public class Configuration {
 		lobby_max = config.getString("lobby.max");
 		host = config.getString("mysql.host");
 		database = config.getString("mysql.database");
-		user = config.getString("mysql.username");
+		user = config.getString("mysql.user");
 		password = config.getString("mysql.password");
 		port = config.getInt("mysql.port");
 		save_data = config.getBoolean("ranks.save_data_of_unranked_players");

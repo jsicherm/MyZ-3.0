@@ -7,9 +7,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import myz.MyZ;
+import myz.Support.Configuration;
 import myz.Support.Messenger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 public class SQLManager {
 
@@ -40,15 +43,10 @@ public class SQLManager {
 		this.password = password;
 		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
 		connect();
-		setup();
 	}
 
-	public void executeQuery(String query) {
-		try {
-			sql.createStatement().executeUpdate(query);
-		} catch (SQLException e) {
-			// Unable to do. Dispose silently.
-		}
+	public void executeQuery(String query) throws SQLException {
+		sql.createStatement().executeUpdate(query);
 	}
 
 	/**
@@ -63,6 +61,7 @@ public class SQLManager {
 			sql = DriverManager.getConnection(url, username, password);
 			connected = true;
 			Messenger.sendConsoleMessage(ChatColor.GREEN + "Connection successful.");
+			setup();
 		} catch (Exception e) {
 			// Couldn't connect to the database
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to connect.");
@@ -97,8 +96,9 @@ public class SQLManager {
 		if (!isConnected())
 			return;
 		try {
-			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED, zombie_kills SMALLINT UNSIGNED, pigman_kills SMALLINT UNSIGNED, giant_kills SMALLINT UNSIGNED, player_kills_life SMALLINT UNSIGNED, zombie_kills_life SMALLINT UNSIGNED, pigman_kills_life SMALLINT UNSIGNED, giant_kills_life SMALLINT UNSIGNED, plays SMALLINT UNSIGNED, deaths SMALLINT UNSIGNED, rank SMALLINT UNSIGNED, isBleeding TINYINT(1), isPoisoned TINYINT(1), wasNPCKilled TINYINT(1), timeOfKickban BIGINT(15), friends VARCHAR(255), heals_life SMALLINT UNSIGNED, thirst SMALLINT UNSIGNED");
+			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED, zombie_kills SMALLINT UNSIGNED, pigman_kills SMALLINT UNSIGNED, giant_kills SMALLINT UNSIGNED, player_kills_life SMALLINT UNSIGNED, zombie_kills_life SMALLINT UNSIGNED, pigman_kills_life SMALLINT UNSIGNED, giant_kills_life SMALLINT UNSIGNED, plays SMALLINT UNSIGNED, deaths SMALLINT UNSIGNED, rank SMALLINT UNSIGNED, isBleeding TINYINT(1), isPoisoned TINYINT(1), wasNPCKilled TINYINT(1), timeOfKickban BIGINT(15), friends VARCHAR(255), heals_life SMALLINT UNSIGNED, thirst SMALLINT UNSIGNED)");
 		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
 		}
 	}
 
@@ -116,12 +116,18 @@ public class SQLManager {
 	/**
 	 * Add a player to the table if they're not currently in.
 	 * 
-	 * @param user
-	 *            The username to add
+	 * @param player
+	 *            The user to add
 	 */
-	public void add(String user) {
-		if (!isIn(user))
-			executeQuery("INSERT INTO playerdata (username) VALUES ('" + user + "')");
+	public void add(Player player) {
+		if (!isIn(player.getName())) {
+			try {
+				executeQuery("INSERT INTO playerdata (username) VALUES ('" + player.getName() + "', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "
+						+ MyZ.instance.getRankFor(player) + ", 0, 0, 0, 0, '', " + Configuration.getMaxThirstLevel() + ")");
+			} catch (Exception e) {
+				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
+			}
+		}
 	}
 
 	/**
@@ -136,7 +142,8 @@ public class SQLManager {
 			return null;
 		try {
 			return sql.createStatement().executeQuery(cmd);
-		} catch (Exception exc) {
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL query command '" + cmd + "': " + e.getMessage());
 			return null;
 		}
 	}
@@ -154,13 +161,9 @@ public class SQLManager {
 		try {
 			return query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1").next();
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL isin command: " + e.getMessage());
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -180,11 +183,7 @@ public class SQLManager {
 					if (rs.getString("username") != null)
 						list.add(rs.getString("username"));
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
 		}
 		return list;
 	}
@@ -200,7 +199,12 @@ public class SQLManager {
 	 *            The value
 	 */
 	public void set(String name, String field, Object value) {
-		executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + name + "' LIMIT 1");
+		try {
+			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + name + "' LIMIT 1");
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + name + "." + field + ": "
+					+ e.getMessage());
+		}
 	}
 
 	/**
@@ -218,11 +222,8 @@ public class SQLManager {
 			if (rs.next())
 				return rs.getInt(field);
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + name + "." + field + ": "
+					+ e.getMessage());
 		}
 		return 0;
 	}
@@ -242,11 +243,8 @@ public class SQLManager {
 			if (rs.next())
 				return rs.getBoolean(field);
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + name + "." + field + ": "
+					+ e.getMessage());
 		}
 		return false;
 	}
@@ -266,11 +264,8 @@ public class SQLManager {
 			if (rs.next())
 				return rs.getLong(field);
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getlong command for " + name + "." + field + ": "
+					+ e.getMessage());
 		}
 		return 0;
 	}
@@ -290,11 +285,8 @@ public class SQLManager {
 			if (rs.next())
 				return rs.getString(field);
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstring commandfor " + name + "." + field + ": "
+					+ e.getMessage());
 		}
 		return "";
 	}
@@ -319,11 +311,8 @@ public class SQLManager {
 					returnList.add(player);
 			}
 		} catch (Exception e) {
-			try {
-				connect();
-			} catch (Exception ex) {
-
-			}
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstringlist command for" + name + "." + field + ": "
+					+ e.getMessage());
 		}
 		return returnList;
 	}
