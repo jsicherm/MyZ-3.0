@@ -1,0 +1,56 @@
+name: MyZ
+main: myz.MyZ
+version: 3.0
+depend: [WorldEdit]
+author: TeeePeee
+
+commands:
+  start:
+    description: Spawn into the world.
+    aliases: [begin]
+  friend:
+    description: Add a friend.
+  friends:
+    description: List friends.
+  setlobby:
+    description: Set the lobby region.
+    permission: MyZ.admin
+    permission-message: You don't have permission.
+  addspawn:
+    description: Add a spawnpoint.
+    permission: MyZ.admin
+    permission-message: You don't have permission.
+  removespawn:
+    description: Remove a spawnpoint.
+    permission: MyZ.admin
+    permission-message: You don't have permission.
+    aliases: [delspawn]
+  spawnpoints:
+    description: List spawnpoints.
+    aliases: [spawns]
+  savekit:
+    description: Save a starting kit.
+    permission: MyZ.admin
+    permission-message: You don't have permission.
+    aliases: [setkit]
+  saverank:
+    description: Set a chat prefix.
+    permission: MyZ.admin
+    permission-message: You don't have permission.
+    aliases: [setrank]
+
+permissions:
+  MyZ.*:
+    description: All MyZ permissions.
+    default: op
+    children:
+      MyZ.admin: true
+  MyZ.admin:
+    description: All MyZ admin permissions.
+    default: op
+    children:
+      MyZ.spawn_giant: true
+  MyZ.spawn_giant:
+    description: Spawn giants.
+    default: op
+    

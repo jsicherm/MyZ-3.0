@@ -1,0 +1,101 @@
+/**
+ * 
+ */
+package myz.Scheduling;
+
+import java.util.Random;
+
+import myz.MyZ;
+import myz.API.PlayerDrinkWaterEvent;
+import myz.API.PlayerTakeBleedingDamageEvent;
+import myz.API.PlayerTakePoisonDamageEvent;
+import myz.API.PlayerTakeWaterDamageEvent;
+import myz.Support.Configuration;
+import myz.mobs.pathing.PathingSupport;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.entity.Player;
+
+/**
+ * @author Jordan
+ * 
+ */
+public class aSync implements Runnable {
+
+	private static int ticks = 0;
+	private static final Random random = new Random();
+
+	@Override
+	public void run() {
+		ticks++;
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (player.getGameMode() == GameMode.CREATIVE)
+				continue;
+
+			player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
+
+			// Increase thirst level by swimming or by standing in the rain.
+			if (player.getLevel() < Configuration.getMaxThirstLevel()
+					&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || ((CraftPlayer) player).getHandle().world
+							.isRainingAt(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation()
+									.getBlockZ())
+							&& noBlocksAbove(player.getLocation())))
+				if (ticks % (random.nextInt(2) + 1) == 0) {
+					PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
+					if (!event.isCancelled())
+						MyZ.instance.setThirst(player, player.getLevel() + 1);
+				}
+
+			// Take bleeding damage.
+			if (ticks % Configuration.getBleedDamageFrequency() == 0 && MyZ.instance.isBleeding(player)
+					&& player.getHealth() > Configuration.getBleedDamage()) {
+				PlayerTakeBleedingDamageEvent event = new PlayerTakeBleedingDamageEvent(player);
+				if (!event.isCancelled())
+					player.damage(Configuration.getBleedDamage());
+			}
+
+			// Take poison damage.
+			if ((ticks + 11) % Configuration.getPoisonDamageFrequency() == 0 && MyZ.instance.isPoisoned(player)
+					&& player.getHealth() > Configuration.getPoisonDamage()) {
+				PlayerTakePoisonDamageEvent event = new PlayerTakePoisonDamageEvent(player);
+				if (!event.isCancelled())
+					player.damage(Configuration.getPoisonDamage());
+			}
+
+			// Take thirst decay and damage.
+			if ((ticks + 22) % Configuration.getWaterDecreaseTime() == 0)
+				if (player.getLevel() > 0)
+					MyZ.instance.setThirst(player, player.getLevel() - 1);
+				else if (player.getHealth() > Configuration.getWaterDamage()) {
+					PlayerTakeWaterDamageEvent event = new PlayerTakeWaterDamageEvent(player);
+					if (!event.isCancelled())
+						player.damage(Configuration.getWaterDamage());
+				}
+		}
+
+		// Ensure we don't exceed the integer size.
+		if (ticks >= Integer.MAX_VALUE)
+			ticks = 0;
+	}
+
+	/**
+	 * Check if there are any blocks above the specified location. Searches from
+	 * this location's y to max build height.
+	 * 
+	 * @param loc
+	 *            The location.
+	 * @return False if there are any blocks above the given location.
+	 */
+	private boolean noBlocksAbove(Location loc) {
+		for (int y = loc.getBlockY(); y < loc.getWorld().getMaxHeight(); y++)
+			if (loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ()).getType() != Material.AIR)
+				return false;
+		return true;
+	}
+}
