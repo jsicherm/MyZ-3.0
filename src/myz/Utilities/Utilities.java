@@ -12,8 +12,11 @@ import myz.API.PlayerFriendEvent;
 import myz.Scheduling.Sync;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityZombie;
+import net.minecraft.server.v1_6_R3.PlayerInteractManager;
 import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_6_R3.WorldServer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,6 +25,7 @@ import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -209,15 +213,18 @@ public class Utilities {
 	 * 
 	 * @param player
 	 *            The player to zombify.
+	 * @param inventory
+	 *            The inventory to spawn the zombie with. If null, will instead
+	 *            use the player's inventory.
 	 */
-	public static void spawnPlayerZombie(Player player) {
+	public static void spawnPlayerZombie(Player player, List<ItemStack> inventory) {
 		ItemStack head = playerSkull(player.getName());
 
 		World world = ((CraftWorld) player.getWorld()).getHandle();
 		CustomEntityZombie zombie = new CustomEntityZombie(world);
 		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
 		world.addEntity(zombie);
-		
+
 		zombie.setBaby(false);
 		zombie.setVillager(false);
 		((Zombie) zombie.getBukkitEntity()).setRemoveWhenFarAway(true);
@@ -235,8 +242,34 @@ public class Utilities {
 		((Zombie) zombie.getBukkitEntity()).getEquipment().setItemInHand(player.getEquipment().getItemInHand());
 		((Zombie) zombie.getBukkitEntity()).getEquipment().setItemInHandDropChance(0f);
 
-		List<ItemStack> inventory = new ArrayList<ItemStack>(Arrays.asList(player.getInventory().getContents()));
+		if (inventory == null)
+			inventory = new ArrayList<ItemStack>(Arrays.asList(player.getInventory().getContents()));
 		inventory.add(player.getEquipment().getHelmet());
 		zombie.setInventory(inventory);
+	}
+
+	/**
+	 * Spawn a player NPC for the given player.
+	 * 
+	 * @param playerDuplicate
+	 *            The player to duplicate an NPC for.
+	 */
+	public static void spawnNPC(Player playerDuplicate) {
+		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
+		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, playerDuplicate.getName(),
+				new PlayerInteractManager(worldServer));
+		Location loc = playerDuplicate.getLocation();
+		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+
+		((Player) player.getBukkitEntity()).setItemInHand(playerDuplicate.getItemInHand());
+		((Player) player.getBukkitEntity()).setCustomName(playerDuplicate.getName());
+		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
+		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
+
+		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
+
+		worldServer.addEntity(player, SpawnReason.CUSTOM);
+		player.world.players.remove(player);
+		MyZ.instance.getNPCs().add(player);
 	}
 }

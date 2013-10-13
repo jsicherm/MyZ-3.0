@@ -10,6 +10,7 @@ import java.util.List;
 import myz.Support.Configuration;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
+import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
 import net.minecraft.server.v1_6_R3.DamageSource;
 import net.minecraft.server.v1_6_R3.Entity;
@@ -57,10 +58,8 @@ public class CustomEntityZombie extends EntityZombie {
 
 		getNavigation().b(true);
 		goalSelector.a(0, new PathfinderGoalFloat(this));
-		// goalSelector.a(2, new PathfinderGoalZombieAttack(this,
-		// EntityHuman.class, Configuration.getZombieSpeed(), false));
-		// goalSelector.a(3, new PathfinderGoalZombieAttack(this,
-		// EntityVillager.class, Configuration.getZombieSpeed(), true));
+		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getZombieSpeed(), false));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getZombieSpeed(), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(6, new PathfinderGoalRandomStroll(this, 1.0D));

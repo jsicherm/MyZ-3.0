@@ -28,7 +28,7 @@ public class CancelPlayerEvents implements Listener {
 
 	@EventHandler
 	private void onSafeLogout(PlayerInteractEvent e) {
-		if ((e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)
+		if ((e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) && e.getItem() != null
 				&& e.getItem().isSimilar(Configuration.getSafeLogoutItem())) {
 			e.setCancelled(true);
 			Utilities.startSafeLogout(e.getPlayer());

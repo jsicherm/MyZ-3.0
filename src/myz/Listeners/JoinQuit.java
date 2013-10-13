@@ -8,6 +8,7 @@ import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 
+import org.bukkit.entity.Horse;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -48,7 +49,21 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onLeave(PlayerQuitEvent e) {
-		if (MyZ.instance.removePlayer(e.getPlayer()))
+		if (MyZ.instance.removePlayer(e.getPlayer())) {
 			e.setQuitMessage(null);
+
+			if (e.getPlayer().getVehicle() != null) {
+				e.getPlayer().getVehicle().eject();
+			}
+			
+			// Get rid of our horse.
+			for (Horse horse : e.getPlayer().getWorld().getEntitiesByClass(Horse.class))
+				if (horse.getOwner() != null && horse.getOwner().getName() != null
+						&& horse.getOwner().getName().equals(e.getPlayer().getName())) {
+					horse.setOwner(null);
+					horse.setTamed(false);
+					horse.setDomestication(0);
+				}
+		}
 	}
 }

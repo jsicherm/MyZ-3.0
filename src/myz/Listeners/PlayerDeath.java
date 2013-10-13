@@ -28,16 +28,23 @@ public class PlayerDeath implements Listener {
 	@EventHandler
 	private void onDeath(PlayerDeathEvent e) {
 		// Get rid of our horse.
-		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class))
+		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class)) {
+			System.out.println("Stuck");
 			if (horse.getOwner() != null && horse.getOwner().getName() != null
-					&& horse.getOwner().getName().equals(e.getEntity().getName()))
+					&& horse.getOwner().getName().equals(e.getEntity().getName())) {
 				horse.setOwner(null);
+				horse.setTamed(false);
+				horse.setDomestication(0);
+			}
+		}
 
 		// Become a zombie and teleport back to spawn to be kicked.
-		Utilities.spawnPlayerZombie(e.getEntity());
+		Utilities.spawnPlayerZombie(e.getEntity(), null);
+
+		revive(e.getEntity());
 		MyZ.instance.putPlayerAtSpawn(e.getEntity(), true);
 	}
-	
+
 	/**
 	 * Bypass the respawn screen and come back to life immediately.
 	 * 
@@ -45,8 +52,9 @@ public class PlayerDeath implements Listener {
 	 *            The player to respawn immediately.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static void backToLife(Player p) {
-		if (!p.isDead()) { return; }
+	private void revive(Player p) {
+		if (!p.isDead())
+			return;
 		try {
 			Class packet = Packet205ClientCommand.class;
 			Object name = packet.getConstructor(new Class[0]).newInstance(new Object[0]);

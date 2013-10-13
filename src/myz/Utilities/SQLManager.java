@@ -5,7 +5,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import myz.MyZ;
 import myz.Support.Configuration;
@@ -20,6 +22,11 @@ public class SQLManager {
 	public final String hostname, database, username, password;
 	public final int port;
 	private boolean connected;
+	private Map<String, Map<String, String>> cachedStringValues = new HashMap<String, Map<String, String>>();
+	private Map<String, Map<String, Integer>> cachedIntegerValues = new HashMap<String, Map<String, Integer>>();
+	private Map<String, Map<String, Boolean>> cachedBooleanValues = new HashMap<String, Map<String, Boolean>>();
+	private Map<String, Map<String, Long>> cachedLongValues = new HashMap<String, Map<String, Long>>();
+	private List<String> cachedKeyValues = new ArrayList<String>();
 
 	/**
 	 * A simple MySQL tool for ease of access.
@@ -120,14 +127,18 @@ public class SQLManager {
 	 *            The user to add
 	 */
 	public void add(Player player) {
-		if (!isIn(player.getName())) {
+		if (!isIn(player.getName()))
 			try {
-				executeQuery("INSERT INTO playerdata (username) VALUES ('" + player.getName() + "', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "
-						+ MyZ.instance.getRankFor(player) + ", 0, 0, 0, 0, '', " + Configuration.getMaxThirstLevel() + ")");
+				cachedKeyValues.add(player.getName());
+				executeQuery("INSERT INTO playerdata (username, player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life, giant_kills_life, plays, rank, isBleeding, isPoisoned, wasNPCKilled, timeOfKickban, friends, heals_life, thirst) VALUES ('"
+						+ player.getName()
+						+ "', 0, 0, 0, 0, 0, 0, 0, 0, 0, "
+						+ MyZ.instance.getRankFor(player)
+						+ ", 0, 0, 0, 0, '', 0,"
+						+ Configuration.getMaxThirstLevel() + ")");
 			} catch (Exception e) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
 			}
-		}
 	}
 
 	/**
@@ -156,14 +167,41 @@ public class SQLManager {
 	 * @return true if the user is in the table.
 	 */
 	public boolean isIn(String name) {
+		boolean isin = false;
+
+		// Make sure our player is in the data cache.
+		if (!cachedBooleanValues.containsKey(name)) {
+			Map<String, Boolean> insert = new HashMap<String, Boolean>();
+			insert.put("isin", false);
+			cachedBooleanValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+			if (!received.containsKey("isin")) {
+				received.put("isin", false);
+				cachedBooleanValues.put(name, received);
+			} else {
+				// The player had the key already so let's return it.
+				return cachedBooleanValues.get(name).get("isin");
+			}
+		}
+
 		if (!isConnected())
-			return false;
+			return isin;
 		try {
-			return query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1").next();
+			isin = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1").next();
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL isin command: " + e.getMessage());
-			return false;
+			isin = false;
 		}
+
+		// Update the keyset because we don't have the current value.
+		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+		received.put("isin", isin);
+		cachedBooleanValues.put(name, received);
+
+		return isin;
 	}
 
 	/**
@@ -173,6 +211,9 @@ public class SQLManager {
 	 *         null if not connected.
 	 */
 	public List<String> getKeys() {
+		// Return the cached values if we have them.
+		if (!cachedKeyValues.isEmpty()) { return cachedKeyValues; }
+
 		if (!isConnected())
 			return null;
 		List<String> list = new ArrayList<String>();
@@ -185,6 +226,9 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
 		}
+
+		// We didn't have any key values stored so let's add all of them.
+		cachedKeyValues.addAll(list);
 		return list;
 	}
 
@@ -192,19 +236,90 @@ public class SQLManager {
 	 * Run a query to set data in MySQL.
 	 * 
 	 * @param name
-	 *            The primary key
+	 *            The primary key.
 	 * @param field
-	 *            The field
+	 *            The field.
 	 * @param value
-	 *            The value
+	 *            The value.
+	 * @param aSync
+	 *            Whether or not to use an aSync thread to execute the command.
 	 */
-	public void set(String name, String field, Object value) {
+	public void set(final String name, final String field, final Object value, boolean aSync) {
+		if (aSync) {
+			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+				@Override
+				public void run() {
+					set(name, field, value, false);
+				}
+			}, 0L);
+			return;
+		}
 		try {
+			// Make sure we update our cached values when we set new ones. Do it
+			// before we execute the query in case of async demands.
+			doUpdateCache(name, field, value);
 			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + name + "' LIMIT 1");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + name + "." + field + ": "
 					+ e.getMessage());
 		}
+	}
+
+	/**
+	 * Update the cache of data to ensure we're up to date when we set new data.
+	 * 
+	 * @param name
+	 *            The primary key.
+	 * @param field
+	 *            The field.
+	 * @param value
+	 *            The value.
+	 */
+	private void doUpdateCache(String name, String field, Object value) {
+		if (value instanceof Integer)
+			// Make sure our player is in the data cache.
+			if (!cachedIntegerValues.containsKey(name)) {
+				Map<String, Integer> insert = new HashMap<String, Integer>();
+				insert.put(field, (Integer) value);
+				cachedIntegerValues.put(name, insert);
+			} else {
+				Map<String, Integer> received = new HashMap<String, Integer>(cachedIntegerValues.get(name));
+				received.put(field, (Integer) value);
+				cachedIntegerValues.put(name, received);
+			}
+		else if (value instanceof Long)
+			// Make sure our player is in the data cache.
+			if (!cachedLongValues.containsKey(name)) {
+				Map<String, Long> insert = new HashMap<String, Long>();
+				insert.put(field, (Long) value);
+				cachedLongValues.put(name, insert);
+			} else {
+				Map<String, Long> received = new HashMap<String, Long>(cachedLongValues.get(name));
+				received.put(field, (Long) value);
+				cachedLongValues.put(name, received);
+			}
+		else if (value instanceof String)
+			// Make sure our player is in the data cache.
+			if (!cachedStringValues.containsKey(name)) {
+				Map<String, String> insert = new HashMap<String, String>();
+				insert.put(field, (String) value);
+				cachedStringValues.put(name, insert);
+			} else {
+				Map<String, String> received = new HashMap<String, String>(cachedStringValues.get(name));
+				received.put(field, (String) value);
+				cachedStringValues.put(name, received);
+			}
+		else if (value instanceof Boolean)
+			// Make sure our player is in the data cache.
+			if (!cachedBooleanValues.containsKey(name)) {
+				Map<String, Boolean> insert = new HashMap<String, Boolean>();
+				insert.put(field, (Boolean) value);
+				cachedBooleanValues.put(name, insert);
+			} else {
+				Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+				received.put(field, (Boolean) value);
+				cachedBooleanValues.put(name, received);
+			}
 	}
 
 	/**
@@ -217,15 +332,41 @@ public class SQLManager {
 	 * @return The int received or 0 if nothing found
 	 */
 	public int getInt(String name, String field) {
+		int getint = 0;
+
+		// Make sure our player is in the data cache.
+		if (!cachedIntegerValues.containsKey(name)) {
+			Map<String, Integer> insert = new HashMap<String, Integer>();
+			insert.put(field, 0);
+			cachedIntegerValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, Integer> received = new HashMap<String, Integer>(cachedIntegerValues.get(name));
+			if (!received.containsKey(field)) {
+				received.put(field, 0);
+				cachedIntegerValues.put(name, received);
+			} else {
+				// The player had the key already so let's return it.
+				return cachedIntegerValues.get(name).get(field);
+			}
+		}
+
 		try {
 			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1");
 			if (rs.next())
-				return rs.getInt(field);
+				getint = rs.getInt(field);
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + name + "." + field + ": "
 					+ e.getMessage());
 		}
-		return 0;
+
+		// Update the keyset because we don't have the current value.
+		Map<String, Integer> received = new HashMap<String, Integer>(cachedIntegerValues.get(name));
+		received.put(field, getint);
+		cachedIntegerValues.put(name, received);
+
+		return getint;
 	}
 
 	/**
@@ -238,15 +379,41 @@ public class SQLManager {
 	 * @return The boolean received or false if nothing found
 	 */
 	public boolean getBoolean(String name, String field) {
+		boolean getboolean = false;
+
+		// Make sure our player is in the data cache.
+		if (!cachedBooleanValues.containsKey(name)) {
+			Map<String, Boolean> insert = new HashMap<String, Boolean>();
+			insert.put(field, false);
+			cachedBooleanValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+			if (!received.containsKey(field)) {
+				received.put(field, false);
+				cachedBooleanValues.put(name, received);
+			} else {
+				// The player had the key already so let's return it.
+				return cachedBooleanValues.get(name).get(field);
+			}
+		}
+
 		try {
 			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1");
 			if (rs.next())
-				return rs.getBoolean(field);
+				getboolean = rs.getBoolean(field);
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + name + "." + field + ": "
 					+ e.getMessage());
 		}
-		return false;
+
+		// Update the keyset because we don't have the current value.
+		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+		received.put(field, getboolean);
+		cachedBooleanValues.put(name, received);
+
+		return getboolean;
 	}
 
 	/**
@@ -259,15 +426,41 @@ public class SQLManager {
 	 * @return The long received or 0 if nothing found
 	 */
 	public long getLong(String name, String field) {
+		long getlong = 0L;
+
+		// Make sure our player is in the data cache.
+		if (!cachedLongValues.containsKey(name)) {
+			Map<String, Long> insert = new HashMap<String, Long>();
+			insert.put(field, 0L);
+			cachedLongValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, Long> received = new HashMap<String, Long>(cachedLongValues.get(name));
+			if (!received.containsKey(field)) {
+				received.put(field, 0L);
+				cachedLongValues.put(name, received);
+			} else {
+				// The player had the key already so let's return it.
+				return cachedLongValues.get(name).get(field);
+			}
+		}
+
 		try {
 			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1");
 			if (rs.next())
-				return rs.getLong(field);
+				getlong = rs.getLong(field);
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getlong command for " + name + "." + field + ": "
 					+ e.getMessage());
 		}
-		return 0;
+
+		// Update the keyset because we don't have the current value.
+		Map<String, Long> received = new HashMap<String, Long>(cachedLongValues.get(name));
+		received.put(field, getlong);
+		cachedLongValues.put(name, received);
+
+		return getlong;
 	}
 
 	/**
@@ -280,15 +473,41 @@ public class SQLManager {
 	 * @return The string received or an empty string if nothing found
 	 */
 	public String getString(String name, String field) {
+		String getstring = "";
+
+		// Make sure our player is in the data cache.
+		if (!cachedStringValues.containsKey(name)) {
+			Map<String, String> insert = new HashMap<String, String>();
+			insert.put(field, "");
+			cachedStringValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, String> received = new HashMap<String, String>(cachedStringValues.get(name));
+			if (!received.containsKey(field)) {
+				received.put(field, "");
+				cachedStringValues.put(name, received);
+			} else {
+				// The player had the key already so let's return it.
+				return cachedStringValues.get(name).get(field);
+			}
+		}
+
 		try {
 			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1");
 			if (rs.next())
-				return rs.getString(field);
+				getstring = rs.getString(field);
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstring commandfor " + name + "." + field + ": "
 					+ e.getMessage());
 		}
-		return "";
+
+		// Update the keyset because we don't have the current value.
+		Map<String, String> received = new HashMap<String, String>(cachedStringValues.get(name));
+		received.put(field, getstring);
+		cachedStringValues.put(name, received);
+
+		return getstring;
 	}
 
 	/**
@@ -303,17 +522,45 @@ public class SQLManager {
 	 */
 	public List<String> getStringList(String name, String field) {
 		List<String> returnList = new ArrayList<String>();
+		String raw = "";
+
+		// Make sure our player is in the data cache.
+		if (!cachedStringValues.containsKey(name)) {
+			Map<String, String> insert = new HashMap<String, String>();
+			insert.put(field, "");
+			cachedStringValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, String> received = new HashMap<String, String>(cachedStringValues.get(name));
+			if (!received.containsKey(field)) {
+				received.put(field, "");
+				cachedStringValues.put(name, received);
+			} else {
+				// The player had the key already so let's return it.
+				for (String player : cachedStringValues.get(name).get(field).split(","))
+					returnList.add(player);
+				return returnList;
+			}
+		}
+
 		try {
 			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1");
 			if (rs.next()) {
-				String string = rs.getString(field);
-				for (String player : string.split(","))
+				raw = rs.getString(field);
+				for (String player : raw.split(","))
 					returnList.add(player);
 			}
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstringlist command for" + name + "." + field + ": "
 					+ e.getMessage());
 		}
+
+		// Update the keyset because we don't have the current value.
+		Map<String, String> received = new HashMap<String, String>(cachedStringValues.get(name));
+		received.put(field, raw);
+		cachedStringValues.put(name, received);
+
 		return returnList;
 	}
 }

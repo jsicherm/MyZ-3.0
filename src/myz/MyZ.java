@@ -45,6 +45,7 @@ import myz.Support.Teleport;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
+import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityType;
 
 import org.bukkit.Bukkit;
@@ -53,6 +54,9 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -66,6 +70,8 @@ import org.bukkit.potion.PotionEffect;
 public class MyZ extends JavaPlugin {
 
 	// TODO giants
+	// TODO npc players can be pushed
+	// TODO despawn player npcs and know when they die.
 	// TODO clans
 
 	public static MyZ instance;
@@ -73,6 +79,7 @@ public class MyZ extends JavaPlugin {
 	private FileConfiguration playerdata;
 	private SQLManager sql;
 	private static final Random random = new Random();
+	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
 
 	@Override
 	public void onEnable() {
@@ -159,6 +166,23 @@ public class MyZ extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getServer().getScheduler().cancelTasks(this);
+
+		// Remove all entities in all worlds as reloads will cause classloader
+		// issues to
+		// do with overriding the pathfinding and entity.
+		for (CustomEntityPlayer player : NPCs) {
+			player.getBukkitEntity().remove();
+		}
+		NPCs.clear();
+		for (World world : getServer().getWorlds()) {
+			for (Entity entity : world.getEntities()) {
+				if (entity instanceof LivingEntity
+						&& (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT
+								|| entity.getType() == EntityType.HORSE || entity.getType() == EntityType.PIG_ZOMBIE)) {
+					entity.remove();
+				}
+			}
+		}
 	}
 
 	/**
@@ -246,7 +270,7 @@ public class MyZ extends JavaPlugin {
 					Messenger.sendConfigMessage(player, "damage.bleed_begin");
 				}
 				if (sql.isConnected())
-					sql.set(player.getName(), "isBleeding", true);
+					sql.set(player.getName(), "isBleeding", true, true);
 			}
 	}
 
@@ -268,7 +292,7 @@ public class MyZ extends JavaPlugin {
 					Messenger.sendConfigMessage(player, "damage.poison_begin");
 				}
 				if (sql.isConnected())
-					sql.set(player.getName(), "isPoisoned", true);
+					sql.set(player.getName(), "isPoisoned", true, true);
 			}
 	}
 
@@ -286,7 +310,7 @@ public class MyZ extends JavaPlugin {
 				Messenger.sendConfigMessage(player, "damage.poison_end");
 			}
 			if (sql.isConnected())
-				sql.set(player.getName(), "isPoisoned", false);
+				sql.set(player.getName(), "isPoisoned", false, true);
 		}
 	}
 
@@ -304,7 +328,7 @@ public class MyZ extends JavaPlugin {
 				Messenger.sendConfigMessage(player, "damage.bleed_end");
 			}
 			if (sql.isConnected())
-				sql.set(player.getName(), "isBleeding", false);
+				sql.set(player.getName(), "isBleeding", false, true);
 		}
 	}
 
@@ -352,7 +376,7 @@ public class MyZ extends JavaPlugin {
 		if (playerdata != null && playerdata.getTimeOfKickban() != 0)
 			playerdata.setTimeOfKickban(0L);
 		if (sql.isConnected() && sql.getLong(player.getName(), "timeOfKickban") != 0)
-			sql.set(player.getName(), "timeOfKickban", 0);
+			sql.set(player.getName(), "timeOfKickban", 0L, true);
 
 		/*
 		 * Teleport the player back to the world spawn if they were killed by an NPC logout.
@@ -377,12 +401,12 @@ public class MyZ extends JavaPlugin {
 			data.setThirst(20);
 		}
 		if (sql.isConnected()) {
-			sql.set(player.getName(), "isBleeding", false);
-			sql.set(player.getName(), "isPoisoned", false);
-			sql.set(player.getName(), "thirst", 20);
+			sql.set(player.getName(), "isBleeding", false, true);
+			sql.set(player.getName(), "isPoisoned", false, true);
+			sql.set(player.getName(), "thirst", 20, true);
 		}
 
-		if (!Configuration.saveDataOfUnrankedPlayers()) {
+		if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0) {
 			if (data != null) {
 				for (String friend : data.getFriends())
 					data.removeFriend(friend);
@@ -400,17 +424,17 @@ public class MyZ extends JavaPlugin {
 				data.setAutosave(true, true);
 			}
 			if (sql.isConnected()) {
-				sql.set(player.getName(), "friends", "''");
-				sql.set(player.getName(), "deaths", 0);
-				sql.set(player.getName(), "giant_kills", 0);
-				sql.set(player.getName(), "giant_kills_life", 0);
-				sql.set(player.getName(), "pigman_kills", 0);
-				sql.set(player.getName(), "pigman_kills_life", 0);
-				sql.set(player.getName(), "player_kills", 0);
-				sql.set(player.getName(), "player_kills_life", 0);
-				sql.set(player.getName(), "plays", 0);
-				sql.set(player.getName(), "zombie_kills", 0);
-				sql.set(player.getName(), "zombie_kills_life", 0);
+				sql.set(player.getName(), "friends", "''", true);
+				sql.set(player.getName(), "deaths", 0, true);
+				sql.set(player.getName(), "giant_kills", 0, true);
+				sql.set(player.getName(), "giant_kills_life", 0, true);
+				sql.set(player.getName(), "pigman_kills", 0, true);
+				sql.set(player.getName(), "pigman_kills_life", 0, true);
+				sql.set(player.getName(), "player_kills", 0, true);
+				sql.set(player.getName(), "player_kills_life", 0, true);
+				sql.set(player.getName(), "plays", 0, true);
+				sql.set(player.getName(), "zombie_kills", 0, true);
+				sql.set(player.getName(), "zombie_kills_life", 0, true);
 			}
 		}
 		return online_players.remove(player.getName());
@@ -432,12 +456,11 @@ public class MyZ extends JavaPlugin {
 		wipeBuffs(player);
 
 		if (wasDeath) {
-			BossBar.
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null)
 				data.setDeaths(data.getDeaths() + 1);
 			if (sql.isConnected())
-				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1);
+				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1, true);
 			/*
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
@@ -447,10 +470,19 @@ public class MyZ extends JavaPlugin {
 					if (data != null)
 						data.setTimeOfKickban(System.currentTimeMillis());
 					if (sql.isConnected())
-						sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis());
+						sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
 					player.kickPlayer(Messenger.getConfigMessage("kick.come_back", Configuration.getKickBanSeconds()));
 				}
 		}
+	}
+
+	/**
+	 * Get the list of NPCs on the server.
+	 * 
+	 * @return The list of NPCs.
+	 */
+	public List<CustomEntityPlayer> getNPCs() {
+		return NPCs;
 	}
 
 	/**
@@ -576,7 +608,7 @@ public class MyZ extends JavaPlugin {
 				if (data != null)
 					data.setThirst(level);
 				if (sql.isConnected())
-					sql.set(player.getName(), "thirst", level);
+					sql.set(player.getName(), "thirst", level, true);
 				player.setLevel(level);
 			}
 		} else {
@@ -584,7 +616,7 @@ public class MyZ extends JavaPlugin {
 			if (data != null)
 				data.setThirst(level);
 			if (sql.isConnected())
-				sql.set(player.getName(), "thirst", level);
+				sql.set(player.getName(), "thirst", level, true);
 			player.setLevel(level);
 		}
 	}
@@ -619,7 +651,7 @@ public class MyZ extends JavaPlugin {
 		}
 		if (sql.isConnected() && !sql.getStringList(friender.getName(), "friends").contains(friended)) {
 			String current = sql.getString(friender.getName(), "friends");
-			sql.set(friender.getName(), "friends", current + (current.isEmpty() ? "" : ",") + friended);
+			sql.set(friender.getName(), "friends", current + (current.isEmpty() ? "" : ",") + friended, true);
 			friender.sendMessage(Messenger.getConfigMessage("friend.added", friended));
 		}
 	}
@@ -640,7 +672,7 @@ public class MyZ extends JavaPlugin {
 		}
 		if (sql.isConnected() && sql.getStringList(unfriender.getName(), "friends").contains(unfriended)) {
 			sql.set(unfriender.getName(), "friends", sql.getString(unfriender.getName(), "friends").replaceAll("," + unfriended, "")
-					.replaceAll(unfriended + ",", ""));
+					.replaceAll(unfriended + ",", ""), true);
 			unfriender.sendMessage(Messenger.getConfigMessage("friend.removed", unfriended));
 		}
 	}
