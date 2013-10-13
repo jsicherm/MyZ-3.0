@@ -156,34 +156,53 @@ public class Configuration {
 	 *            The FileConfiguration to write into.
 	 */
 	private static void writeUnwrittenValues(FileConfiguration config) {
+		// MySQL begin.
+		if (!config.contains("mysql.host"))
+			config.set("mysql.host", "127.0.0.1");
+		if (!config.contains("mysql.database"))
+			config.set("mysql.database", "test");
+		if (!config.contains("mysql.user"))
+			config.set("mysql.user", "root");
+		if (!config.contains("mysql.password"))
+			config.set("mysql.password", "alpine");
+		if (!config.contains("mysql.port"))
+			config.set("mysql.port", 3306);
+
+		// Statistics begin.
 		if (!config.contains("statistics.bandit_kills"))
 			config.set("statistics.bandit_kills", 8);
 		if (!config.contains("statistics.healer_heals"))
 			config.set("statistics.healer_heals", 13);
+
+		// Chat begin.
 		if (!config.contains("chat.local_enabled"))
 			config.set("chat.local_enabled", true);
 		if (!config.contains("chat.local_distance"))
 			config.set("chat.local_distance", 250);
+
+		// Ranks begin.
 		if (!config.contains("ranks.names.0"))
 			config.set("ranks.names.0", "[%s]");
-		if (!config.contains("localizable.radio_name"))
-			config.set("localizable.radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
-		if (!config.contains("localizable.radio_color_override"))
-			config.set("localizable.radio_color_override", "&2");
-		if (!config.contains("localizable.private.to_prefix"))
-			config.set("localizable.private.to_prefix", "&7To %s:");
-		if (!config.contains("localizable.private.from_prefix"))
-			config.set("localizable.private.from_prefix", "&7From %s:");
+		
+		// Radio begin.
 		if (!config.contains("radio.itemstack"))
 			config.set("radio.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
+		
+		// Logout begin.
 		if (!config.contains("safe_logout.itemstack"))
 			config.set("safe_logout.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
 		if (!config.contains("safe_logout.time"))
 			config.set("safe_logout.time", 15);
+		
+		// Datastore begin.
 		if (!config.contains("datastorage.use_server_specific"))
 			config.set("datastorage.use_server_specific", true);
+		
+		// Performance begin.
 		if (!config.contains("performance.use_prelogin_kickban"))
 			config.set("performance.use_prelogin_kickban", true);
+		
+		// Mobs begin.
 		if (!config.contains("mobs.zombie.speed"))
 			config.set("mobs.zombie.speed", 1.2);
 		if (!config.contains("mobs.zombie.damage"))
@@ -200,10 +219,14 @@ public class Configuration {
 			config.set("mobs.pigman.speed", 1.15);
 		if (!config.contains("mobs.giant.speed"))
 			config.set("mobs.giant.speed", 1.3);
+		
+		// Kickban begin.
 		if (!config.contains("kickban.kick_on_death"))
 			config.set("kickban.kick_on_death", true);
-		if (!config.contains("multiworlds.myz_world"))
-			config.set("multiworlds.myz_world", "world");
+		if (!config.contains("kickban.ban_time_seconds"))
+			config.set("kickban.ban_time_seconds", 30);
+		
+		// Damage begin.
 		if (!config.contains("damage.bleed_damage"))
 			config.set("damage.bleed_damage", 1);
 		if (!config.contains("damage.bleed_damage_frequency"))
@@ -216,34 +239,67 @@ public class Configuration {
 			config.set("ranks.save_data_of_unranked_players", false);
 		if (!config.contains("damage.water_damage"))
 			config.set("damage.water_damage", 1);
-		if (!config.contains("water.decay_time_seconds"))
-			config.set("water.decay_time_seconds", 45);
-		if (!config.contains("kickban.ban_time_seconds"))
-			config.set("kickban.ban_time_seconds", 30);
 		if (!config.contains("damage.chance_of_bleeding"))
 			config.set("damage.chance_of_bleeding", 0.05);
 		if (!config.contains("damage.chance_of_poison_from_zombie"))
 			config.set("damage.chance_of_poison_from_zombie", 0.05);
 		if (!config.contains("damage.chance_of_poison_from_flesh"))
 			config.set("damage.chance_of_poison_from_flesh", 0.05);
+		
+		// Friends begin.
 		if (!config.contains("friends.autofriend"))
 			config.set("friends.autofriend", true);
-		if (!config.contains("lobby.min"))
-			config.set("lobby.min", "0,0,0");
-		if (!config.contains("lobby.max"))
-			config.set("lobby.max", "0,0,0");
-		if (!config.contains("mysql.host"))
-			config.set("mysql.host", "127.0.0.1");
-		if (!config.contains("mysql.database"))
-			config.set("mysql.database", "test");
-		if (!config.contains("mysql.user"))
-			config.set("mysql.user", "root");
-		if (!config.contains("mysql.password"))
-			config.set("mysql.password", "alpine");
-		if (!config.contains("mysql.port"))
-			config.set("mysql.port", 3306);
+
+		// Water begin.
 		if (!config.contains("water.max_level"))
 			config.set("water.max_level", 20);
+		if (!config.contains("water.decay_time_seconds"))
+			config.set("water.decay_time_seconds", 45);
+
+		// Projectile begin.
+		if (!config.contains("projectile.enderpearl.become_grenade"))
+			config.set("projectile.enderpearl.become_grenade", true);
+
+		// Heal begin.
+		if (!config.contains("heal.bandage"))
+			config.set("heal.bandage", new ItemStack(Material.PAPER));
+		if (!config.contains("heal.bandage_heal_amount"))
+			config.set("heal.bandage_heal_amount", 1);
+		if (!config.contains("heal.food_heal_amount"))
+			config.set("heal.food_heal_amount", 1);
+
+		// Spawn-related begin.
+		if (!config.contains("spawn.safespawn_radius"))
+			config.set("spawn.safespawn_radius", 30);
+		if (!config.contains("spawn.numbered_requires_rank"))
+			config.set("spawn.numbered_requires_rank", true);
+		if (!config.contains("spawn.default_kit.helmet"))
+			config.set("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET, 1));
+		if (!config.contains("spawn.default_kit.chestplate"))
+			config.set("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+		if (!config.contains("spawn.default_kit.leggings"))
+			config.set("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS, 1));
+		if (!config.contains("spawn.default_kit.boots"))
+			config.set("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS, 1));
+		if (!config.contains("spawn.default_kit.inventory_contents"))
+			config.set("spawn.default_kit.inventory_contents", new ArrayList<ItemStack>());
+		if (!config.contains("spawn.potion_effects")) {
+			List<String> potion_effects = new ArrayList<String>();
+			potion_effects.add("CONFUSION,3,4");
+			potion_effects.add("BLINDNESS,1,3");
+			potion_effects.add("ABSORPTION,1,5");
+			config.set("spawn.potion_effects", potion_effects);
+		}
+
+		// Localizable begin.
+		if (!config.contains("localizable.radio_name"))
+			config.set("localizable.radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
+		if (!config.contains("localizable.radio_color_override"))
+			config.set("localizable.radio_color_override", "&2");
+		if (!config.contains("localizable.private.to_prefix"))
+			config.set("localizable.private.to_prefix", "&7To %s:");
+		if (!config.contains("localizable.private.from_prefix"))
+			config.set("localizable.private.from_prefix", "&7From %s:");
 		if (!config.contains("localizable.damage.bleed_begin"))
 			config.set("localizable.damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
 		if (!config.contains("localizable.damage.poison_begin"))
@@ -295,6 +351,10 @@ public class Configuration {
 		if (!config.contains("localizable.special.giant_summon_permission"))
 			config.set("localizable.special.giant_summon_permission",
 					"&4This is a donator-only feature. Donate today for the ability to spawn the fabled boss mobs.");
+		if (!config.contains("localizable.player_npc_killed"))
+			config.set("localizable.player_npc_killed", "&e%s has been killed while combat logging.");
+		if (!config.contains("localizable.player_was_killed_npc"))
+			config.set("localizable.player_was_killed_npc", "&eYou were killed while combat logging.");
 		if (!config.contains("localizable.command.friend.requires_name"))
 			config.set("localizable.command.friend.requires_name", "&4You must specify a name to friend.");
 		if (!config.contains("localizable.command.savekit.requires_number"))
@@ -314,38 +374,15 @@ public class Configuration {
 			config.set("localizable.friend.added", "&e%s &9has been added to your friends list.");
 		if (!config.contains("localizable.friend.removed"))
 			config.set("localizable.friend.removed", "&e%s &9has been removed from your friends list.");
-		if (!config.contains("projectile.enderpearl.become_grenade"))
-			config.set("projectile.enderpearl.become_grenade", true);
+
+		// Spawning begin.
+		if (!config.contains("lobby.min"))
+			config.set("lobby.min", "0,0,0");
+		if (!config.contains("lobby.max"))
+			config.set("lobby.max", "0,0,0");
 		if (!config.contains("spawnpoints"))
 			config.set("spawnpoints", new ArrayList<String>());
-		if (!config.contains("spawn.potion_effects")) {
-			List<String> potion_effects = new ArrayList<String>();
-			potion_effects.add("CONFUSION,3,4");
-			potion_effects.add("BLINDNESS,1,3");
-			potion_effects.add("ABSORPTION,1,5");
-			config.set("spawn.potion_effects", potion_effects);
-		}
-		if (!config.contains("spawn.safespawn_radius"))
-			config.set("spawn.safespawn_radius", 30);
-		if (!config.contains("spawn.numbered_requires_rank"))
-			config.set("spawn.numbered_requires_rank", true);
 
-		if (!config.contains("spawn.default_kit.helmet"))
-			config.set("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET, 1));
-		if (!config.contains("spawn.default_kit.chestplate"))
-			config.set("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE, 1));
-		if (!config.contains("spawn.default_kit.leggings"))
-			config.set("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS, 1));
-		if (!config.contains("spawn.default_kit.boots"))
-			config.set("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS, 1));
-		if (!config.contains("spawn.default_kit.inventory_contents"))
-			config.set("spawn.default_kit.inventory_contents", new ArrayList<ItemStack>());
-		if (!config.contains("heal.bandage"))
-			config.set("heal.bandage", new ItemStack(Material.PAPER));
-		if (!config.contains("heal.bandage_heal_amount"))
-			config.set("heal.bandage_heal_amount", 1);
-		if (!config.contains("heal.food_heal_amount"))
-			config.set("heal.food_heal_amount", 1);
 		MyZ.instance.saveConfig();
 	}
 

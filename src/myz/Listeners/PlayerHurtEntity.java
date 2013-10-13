@@ -15,6 +15,5 @@ public class PlayerHurtEntity implements Listener {
 
 	@EventHandler
 	private void onDamage(EntityDamageByEntityEvent e) {
-
 	}
 }

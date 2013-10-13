@@ -103,7 +103,7 @@ public class SQLManager {
 		if (!isConnected())
 			return;
 		try {
-			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED, zombie_kills SMALLINT UNSIGNED, pigman_kills SMALLINT UNSIGNED, giant_kills SMALLINT UNSIGNED, player_kills_life SMALLINT UNSIGNED, zombie_kills_life SMALLINT UNSIGNED, pigman_kills_life SMALLINT UNSIGNED, giant_kills_life SMALLINT UNSIGNED, plays SMALLINT UNSIGNED, deaths SMALLINT UNSIGNED, rank SMALLINT UNSIGNED, isBleeding TINYINT(1), isPoisoned TINYINT(1), wasNPCKilled TINYINT(1), timeOfKickban BIGINT(15), friends VARCHAR(255), heals_life SMALLINT UNSIGNED, thirst SMALLINT UNSIGNED)");
+			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED, zombie_kills SMALLINT UNSIGNED, pigman_kills SMALLINT UNSIGNED, giant_kills SMALLINT UNSIGNED, player_kills_life SMALLINT UNSIGNED, zombie_kills_life SMALLINT UNSIGNED, pigman_kills_life SMALLINT UNSIGNED, giant_kills_life SMALLINT UNSIGNED, plays SMALLINT UNSIGNED, deaths SMALLINT UNSIGNED, rank SMALLINT UNSIGNED, isBleeding TINYINT(1), isPoisoned TINYINT(1), wasNPCKilled TINYINT(1), timeOfKickban BIGINT(20), friends VARCHAR(255), heals_life SMALLINT UNSIGNED, thirst SMALLINT UNSIGNED)");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
 		}
@@ -132,10 +132,9 @@ public class SQLManager {
 				cachedKeyValues.add(player.getName());
 				executeQuery("INSERT INTO playerdata (username, player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life, giant_kills_life, plays, rank, isBleeding, isPoisoned, wasNPCKilled, timeOfKickban, friends, heals_life, thirst) VALUES ('"
 						+ player.getName()
-						+ "', 0, 0, 0, 0, 0, 0, 0, 0, 0, "
-						+ MyZ.instance.getRankFor(player)
-						+ ", 0, 0, 0, 0, '', 0,"
-						+ Configuration.getMaxThirstLevel() + ")");
+						+ "', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0,"
+						+ Configuration.getMaxThirstLevel()
+						+ ")");
 			} catch (Exception e) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
 			}

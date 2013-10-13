@@ -10,6 +10,7 @@ import java.util.List;
 import myz.MyZ;
 import myz.API.PlayerFriendEvent;
 import myz.Scheduling.Sync;
+import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.CustomEntityPlayer;
@@ -255,8 +256,12 @@ public class Utilities {
 	 *            The player to duplicate an NPC for.
 	 */
 	public static void spawnNPC(Player playerDuplicate) {
+		// The NPC won't even be on the screen for a second, may as well not add
+		// it.
+		if (Configuration.getSafeLogoutTime() <= 0) { return; }
+
 		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
-		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, playerDuplicate.getName(),
+		final CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, playerDuplicate.getName(),
 				new PlayerInteractManager(worldServer));
 		Location loc = playerDuplicate.getLocation();
 		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
@@ -266,10 +271,38 @@ public class Utilities {
 		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
 		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
 
+		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
 		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
+		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
 
 		worldServer.addEntity(player, SpawnReason.CUSTOM);
 		player.world.players.remove(player);
 		MyZ.instance.getNPCs().add(player);
+
+		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			public void run() {
+				MyZ.instance.getNPCs().remove(player);
+				player.getBukkitEntity().remove();
+			}
+		}, Configuration.getSafeLogoutTime() * 20L);
+	}
+
+	/**
+	 * Fired when a player NPC dies. Assumes the NPC entity has already been
+	 * removed.
+	 * 
+	 * @param customEntityPlayer
+	 *            The NPC that died.
+	 */
+	public static void playerNPCDied(CustomEntityPlayer player) {
+		MyZ.instance.getNPCs().remove(player);
+		PlayerData data = PlayerData.getDataFor(player.getName());
+		if (data != null) {
+			data.setWasKilledNPC(true);
+		}
+		if (MyZ.instance.getSQLManager().isConnected()) {
+			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
+		}
+		Messenger.sendMessage(player.getBukkitEntity().getWorld(), Messenger.getConfigMessage("player_npc_killed", player.getName()));
 	}
 }

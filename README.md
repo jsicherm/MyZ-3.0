@@ -45,8 +45,8 @@ So far, here are the base features that haven't yet been added.
 
 - [ ] Overridden Giant behaviour
 - [ ] Statistic trackers (eg. zombie kills life)
-- [ ] Player zombies
-- [ ] NPC's
+- [x] Player zombies
+- [x] NPC's
 - [ ] Clans
 - [ ] Zombie attraction to sound
 

@@ -70,9 +70,10 @@ import org.bukkit.potion.PotionEffect;
 public class MyZ extends JavaPlugin {
 
 	// TODO giants
-	// TODO npc players can be pushed
-	// TODO despawn player npcs and know when they die.
 	// TODO clans
+	// TODO track stats
+	// TODO block/entity protection
+	// TODO sound attraction
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -80,6 +81,7 @@ public class MyZ extends JavaPlugin {
 	private SQLManager sql;
 	private static final Random random = new Random();
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
+	private List<String> flags = new ArrayList<String>();
 
 	@Override
 	public void onEnable() {
@@ -357,6 +359,7 @@ public class MyZ extends JavaPlugin {
 				return;
 			}
 		}
+		online_players.add(player.getName());
 
 		/*
 		 * Add the player to the dataset if they're not in it yet. If they weren't in it, put them at the spawn.
@@ -381,8 +384,10 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * Teleport the player back to the world spawn if they were killed by an NPC logout.
 		 */
-		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getName(), "wasNPCKilled"))
+		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getName(), "wasNPCKilled")) {
+			Messenger.sendConfigMessage(player, "player_was_killed_npc");
 			putPlayerAtSpawn(player, true);
+		}
 	}
 
 	/**
@@ -394,50 +399,61 @@ public class MyZ extends JavaPlugin {
 	 * @return True if the player was removed, false otherwise.
 	 */
 	public boolean removePlayer(Player player) {
-		PlayerData data = PlayerData.getDataFor(player);
-		if (data != null) {
-			data.setBleeding(false);
-			data.setPoisoned(false);
-			data.setThirst(20);
-		}
-		if (sql.isConnected()) {
-			sql.set(player.getName(), "isBleeding", false, true);
-			sql.set(player.getName(), "isPoisoned", false, true);
-			sql.set(player.getName(), "thirst", 20, true);
-		}
-
-		if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0) {
+		if (online_players.contains(player.getName())) {
+			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null) {
-				for (String friend : data.getFriends())
-					data.removeFriend(friend);
-				data.setAutosave(false, false);
-				data.setDeaths(0);
-				data.setGiantKills(0);
-				data.setGiantKillsLife(0);
-				data.setPigmanKills(0);
-				data.setPigmanKillsLife(0);
-				data.setPlayerKills(0);
-				data.setPlayerKillsLife(0);
-				data.setPlays(0);
-				data.setZombieKills(0);
-				data.setZombieKillsLife(0);
-				data.setAutosave(true, true);
+				data.setBleeding(false);
+				data.setPoisoned(false);
+				data.setThirst(20);
 			}
 			if (sql.isConnected()) {
-				sql.set(player.getName(), "friends", "''", true);
-				sql.set(player.getName(), "deaths", 0, true);
-				sql.set(player.getName(), "giant_kills", 0, true);
-				sql.set(player.getName(), "giant_kills_life", 0, true);
-				sql.set(player.getName(), "pigman_kills", 0, true);
-				sql.set(player.getName(), "pigman_kills_life", 0, true);
-				sql.set(player.getName(), "player_kills", 0, true);
-				sql.set(player.getName(), "player_kills_life", 0, true);
-				sql.set(player.getName(), "plays", 0, true);
-				sql.set(player.getName(), "zombie_kills", 0, true);
-				sql.set(player.getName(), "zombie_kills_life", 0, true);
+				sql.set(player.getName(), "isBleeding", false, true);
+				sql.set(player.getName(), "isPoisoned", false, true);
+				sql.set(player.getName(), "thirst", 20, true);
 			}
+
+			if (Configuration.isKickBan()) {
+				if (data != null)
+					data.setTimeOfKickban(System.currentTimeMillis());
+				if (sql.isConnected())
+					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
+			}
+
+			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0) {
+				if (data != null) {
+					for (String friend : data.getFriends())
+						data.removeFriend(friend);
+					data.setAutosave(false, false);
+					data.setDeaths(0);
+					data.setGiantKills(0);
+					data.setGiantKillsLife(0);
+					data.setPigmanKills(0);
+					data.setPigmanKillsLife(0);
+					data.setPlayerKills(0);
+					data.setPlayerKillsLife(0);
+					data.setPlays(0);
+					data.setZombieKills(0);
+					data.setZombieKillsLife(0);
+					data.setAutosave(true, true);
+				}
+				if (sql.isConnected()) {
+					sql.set(player.getName(), "friends", "''", true);
+					sql.set(player.getName(), "deaths", 0, true);
+					sql.set(player.getName(), "giant_kills", 0, true);
+					sql.set(player.getName(), "giant_kills_life", 0, true);
+					sql.set(player.getName(), "pigman_kills", 0, true);
+					sql.set(player.getName(), "pigman_kills_life", 0, true);
+					sql.set(player.getName(), "player_kills", 0, true);
+					sql.set(player.getName(), "player_kills_life", 0, true);
+					sql.set(player.getName(), "plays", 0, true);
+					sql.set(player.getName(), "zombie_kills", 0, true);
+					sql.set(player.getName(), "zombie_kills_life", 0, true);
+				}
+			}
+			online_players.remove(player.getName());
+			return true;
 		}
-		return online_players.remove(player.getName());
+		return false;
 	}
 
 	/**
@@ -461,18 +477,33 @@ public class MyZ extends JavaPlugin {
 				data.setDeaths(data.getDeaths() + 1);
 			if (sql.isConnected())
 				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1, true);
+
+			boolean wasNPCKilled = false;
+			if (data != null) {
+				wasNPCKilled = data.wasKilledNPC();
+			}
+			if (sql.isConnected()) {
+				wasNPCKilled = sql.getBoolean(player.getName(), "wasNPCKilled");
+			}
 			/*
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
-			if (Configuration.isKickBan())
-				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0) {
+			if (Configuration.isKickBan() && !wasNPCKilled)
+				if ((data != null && data.getRank() <= 0) || (sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0)) {
 					removePlayer(player);
 					if (data != null)
 						data.setTimeOfKickban(System.currentTimeMillis());
 					if (sql.isConnected())
 						sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
+					flags.add(player.getName());
 					player.kickPlayer(Messenger.getConfigMessage("kick.come_back", Configuration.getKickBanSeconds()));
 				}
+			if (data != null) {
+				data.setWasKilledNPC(false);
+			}
+			if (sql.isConnected()) {
+				sql.set(player.getName(), "wasNPCKilled", false, true);
+			}
 		}
 	}
 
@@ -483,6 +514,16 @@ public class MyZ extends JavaPlugin {
 	 */
 	public List<CustomEntityPlayer> getNPCs() {
 		return NPCs;
+	}
+
+	/**
+	 * Get the list of flagged players, that is, players that have died and are
+	 * about to be kicked. Ensures dead players don't spawn NPC's.
+	 * 
+	 * @return The list of players.
+	 */
+	public List<String> getFlagged() {
+		return flags;
 	}
 
 	/**
@@ -776,8 +817,7 @@ public class MyZ extends JavaPlugin {
 		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null)
 			return data.getRank();
-		if (sql.isConnected())
-			return sql.getInt(player.getName(), "rank");
+		if (sql.isConnected()) { return sql.getInt(player.getName(), "rank"); }
 		return 0;
 	}
 }

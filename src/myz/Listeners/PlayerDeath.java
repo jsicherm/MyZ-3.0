@@ -29,7 +29,6 @@ public class PlayerDeath implements Listener {
 	private void onDeath(PlayerDeathEvent e) {
 		// Get rid of our horse.
 		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class)) {
-			System.out.println("Stuck");
 			if (horse.getOwner() != null && horse.getOwner().getName() != null
 					&& horse.getOwner().getName().equals(e.getEntity().getName())) {
 				horse.setOwner(null);
