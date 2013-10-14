@@ -74,6 +74,7 @@ public class MyZ extends JavaPlugin {
 	// TODO track stats
 	// TODO block/entity protection
 	// TODO sound attraction
+	// TODO make zombies give poison and normal damage give bleed
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();

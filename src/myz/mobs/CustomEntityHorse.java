@@ -36,6 +36,8 @@ import net.minecraft.server.v1_6_R3.StepSound;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.craftbukkit.v1_6_R3.util.UnsafeList;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Horse.Variant;
 
 /**
  * @author Jordan
@@ -49,8 +51,6 @@ public class CustomEntityHorse extends EntityHorse {
 
 	public CustomEntityHorse(World world) {
 		super(world);
-
-		// setVariant(3);
 
 		try {
 			Field field = PathfinderGoalSelector.class.getDeclaredField("a");
@@ -69,8 +69,8 @@ public class CustomEntityHorse extends EntityHorse {
 		goalSelector.a(2, new PathfinderGoalBreed(this, 1.0D));
 		goalSelector.a(3, new PathfinderGoalTempt(this, 1.0D, Item.ROTTEN_FLESH.id, false));
 		goalSelector.a(4, new PathfinderGoalFollowParent(this, 1.0D));
-		goalSelector.a(5, new PathfinderGoalRandomStroll(this, 1.0D));
-		goalSelector.a(6, new PathfinderGoalLookAtTarget(this, EntityHuman.class, 6.0F));
+		goalSelector.a(6, new PathfinderGoalRandomStroll(this, 1.0D));
+		goalSelector.a(7, new PathfinderGoalLookAtTarget(this, EntityHuman.class, 6.0F));
 		goalSelector.a(7, new PathfinderGoalRandomLookaround(this));
 		targetSelector.a(1, new PathfinderGoalHurtByTarget(this, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntityHuman.class, 0, true));
@@ -78,6 +78,9 @@ public class CustomEntityHorse extends EntityHorse {
 
 	@Override
 	public boolean m(Entity entity) {
+		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+			return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getHorseDamage() * (isBaby() ? 0.5f : 1f));
 		if (getOwnerName() == null || getOwnerName().isEmpty())
 			return false;
 		if (!MyZ.instance.isBandit(getOwnerName()))
@@ -91,7 +94,8 @@ public class CustomEntityHorse extends EntityHorse {
 
 	@Override
 	protected Entity findTarget() {
-		if (getOwnerName() == null || getOwnerName().isEmpty())
+		if ((getOwnerName() == null || getOwnerName().isEmpty())
+				&& (((Horse) getBukkitEntity()).getVariant() != Variant.UNDEAD_HORSE && ((Horse) getBukkitEntity()).getVariant() != Variant.SKELETON_HORSE))
 			return null;
 		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
 
@@ -100,6 +104,9 @@ public class CustomEntityHorse extends EntityHorse {
 
 	@Override
 	public EntityLiving getGoalTarget() {
+		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+			return super.getGoalTarget();
 		if (getOwnerName() == null || getOwnerName().isEmpty())
 			return null;
 		if (!MyZ.instance.isBandit(getOwnerName()))
@@ -109,6 +116,8 @@ public class CustomEntityHorse extends EntityHorse {
 
 	@Override
 	public boolean a(EntityHuman entityhuman) {
+		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE) { return false; }
 		ItemStack itemstack = entityhuman.inventory.getItemInHand();
 
 		if (itemstack != null && itemstack.id == Item.MONSTER_EGG.id)

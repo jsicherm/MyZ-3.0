@@ -42,6 +42,9 @@ public class PlayerDeath implements Listener {
 
 		revive(e.getEntity());
 		MyZ.instance.putPlayerAtSpawn(e.getEntity(), true);
+		
+		e.setDroppedExp(0);
+		e.getDrops().clear();
 	}
 
 	/**
