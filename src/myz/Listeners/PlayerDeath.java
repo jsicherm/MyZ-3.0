@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
@@ -25,7 +26,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
  */
 public class PlayerDeath implements Listener {
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDeath(PlayerDeathEvent e) {
 		// Get rid of our horse.
 		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class)) {

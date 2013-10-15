@@ -12,6 +12,7 @@ import myz.mobs.CustomEntityPlayer;
 
 import org.bukkit.entity.Horse;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
@@ -24,7 +25,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
  */
 public class JoinQuit implements Listener {
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPreJoin(AsyncPlayerPreLoginEvent e) {
 		if (Configuration.usePreLogin()) {
 			String name = e.getName();

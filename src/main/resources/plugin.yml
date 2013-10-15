@@ -1,6 +1,6 @@
 name: MyZ
 main: myz.MyZ
-version: 3.0
+version: 3.0.20
 depend: [WorldEdit]
 author: TeeePeee
 
@@ -28,6 +28,12 @@ commands:
   spawnpoints:
     description: List spawnpoints.
     aliases: [spawns]
+  savemedkit:
+    description: Save a MedKit.
+    permission: MyZ.admin
+    permission-message: You don't have permission.
+    aliases: [setmedkit, medkit]
+    usage: /<command> <name>
   savekit:
     description: Save a starting kit.
     permission: MyZ.admin

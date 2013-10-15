@@ -13,6 +13,7 @@ import myz.API.PlayerBeginPoisonEvent;
 import myz.API.PlayerSpawnInWorldEvent;
 import myz.API.PlayerWaterDecayEvent;
 import myz.Commands.AddSpawnCommand;
+import myz.Commands.CreateMedKitCommand;
 import myz.Commands.FriendCommand;
 import myz.Commands.FriendsCommand;
 import myz.Commands.RemoveSpawnCommand;
@@ -22,7 +23,7 @@ import myz.Commands.SetLobbyCommand;
 import myz.Commands.SpawnCommand;
 import myz.Commands.SpawnsCommand;
 import myz.Listeners.AutoFriend;
-import myz.Listeners.BandageSelf;
+import myz.Listeners.Heal;
 import myz.Listeners.CancelPlayerEvents;
 import myz.Listeners.CancelZombieDamage;
 import myz.Listeners.Chat;
@@ -35,10 +36,12 @@ import myz.Listeners.PlayerDeath;
 import myz.Listeners.PlayerHurtEntity;
 import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
+import myz.Listeners.PlayerTakeDamage;
 import myz.Listeners.ThrowProjectile;
 import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
 import myz.Support.Configuration;
+import myz.Support.MedKit;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Support.Teleport;
@@ -74,7 +77,7 @@ public class MyZ extends JavaPlugin {
 	// TODO track stats
 	// TODO block/entity protection
 	// TODO sound attraction
-	// TODO make zombies give poison and normal damage give bleed
+	// TODO make zombies give poison
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -89,6 +92,12 @@ public class MyZ extends JavaPlugin {
 		instance = this;
 		saveDefaultConfig();
 		loadPlayerData();
+
+		/*
+		 * Register the new enchantment so that MedKits can have their glow.
+		 */
+		MedKit.registerNewEnchantment();
+
 		Configuration.reload();
 
 		sql = new SQLManager(Configuration.getHost(), Configuration.getPort(), Configuration.getDatabase(), Configuration.getUser(),
@@ -133,7 +142,7 @@ public class MyZ extends JavaPlugin {
 		PluginManager p = getServer().getPluginManager();
 		p.registerEvents(new JoinQuit(), this);
 		p.registerEvents(new AutoFriend(), this);
-		p.registerEvents(new BandageSelf(), this);
+		p.registerEvents(new Heal(), this);
 		p.registerEvents(new CancelZombieDamage(), this);
 		p.registerEvents(new ConsumeFood(), this);
 		p.registerEvents(new PlayerHurtEntity(), this);
@@ -146,6 +155,7 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new Chat(), this);
 		p.registerEvents(new CancelPlayerEvents(), this);
 		p.registerEvents(new Movement(), this);
+		p.registerEvents(new PlayerTakeDamage(), this);
 
 		/*
 		 * Register all commands.
@@ -159,6 +169,7 @@ public class MyZ extends JavaPlugin {
 		getCommand("spawnpoints").setExecutor(new SpawnsCommand());
 		getCommand("savekit").setExecutor(new SaveKitCommand());
 		getCommand("saverank").setExecutor(new SaveRankCommand());
+		getCommand("savemedkit").setExecutor(new CreateMedKitCommand());
 
 		/*
 		 * Register our custom mobs.

@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
  */
 public class Movement implements Listener {
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onMove(PlayerMoveEvent e) {
 		if (e.getFrom().distance(e.getTo()) >= 0.2 && Sync.getSafeLogoutPlayers().containsKey(e.getPlayer().getName())) {
 			Sync.removeSafeLogoutPlayer(e.getPlayer());

@@ -14,6 +14,7 @@ import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
@@ -24,8 +25,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public class PlayerSummonGiant implements Listener {
 
-	@EventHandler
-	private void onSummon(final BlockPlaceEvent e) {
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	private void onSummon(final BlockPlaceEvent e) {	
 		if (!e.getPlayer().hasPermission("MyZ.spawn_giant")) {
 			Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summon_permission");
 			e.setCancelled(true);

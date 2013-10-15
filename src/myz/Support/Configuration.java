@@ -15,11 +15,13 @@ import myz.MyZ;
 import myz.Utilities.WorldlessLocation;
 
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Dye;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -33,14 +35,15 @@ public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
 			numbered_spawn_requires_rank, grenade, local_chat;
-	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name,
-			radio_color_override, to_prefix, from_prefix;
+	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
+			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
 			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time;
-	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, bandage_heal, food_heal, poison_damage, water_damage,
-			bleed_damage, zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage, pigman_damage;
+	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage,
+			water_damage, bleed_damage, zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage,
+			pigman_damage;
 	private static List<String> spawnpoints = new ArrayList<String>(), spawn_potion_effects = new ArrayList<String>();
-	private static ItemStack bandage, radio, safe_logout_item;
+	private static ItemStack radio, safe_logout_item;
 
 	private static Map<Integer, String> rank_prefix = new HashMap<Integer, String>();
 	private static Map<Integer, ItemStack> ranked_helmet = new HashMap<Integer, ItemStack>();
@@ -108,8 +111,9 @@ public class Configuration {
 		numbered_spawn_requires_rank = config.getBoolean("spawn.numbered_requires_rank");
 
 		grenade = config.getBoolean("projectile.enderpearl.become_grenade");
-		bandage = config.getItemStack("heal.bandage");
-		bandage_heal = config.getDouble("heal.bandage_heal_amount");
+
+		ointment_color = config.getString("heal.medkit.ointment_color");
+		antiseptic_color = config.getString("heal.medkit.antiseptic_color");
 		food_heal = config.getDouble("heal.food_heal_amount");
 
 		ranked_helmet.put(0, config.getItemStack("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET)));
@@ -130,6 +134,20 @@ public class Configuration {
 				Messenger.sendConsoleMessage("&4The entry " + entry + "(ranks.names." + entry + ") must be an integer.");
 			}
 
+		for (String entry : config.getConfigurationSection("heal.medkit.kit").getKeys(false)) {
+			try {
+				String name = config.getString("heal.medkit.kit." + entry + ".name");
+				int antiseptic = config.getInt("heal.medkit.kit." + entry + ".antiseptic_required");
+				int ointment = config.getInt("heal.medkit.kit." + entry + ".ointment_required");
+				ItemStack input = config.getItemStack("heal.medkit.kit." + entry + ".input");
+				ItemStack output = config.getItemStack("heal.medkit.kit." + entry + ".output");
+				new MedKit(entry, name, antiseptic, ointment, input, output);
+			} catch (Exception exc) {
+				exc.printStackTrace();
+				Messenger.sendConsoleMessage("&4heal.medkit.kit." + entry + " could not be resolved. Please re-configure or remove.");
+			}
+		}
+
 		for (String entry : config.getConfigurationSection("spawn").getKeys(false))
 			if (entry.startsWith("kit_"))
 				try {
@@ -145,7 +163,7 @@ public class Configuration {
 					ranked_inventory.put(position, config.getList("spawn.kit_" + position + ".inventory_contents")
 							.toArray(new ItemStack[0]));
 				} catch (Exception exc) {
-					Messenger.sendConsoleMessage(ChatColor.RED + entry + " could not be resolved. Please re-configure or remove.");
+					Messenger.sendConsoleMessage("&4spawn.kit_" + entry + " could not be resolved. Please re-configure or remove.");
 				}
 	}
 
@@ -183,25 +201,25 @@ public class Configuration {
 		// Ranks begin.
 		if (!config.contains("ranks.names.0"))
 			config.set("ranks.names.0", "[%s]");
-		
+
 		// Radio begin.
 		if (!config.contains("radio.itemstack"))
 			config.set("radio.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
-		
+
 		// Logout begin.
 		if (!config.contains("safe_logout.itemstack"))
 			config.set("safe_logout.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
 		if (!config.contains("safe_logout.time"))
 			config.set("safe_logout.time", 15);
-		
+
 		// Datastore begin.
 		if (!config.contains("datastorage.use_server_specific"))
 			config.set("datastorage.use_server_specific", true);
-		
+
 		// Performance begin.
 		if (!config.contains("performance.use_prelogin_kickban"))
 			config.set("performance.use_prelogin_kickban", true);
-		
+
 		// Mobs begin.
 		if (!config.contains("mobs.zombie.speed"))
 			config.set("mobs.zombie.speed", 1.2);
@@ -219,13 +237,13 @@ public class Configuration {
 			config.set("mobs.pigman.speed", 1.15);
 		if (!config.contains("mobs.giant.speed"))
 			config.set("mobs.giant.speed", 1.3);
-		
+
 		// Kickban begin.
 		if (!config.contains("kickban.kick_on_death"))
 			config.set("kickban.kick_on_death", true);
 		if (!config.contains("kickban.ban_time_seconds"))
 			config.set("kickban.ban_time_seconds", 30);
-		
+
 		// Damage begin.
 		if (!config.contains("damage.bleed_damage"))
 			config.set("damage.bleed_damage", 1);
@@ -245,7 +263,7 @@ public class Configuration {
 			config.set("damage.chance_of_poison_from_zombie", 0.05);
 		if (!config.contains("damage.chance_of_poison_from_flesh"))
 			config.set("damage.chance_of_poison_from_flesh", 0.05);
-		
+
 		// Friends begin.
 		if (!config.contains("friends.autofriend"))
 			config.set("friends.autofriend", true);
@@ -261,10 +279,40 @@ public class Configuration {
 			config.set("projectile.enderpearl.become_grenade", true);
 
 		// Heal begin.
-		if (!config.contains("heal.bandage"))
-			config.set("heal.bandage", new ItemStack(Material.PAPER));
-		if (!config.contains("heal.bandage_heal_amount"))
-			config.set("heal.bandage_heal_amount", 1);
+		if (!config.contains("heal.medkit.localizable.regeneration")) {
+			config.set("heal.medkit.localizable.regeneration", "Regeneration");
+		}
+		if (!config.contains("heal.medkit.localizable.heal")) {
+			config.set("heal.medkit.localizable.heal", "Heal");
+		}
+		if (!config.contains("heal.medkit.localizable.antiseptic")) {
+			config.set("heal.medkit.localizable.antiseptic", "Antiseptic");
+		}
+		if (!config.contains("heal.medkit.ointment_color")) {
+			config.set("heal.medkit.ointment_color", "RED");
+		}
+		if (!config.contains("heal.medkit.antiseptic_color")) {
+			config.set("heal.medkit.antiseptic_color", "LIME");
+		}
+		if (!config.contains("heal.medkit.kit")) {
+			config.set("heal.medkit.kit.First Aid Kit.name", "&4First Aid Kit");
+			config.set("heal.medkit.kit.First Aid Kit.input", new ItemStack(Material.CLAY_BRICK));
+			config.set("heal.medkit.kit.First Aid Kit.antiseptic_required", 0);
+			config.set("heal.medkit.kit.First Aid Kit.ointment_required", 0);
+			config.set("heal.medkit.kit.First Aid Kit.output", new ItemStack(Material.NETHER_BRICK_ITEM));
+
+			config.set("heal.medkit.kit.Med-Kit.name", "&4Med-Kit");
+			config.set("heal.medkit.kit.Med-Kit.input", new ItemStack(Material.CLAY_BRICK));
+			config.set("heal.medkit.kit.Med-Kit.antiseptic_required", 1);
+			config.set("heal.medkit.kit.Med-Kit.ointment_required", 1);
+			config.set("heal.medkit.kit.Med-Kit.output", new ItemStack(Material.NETHER_BRICK_ITEM));
+
+			config.set("heal.medkit.kit.Advanced Med-Kit.name", "&4Advanced Med-Kit");
+			config.set("heal.medkit.kit.Advanced Med-Kit.input", new ItemStack(Material.CLAY_BRICK));
+			config.set("heal.medkit.kit.Advanced Med-Kit.antiseptic_required", 2);
+			config.set("heal.medkit.kit.Advanced Med-Kit.ointment_required", 2);
+			config.set("heal.medkit.kit.Advanced Med-Kit.output", new ItemStack(Material.NETHER_BRICK_ITEM));
+		}
 		if (!config.contains("heal.food_heal_amount"))
 			config.set("heal.food_heal_amount", 1);
 
@@ -394,6 +442,7 @@ public class Configuration {
 
 		if (!playerdata_is_temporary)
 			config.set("datastorage.use_server_specific", use_playerdata);
+		/*
 		config.set("chat.local_enabled", local_chat);
 		config.set("chat.local_distance", local_chat_distance);
 		config.set("mobs.zombie.damage", zombie_damage);
@@ -416,14 +465,18 @@ public class Configuration {
 		config.set("damage.chance_of_bleeding", bleed_chance);
 		config.set("damage.chance_of_poison_from_zombie", poison_chance_zombie);
 		config.set("damage.chance_of_poison_from_flesh", poison_chance_flesh);
+		/*
 		config.set("lobby.min", lobby_min);
 		config.set("lobby.max", lobby_max);
+		/*
 		config.set("mysql.user", user);
 		config.set("mysql.password", password);
 		config.set("mysql.host", host);
 		config.set("mysql.database", database);
 		config.set("mysql.port", port);
+		*/
 		config.set("spawnpoints", spawnpoints);
+		/*
 		config.set("spawn.safespawn_radius", safespawn_radius);
 		config.set("friends.autofriend", autofriend);
 		config.set("ranks.save_data_of_unranked_players", save_data);
@@ -434,21 +487,32 @@ public class Configuration {
 		config.set("radio.itemstack", radio);
 		config.set("safe_logout.time", safe_logout_time);
 		config.set("safe_logout.itemstack", safe_logout_item);
+		*/
 		config.set("spawn.default_kit.helmet", ranked_helmet.get(0));
 		config.set("spawn.default_kit.chestplate", ranked_chestplate.get(0));
 		config.set("spawn.default_kit.leggings", ranked_leggings.get(0));
 		config.set("spawn.default_kit.boots", ranked_boots.get(0));
 		config.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
-		config.set("heal.bandage", bandage);
-		config.set("heal.bandage_heal_amount", bandage_heal);
+		/*
+		config.set("heal.medkit.ointment_color", ointment_color);
+		config.set("heal.medkit.antiseptic_color", antiseptic_color);
+
 		config.set("heal.food_heal_amount", food_heal);
 		config.set("projectile.enderpearl.become_grenade", grenade);
+		*/
 
+		/*
 		int pos = 0;
 		for (String prefix : rank_prefix.values()) {
 			config.set("ranks.names." + pos, prefix);
 			pos++;
 		}
+
+				for (MedKit kit : MedKit.getKits()) {
+					kit.save();
+				}
+				*/
+
 		for (int position = 1; position < ranked_helmet.size(); position++)
 			config.set("spawn.kit_" + position + ".helmet", ranked_helmet.get(position));
 		for (int position = 1; position < ranked_chestplate.size(); position++)
@@ -921,20 +985,6 @@ public class Configuration {
 	}
 
 	/**
-	 * @return The bandage item.
-	 */
-	public static ItemStack getBandageItem() {
-		return bandage;
-	}
-
-	/**
-	 * @return The number of half hearts healed per bandage.
-	 */
-	public static double getBandageHealAmount() {
-		return bandage_heal;
-	}
-
-	/**
 	 * @return the food_heal
 	 */
 	public static double getFoodHealthValue() {
@@ -1155,5 +1205,39 @@ public class Configuration {
 	 */
 	public static int getSafeLogoutTime() {
 		return safe_logout_time;
+	}
+
+	/**
+	 * The ointment, as an ItemStack. Attempts to retrieve the DyeColor from a
+	 * specified string, falls back to DyeColor.RED if the string provided is
+	 * not a valid value.
+	 * 
+	 * @return The ItemStack representing the dye of the ointment.
+	 */
+	public static ItemStack getOintment() {
+		DyeColor color = DyeColor.valueOf(ointment_color.toUpperCase());
+		if (color == null) {
+			color = DyeColor.RED;
+		}
+		Dye dye = new Dye();
+		dye.setColor(color);
+		return dye.toItemStack();
+	}
+
+	/**
+	 * The antiseptic, as an ItemStack. Attempts to retrieve the DyeColor from a
+	 * specified string, falls back to DyeColor.LIME if the string provided is
+	 * not a valid value.
+	 * 
+	 * @return The ItemStack representing the dye of the antiseptic.
+	 */
+	public static ItemStack getAntiseptic() {
+		DyeColor color = DyeColor.valueOf(antiseptic_color.toUpperCase());
+		if (color == null) {
+			color = DyeColor.LIME;
+		}
+		Dye dye = new Dye();
+		dye.setColor(color);
+		return dye.toItemStack();
 	}
 }

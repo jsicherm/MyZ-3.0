@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -25,7 +26,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
  */
 public class ThrowProjectile implements Listener {
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onShootArrow(ProjectileLaunchEvent e) {
 		if (e.getEntity().getShooter() instanceof Player) {
 			// TODO attract zombies to location of fired projectile with medium
@@ -33,13 +34,13 @@ public class ThrowProjectile implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onProjectileLand(ProjectileHitEvent e) {
 		// TODO attract zombies to location of landed projectile with low
 		// priority unless was snowball, in which case high priority.
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onGrenadeLand(PlayerTeleportEvent e) {
 		if (e.getCause() == TeleportCause.ENDER_PEARL && Configuration.isUsingGrenades()) {
 			e.setCancelled(true);
@@ -49,7 +50,7 @@ public class ThrowProjectile implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	private void onExplodeBlocks(EntityExplodeEvent e) {
 		List<Block> explodedBlocks = new ArrayList<Block>();
 

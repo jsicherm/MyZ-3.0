@@ -14,6 +14,7 @@ import myz.Support.Configuration;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
@@ -28,7 +29,7 @@ public class ConsumeFood implements Listener {
 
 	private static final Random random = new Random();
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onConsume(final PlayerItemConsumeEvent e) {
 		if (isFood(e.getItem())) {
 			if (e.getPlayer().getHealth() + Configuration.getFoodHealthValue() <= e.getPlayer().getMaxHealth()) {
@@ -58,7 +59,8 @@ public class ConsumeFood implements Listener {
 					e.getPlayer().setItemInHand(null);
 				}
 			}, 0L);
-		} else if (e.getItem().getType() == Material.ROTTEN_FLESH && random.nextDouble() <= Configuration.getPoisonChanceFlesh())
+		} else if (e.getItem().getType() == Material.ROTTEN_FLESH && random.nextDouble() <= Configuration.getPoisonChanceFlesh()
+				&& Configuration.getPoisonChanceFlesh() != 0.0)
 			MyZ.instance.startPoison(e.getPlayer());
 	}
 
