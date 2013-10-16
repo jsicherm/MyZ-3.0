@@ -13,6 +13,7 @@ import myz.API.PlayerDrinkWaterEvent;
 import myz.Support.Configuration;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,6 +21,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 /**
  * @author Jordan
@@ -36,8 +38,10 @@ public class ConsumeFood implements Listener {
 				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(e.getPlayer(), Configuration.getFoodHealthValue(),
 						RegainReason.EATING);
 				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
-				if (!regainEvent.isCancelled())
+				if (!regainEvent.isCancelled()) {
 					e.getPlayer().setHealth(e.getPlayer().getHealth() + Configuration.getFoodHealthValue());
+					addEffects(e.getPlayer(), e.getItem());
+				}
 			}
 		} else if (e.getItem().getType() == Material.POTION && e.getItem().getDurability() == (short) 0) {
 			PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(e.getPlayer());
@@ -74,11 +78,39 @@ public class ConsumeFood implements Listener {
 	 *         otherwise.
 	 */
 	private boolean isFood(ItemStack stack) {
+		return getFoodTypes().contains(stack.getType());
+	}
+
+	/**
+	 * Get a list of all the current Minecraft food types by Material.
+	 * 
+	 * @return The list of materials.
+	 */
+	public static List<Material> getFoodTypes() {
 		List<Material> foodTypes = new ArrayList<Material>();
 		foodTypes.addAll(Arrays.asList(Material.APPLE, Material.BAKED_POTATO, Material.BREAD, Material.CARROT, Material.COOKED_BEEF,
 				Material.COOKED_CHICKEN, Material.COOKED_FISH, Material.COOKIE, Material.GOLDEN_APPLE, Material.GRILLED_PORK,
 				Material.MELON, Material.MUSHROOM_SOUP, Material.POISONOUS_POTATO, Material.PORK, Material.POTATO, Material.PUMPKIN_PIE,
 				Material.RAW_BEEF, Material.RAW_CHICKEN, Material.RAW_FISH, Material.SPIDER_EYE));
-		return foodTypes.contains(stack.getType());
+		return foodTypes;
+	}
+
+	/**
+	 * Add the potion effects and thirst value specified in the config for the
+	 * given food item.
+	 * 
+	 * @param player
+	 *            The player to effect.
+	 * @param food
+	 *            The food that was consumed.
+	 */
+	private void addEffects(Player player, ItemStack food) {
+		if (!isFood(food)) { return; }
+		int thirstValue = Configuration.getFoodThirstValues().get(food.getType().toString().toUpperCase()) == null ? 0 : Configuration
+				.getFoodThirstValues().get(food.getType().toString().toUpperCase());
+		List<PotionEffect> potionEffects = Configuration.getFoodPotionEffects().get(food.getType().toString().toUpperCase()) == null ? new ArrayList<PotionEffect>()
+				: Configuration.getFoodPotionEffects().get(food.getType().toString().toUpperCase());
+		MyZ.instance.setThirst(player, player.getLevel() + thirstValue);
+		player.addPotionEffects(potionEffects);
 	}
 }

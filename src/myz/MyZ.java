@@ -653,10 +653,15 @@ public class MyZ extends JavaPlugin {
 	 *            The thirst level.
 	 */
 	public void setThirst(Player player, int level) {
+		if (level == player.getLevel()) { return; }
 		if (level != Configuration.getMaxThirstLevel()) {
-			PlayerWaterDecayEvent event = new PlayerWaterDecayEvent(player);
-			getServer().getPluginManager().callEvent(event);
-			if (!event.isCancelled()) {
+			if (level > Configuration.getMaxThirstLevel()) {
+				level = Configuration.getMaxThirstLevel();
+			}
+			PlayerWaterDecayEvent event = level < player.getLevel() ? new PlayerWaterDecayEvent(player) : null;
+			if (event != null)
+				getServer().getPluginManager().callEvent(event);
+			if (event == null || !event.isCancelled()) {
 				PlayerData data = PlayerData.getDataFor(player);
 				if (data != null)
 					data.setThirst(level);

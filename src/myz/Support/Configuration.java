@@ -12,6 +12,7 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 
 import myz.MyZ;
+import myz.Listeners.ConsumeFood;
 import myz.Utilities.WorldlessLocation;
 
 import org.bukkit.ChatColor;
@@ -50,6 +51,8 @@ public class Configuration {
 	private static Map<Integer, ItemStack> ranked_leggings = new HashMap<Integer, ItemStack>();
 	private static Map<Integer, ItemStack> ranked_boots = new HashMap<Integer, ItemStack>();
 	private static Map<Integer, ItemStack[]> ranked_inventory = new HashMap<Integer, ItemStack[]>();
+	private static Map<String, Integer> food_thirst = new HashMap<String, Integer>();
+	private static Map<String, List<PotionEffect>> food_potion = new HashMap<String, List<PotionEffect>>();
 
 	// TODO ensure all new values are added in reload(), writeUnwrittenValues()
 	// and save()
@@ -62,6 +65,24 @@ public class Configuration {
 		writeUnwrittenValues(config);
 
 		playerdata_is_temporary = false;
+
+		for (String entry : config.getConfigurationSection("food").getKeys(false)) {
+			food_thirst.put(entry, config.getInt(entry));
+			List<PotionEffect> effectList = new ArrayList<PotionEffect>();
+			for (String potion : config.getStringList("food." + entry + ".potioneffect")) {
+				try {
+					PotionEffectType type = PotionEffectType.getByName(potion.split(",")[0]);
+					int level = Integer.parseInt(potion.split(",")[1]);
+					int duration = Integer.parseInt(potion.split(",")[2]) * 20;
+					effectList.add(new PotionEffect(type, duration, level));
+				} catch (Exception exc) {
+					Messenger.sendConsoleMessage(ChatColor.RED + "Misconfigured food potion entry for: " + entry
+							+ ". Please re-configure. Format: type,level,duration");
+				}
+			}
+			food_potion.put(entry, effectList);
+		}
+
 		bandage = config.getItemStack("heal.bandage");
 		bandage_heal = config.getDouble("heal.bandage_heal_amount");
 		local_chat = config.getBoolean("chat.local_enabled");
@@ -264,6 +285,16 @@ public class Configuration {
 			config.set("damage.chance_of_poison_from_zombie", 0.05);
 		if (!config.contains("damage.chance_of_poison_from_flesh"))
 			config.set("damage.chance_of_poison_from_flesh", 0.05);
+
+		// Food begin.
+		for (Material material : ConsumeFood.getFoodTypes()) {
+			if (!config.contains("food." + material + ".thirst")) {
+				config.set("food." + material + ".thirst", 0);
+			}
+			if (!config.contains("food." + material + ".potioneffect")) {
+				config.set("food." + material + ".potioneffect", new ArrayList<String>());
+			}
+		}
 
 		// Friends begin.
 		if (!config.contains("friends.autofriend"))
@@ -837,7 +868,7 @@ public class Configuration {
 				int duration = Integer.parseInt(potion.split(",")[2]) * 20;
 				returnList.add(new PotionEffect(type, duration, level));
 			} catch (Exception exc) {
-				Messenger.sendConsoleMessage(ChatColor.RED + "Misconfigured potion entry for: " + potion
+				Messenger.sendConsoleMessage(ChatColor.RED + "Misconfigured spawn potion entry for: " + potion
 						+ ". Please re-configure. Format: type,level,duration");
 			}
 		return returnList;
@@ -1260,5 +1291,19 @@ public class Configuration {
 	 */
 	public static double getBandageHealAmount() {
 		return bandage_heal;
+	}
+
+	/**
+	 * @return The value for thirst of every food.
+	 */
+	public static Map<String, Integer> getFoodThirstValues() {
+		return food_thirst;
+	}
+
+	/**
+	 * @return The potio
+	 */
+	public static Map<String, List<PotionEffect>> getFoodPotionEffects() {
+		return food_potion;
 	}
 }
