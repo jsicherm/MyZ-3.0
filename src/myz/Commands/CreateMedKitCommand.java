@@ -6,7 +6,6 @@ package myz.Commands;
 import java.util.HashMap;
 import java.util.Map;
 
-import myz.Support.Configuration;
 import myz.Support.MedKit;
 import myz.Support.Messenger;
 

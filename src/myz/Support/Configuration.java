@@ -39,11 +39,10 @@ public class Configuration {
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
 			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time;
-	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage,
-			water_damage, bleed_damage, zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage,
-			pigman_damage;
+	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage, water_damage, bleed_damage,
+			zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage, pigman_damage, bandage_heal;
 	private static List<String> spawnpoints = new ArrayList<String>(), spawn_potion_effects = new ArrayList<String>();
-	private static ItemStack radio, safe_logout_item;
+	private static ItemStack radio, safe_logout_item, bandage;
 
 	private static Map<Integer, String> rank_prefix = new HashMap<Integer, String>();
 	private static Map<Integer, ItemStack> ranked_helmet = new HashMap<Integer, ItemStack>();
@@ -63,6 +62,8 @@ public class Configuration {
 		writeUnwrittenValues(config);
 
 		playerdata_is_temporary = false;
+		bandage = config.getItemStack("heal.bandage");
+		bandage_heal = config.getDouble("heal.bandage_heal_amount");
 		local_chat = config.getBoolean("chat.local_enabled");
 		local_chat_distance = config.getInt("chat.local_distance");
 		radio_color_override = config.getString("localizable.radio_color_override");
@@ -221,8 +222,6 @@ public class Configuration {
 			config.set("performance.use_prelogin_kickban", true);
 
 		// Mobs begin.
-		if (!config.contains("mobs.zombie.speed"))
-			config.set("mobs.zombie.speed", 1.2);
 		if (!config.contains("mobs.zombie.damage"))
 			config.set("mobs.zombie.damage", 2.0);
 		if (!config.contains("mobs.giant.damage"))
@@ -231,6 +230,8 @@ public class Configuration {
 			config.set("mobs.pigman.damage", 3.0);
 		if (!config.contains("mobs.horse.damage"))
 			config.set("mobs.horse.damage", 1.0);
+		if (!config.contains("mobs.zombie.speed"))
+			config.set("mobs.zombie.speed", 1.2);
 		if (!config.contains("mobs.horse.speed"))
 			config.set("mobs.horse.speed", 1.2);
 		if (!config.contains("mobs.pigman.speed"))
@@ -279,6 +280,10 @@ public class Configuration {
 			config.set("projectile.enderpearl.become_grenade", true);
 
 		// Heal begin.
+		if (!config.contains("heal.bandage"))
+			config.set("heal.bandage", new ItemStack(Material.PAPER));
+		if (!config.contains("heal.bandage_heal_amount"))
+			config.set("heal.bandage_heal_amount", 1);
 		if (!config.contains("heal.medkit.localizable.regeneration")) {
 			config.set("heal.medkit.localizable.regeneration", "Regeneration");
 		}
@@ -494,6 +499,8 @@ public class Configuration {
 		config.set("spawn.default_kit.boots", ranked_boots.get(0));
 		config.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
 		/*
+		config.set("heal.bandage", bandage);
+		config.set("heal.bandage_heal_amount", bandage_heal); 
 		config.set("heal.medkit.ointment_color", ointment_color);
 		config.set("heal.medkit.antiseptic_color", antiseptic_color);
 
@@ -1239,5 +1246,19 @@ public class Configuration {
 		Dye dye = new Dye();
 		dye.setColor(color);
 		return dye.toItemStack();
+	}
+
+	/**
+	 * @return The bandage item.
+	 */
+	public static ItemStack getBandageItem() {
+		return bandage;
+	}
+
+	/**
+	 * @return The number of half hearts healed per bandage.
+	 */
+	public static double getBandageHealAmount() {
+		return bandage_heal;
 	}
 }
