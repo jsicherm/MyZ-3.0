@@ -111,6 +111,8 @@ public class MyZ extends JavaPlugin {
 			Configuration.togglePlayerDataTemporarily(false);
 		}
 
+		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Using " + (Configuration.usePlayerData() ? "PlayerData" : "MySQL"));
+
 		/*
 		 * Add all players that weren't already in the playerdata to it (in case of a reload).
 		 */
@@ -250,7 +252,9 @@ public class MyZ extends JavaPlugin {
 	 */
 	public boolean isBleeding(Player player) {
 		PlayerData data = PlayerData.getDataFor(player);
-		return data != null && data.isBleeding() || sql.isConnected() && sql.getBoolean(player.getName(), "isBleeding");
+		if (data != null) { return data.isBleeding(); }
+		if (sql.isConnected()) { return sql.getBoolean(player.getName(), "isBleeding"); }
+		return false;
 	}
 
 	/**
@@ -262,7 +266,9 @@ public class MyZ extends JavaPlugin {
 	 */
 	public boolean isPoisoned(Player player) {
 		PlayerData data = PlayerData.getDataFor(player);
-		return data != null && data.isPoisoned() || sql.isConnected() && sql.getBoolean(player.getName(), "isPoisoned");
+		if (data != null) { return data.isPoisoned(); }
+		if (sql.isConnected()) { return sql.getBoolean(player.getName(), "isPoisoned"); }
+		return false;
 	}
 
 	/**
@@ -274,18 +280,19 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 */
 	public void startBleeding(Player player) {
-		PlayerBeginBleedingEvent event = new PlayerBeginBleedingEvent(player);
-		getServer().getPluginManager().callEvent(event);
-		if (!event.isCancelled())
-			if (!isBleeding(player)) {
+		if (!isBleeding(player)) {
+			PlayerBeginBleedingEvent event = new PlayerBeginBleedingEvent(player);
+			getServer().getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
 				PlayerData data = PlayerData.getDataFor(player);
 				if (data != null) {
 					data.setBleeding(true);
-					Messenger.sendConfigMessage(player, "damage.bleed_begin");
 				}
 				if (sql.isConnected())
 					sql.set(player.getName(), "isBleeding", true, true);
+				Messenger.sendConfigMessage(player, "damage.bleed_begin");
 			}
+		}
 	}
 
 	/**
@@ -296,18 +303,19 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 */
 	public void startPoison(Player player) {
-		PlayerBeginPoisonEvent event = new PlayerBeginPoisonEvent(player);
-		getServer().getPluginManager().callEvent(event);
-		if (!event.isCancelled())
-			if (!isPoisoned(player)) {
+		if (!isPoisoned(player)) {
+			PlayerBeginPoisonEvent event = new PlayerBeginPoisonEvent(player);
+			getServer().getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
 				PlayerData data = PlayerData.getDataFor(player);
 				if (data != null) {
 					data.setPoisoned(true);
-					Messenger.sendConfigMessage(player, "damage.poison_begin");
 				}
 				if (sql.isConnected())
 					sql.set(player.getName(), "isPoisoned", true, true);
+				Messenger.sendConfigMessage(player, "damage.poison_begin");
 			}
+		}
 	}
 
 	/**
@@ -321,10 +329,10 @@ public class MyZ extends JavaPlugin {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null) {
 				data.setPoisoned(false);
-				Messenger.sendConfigMessage(player, "damage.poison_end");
 			}
 			if (sql.isConnected())
 				sql.set(player.getName(), "isPoisoned", false, true);
+			Messenger.sendConfigMessage(player, "damage.poison_end");
 		}
 	}
 
@@ -339,10 +347,10 @@ public class MyZ extends JavaPlugin {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null) {
 				data.setBleeding(false);
-				Messenger.sendConfigMessage(player, "damage.bleed_end");
 			}
 			if (sql.isConnected())
 				sql.set(player.getName(), "isBleeding", false, true);
+			Messenger.sendConfigMessage(player, "damage.bleed_end");
 		}
 	}
 
@@ -433,9 +441,9 @@ public class MyZ extends JavaPlugin {
 
 			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0) {
 				if (data != null) {
+					data.setAutosave(false, false);
 					for (String friend : data.getFriends())
 						data.removeFriend(friend);
-					data.setAutosave(false, false);
 					data.setDeaths(0);
 					data.setGiantKills(0);
 					data.setGiantKillsLife(0);
@@ -489,6 +497,8 @@ public class MyZ extends JavaPlugin {
 				data.setDeaths(data.getDeaths() + 1);
 			if (sql.isConnected())
 				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1, true);
+
+			setThirst(player, Configuration.getMaxThirstLevel());
 
 			boolean wasNPCKilled = false;
 			if (data != null) {

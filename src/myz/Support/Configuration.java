@@ -53,6 +53,7 @@ public class Configuration {
 	private static Map<Integer, ItemStack[]> ranked_inventory = new HashMap<Integer, ItemStack[]>();
 	private static Map<String, Integer> food_thirst = new HashMap<String, Integer>();
 	private static Map<String, List<PotionEffect>> food_potion = new HashMap<String, List<PotionEffect>>();
+	private static Map<String, Double> food_potion_chance = new HashMap<String, Double>();
 
 	// TODO ensure all new values are added in reload(), writeUnwrittenValues()
 	// and save()
@@ -67,7 +68,8 @@ public class Configuration {
 		playerdata_is_temporary = false;
 
 		for (String entry : config.getConfigurationSection("food").getKeys(false)) {
-			food_thirst.put(entry, config.getInt(entry));
+			food_thirst.put(entry, config.getInt("food." + entry + ".thirst"));
+			food_potion_chance.put(entry, config.getDouble("food." + entry + ".potioneffectchance"));
 			List<PotionEffect> effectList = new ArrayList<PotionEffect>();
 			for (String potion : config.getStringList("food." + entry + ".potioneffect")) {
 				try {
@@ -294,6 +296,18 @@ public class Configuration {
 			if (!config.contains("food." + material + ".potioneffect")) {
 				config.set("food." + material + ".potioneffect", new ArrayList<String>());
 			}
+			if (!config.contains("food." + material + ".potioneffectchance")) {
+				config.set("food." + material + ".potioneffectchance", 1.0);
+			}
+		}
+		if (!config.contains("food.ROTTEN_FLESH.thirst")) {
+			config.set("food.ROTTEN_FLESH.thirst", 0);
+		}
+		if (!config.contains("food.ROTTEN_FLESH.potioneffect")) {
+			config.set("food.ROTTEN_FLESH.potioneffect", new ArrayList<String>());
+		}
+		if (!config.contains("food.ROTTEN_FLESH.potioneffectchance")) {
+			config.set("food.ROTTEN_FLESH.potioneffectchance", 1.0);
 		}
 
 		// Friends begin.
@@ -1305,5 +1319,18 @@ public class Configuration {
 	 */
 	public static Map<String, List<PotionEffect>> getFoodPotionEffects() {
 		return food_potion;
+	}
+
+	/**
+	 * Get the percent chance of the potion effect applying to a given ItemStack
+	 * or 0.0 if no ItemStack is recorded.
+	 * 
+	 * @param food
+	 *            The ItemStack (food) that was consumed.
+	 * @return The double percent value (0.0 to 1.0) of the effect happening.
+	 */
+	public static double getEffectChance(ItemStack food) {
+		return food_potion_chance.get(food.getType().toString().toUpperCase()) == null ? 0 : food_potion_chance.get(food.getType()
+				.toString().toUpperCase());
 	}
 }

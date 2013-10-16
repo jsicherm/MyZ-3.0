@@ -23,7 +23,7 @@ public class PlayerData {
 	private final String name;
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
 			giant_kills_life, plays, deaths, rank, heals_life, thirst;
-	private boolean isBleeding, isPoisoned, wasKilledNPC, autosave;
+	private boolean isBleeding, isPoisoned, wasKilledNPC, autosave = true;
 	private long timeOfKickban;
 	private List<String> friends = new ArrayList<String>();
 
@@ -193,7 +193,7 @@ public class PlayerData {
 	public void save(boolean bypass_autosave) {
 		if (!Configuration.usePlayerData())
 			return;
-		if (bypass_autosave || autosave)
+		if (bypass_autosave || autosave) {
 			if (playerDataExists(name)) {
 				ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(name);
 				section.set("player_kills", player_kills);
@@ -219,6 +219,7 @@ public class PlayerData {
 					MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + name + ": " + e.getMessage());
 				}
 			}
+		}
 	}
 
 	/**

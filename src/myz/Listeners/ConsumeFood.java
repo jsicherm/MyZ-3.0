@@ -32,40 +32,44 @@ public class ConsumeFood implements Listener {
 	private static final Random random = new Random();
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	private void onConsume(final PlayerItemConsumeEvent e) {
-		if (isFood(e.getItem())) {
-			if (e.getPlayer().getHealth() + Configuration.getFoodHealthValue() <= e.getPlayer().getMaxHealth()) {
-				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(e.getPlayer(), Configuration.getFoodHealthValue(),
+	private void onConsume(PlayerItemConsumeEvent e) {
+		final Player player = e.getPlayer();
+		ItemStack item = e.getItem();
+
+		if (isFood(item)) {
+			if (player.getHealth() + Configuration.getFoodHealthValue() <= player.getMaxHealth()) {
+				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getFoodHealthValue(),
 						RegainReason.EATING);
 				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
 				if (!regainEvent.isCancelled()) {
-					e.getPlayer().setHealth(e.getPlayer().getHealth() + Configuration.getFoodHealthValue());
-					addEffects(e.getPlayer(), e.getItem());
+					player.setHealth(player.getHealth() + Configuration.getFoodHealthValue());
 				}
 			}
-		} else if (e.getItem().getType() == Material.POTION && e.getItem().getDurability() == (short) 0) {
-			PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(e.getPlayer());
+			addEffects(player, item);
+		} else if (item.getType() == Material.POTION && item.getDurability() == (short) 0) {
+			PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
 			MyZ.instance.getServer().getPluginManager().callEvent(event);
 			if (!event.isCancelled())
-				MyZ.instance.setThirst(e.getPlayer(), Configuration.getMaxThirstLevel());
-		} else if (e.getItem().getType() == Material.POTION && e.getItem().getDurability() != (short) 0
-				|| e.getItem().getType() == Material.MILK_BUCKET) {
-			if (e.getItem().getType() == Material.MILK_BUCKET) {
-				MyZ.instance.stopPoison(e.getPlayer());
-				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(e.getPlayer());
+				MyZ.instance.setThirst(player, Configuration.getMaxThirstLevel());
+		} else if (item.getType() == Material.POTION && item.getDurability() != (short) 0 || item.getType() == Material.MILK_BUCKET) {
+			if (item.getType() == Material.MILK_BUCKET) {
+				MyZ.instance.stopPoison(player);
+				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
 				MyZ.instance.getServer().getPluginManager().callEvent(event);
 				if (!event.isCancelled())
-					MyZ.instance.setThirst(e.getPlayer(), Configuration.getMaxThirstLevel());
+					MyZ.instance.setThirst(player, Configuration.getMaxThirstLevel());
 			}
 			MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 				@Override
 				public void run() {
-					e.getPlayer().setItemInHand(null);
+					player.setItemInHand(null);
 				}
 			}, 0L);
-		} else if (e.getItem().getType() == Material.ROTTEN_FLESH && random.nextDouble() <= Configuration.getPoisonChanceFlesh()
-				&& Configuration.getPoisonChanceFlesh() != 0.0)
-			MyZ.instance.startPoison(e.getPlayer());
+		} else if (item.getType() == Material.ROTTEN_FLESH) {
+			if (random.nextDouble() <= Configuration.getPoisonChanceFlesh() && Configuration.getPoisonChanceFlesh() != 0.0)
+				MyZ.instance.startPoison(player);
+			addEffects(player, item);
+		}
 	}
 
 	/**
@@ -105,12 +109,14 @@ public class ConsumeFood implements Listener {
 	 *            The food that was consumed.
 	 */
 	private void addEffects(Player player, ItemStack food) {
-		if (!isFood(food)) { return; }
+		if (!isFood(food) && food.getType() != Material.ROTTEN_FLESH) { return; }
 		int thirstValue = Configuration.getFoodThirstValues().get(food.getType().toString().toUpperCase()) == null ? 0 : Configuration
 				.getFoodThirstValues().get(food.getType().toString().toUpperCase());
 		List<PotionEffect> potionEffects = Configuration.getFoodPotionEffects().get(food.getType().toString().toUpperCase()) == null ? new ArrayList<PotionEffect>()
 				: Configuration.getFoodPotionEffects().get(food.getType().toString().toUpperCase());
 		MyZ.instance.setThirst(player, player.getLevel() + thirstValue);
-		player.addPotionEffects(potionEffects);
+		double chance;
+		if (random.nextDouble() <= (chance = Configuration.getEffectChance(food)) && chance != 0.0)
+			player.addPotionEffects(potionEffects);
 	}
 }

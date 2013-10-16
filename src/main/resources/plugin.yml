@@ -1,6 +1,6 @@
 name: MyZ
 main: myz.MyZ
-version: 3.0.22
+version: 3.0.23
 depend: [WorldEdit]
 author: TeeePeee
 

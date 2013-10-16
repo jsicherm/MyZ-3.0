@@ -11,6 +11,7 @@ import myz.API.PlayerTakeBleedingDamageEvent;
 import myz.API.PlayerTakePoisonDamageEvent;
 import myz.API.PlayerTakeWaterDamageEvent;
 import myz.Support.Configuration;
+import myz.Support.Messenger;
 import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.Bukkit;
@@ -56,16 +57,20 @@ public class aSync implements Runnable {
 			if (ticks % Configuration.getBleedDamageFrequency() == 0 && MyZ.instance.isBleeding(player)
 					&& player.getHealth() > Configuration.getBleedDamage()) {
 				PlayerTakeBleedingDamageEvent event = new PlayerTakeBleedingDamageEvent(player);
-				if (!event.isCancelled())
+				if (!event.isCancelled()) {
 					player.damage(Configuration.getBleedDamage());
+					Messenger.sendConfigMessage(player, "damage.bleed_begin");
+				}
 			}
 
 			// Take poison damage.
 			if ((ticks + 11) % Configuration.getPoisonDamageFrequency() == 0 && MyZ.instance.isPoisoned(player)
 					&& player.getHealth() > Configuration.getPoisonDamage()) {
 				PlayerTakePoisonDamageEvent event = new PlayerTakePoisonDamageEvent(player);
-				if (!event.isCancelled())
+				if (!event.isCancelled()) {
 					player.damage(Configuration.getPoisonDamage());
+					Messenger.sendConfigMessage(player, "damage.poison_begin");
+				}
 			}
 
 			// Take thirst decay and damage.
