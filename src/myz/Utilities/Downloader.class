@@ -1,0 +1,36 @@
+package me.sirantony.minezchests;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+public class Downloader {
+	Downloader(File DataFolder) throws IOException {
+		
+		String file = "http://dev.bukkit.org/media/files/728/907/MineZ-chests_v0.3.3.jar";
+        String downloadedFileName = file.substring(file.lastIndexOf("/")+1);
+         
+        URL url = new URL(file);
+        InputStream is = url.openStream();
+        
+        FileOutputStream fos = new FileOutputStream(DataFolder.getParentFile() + "/" + downloadedFileName);
+  
+        byte[] buffer = new byte[4096];
+        int bytesRead = 0;
+         
+        System.out.print("Downloading MineZ-chests!");
+        while ((bytesRead = is.read(buffer)) != -1) {
+            System.out.print("|");
+            fos.write(buffer,0,bytesRead);
+        }
+        System.out.println("done!");
+  
+        
+        fos.close();
+        
+        is.close();
+    } 
+
+}
