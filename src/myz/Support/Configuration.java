@@ -35,7 +35,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
-			numbered_spawn_requires_rank, grenade, local_chat;
+			numbered_spawn_requires_rank, grenade, local_chat, minez_chests;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
@@ -85,6 +85,7 @@ public class Configuration {
 			food_potion.put(entry, effectList);
 		}
 
+		minez_chests = config.getBoolean("download.minez_chests");
 		bandage = config.getItemStack("heal.bandage");
 		bandage_heal = config.getDouble("heal.bandage_heal_amount");
 		local_chat = config.getBoolean("chat.local_enabled");
@@ -243,6 +244,10 @@ public class Configuration {
 		// Performance begin.
 		if (!config.contains("performance.use_prelogin_kickban"))
 			config.set("performance.use_prelogin_kickban", true);
+
+		// Download begin.
+		if (!config.contains("download.minez_chests"))
+			config.set("download.minez_chests", true);
 
 		// Mobs begin.
 		if (!config.contains("mobs.zombie.damage"))
@@ -1315,7 +1320,7 @@ public class Configuration {
 	}
 
 	/**
-	 * @return The potio
+	 * @return The potion effects with the food name as the key.
 	 */
 	public static Map<String, List<PotionEffect>> getFoodPotionEffects() {
 		return food_potion;
@@ -1332,5 +1337,12 @@ public class Configuration {
 	public static double getEffectChance(ItemStack food) {
 		return food_potion_chance.get(food.getType().toString().toUpperCase()) == null ? 0 : food_potion_chance.get(food.getType()
 				.toString().toUpperCase());
+	}
+
+	/**
+	 * @return the minez_chests.
+	 */
+	public static boolean isDownloadMineZChests() {
+		return minez_chests;
 	}
 }

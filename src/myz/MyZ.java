@@ -45,6 +45,7 @@ import myz.Support.MedKit;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Support.Teleport;
+import myz.Utilities.Downloader;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
@@ -177,6 +178,13 @@ public class MyZ extends JavaPlugin {
 		 * Register our custom mobs.
 		 */
 		CustomEntityType.registerEntities();
+		if (Configuration.isDownloadMineZChests())
+			getServer().getScheduler().runTaskLaterAsynchronously(instance, new Runnable() {
+				public void run() {
+					if (getServer().getPluginManager().getPlugin("MineZ-chests") == null)
+						new Downloader(getDataFolder());
+				}
+			}, 0L);
 	}
 
 	@Override
