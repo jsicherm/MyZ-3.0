@@ -41,9 +41,8 @@ public class ConsumeFood implements Listener {
 				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getFoodHealthValue(),
 						RegainReason.EATING);
 				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
-				if (!regainEvent.isCancelled()) {
+				if (!regainEvent.isCancelled())
 					player.setHealth(player.getHealth() + Configuration.getFoodHealthValue());
-				}
 			}
 			addEffects(player, item);
 		} else if (item.getType() == Material.POTION && item.getDurability() == (short) 0) {
@@ -124,7 +123,8 @@ public class ConsumeFood implements Listener {
 	 *            The food that was consumed.
 	 */
 	private void addEffects(Player player, ItemStack food) {
-		if (!isFood(food) && food.getType() != Material.ROTTEN_FLESH) { return; }
+		if (!isFood(food) && food.getType() != Material.ROTTEN_FLESH)
+			return;
 		int thirstValue = Configuration.getFoodThirstValues().get(food.getType().toString().toUpperCase()) == null ? 0 : Configuration
 				.getFoodThirstValues().get(food.getType().toString().toUpperCase());
 		List<PotionEffect> potionEffects = Configuration.getFoodPotionEffects().get(food.getType().toString().toUpperCase()) == null ? new ArrayList<PotionEffect>()

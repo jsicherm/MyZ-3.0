@@ -75,36 +75,33 @@ public class CustomEntityZombie extends EntityZombie {
 
 	@Override
 	public boolean damageEntity(DamageSource damagesource, float f) {
-		if (!super.damageEntity(damagesource, f)) {
+		if (!super.damageEntity(damagesource, f))
 			return false;
-		} else {
-			EntityLiving entityliving = this.getGoalTarget();
+		else {
+			EntityLiving entityliving = getGoalTarget();
 
-			if (entityliving == null && this.bN() instanceof EntityLiving) {
-				entityliving = (EntityLiving) this.bN();
-			}
+			if (entityliving == null && bN() instanceof EntityLiving)
+				entityliving = (EntityLiving) bN();
 
-			if (entityliving == null && damagesource.getEntity() instanceof EntityLiving) {
+			if (entityliving == null && damagesource.getEntity() instanceof EntityLiving)
 				entityliving = (EntityLiving) damagesource.getEntity();
-			}
 
-			if (entityliving != null && this.world.difficulty >= 3
-					&& (double) this.random.nextFloat() < this.getAttributeInstance(bp).getValue()) {
-				int i = MathHelper.floor(this.locX);
-				int j = MathHelper.floor(this.locY);
-				int k = MathHelper.floor(this.locZ);
-				EntityZombie entityzombie = new EntityZombie(this.world);
+			if (entityliving != null && world.difficulty >= 3 && random.nextFloat() < getAttributeInstance(bp).getValue()) {
+				int i = MathHelper.floor(locX);
+				int j = MathHelper.floor(locY);
+				int k = MathHelper.floor(locZ);
+				EntityZombie entityzombie = new EntityZombie(world);
 
 				for (int l = 0; l < 50; ++l) {
-					int i1 = i + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
-					int j1 = j + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
-					int k1 = k + MathHelper.nextInt(this.random, 7, 40) * MathHelper.nextInt(this.random, -1, 1);
+					int i1 = i + MathHelper.nextInt(random, 7, 40) * MathHelper.nextInt(random, -1, 1);
+					int j1 = j + MathHelper.nextInt(random, 7, 40) * MathHelper.nextInt(random, -1, 1);
+					int k1 = k + MathHelper.nextInt(random, 7, 40) * MathHelper.nextInt(random, -1, 1);
 
-					if (this.world.w(i1, j1 - 1, k1) && this.world.getLightLevel(i1, j1, k1) < 10) {
-						entityzombie.setPosition((double) i1, (double) j1, (double) k1);
-						if (this.world.b(entityzombie.boundingBox) && this.world.getCubes(entityzombie, entityzombie.boundingBox).isEmpty()
-								&& !this.world.containsLiquid(entityzombie.boundingBox)) {
-							this.world.addEntity(entityzombie);
+					if (world.w(i1, j1 - 1, k1) && world.getLightLevel(i1, j1, k1) < 10) {
+						entityzombie.setPosition(i1, j1, k1);
+						if (world.b(entityzombie.boundingBox) && world.getCubes(entityzombie, entityzombie.boundingBox).isEmpty()
+								&& !world.containsLiquid(entityzombie.boundingBox)) {
+							world.addEntity(entityzombie);
 							// Prevent crazy zombie mobs.
 							entityzombie.setGoalTarget(entityliving);
 							// entityzombie.a((GroupDataEntity) null);
@@ -174,10 +171,9 @@ public class CustomEntityZombie extends EntityZombie {
 	}
 
 	private void emptyInventory() {
-		for (org.bukkit.inventory.ItemStack item : inventory) {
+		for (org.bukkit.inventory.ItemStack item : inventory)
 			if (item != null)
 				getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
-		}
 		inventory.clear();
 	}
 

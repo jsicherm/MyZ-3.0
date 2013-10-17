@@ -35,29 +35,26 @@ public class CreateMedKitCommand implements CommandExecutor {
 				if (args.length >= 1) {
 
 					String configID = "", name;
-					for (String string : args) {
+					for (String string : args)
 						configID += string + " ";
-					}
 					configID = configID.trim();
 					name = configID;
 
-					for (MedKit kit : MedKit.getKits()) {
+					for (MedKit kit : MedKit.getKits())
 						if (kit.getConfigID().equals(configID)) {
 							int i = 0;
 							boolean flag = true;
 							while (flag) {
 								flag = false;
-								for (MedKit kit2 : MedKit.getKits()) {
+								for (MedKit kit2 : MedKit.getKits())
 									if (kit2.getConfigID().equals(configID + i)) {
 										i++;
 										flag = true;
 									}
-								}
 							}
 							configID += i;
 							break;
 						}
-					}
 					sender.sendMessage("To create the MedKit '" + ChatColor.translateAlternateColorCodes('&', name) + ChatColor.RESET
 							+ "', put the following items in your bar:");
 					sender.sendMessage(ChatColor.YELLOW + "Slot 1 - [Input Item]");
@@ -71,16 +68,15 @@ public class CreateMedKitCommand implements CommandExecutor {
 					medkit.name = name;
 
 					kitCreators.put(sender.getName(), medkit);
-				} else {
+				} else
 					return false;
-				}
 			else {
 				UnfinishedMedKit kit = kitCreators.get(sender.getName());
 				ItemStack input = ((Player) sender).getInventory().getItem(0);
 				ItemStack ointment = ((Player) sender).getInventory().getItem(1);
 				ItemStack antiseptic = ((Player) sender).getInventory().getItem(2);
 				ItemStack output = ((Player) sender).getInventory().getItem(3);
-				if ((input == null || input.getType() == Material.AIR) || (output == null || output.getType() == Material.AIR)) {
+				if (input == null || input.getType() == Material.AIR || output == null || output.getType() == Material.AIR) {
 					sender.sendMessage(ChatColor.RED + "Cancelled.");
 					kitCreators.remove(sender.getName());
 					return true;

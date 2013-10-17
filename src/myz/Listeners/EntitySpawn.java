@@ -40,7 +40,7 @@ public class EntitySpawn implements Listener {
 		}
 
 		if (type == EntityType.HORSE) {
-			Horse horse = ((Horse) e.getEntity());
+			Horse horse = (Horse) e.getEntity();
 			switch (random.nextInt(10)) {
 			case 0:
 			case 1:

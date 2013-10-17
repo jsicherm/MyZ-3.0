@@ -41,14 +41,12 @@ public class Heal implements Listener {
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
 				MyZ.instance.stopBleeding(player);
 				if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
-					if (player.getHealth() + 1 <= player.getMaxHealth()) {
+					if (player.getHealth() + 1 <= player.getMaxHealth())
 						player.setHealth(player.getHealth() + 1);
-					}
 				} else {
 					int antiLevel = kit.getAntisepticRequired(), regenLevel = kit.getOintmentRequired();
-					if (regenLevel != 0) {
+					if (regenLevel != 0)
 						player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenLevel * 40, regenLevel));
-					}
 					if (antiLevel != 0) {
 						MyZ.instance.stopPoison(player);
 						player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, antiLevel * 100, antiLevel));
@@ -93,7 +91,8 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onRightClickOther(PlayerInteractEntityEvent e) {
-		if (!(e.getRightClicked() instanceof Player)) { return; }
+		if (!(e.getRightClicked() instanceof Player))
+			return;
 		final Player player = (Player) e.getRightClicked();
 		final Player healer = e.getPlayer();
 		final ItemStack item = healer.getItemInHand();
@@ -105,14 +104,12 @@ public class Heal implements Listener {
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
 				MyZ.instance.stopBleeding(player);
 				if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
-					if (player.getHealth() + 1 <= player.getMaxHealth()) {
+					if (player.getHealth() + 1 <= player.getMaxHealth())
 						player.setHealth(player.getHealth() + 1);
-					}
 				} else {
 					int antiLevel = kit.getAntisepticRequired(), regenLevel = kit.getOintmentRequired();
-					if (regenLevel != 0) {
+					if (regenLevel != 0)
 						player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenLevel * 40, regenLevel));
-					}
 					if (antiLevel != 0) {
 						MyZ.instance.stopPoison(player);
 						player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, antiLevel * 100, antiLevel));
@@ -159,13 +156,11 @@ public class Heal implements Listener {
 		if (flag) {
 			PlayerData data = PlayerData.getDataFor(healer);
 			int amount = 0;
-			if (data != null) {
-				data.setHealsLife((amount = data.getHealsLife() + 1));
-			}
-			if (MyZ.instance.getSQLManager().isConnected()) {
+			if (data != null)
+				data.setHealsLife(amount = data.getHealsLife() + 1);
+			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
-						(amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1), true);
-			}
+						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
 			Messenger.sendMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
 			Utilities.colorName(healer);
 		}

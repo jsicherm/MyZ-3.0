@@ -77,7 +77,7 @@ public class Messenger {
 	 *            The uncolored message.
 	 */
 	public static void sendConsoleMessage(String uncolored_message) {
-		Bukkit.getConsoleSender().sendMessage("[MyZ] " + ChatColor.translateAlternateColorCodes('&', uncolored_message));
+		Bukkit.getConsoleSender().sendMessage("[MyZ-3] " + ChatColor.translateAlternateColorCodes('&', uncolored_message));
 	}
 
 	/**
@@ -87,10 +87,8 @@ public class Messenger {
 	 *            The uncolored config message.
 	 */
 	public static void sendConfigConsoleMessage(String uncolored_config_message) {
-		Bukkit.getConsoleSender().sendMessage(
-				"[MyZ] "
-						+ ChatColor.translateAlternateColorCodes('&',
-								MyZ.instance.getConfig().getString("localizable." + uncolored_config_message)));
+		sendConsoleMessage(ChatColor.translateAlternateColorCodes('&',
+				MyZ.instance.getConfig().getString("localizable." + uncolored_config_message)));
 	}
 
 	/**
@@ -108,7 +106,7 @@ public class Messenger {
 			try {
 				message = String.format(message, variables);
 			} catch (MissingFormatArgumentException exc) {
-				sendConsoleMessage("[MyZ] " + ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat.");
+				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat.");
 				message = message.replaceAll("%s", "");
 			}
 		return ChatColor.translateAlternateColorCodes('&', message);

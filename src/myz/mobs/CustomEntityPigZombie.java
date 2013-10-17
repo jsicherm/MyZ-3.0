@@ -51,8 +51,7 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 
 		getNavigation().b(true);
 		goalSelector.a(0, new PathfinderGoalFloat(this));
-		goalSelector.a(2, new PathfinderGoalZombieAttack(this,
-		EntityHuman.class, Configuration.getPigmanSpeed(), false));
+		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getPigmanSpeed(), false));
 		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getPigmanSpeed(), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));

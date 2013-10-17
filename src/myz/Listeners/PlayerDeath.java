@@ -29,21 +29,20 @@ public class PlayerDeath implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDeath(PlayerDeathEvent e) {
 		// Get rid of our horse.
-		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class)) {
+		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class))
 			if (horse.getOwner() != null && horse.getOwner().getName() != null
 					&& horse.getOwner().getName().equals(e.getEntity().getName())) {
 				horse.setOwner(null);
 				horse.setTamed(false);
 				horse.setDomestication(0);
 			}
-		}
 
 		// Become a zombie and teleport back to spawn to be kicked.
 		Utilities.spawnPlayerZombie(e.getEntity(), null);
 
 		revive(e.getEntity());
 		MyZ.instance.putPlayerAtSpawn(e.getEntity(), true);
-		
+
 		e.setDroppedExp(0);
 		e.getDrops().clear();
 	}

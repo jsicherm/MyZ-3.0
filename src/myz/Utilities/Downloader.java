@@ -7,14 +7,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.bukkit.ChatColor;
 
 import myz.Support.Messenger;
 
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import org.bukkit.ChatColor;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -41,7 +40,8 @@ public class Downloader {
 			bukgetConnect.connect();
 
 			int response = bukgetConnect.getResponseCode();
-			if (response != 200) { return; }
+			if (response != 200)
+				return;
 
 			stream = new InputStreamReader(bukgetConnect.getInputStream());
 
@@ -62,7 +62,8 @@ public class Downloader {
 		}
 
 		// Unable to fetch the updateURL, cancel.
-		if (updateURL == null) { return; }
+		if (updateURL == null)
+			return;
 
 		// Now try to download the file.
 		try {
@@ -75,9 +76,8 @@ public class Downloader {
 			int bytesRead = 0;
 
 			Messenger.sendConsoleMessage(ChatColor.YELLOW + "Downloading MineZ-chests!");
-			while ((bytesRead = is.read(buffer)) != -1) {
+			while ((bytesRead = is.read(buffer)) != -1)
 				fos.write(buffer, 0, bytesRead);
-			}
 			Messenger.sendConsoleMessage(ChatColor.GREEN + "Completed download!");
 
 			fos.close();

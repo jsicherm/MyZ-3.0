@@ -6,9 +6,6 @@ package myz.mobs.pathing;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Horse.Variant;
-
 import myz.MyZ;
 import net.minecraft.server.v1_6_R3.DistanceComparator;
 import net.minecraft.server.v1_6_R3.Entity;
@@ -17,6 +14,9 @@ import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityLiving;
 import net.minecraft.server.v1_6_R3.IEntitySelector;
 import net.minecraft.server.v1_6_R3.PathfinderGoalTarget;
+
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Horse.Variant;
 
 /**
  * @author Jordan
@@ -64,10 +64,9 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 			Collections.sort(list, e);
 			if (list.isEmpty())
 				return false;
-			else {
+			else
 				// g = list.get(0);
 				return true;
-			}
 		}
 	}
 
@@ -94,8 +93,9 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 				return false;
 
 			// Attack if we are an undead horse.
-			if ((((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE || ((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)) { return c != null
-					&& !c.a(entity) ? false : d.a((EntityLiving) entity, false); }
+			if (((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+					|| ((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+				return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
 
 			if (d.cc.getOwnerName() != null && !d.cc.getOwnerName().isEmpty()) {
 				if (!MyZ.instance.isBandit(d.cc.getOwnerName()))

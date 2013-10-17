@@ -24,7 +24,8 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 	private final EntityCreature cc;
 	private final DistanceComparator e;
 	private final IEntitySelector f;
-	//private EntityLiving g;
+
+	// private EntityLiving g;
 
 	public PathfinderGoalNearestAttackableZombieTarget(EntityCreature creature, Class<? extends EntityLiving> oclass, int i, boolean flag) {
 		this(creature, oclass, i, flag, false);
@@ -58,10 +59,9 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 			Collections.sort(list, e);
 			if (list.isEmpty())
 				return false;
-			else {
-				//g = list.get(0);
+			else
+				// g = list.get(0);
 				return true;
-			}
 		}
 	}
 

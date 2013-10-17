@@ -259,7 +259,8 @@ public class Utilities {
 	public static void spawnNPC(Player playerDuplicate) {
 		// The NPC won't even be on the screen for a second, may as well not add
 		// it.
-		if (Configuration.getSafeLogoutTime() <= 0) { return; }
+		if (Configuration.getSafeLogoutTime() <= 0)
+			return;
 
 		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
 		final CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, playerDuplicate.getName(),
@@ -281,6 +282,7 @@ public class Utilities {
 		MyZ.instance.getNPCs().add(player);
 
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			@Override
 			public void run() {
 				MyZ.instance.getNPCs().remove(player);
 				player.getBukkitEntity().remove();
@@ -298,12 +300,10 @@ public class Utilities {
 	public static void playerNPCDied(CustomEntityPlayer player) {
 		MyZ.instance.getNPCs().remove(player);
 		PlayerData data = PlayerData.getDataFor(player.getName());
-		if (data != null) {
+		if (data != null)
 			data.setWasKilledNPC(true);
-		}
-		if (MyZ.instance.getSQLManager().isConnected()) {
+		if (MyZ.instance.getSQLManager().isConnected())
 			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
-		}
 		Messenger.sendMessage(player.getBukkitEntity().getWorld(), Messenger.getConfigMessage("player_npc_killed", player.getName()));
 	}
 

@@ -193,7 +193,7 @@ public class PlayerData {
 	public void save(boolean bypass_autosave) {
 		if (!Configuration.usePlayerData())
 			return;
-		if (bypass_autosave || autosave) {
+		if (bypass_autosave || autosave)
 			if (playerDataExists(name)) {
 				ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(name);
 				section.set("player_kills", player_kills);
@@ -219,7 +219,6 @@ public class PlayerData {
 					MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + name + ": " + e.getMessage());
 				}
 			}
-		}
 	}
 
 	/**

@@ -46,9 +46,8 @@ public class SetRankCommand implements CommandExecutor {
 				return true;
 			}
 
-			for (int i = 0; i < args.length - 1; i++) {
+			for (int i = 0; i < args.length - 1; i++)
 				player += args[i] + " ";
-			}
 			player = player.trim();
 
 			OfflinePlayer offline_player = Bukkit.getOfflinePlayer(player);
@@ -61,12 +60,10 @@ public class SetRankCommand implements CommandExecutor {
 			}
 
 			PlayerData data = PlayerData.getDataFor(player);
-			if (data != null) {
+			if (data != null)
 				data.setRank(rank);
-			}
-			if (MyZ.instance.getSQLManager().isConnected()) {
+			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(player, "rank", rank, true);
-			}
 			if (sender instanceof Player)
 				Messenger.sendConfigMessage(sender, "command.setrank.success");
 			else

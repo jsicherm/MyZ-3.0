@@ -180,10 +180,9 @@ public class SQLManager {
 			if (!received.containsKey("isin")) {
 				received.put("isin", false);
 				cachedBooleanValues.put(name, received);
-			} else {
+			} else
 				// The player had the key already so let's return it.
 				return cachedBooleanValues.get(name).get("isin");
-			}
 		}
 
 		if (!isConnected())
@@ -211,7 +210,8 @@ public class SQLManager {
 	 */
 	public List<String> getKeys() {
 		// Return the cached values if we have them.
-		if (!cachedKeyValues.isEmpty()) { return cachedKeyValues; }
+		if (!cachedKeyValues.isEmpty())
+			return cachedKeyValues;
 
 		if (!isConnected())
 			return null;
@@ -345,10 +345,9 @@ public class SQLManager {
 			if (!received.containsKey(field)) {
 				received.put(field, 0);
 				cachedIntegerValues.put(name, received);
-			} else {
+			} else
 				// The player had the key already so let's return it.
 				return cachedIntegerValues.get(name).get(field);
-			}
 		}
 
 		try {
@@ -392,10 +391,9 @@ public class SQLManager {
 			if (!received.containsKey(field)) {
 				received.put(field, false);
 				cachedBooleanValues.put(name, received);
-			} else {
+			} else
 				// The player had the key already so let's return it.
 				return cachedBooleanValues.get(name).get(field);
-			}
 		}
 
 		try {
@@ -439,10 +437,9 @@ public class SQLManager {
 			if (!received.containsKey(field)) {
 				received.put(field, 0L);
 				cachedLongValues.put(name, received);
-			} else {
+			} else
 				// The player had the key already so let's return it.
 				return cachedLongValues.get(name).get(field);
-			}
 		}
 
 		try {
@@ -486,10 +483,9 @@ public class SQLManager {
 			if (!received.containsKey(field)) {
 				received.put(field, "");
 				cachedStringValues.put(name, received);
-			} else {
+			} else
 				// The player had the key already so let's return it.
 				return cachedStringValues.get(name).get(field);
-			}
 		}
 
 		try {

@@ -71,7 +71,7 @@ public class Configuration {
 			food_thirst.put(entry, config.getInt("food." + entry + ".thirst"));
 			food_potion_chance.put(entry, config.getDouble("food." + entry + ".potioneffectchance"));
 			List<PotionEffect> effectList = new ArrayList<PotionEffect>();
-			for (String potion : config.getStringList("food." + entry + ".potioneffect")) {
+			for (String potion : config.getStringList("food." + entry + ".potioneffect"))
 				try {
 					PotionEffectType type = PotionEffectType.getByName(potion.split(",")[0]);
 					int level = Integer.parseInt(potion.split(",")[1]);
@@ -81,7 +81,6 @@ public class Configuration {
 					Messenger.sendConsoleMessage(ChatColor.RED + "Misconfigured food potion entry for: " + entry
 							+ ". Please re-configure. Format: type,level,duration");
 				}
-			}
 			food_potion.put(entry, effectList);
 		}
 
@@ -159,7 +158,7 @@ public class Configuration {
 				Messenger.sendConsoleMessage("&4The entry " + entry + "(ranks.names." + entry + ") must be an integer.");
 			}
 
-		for (String entry : config.getConfigurationSection("heal.medkit.kit").getKeys(false)) {
+		for (String entry : config.getConfigurationSection("heal.medkit.kit").getKeys(false))
 			try {
 				String name = config.getString("heal.medkit.kit." + entry + ".name");
 				int antiseptic = config.getInt("heal.medkit.kit." + entry + ".antiseptic_required");
@@ -171,7 +170,6 @@ public class Configuration {
 				exc.printStackTrace();
 				Messenger.sendConsoleMessage("&4heal.medkit.kit." + entry + " could not be resolved. Please re-configure or remove.");
 			}
-		}
 
 		for (String entry : config.getConfigurationSection("spawn").getKeys(false))
 			if (entry.startsWith("kit_"))
@@ -295,25 +293,19 @@ public class Configuration {
 
 		// Food begin.
 		for (Material material : ConsumeFood.getFoodTypes()) {
-			if (!config.contains("food." + material + ".thirst")) {
+			if (!config.contains("food." + material + ".thirst"))
 				config.set("food." + material + ".thirst", 0);
-			}
-			if (!config.contains("food." + material + ".potioneffect")) {
+			if (!config.contains("food." + material + ".potioneffect"))
 				config.set("food." + material + ".potioneffect", new ArrayList<String>());
-			}
-			if (!config.contains("food." + material + ".potioneffectchance")) {
+			if (!config.contains("food." + material + ".potioneffectchance"))
 				config.set("food." + material + ".potioneffectchance", 1.0);
-			}
 		}
-		if (!config.contains("food.ROTTEN_FLESH.thirst")) {
+		if (!config.contains("food.ROTTEN_FLESH.thirst"))
 			config.set("food.ROTTEN_FLESH.thirst", 0);
-		}
-		if (!config.contains("food.ROTTEN_FLESH.potioneffect")) {
+		if (!config.contains("food.ROTTEN_FLESH.potioneffect"))
 			config.set("food.ROTTEN_FLESH.potioneffect", new ArrayList<String>());
-		}
-		if (!config.contains("food.ROTTEN_FLESH.potioneffectchance")) {
+		if (!config.contains("food.ROTTEN_FLESH.potioneffectchance"))
 			config.set("food.ROTTEN_FLESH.potioneffectchance", 1.0);
-		}
 
 		// Friends begin.
 		if (!config.contains("friends.autofriend"))
@@ -334,21 +326,16 @@ public class Configuration {
 			config.set("heal.bandage", new ItemStack(Material.PAPER));
 		if (!config.contains("heal.bandage_heal_amount"))
 			config.set("heal.bandage_heal_amount", 1);
-		if (!config.contains("heal.medkit.localizable.regeneration")) {
+		if (!config.contains("heal.medkit.localizable.regeneration"))
 			config.set("heal.medkit.localizable.regeneration", "Regeneration");
-		}
-		if (!config.contains("heal.medkit.localizable.heal")) {
+		if (!config.contains("heal.medkit.localizable.heal"))
 			config.set("heal.medkit.localizable.heal", "Heal");
-		}
-		if (!config.contains("heal.medkit.localizable.antiseptic")) {
+		if (!config.contains("heal.medkit.localizable.antiseptic"))
 			config.set("heal.medkit.localizable.antiseptic", "Antiseptic");
-		}
-		if (!config.contains("heal.medkit.ointment_color")) {
+		if (!config.contains("heal.medkit.ointment_color"))
 			config.set("heal.medkit.ointment_color", "RED");
-		}
-		if (!config.contains("heal.medkit.antiseptic_color")) {
+		if (!config.contains("heal.medkit.antiseptic_color"))
 			config.set("heal.medkit.antiseptic_color", "LIME");
-		}
 		if (!config.contains("heal.medkit.kit")) {
 			config.set("heal.medkit.kit.First Aid Kit.name", "&4First Aid Kit");
 			config.set("heal.medkit.kit.First Aid Kit.input", new ItemStack(Material.CLAY_BRICK));
@@ -1288,9 +1275,8 @@ public class Configuration {
 	 */
 	public static ItemStack getOintment() {
 		DyeColor color = DyeColor.valueOf(ointment_color.toUpperCase());
-		if (color == null) {
+		if (color == null)
 			color = DyeColor.RED;
-		}
 		Dye dye = new Dye();
 		dye.setColor(color);
 		return dye.toItemStack();
@@ -1305,9 +1291,8 @@ public class Configuration {
 	 */
 	public static ItemStack getAntiseptic() {
 		DyeColor color = DyeColor.valueOf(antiseptic_color.toUpperCase());
-		if (color == null) {
+		if (color == null)
 			color = DyeColor.LIME;
-		}
 		Dye dye = new Dye();
 		dye.setColor(color);
 		return dye.toItemStack();

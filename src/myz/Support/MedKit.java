@@ -13,7 +13,6 @@ import myz.Utilities.GlowEnchant;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -37,19 +36,15 @@ public class MedKit {
 		uuid++;
 		uid = uuid;
 
-		if (ointment > 10) {
+		if (ointment > 10)
 			ointment = 10;
-		}
-		if (antiseptic > 10) {
+		if (antiseptic > 10)
 			antiseptic = 10;
-		}
 		if (ointment + antiseptic > 8) {
-			if (ointment > 4) {
+			if (ointment > 4)
 				ointment = 4;
-			}
-			if (antiseptic > 4) {
+			if (antiseptic > 4)
 				antiseptic = 4;
-			}
 		}
 
 		this.configID = configID;
@@ -59,18 +54,16 @@ public class MedKit {
 		this.input = input;
 		this.output = output;
 
-		if (antiseptic > 0) {
+		if (antiseptic > 0)
 			lore.add(ChatColor.GRAY
 					+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
 							MyZ.instance.getConfig().getString("heal.medkit.localizable.antiseptic"))) + " "
 					+ getRomanNumeralsFor(antiseptic));
-		}
-		if (ointment > 0) {
+		if (ointment > 0)
 			lore.add(ChatColor.GRAY
 					+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
 							MyZ.instance.getConfig().getString("heal.medkit.localizable.regeneration"))) + " "
 					+ getRomanNumeralsFor(ointment));
-		}
 		if (lore.isEmpty())
 			lore.add(ChatColor.GRAY
 					+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
@@ -136,10 +129,9 @@ public class MedKit {
 	 */
 	public static MedKit getMedKitFor(ItemStack stack) {
 		short durability = stack.getDurability();
-		for (MedKit kit : medkits) {
+		for (MedKit kit : medkits)
 			if ((short) kit.uid == durability && stack.getType() == kit.output.getType())
 				return kit;
-		}
 		return null;
 	}
 
@@ -231,7 +223,7 @@ public class MedKit {
 			f.setAccessible(true);
 			f.set(null, true);
 			try {
-				EnchantmentWrapper.registerEnchantment(glow);
+				Enchantment.registerEnchantment(glow);
 				return true;
 			} catch (IllegalArgumentException e) {
 

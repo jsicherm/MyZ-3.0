@@ -1,6 +1,6 @@
-name: MyZ
+name: MyZ-3
 main: myz.MyZ
-version: 3.0.3
+version: 3.0.31
 depend: [WorldEdit, TagAPI]
 author: TeeePeee
 

@@ -21,14 +21,12 @@ public class KittehTag implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onNameTagsReceived(PlayerReceiveNameTagEvent e) {
 		Player player = e.getNamedPlayer();
-		
-		if (MyZ.instance.isBandit(player)) {
+
+		if (MyZ.instance.isBandit(player))
 			e.setTag(ChatColor.RED + e.getTag());
-		} else if (MyZ.instance.isHealer(player)) {
+		else if (MyZ.instance.isHealer(player))
 			e.setTag(ChatColor.GREEN + e.getTag());
-		}
-		if (MyZ.instance.isFriend(e.getPlayer().getName(), player.getName())) {
+		if (MyZ.instance.isFriend(e.getPlayer().getName(), player.getName()))
 			e.setTag(ChatColor.BLUE + e.getTag());
-		}
 	}
 }

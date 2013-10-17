@@ -94,8 +94,8 @@ public class CustomEntityHorse extends EntityHorse {
 
 	@Override
 	protected Entity findTarget() {
-		if ((getOwnerName() == null || getOwnerName().isEmpty())
-				&& (((Horse) getBukkitEntity()).getVariant() != Variant.UNDEAD_HORSE && ((Horse) getBukkitEntity()).getVariant() != Variant.SKELETON_HORSE))
+		if ((getOwnerName() == null || getOwnerName().isEmpty()) && ((Horse) getBukkitEntity()).getVariant() != Variant.UNDEAD_HORSE
+				&& ((Horse) getBukkitEntity()).getVariant() != Variant.SKELETON_HORSE)
 			return null;
 		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
 
@@ -117,7 +117,8 @@ public class CustomEntityHorse extends EntityHorse {
 	@Override
 	public boolean a(EntityHuman entityhuman) {
 		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
-				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE) { return false; }
+				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+			return false;
 		ItemStack itemstack = entityhuman.inventory.getItemInHand();
 
 		if (itemstack != null && itemstack.id == Item.MONSTER_EGG.id)

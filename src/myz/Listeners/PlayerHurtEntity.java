@@ -6,6 +6,7 @@ package myz.Listeners;
 import java.util.Random;
 
 import myz.Support.Configuration;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
@@ -29,23 +30,19 @@ public class PlayerHurtEntity implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onDamage(EntityDamageByEntityEvent e) {
 		// Cancel damage inside spawn room.
-		if (Configuration.isInLobby(e.getDamager().getLocation())) {
+		if (Configuration.isInLobby(e.getDamager().getLocation()))
 			e.setCancelled(true);
-		}
 
 		// Do widespread hits with axes when crouched.
 		if (e.getDamager() instanceof Player && isAxe(((Player) e.getDamager()).getItemInHand().getType())
-				&& ((Player) e.getDamager()).isSneaking()) {
-			if (random.nextDouble() <= 0.33) {
-				for (Entity nearby : e.getDamager().getNearbyEntities(1.5, 2, 1.5)) {
-					if (nearby instanceof Zombie || nearby instanceof PigZombie || nearby instanceof Horse
-							|| (nearby instanceof Player && nearby != e.getDamager())) {
-						LivingEntity living = ((LivingEntity) nearby);
+				&& ((Player) e.getDamager()).isSneaking())
+			if (random.nextDouble() <= 0.33)
+				for (Entity nearby : e.getDamager().getNearbyEntities(1.5, 2, 1.5))
+					if (nearby instanceof Zombie || nearby instanceof PigZombie || nearby instanceof Horse || nearby instanceof Player
+							&& nearby != e.getDamager()) {
+						LivingEntity living = (LivingEntity) nearby;
 						living.damage(e.getDamage(), e.getDamager());
 					}
-				}
-			}
-		}
 	}
 
 	/**
