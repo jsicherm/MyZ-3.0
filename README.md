@@ -44,13 +44,10 @@ What's left?
 So far, here are the base features that haven't yet been added.
 
 - [ ] Overridden Giant behaviour
-- [ ] Statistic trackers (eg. zombie kills life)
-- [x] Player zombies
-- [x] NPC's
 - [ ] Clans
 - [ ] Zombie attraction to sound
 
-What's broken?
-==============
+Known Caveats
+=============
 
-A list of known caveats can be found on the Issues tab.
+In some scenarios when you reload the server after updating the MyZ jar, mobs in unloaded chunks can cause the server to crash when those chunks become loaded. It does not corrupt your world, or is even harmful. Simply restart the server. For this reason, try to keep reloading MyZ to a minimum. 

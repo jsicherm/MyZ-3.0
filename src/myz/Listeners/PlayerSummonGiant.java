@@ -44,9 +44,6 @@ public class PlayerSummonGiant implements Listener {
 			MyZ.instance.getServer().getPluginManager().callEvent(event);
 			if (!event.isCancelled()) {
 				Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summoned");
-				Messenger.sendConsoleMessage(e.getPlayer().getName() + " has summoned a giant at location: "
-						+ e.getPlayer().getLocation().getWorld().getName() + " " + e.getBlockPlaced().getX() + ", "
-						+ e.getBlockPlaced().getY() + ", " + e.getBlockPlaced().getZ());
 				for (Entity player : e.getPlayer().getNearbyEntities(40, 10, 40))
 					if (player instanceof Player)
 						Messenger.sendConfigMessage((Player) player, "special.giant_summoned");
@@ -54,8 +51,6 @@ public class PlayerSummonGiant implements Listener {
 					@Override
 					public void run() {
 						e.getBlockPlaced().setType(Material.AIR);
-						// TODO Replace with non-NMS code if
-						// possible.
 						World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
 						CustomEntityGiantZombie zombie = new CustomEntityGiantZombie(world);
 						zombie.setPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ());

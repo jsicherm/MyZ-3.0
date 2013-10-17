@@ -20,6 +20,7 @@ import myz.Commands.RemoveSpawnCommand;
 import myz.Commands.SaveKitCommand;
 import myz.Commands.SaveRankCommand;
 import myz.Commands.SetLobbyCommand;
+import myz.Commands.SetRankCommand;
 import myz.Commands.SpawnCommand;
 import myz.Commands.SpawnsCommand;
 import myz.Listeners.AutoFriend;
@@ -31,6 +32,7 @@ import myz.Listeners.ConsumeFood;
 import myz.Listeners.EntityHurtPlayer;
 import myz.Listeners.EntitySpawn;
 import myz.Listeners.JoinQuit;
+import myz.Listeners.KittehTag;
 import myz.Listeners.Movement;
 import myz.Listeners.PlayerDeath;
 import myz.Listeners.PlayerHurtEntity;
@@ -103,41 +105,12 @@ public class MyZ extends JavaPlugin {
 
 		sql = new SQLManager(Configuration.getHost(), Configuration.getPort(), Configuration.getDatabase(), Configuration.getUser(),
 				Configuration.getPassword());
-		if (!sql.isConnected() && !Configuration.usePlayerData()) {
-			Messenger.sendConsoleMessage(ChatColor.RED
-					+ "MySQL is not connected and PlayerData is disabled. Enabling PlayerData for this session.");
-			Configuration.togglePlayerDataTemporarily(true);
-		} else if (sql.isConnected() && Configuration.usePlayerData()) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "MySQL and PlayerData are enabled. Disabling PlayerData for this session.");
-			Configuration.togglePlayerDataTemporarily(false);
-		}
-
-		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Using " + (Configuration.usePlayerData() ? "PlayerData" : "MySQL"));
-
-		/*
-		 * Add all players that weren't already in the playerdata to it (in case of a reload).
-		 */
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			addPlayer(player);
-			PlayerData data = null;
-			if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
-				if (data == null && Configuration.usePlayerData()) {
-					PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(), 0,
-							Configuration.getMaxThirstLevel());
-					putPlayerAtSpawn(player, false);
-				}
-				if (sql.isConnected() && !sql.isIn(player.getName())) {
-					sql.add(player);
-					putPlayerAtSpawn(player, false);
-				}
-			}
-		}
 
 		/*
 		 * Register threads.
 		 */
-		getServer().getScheduler().runTaskTimerAsynchronously(this, new aSync(), 20L, 20L);
-		getServer().getScheduler().runTaskTimer(this, new Sync(), 20L, 20L);
+		getServer().getScheduler().runTaskTimerAsynchronously(this, new aSync(), 100L, 20L);
+		getServer().getScheduler().runTaskTimer(this, new Sync(), 100L, 20L);
 
 		/*
 		 * Register all listeners.
@@ -159,6 +132,7 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new CancelPlayerEvents(), this);
 		p.registerEvents(new Movement(), this);
 		p.registerEvents(new PlayerTakeDamage(), this);
+		p.registerEvents(new KittehTag(), this);
 
 		/*
 		 * Register all commands.
@@ -173,6 +147,46 @@ public class MyZ extends JavaPlugin {
 		getCommand("savekit").setExecutor(new SaveKitCommand());
 		getCommand("saverank").setExecutor(new SaveRankCommand());
 		getCommand("savemedkit").setExecutor(new CreateMedKitCommand());
+		getCommand("setrank").setExecutor(new SetRankCommand());
+
+		/*
+		 * Connect to SQL or use PlayerData.
+		 */
+		getServer().getScheduler().runTaskLaterAsynchronously(instance, new Runnable() {
+			public void run() {
+				sql.connect();
+				if (!sql.isConnected() && !Configuration.usePlayerData()) {
+					Messenger.sendConsoleMessage(ChatColor.RED
+							+ "MySQL is not connected and PlayerData is disabled. Enabling PlayerData for this session.");
+					Configuration.togglePlayerDataTemporarily(true);
+				} else if (sql.isConnected() && Configuration.usePlayerData()) {
+					Messenger
+							.sendConsoleMessage(ChatColor.RED + "MySQL and PlayerData are enabled. Disabling PlayerData for this session.");
+					Configuration.togglePlayerDataTemporarily(false);
+				}
+
+				Messenger.sendConsoleMessage(ChatColor.YELLOW + "Using " + (Configuration.usePlayerData() ? "PlayerData" : "MySQL"));
+
+				/*
+				 * Add all players that weren't already in the playerdata to it (in case of a reload).
+				 */
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					addPlayer(player);
+					PlayerData data = null;
+					if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
+						if (data == null && Configuration.usePlayerData()) {
+							PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
+									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel());
+							putPlayerAtSpawn(player, false);
+						}
+						if (sql.isConnected() && !sql.isIn(player.getName())) {
+							sql.add(player);
+							putPlayerAtSpawn(player, false);
+						}
+					}
+				}
+			}
+		}, 0L);
 
 		/*
 		 * Register our custom mobs.

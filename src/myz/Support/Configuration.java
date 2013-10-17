@@ -425,10 +425,25 @@ public class Configuration {
 			config.set("localizable.command.setlobby.updated", "&2The lobby region has been updated.");
 		if (!config.contains("localizable.command.spawn.too_far_from_lobby"))
 			config.set("localizable.command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
+		if (!config.contains("localizable.command.setrank.success"))
+			config.set("localizable.command.setrank.success", "&eYou have successfully updated the player's rank.");
+		if (!config.contains("localizable.command.setrank.failure"))
+			config.set("localizable.command.setrank.failure",
+					"&4You must specify the name of a player that has played before and a rank value greater or equal to 0.");
 		if (!config.contains("localizable.private.no_player"))
 			config.set("localizable.private.no_player", "&4The player could not be found.");
 		if (!config.contains("localizable.safe_logout.cancelled"))
 			config.set("localizable.safe_logout.cancelled", "&4Safe logout cancelled due to movement.");
+		if (!config.contains("localizable.heal.amount"))
+			config.set("localizable.heal.amount", "&ePlayer &2healed&e. You now have %s heals this life.");
+		if (!config.contains("localizable.bandit.amount"))
+			config.set("localizable.bandit.amount", "&ePlayer &4killed&e. You now have %s kills this life.");
+		if (!config.contains("localizable.zombie.kill_amount"))
+			config.set("localizable.zombie.kill_amount", "&eZombie down. %s this life.");
+		if (!config.contains("localizable.pigman.kill_amount"))
+			config.set("localizable.pigman.kill_amount", "&ePigman down. %s this life.");
+		if (!config.contains("localizable.giant.kill_amount"))
+			config.set("localizable.giant.kill_amount", "&eGiant down. %s this life.");
 		if (!config.contains("localizable.safe_logout.beginning"))
 			config.set("localizable.safe_logout.beginning", "&2Safe logout will occur in:");
 		if (!config.contains("localizable.private.many_players"))

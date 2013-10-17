@@ -48,8 +48,6 @@ public class SQLManager {
 		this.database = database;
 		this.username = username;
 		this.password = password;
-		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
-		connect();
 	}
 
 	public void executeQuery(String query) throws SQLException {
@@ -60,6 +58,8 @@ public class SQLManager {
 	 * Establish connection with MySQL.
 	 */
 	public void connect() {
+		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
+
 		String url = "jdbc:mysql://" + hostname + ":" + port + "/" + database;
 
 		// Attempt to connect

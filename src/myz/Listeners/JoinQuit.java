@@ -3,6 +3,9 @@
  */
 package myz.Listeners;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
@@ -10,7 +13,9 @@ import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityPlayer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Horse;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -65,6 +70,24 @@ public class JoinQuit implements Listener {
 		}
 
 		e.setJoinMessage(null);
+
+		// Update name colors for this player and all of their online friends.
+		Utilities.colorName(e.getPlayer());
+
+		List<String> friends = new ArrayList<String>();
+		PlayerData data = PlayerData.getDataFor(e.getPlayer());
+		if (data != null) {
+			friends = data.getFriends();
+		}
+		if (MyZ.instance.getSQLManager().isConnected()) {
+			friends = MyZ.instance.getSQLManager().getStringList(e.getPlayer().getName(), "friends");
+		}
+		for (String friend : friends) {
+			Player online_friend = Bukkit.getPlayer(friend);
+			if (online_friend != null && online_friend.isOnline()) {
+				Utilities.colorName(online_friend);
+			}
+		}
 	}
 
 	@EventHandler

@@ -81,6 +81,19 @@ public class Messenger {
 	}
 
 	/**
+	 * Send a colored config message to the console.
+	 * 
+	 * @param uncolored_config_message
+	 *            The uncolored config message.
+	 */
+	public static void sendConfigConsoleMessage(String uncolored_config_message) {
+		Bukkit.getConsoleSender().sendMessage(
+				"[MyZ] "
+						+ ChatColor.translateAlternateColorCodes('&',
+								MyZ.instance.getConfig().getString("localizable." + uncolored_config_message)));
+	}
+
+	/**
 	 * Get a message out of the config and color it.
 	 * 
 	 * @param uncolored_config_message
