@@ -69,7 +69,8 @@ public class JoinQuit implements Listener {
 		e.setJoinMessage(null);
 
 		// Update name colors for this player and all of their online friends.
-		Utilities.colorName(e.getPlayer());
+		if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+			KittehTag.colorName(e.getPlayer());
 
 		List<String> friends = new ArrayList<String>();
 		PlayerData data = PlayerData.getDataFor(e.getPlayer());
@@ -80,7 +81,9 @@ public class JoinQuit implements Listener {
 		for (String friend : friends) {
 			Player online_friend = Bukkit.getPlayer(friend);
 			if (online_friend != null && online_friend.isOnline())
-				Utilities.colorName(online_friend);
+				if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
+						&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+					KittehTag.colorName(online_friend);
 		}
 	}
 

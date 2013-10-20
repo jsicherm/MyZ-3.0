@@ -8,7 +8,6 @@ import myz.Support.Configuration;
 import myz.Support.MedKit;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
-import myz.Utilities.Utilities;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -16,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -32,6 +32,7 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onRightClick(PlayerInteractEvent e) {
+		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 		final Player player = e.getPlayer();
 		final ItemStack item = e.getItem();
 
@@ -162,7 +163,9 @@ public class Heal implements Listener {
 				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
 						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
 			Messenger.sendMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
-			Utilities.colorName(healer);
+			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
+					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+				KittehTag.colorName(healer);
 		}
 	}
 }

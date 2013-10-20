@@ -1191,12 +1191,14 @@ public class Configuration {
 	 * @return The string prefix for the given rank.
 	 */
 	private static String getPrefixForPlayerRank(Player playerFor, int rank) {
-		if (playerFor.getName().equals("MrTeePee")) {
+		if (playerFor.getName().equals("MrTeePee"))
 			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee" + ChatColor.GRAY;
-		} else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName())) { return ChatColor.DARK_GRAY + "["
-				+ ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET + playerFor.getName(); }
-		if (playerFor.getName().equals("CraftySubZero")) { return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer"
-				+ ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty" + ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero"; }
+		else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
+			return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
+					+ playerFor.getName();
+		if (playerFor.getName().equals("CraftySubZero"))
+			return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer" + ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty"
+					+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero";
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
 					+ ChatColor.RESET;

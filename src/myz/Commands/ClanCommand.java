@@ -38,11 +38,10 @@ public class ClanCommand implements CommandExecutor {
 				online = MyZ.instance.getSQLManager().getOnlinePlayersInClan(sender.getName()).size();
 				total = MyZ.instance.getSQLManager().getNumberInClan(sender.getName());
 			}
-			if (clan == null || clan.isEmpty()) {
+			if (clan == null || clan.isEmpty())
 				Messenger.sendConfigMessage(sender, "command.clan.not_in");
-			} else {
+			else
 				Messenger.sendMessage(sender, Messenger.getConfigMessage("command.clan.in", clan, online, total));
-			}
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;

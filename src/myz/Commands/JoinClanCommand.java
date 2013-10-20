@@ -27,9 +27,8 @@ public class JoinClanCommand implements CommandExecutor {
 		if (sender instanceof Player) {
 			if (args.length >= 1) {
 				String clan = "";
-				for (String arg : args) {
+				for (String arg : args)
 					clan += arg + " ";
-				}
 				clan = clan.trim();
 				if (clan.length() >= 20) {
 					Messenger.sendConfigMessage(sender, "clan.name.too_long");
@@ -46,18 +45,16 @@ public class JoinClanCommand implements CommandExecutor {
 				}
 			} else {
 				PlayerData data = PlayerData.getDataFor((Player) sender);
-				if (data != null) {
+				if (data != null)
 					if (data.inClan()) {
 						Messenger.sendConfigMessage(sender, "command.clan.leave");
 						data.setClan("");
 					}
-				}
-				if (MyZ.instance.getSQLManager().isConnected()) {
+				if (MyZ.instance.getSQLManager().isConnected())
 					if (MyZ.instance.getSQLManager().inClan(sender.getName())) {
 						Messenger.sendConfigMessage(sender, "command.clan.leave");
 						MyZ.instance.getSQLManager().setClan(sender.getName(), "");
 					}
-				}
 			}
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");

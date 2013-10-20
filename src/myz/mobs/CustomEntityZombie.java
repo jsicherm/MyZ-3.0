@@ -192,12 +192,12 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 
 	@Override
 	public boolean canSpawn() {
-		int i = MathHelper.floor(this.locX);
-		int j = MathHelper.floor(this.boundingBox.b);
-		int k = MathHelper.floor(this.locZ);
+		int i = MathHelper.floor(locX);
+		int j = MathHelper.floor(boundingBox.b);
+		int k = MathHelper.floor(locZ);
 
-		return this.world.difficulty > 0 && this.world.b(this.boundingBox) && this.world.getCubes(this, this.boundingBox).isEmpty()
-				&& !this.world.containsLiquid(this.boundingBox) && this.a(i, j, k) >= 0.0F;
+		return world.difficulty > 0 && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
+				&& !world.containsLiquid(boundingBox) && this.a(i, j, k) >= 0.0F;
 	}
 
 	/* (non-Javadoc)

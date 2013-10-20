@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.kitteh.tag.PlayerReceiveNameTagEvent;
+import org.kitteh.tag.TagAPI;
 
 /**
  * @author Jordan
@@ -28,5 +29,16 @@ public class KittehTag implements Listener {
 			e.setTag(ChatColor.GREEN + e.getTag());
 		if (MyZ.instance.isFriend(e.getPlayer().getName(), player.getName()))
 			e.setTag(ChatColor.BLUE + e.getTag());
+	}
+
+	/**
+	 * Color the name of the given player based on bandit/healer definitions.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+	public static void colorName(Player player) {
+		if (MyZ.instance.isBandit(player) || MyZ.instance.isHealer(player))
+			TagAPI.refreshPlayer(player);
 	}
 }

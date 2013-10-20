@@ -5,13 +5,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import myz.MyZ;
-import myz.Support.Configuration;
 import myz.Support.Messenger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -28,6 +29,10 @@ public class SQLManager {
 	private Map<String, Map<String, Boolean>> cachedBooleanValues = new HashMap<String, Map<String, Boolean>>();
 	private Map<String, Map<String, Long>> cachedLongValues = new HashMap<String, Map<String, Long>>();
 	private List<String> cachedKeyValues = new ArrayList<String>();
+	private static final List<String> stringcolumns = new ArrayList<String>();
+	private static final List<String> intcolumns = new ArrayList<String>();
+	private static final List<String> booleancolumns = new ArrayList<String>();
+	private static final List<String> longcolumns = new ArrayList<String>();
 
 	/**
 	 * A simple MySQL tool for ease of access.
@@ -49,6 +54,14 @@ public class SQLManager {
 		this.database = database;
 		this.username = username;
 		this.password = password;
+
+		stringcolumns.addAll(Arrays.asList("friends", "clan"));
+		intcolumns.addAll(Arrays.asList("player_kills", "zombie_kills", "pigman_kills", "giant_kills", "player_kills_life",
+				"zombie_kills_life", "pigman_kills_life", "giant_kills_life", "player_kills_life_record", "zombie_kills_life_record",
+				"pigman_kills_life_record", "giant_kills_life_record", "deaths", "rank", "heals_life", "thirst", "minutes_alive_life",
+				"minutes_alive_record"));
+		booleancolumns.addAll(Arrays.asList("isBleeding", "isPoisoned", "wasNPCKilled"));
+		longcolumns.addAll(Arrays.asList("timeOfKickban", "minutes_alive"));
 	}
 
 	public void executeQuery(String query) throws SQLException {
@@ -104,7 +117,7 @@ public class SQLManager {
 		if (!isConnected())
 			return;
 		try {
-			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, plays SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends VARCHAR(255) NOT NULL DEFAULT '', heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0)");
+			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends VARCHAR(255) NOT NULL DEFAULT '', heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0)");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
 		}
@@ -265,10 +278,9 @@ public class SQLManager {
 			return;
 		}
 		try {
-			if (forcingaSync) {
+			if (forcingaSync)
 				// Make sure we update our cached values when we set new ones.
 				doUpdateCache(name, field, value);
-			}
 			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + name + "' LIMIT 1");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + name + "." + field + ": "
@@ -591,26 +603,23 @@ public class SQLManager {
 	 */
 	public int getNumberInClan(String name) {
 		String clan = getClan(name);
-		if (clan == null || clan.isEmpty()) { return 0; }
+		if (clan == null || clan.isEmpty())
+			return 0;
 		List<String> playersInClan = new ArrayList<String>();
 		playersInClan.add(name);
 		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (playersInClan.contains(player.getName())) {
+			if (playersInClan.contains(player.getName()))
 				continue;
-			}
 			String clan1 = getClan(player.getName());
-			if (clan1 != null && clan1.equals(clan)) {
+			if (clan1 != null && clan1.equals(clan))
 				playersInClan.add(player.getName());
-			}
 		}
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getName())) {
+			if (playersInClan.contains(player.getName()))
 				continue;
-			}
 			String clan1 = getClan(player.getName());
-			if (clan1 != null && clan1.equals(clan)) {
+			if (clan1 != null && clan1.equals(clan))
 				playersInClan.add(player.getName());
-			}
 		}
 		return playersInClan.size();
 	}
@@ -621,18 +630,17 @@ public class SQLManager {
 	public List<Player> getOnlinePlayersInClan(String name) {
 		String clan = getClan(name);
 		List<Player> playersInClan = new ArrayList<Player>();
-		if (clan == null || clan.isEmpty()) { return playersInClan; }
+		if (clan == null || clan.isEmpty())
+			return playersInClan;
 
 		playersInClan.add(Bukkit.getPlayerExact(name));
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player)) {
+			if (playersInClan.contains(player))
 				continue;
-			}
 			String clan1 = getClan(player.getName());
-			if (clan1 != null && clan1.equals(clan)) {
+			if (clan1 != null && clan1.equals(clan))
 				playersInClan.add(player);
-			}
 		}
 		return playersInClan;
 	}
@@ -648,20 +656,50 @@ public class SQLManager {
 	 */
 	public void setClan(final String name, final String clan) {
 		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+			@Override
 			public void run() {
 				final Player player = Bukkit.getPlayer(name);
-				if (player == null || !player.isOnline()) { return; }
+				if (player == null || !player.isOnline())
+					return;
 				set(name, "clan", "'" + clan + "'", false);
 				// Force the caches to be created.
 				getNumberInClan(name);
 				// Force a sync message to be delivered.
 				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+					@Override
 					public void run() {
-						if (player.isOnline()) {
+						if (player.isOnline())
 							Messenger.sendMessage(player, Messenger.getConfigMessage("clan.joined", clan));
-						}
 					}
 				}, 0L);
+			}
+		}, 0L);
+	}
+
+	/**
+	 * Create all the necessary caches for the player
+	 * 
+	 * @param p
+	 *            The player name to cache for.
+	 */
+	public void createLinks(final String p) {
+		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+			@Override
+			public void run() {
+				for (String entry : intcolumns)
+					getInt(p, entry);
+				for (String entry : longcolumns)
+					getLong(p, entry);
+			}
+		}, 0L);
+
+		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+			@Override
+			public void run() {
+				for (String entry : stringcolumns)
+					getString(p, entry);
+				for (String entry : booleancolumns)
+					getBoolean(p, entry);
 			}
 		}, 0L);
 	}

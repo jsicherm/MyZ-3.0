@@ -29,7 +29,7 @@ public class BossBar {
 	public static final int ENTITY_ID = 1234;
 	private static HashMap<String, Boolean> hasHealthBar = new HashMap<String, Boolean>();
 
-	public static void sendPacket(Player player, Packet packet) {
+	private static void sendPacket(Player player, Packet packet) {
 		EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
 		entityPlayer.playerConnection.sendPacket(packet);
 	}

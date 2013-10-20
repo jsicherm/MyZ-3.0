@@ -24,7 +24,7 @@ public class PlayerData {
 
 	private final String name;
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
-			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record, plays,
+			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record,
 			deaths, rank, heals_life, thirst, minutes_alive_life, minutes_alive_life_record;
 	private boolean isBleeding, isPoisoned, wasKilledNPC, autosave = true;
 	private long timeOfKickban, minutes_alive;
@@ -32,7 +32,7 @@ public class PlayerData {
 	private List<String> friends = new ArrayList<String>();
 
 	private PlayerData(String name, int player_kills, int zombie_kills, int pigman_kills, int giant_kills, int player_kills_life,
-			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int plays, int deaths, int rank, boolean isBleeding,
+			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int deaths, int rank, boolean isBleeding,
 			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan,
 			long minutes_alive, int minutes_alive_life, int minutes_alive_life_record, int player_kills_life_record,
 			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record) {
@@ -49,7 +49,6 @@ public class PlayerData {
 		this.zombie_kills_life_record = zombie_kills_life_record;
 		this.pigman_kills_life_record = pigman_kills_life_record;
 		this.giant_kills_life_record = giant_kills_life_record;
-		this.plays = plays;
 		this.deaths = deaths;
 		this.rank = rank;
 		this.isBleeding = isBleeding;
@@ -87,13 +86,13 @@ public class PlayerData {
 		ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(player);
 		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie.kills"), section.getInt("pigman.kills"),
 				section.getInt("giant.kills"), section.getInt("player.kills_life"), section.getInt("zombie.kills_life"),
-				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("plays"), section.getInt("deaths"),
-				section.getInt("rank"), section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"),
-				section.getBoolean("wasKilledNPC"), section.getLong("timeOfKickban"), section.getStringList("friends"),
-				section.getInt("heals_life"), section.getInt("thirst"), section.getString("clan"), section.getInt("minutes.played"),
-				section.getInt("minutes.played_life"), section.getInt("minutes.played_life_record"),
-				section.getInt("player.kills_life_record"), section.getInt("zombie.kills_life_record"),
-				section.getInt("pigman.kills_life_record"), section.getInt("giant.kills_life_record"));
+				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("deaths"), section.getInt("rank"),
+				section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"), section.getBoolean("wasKilledNPC"),
+				section.getLong("timeOfKickban"), section.getStringList("friends"), section.getInt("heals_life"), section.getInt("thirst"),
+				section.getString("clan"), section.getInt("minutes.played"), section.getInt("minutes.played_life"),
+				section.getInt("minutes.played_life_record"), section.getInt("player.kills_life_record"),
+				section.getInt("zombie.kills_life_record"), section.getInt("pigman.kills_life_record"),
+				section.getInt("giant.kills_life_record"));
 	}
 
 	/**
@@ -117,8 +116,6 @@ public class PlayerData {
 	 *            How many pigman kills (life) to begin with.
 	 * @param giant_kills_life
 	 *            How many giant kills (life) to begin with.
-	 * @param plays
-	 *            How many times the player has played (default 1).
 	 * @param deaths
 	 *            How many times the player has died.
 	 * @param rank
@@ -154,7 +151,7 @@ public class PlayerData {
 	 * @return The PlayerData object created.
 	 */
 	public static PlayerData createDataFor(Player player, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
-			int player_kills_life, int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int plays, int deaths, int rank,
+			int player_kills_life, int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int deaths, int rank,
 			boolean isBleeding, boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life,
 			int thirst, String clan, long minutes_alive, int minutes_alive_life, int minutes_alive_life_record,
 			int player_kills_life_record, int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record) {
@@ -174,7 +171,6 @@ public class PlayerData {
 			section.set("zombie.kills_life_record", zombie_kills_life_record);
 			section.set("pigman.kills_life_record", pigman_kills_life_record);
 			section.set("giant.kills_life_record", giant_kills_life_record);
-			section.set("plays", plays);
 			section.set("deaths", deaths);
 			section.set("rank", rank);
 			section.set("isBleeding", isBleeding);
@@ -250,7 +246,6 @@ public class PlayerData {
 				section.set("zombie.kills_life_record", zombie_kills_life_record);
 				section.set("pigman.kills_life_record", pigman_kills_life_record);
 				section.set("giant.kills_life_record", giant_kills_life_record);
-				section.set("plays", plays);
 				section.set("deaths", deaths);
 				section.set("rank", rank);
 				section.set("isBleeding", isBleeding);
@@ -297,31 +292,26 @@ public class PlayerData {
 	 * @return The number of players in the same clan as this player.
 	 */
 	public int getNumberInClan() {
-		if (!inClan()) { return 0; }
+		if (!inClan())
+			return 0;
 		List<String> playersInClan = new ArrayList<String>();
 		playersInClan.add(name);
 		PlayerData data;
 		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (playersInClan.contains(player.getName())) {
+			if (playersInClan.contains(player.getName()))
 				continue;
-			}
 			data = getDataFor(player.getName());
-			if (data != null) {
-				if (data.inClan() && data.getClan().equals(getClan())) {
+			if (data != null)
+				if (data.inClan() && data.getClan().equals(getClan()))
 					playersInClan.add(player.getName());
-				}
-			}
 		}
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getName())) {
+			if (playersInClan.contains(player.getName()))
 				continue;
-			}
 			data = getDataFor(player.getName());
-			if (data != null) {
-				if (data.inClan() && data.getClan().equals(getClan())) {
+			if (data != null)
+				if (data.inClan() && data.getClan().equals(getClan()))
 					playersInClan.add(player.getName());
-				}
-			}
 		}
 		return playersInClan.size();
 	}
@@ -331,19 +321,17 @@ public class PlayerData {
 	 */
 	public List<Player> getOnlinePlayersInClan() {
 		List<Player> playersInClan = new ArrayList<Player>();
-		if (!inClan()) { return playersInClan; }
+		if (!inClan())
+			return playersInClan;
 		playersInClan.add(Bukkit.getPlayerExact(name));
 		PlayerData data;
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getName())) {
+			if (playersInClan.contains(player.getName()))
 				continue;
-			}
 			data = getDataFor(player.getName());
-			if (data != null) {
-				if (data.inClan() && data.getClan().equals(getClan())) {
+			if (data != null)
+				if (data.inClan() && data.getClan().equals(getClan()))
 					playersInClan.add(player);
-				}
-			}
 		}
 		return playersInClan;
 	}
@@ -409,22 +397,6 @@ public class PlayerData {
 	 */
 	public void setGiantKills(int giant_kills) {
 		this.giant_kills = giant_kills;
-		save();
-	}
-
-	/**
-	 * @return the plays
-	 */
-	public int getPlays() {
-		return plays;
-	}
-
-	/**
-	 * @param plays
-	 *            the plays to set
-	 */
-	public void setPlays(int plays) {
-		this.plays = plays;
 		save();
 	}
 

@@ -42,7 +42,7 @@ import myz.Listeners.PlayerHurtEntity;
 import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
 import myz.Listeners.PlayerTakeDamage;
-import myz.Listeners.ThrowProjectile;
+import myz.Listeners.Visibility;
 import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
 import myz.Support.Configuration;
@@ -81,7 +81,7 @@ public class MyZ extends JavaPlugin {
 
 	// TODO giants
 	// TODO block/entity protection
-	// TODO sound attraction
+	// TODO sound attraction (50%)
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -123,7 +123,7 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new CancelZombieDamage(), this);
 		p.registerEvents(new ConsumeFood(), this);
 		p.registerEvents(new PlayerHurtEntity(), this);
-		p.registerEvents(new ThrowProjectile(), this);
+		p.registerEvents(new Visibility(), this);
 		p.registerEvents(new PlayerKillEntity(), this);
 		p.registerEvents(new EntityHurtPlayer(), this);
 		p.registerEvents(new PlayerDeath(), this);
@@ -133,7 +133,8 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new CancelPlayerEvents(), this);
 		p.registerEvents(new Movement(), this);
 		p.registerEvents(new PlayerTakeDamage(), this);
-		p.registerEvents(new KittehTag(), this);
+		if (getServer().getPluginManager().getPlugin("TagAPI") != null && getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+			p.registerEvents(new KittehTag(), this);
 
 		/*
 		 * Register all commands.
@@ -141,7 +142,9 @@ public class MyZ extends JavaPlugin {
 		getCommand("friend").setExecutor(new FriendCommand());
 		getCommand("friends").setExecutor(new FriendsCommand());
 		getCommand("start").setExecutor(new SpawnCommand());
-		getCommand("setlobby").setExecutor(new SetLobbyCommand());
+		if (getServer().getPluginManager().getPlugin("WorldEdit") != null
+				&& getServer().getPluginManager().getPlugin("WorldEdit").isEnabled())
+			getCommand("setlobby").setExecutor(new SetLobbyCommand());
 		getCommand("addspawn").setExecutor(new AddSpawnCommand());
 		getCommand("removespawn").setExecutor(new RemoveSpawnCommand());
 		getCommand("spawnpoints").setExecutor(new SpawnsCommand());
@@ -177,7 +180,7 @@ public class MyZ extends JavaPlugin {
 					PlayerData data = null;
 					if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 						if (data == null && Configuration.usePlayerData()) {
-							PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
+							PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
 									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0);
 							putPlayerAtSpawn(player, false);
 						}
@@ -420,8 +423,8 @@ public class MyZ extends JavaPlugin {
 		 * Add the player to the dataset if they're not in it yet. If they weren't in it, put them at the spawn.
 		 */
 		if (playerdata == null && Configuration.usePlayerData()) {
-			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-					new ArrayList<String>(), 0, 20, "", 0, 0, 0, 0, 0, 0, 0);
+			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
+					0, 20, "", 0, 0, 0, 0, 0, 0, 0);
 			putPlayerAtSpawn(player, false);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -435,6 +438,12 @@ public class MyZ extends JavaPlugin {
 			playerdata.setTimeOfKickban(0L);
 		if (sql.isConnected() && sql.getLong(player.getName(), "timeOfKickban") != 0)
 			sql.set(player.getName(), "timeOfKickban", 0L, true);
+
+		/*
+		 * Cache all values asynchronously to reduce runtime lag.
+		 */
+		if (sql.isConnected())
+			sql.createLinks(player.getName());
 
 		/*
 		 * Teleport the player back to the world spawn if they were killed by an NPC logout.
@@ -476,7 +485,7 @@ public class MyZ extends JavaPlugin {
 					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
 			}
 
-			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0) {
+			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && player.getName() != "MrTeePee") {
 				if (data != null) {
 					data.setAutosave(false, false);
 					for (String friend : data.getFriends())
@@ -491,7 +500,6 @@ public class MyZ extends JavaPlugin {
 					data.setPlayerKills(0);
 					data.setPlayerKillsLife(0);
 					data.setPlayerKillsLifeRecord(0);
-					data.setPlays(0);
 					data.setZombieKills(0);
 					data.setZombieKillsLife(0);
 					data.setZombieKillsLifeRecord(0);
@@ -512,7 +520,6 @@ public class MyZ extends JavaPlugin {
 					sql.set(player.getName(), "player_kills", 0, true);
 					sql.set(player.getName(), "player_kills_life", 0, true);
 					sql.set(player.getName(), "player_kills_life_record", 0, true);
-					sql.set(player.getName(), "plays", 0, true);
 					sql.set(player.getName(), "zombie_kills", 0, true);
 					sql.set(player.getName(), "zombie_kills_life", 0, true);
 					sql.set(player.getName(), "zombie_kills_life_record", 0, true);
@@ -693,14 +700,10 @@ public class MyZ extends JavaPlugin {
 				player.addPotionEffect(potioneffect);
 
 			int rank = 0;
-			if (data != null) {
+			if (data != null)
 				rank = data.getRank();
-				data.setPlays(data.getPlays() + 1);
-			}
-			if (sql.isConnected()) {
+			if (sql.isConnected())
 				rank = sql.getInt(player.getName(), "rank");
-				sql.set(player.getName(), "plays", sql.getInt(player.getName(), "plays") + 1, true);
-			}
 
 			try {
 				player.getInventory().setArmorContents(Configuration.getArmorContents(rank));

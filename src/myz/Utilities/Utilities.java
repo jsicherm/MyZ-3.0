@@ -30,7 +30,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.kitteh.tag.TagAPI;
 
 /**
  * @author Jordan
@@ -305,16 +304,5 @@ public class Utilities {
 		if (MyZ.instance.getSQLManager().isConnected())
 			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
 		Messenger.sendMessage(player.getBukkitEntity().getWorld(), Messenger.getConfigMessage("player_npc_killed", player.getName()));
-	}
-
-	/**
-	 * Color the name of the given player based on bandit/healer definitions.
-	 * 
-	 * @param player
-	 *            The player.
-	 */
-	public static void colorName(Player player) {
-		if (MyZ.instance.isBandit(player) || MyZ.instance.isHealer(player))
-			TagAPI.refreshPlayer(player);
 	}
 }

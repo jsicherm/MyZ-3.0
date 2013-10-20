@@ -6,7 +6,6 @@ package myz.Listeners;
 import myz.MyZ;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
-import myz.Utilities.Utilities;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -110,7 +109,9 @@ public class PlayerKillEntity implements Listener {
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life_record", amount, true);
 			}
 			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("bandit.amount", amount));
-			Utilities.colorName(playerFor);
+			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
+					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+				KittehTag.colorName(playerFor);
 			break;
 		default:
 			break;

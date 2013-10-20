@@ -3,6 +3,9 @@
  */
 package myz.mobs.pathing;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import myz.MyZ;
 import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityCreature;
@@ -23,6 +26,8 @@ import org.bukkit.inventory.ItemStack;
  * 
  */
 public class PathingSupport {
+
+	private static Map<String, Double> visibility_override = new HashMap<String, Double>();
 
 	/**
 	 * @see findNearbyVulnerablePlayer(Entity entity, double x, double y, double
@@ -93,7 +98,19 @@ public class PathingSupport {
 	public static void setTarget(EntityCreature creature, Location location, double speed) {
 		PathEntity path = creature.world.a(creature, location.getBlockX(), location.getBlockY(), location.getBlockZ(), 100.0F, true, false,
 				false, true);
-		creature.getNavigation().a(path, speed);
+		creature.pathEntity = path;
+	}
+
+	/**
+	 * Override the standard visibility value with a set value.
+	 * 
+	 * @param player
+	 *            The player to override.
+	 * @param visibility
+	 *            The visibility in blocks to override with.
+	 */
+	public static void elevatePlayer(Player player, double visibility) {
+		visibility_override.put(player.getName(), visibility);
 	}
 
 	/**
@@ -111,6 +128,11 @@ public class PathingSupport {
 
 		CraftPlayer p = (CraftPlayer) player;
 
+		if (visibility_override.containsKey(player.getName())) {
+			double vis = visibility_override.get(player.getName());
+			visibility_override.remove(player.getName());
+			return vis;
+		}
 		// Sneaking players must be nearer to be seen.
 		if (player.isSneaking())
 			total = 6; // 6 bars of exp filled.
