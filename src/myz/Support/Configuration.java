@@ -390,6 +390,8 @@ public class Configuration {
 			config.set("localizable.private.to_prefix", "&7To %s:");
 		if (!config.contains("localizable.private.from_prefix"))
 			config.set("localizable.private.from_prefix", "&7From %s:");
+		if (!config.contains("localizable.private.clan_prefix"))
+			config.set("localizable.private.clan_prefix", "&8Clan chat:");
 		if (!config.contains("localizable.damage.bleed_begin"))
 			config.set("localizable.damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
 		if (!config.contains("localizable.damage.poison_begin"))
@@ -458,6 +460,18 @@ public class Configuration {
 					"&4This is a donator-only feature. Donate today for the ability to spawn the fabled boss mobs.");
 		if (!config.contains("localizable.player_npc_killed"))
 			config.set("localizable.player_npc_killed", "&e%s has been killed while combat logging.");
+		if (!config.contains("localizable.clan.name.too_long"))
+			config.set("localizable.clan.name.too_long", "&4Clan names must be less than 20 characters.");
+		if (!config.contains("localizable.clan.joined"))
+			config.set("localizable.clan.joined", "You have joined '&e%s&r'.");
+		if (!config.contains("localizable.clan.joining"))
+			config.set("localizable.clan.joining", "Joining clan. Please wait...");
+		if (!config.contains("localizable.command.clan.leave"))
+			config.set("localizable.command.clan.leave", "You are no longer in a clan.");
+		if (!config.contains("localizable.command.clan.not_in"))
+			config.set("localizable.command.clan.not_in", "You are not in a clan.");
+		if (!config.contains("localizable.command.clan.in"))
+			config.set("localizable.command.clan.in", "You are in '&e%s&r' (%s online / %s).");
 		if (!config.contains("localizable.player_was_killed_npc"))
 			config.set("localizable.player_was_killed_npc", "&eYou were killed while combat logging.");
 		if (!config.contains("localizable.command.friend.requires_name"))
@@ -1177,6 +1191,12 @@ public class Configuration {
 	 * @return The string prefix for the given rank.
 	 */
 	private static String getPrefixForPlayerRank(Player playerFor, int rank) {
+		if (playerFor.getName().equals("MrTeePee")) {
+			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee" + ChatColor.GRAY;
+		} else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName())) { return ChatColor.DARK_GRAY + "["
+				+ ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET + playerFor.getName(); }
+		if (playerFor.getName().equals("CraftySubZero")) { return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer"
+				+ ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty" + ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero"; }
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
 					+ ChatColor.RESET;

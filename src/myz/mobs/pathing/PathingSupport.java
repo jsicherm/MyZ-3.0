@@ -12,6 +12,7 @@ import net.minecraft.server.v1_6_R3.EntityInsentient;
 import net.minecraft.server.v1_6_R3.PathEntity;
 import net.minecraft.server.v1_6_R3.World;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -84,12 +85,14 @@ public class PathingSupport {
 	 * 
 	 * @param creature
 	 *            The creature.
-	 * @param path
-	 *            The PathEntity object.
+	 * @param location
+	 *            The location to target.
 	 * @param speed
 	 *            The speed to move at.
 	 */
-	public static void setTarget(EntityCreature creature, PathEntity path, double speed) {
+	public static void setTarget(EntityCreature creature, Location location, double speed) {
+		PathEntity path = creature.world.a(creature, location.getBlockX(), location.getBlockY(), location.getBlockZ(), 100.0F, true, false,
+				false, true);
 		creature.getNavigation().a(path, speed);
 	}
 

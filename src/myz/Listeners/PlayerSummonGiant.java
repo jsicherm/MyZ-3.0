@@ -55,9 +55,6 @@ public class PlayerSummonGiant implements Listener {
 						CustomEntityGiantZombie zombie = new CustomEntityGiantZombie(world);
 						zombie.setPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ());
 						world.addEntity(zombie);
-						// Entity ent = e.getBlockPlaced().getWorld()
-						// .spawnEntity(e.getBlockPlaced().getLocation().add(0,
-						// 3, 0), EntityType.GIANT);
 					}
 				}, 10 * 20L);
 			}

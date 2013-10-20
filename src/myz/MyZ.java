@@ -14,9 +14,11 @@ import myz.API.PlayerBeginPoisonEvent;
 import myz.API.PlayerSpawnInWorldEvent;
 import myz.API.PlayerWaterDecayEvent;
 import myz.Commands.AddSpawnCommand;
+import myz.Commands.ClanCommand;
 import myz.Commands.CreateMedKitCommand;
 import myz.Commands.FriendCommand;
 import myz.Commands.FriendsCommand;
+import myz.Commands.JoinClanCommand;
 import myz.Commands.RemoveSpawnCommand;
 import myz.Commands.SaveKitCommand;
 import myz.Commands.SaveRankCommand;
@@ -78,7 +80,6 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO giants
-	// TODO clans
 	// TODO block/entity protection
 	// TODO sound attraction
 
@@ -148,6 +149,8 @@ public class MyZ extends JavaPlugin {
 		getCommand("saverank").setExecutor(new SaveRankCommand());
 		getCommand("savemedkit").setExecutor(new CreateMedKitCommand());
 		getCommand("setrank").setExecutor(new SetRankCommand());
+		getCommand("clan").setExecutor(new ClanCommand());
+		getCommand("joinclan").setExecutor(new JoinClanCommand());
 
 		/*
 		 * Connect to SQL or use PlayerData.
@@ -175,7 +178,7 @@ public class MyZ extends JavaPlugin {
 					if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 						if (data == null && Configuration.usePlayerData()) {
 							PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel());
+									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "");
 							putPlayerAtSpawn(player, false);
 						}
 						if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -418,7 +421,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (playerdata == null && Configuration.usePlayerData()) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-					new ArrayList<String>(), 0, 20);
+					new ArrayList<String>(), 0, 20, "");
 			putPlayerAtSpawn(player, false);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {

@@ -33,13 +33,14 @@ import net.minecraft.server.v1_6_R3.PathfinderGoalRestrictOpenDoor;
 import net.minecraft.server.v1_6_R3.PathfinderGoalSelector;
 import net.minecraft.server.v1_6_R3.World;
 
+import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_6_R3.util.UnsafeList;
 
 /**
  * @author Jordan
  * 
  */
-public class CustomEntityZombie extends EntityZombie {
+public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 
 	protected List<org.bukkit.inventory.ItemStack> inventory = new ArrayList<org.bukkit.inventory.ItemStack>();
 
@@ -187,5 +188,27 @@ public class CustomEntityZombie extends EntityZombie {
 	public void die() {
 		super.die();
 		emptyInventory();
+	}
+
+	@Override
+	public boolean canSpawn() {
+		int i = MathHelper.floor(this.locX);
+		int j = MathHelper.floor(this.boundingBox.b);
+		int k = MathHelper.floor(this.locZ);
+
+		return this.world.difficulty > 0 && this.world.b(this.boundingBox) && this.world.getCubes(this, this.boundingBox).isEmpty()
+				&& !this.world.containsLiquid(this.boundingBox) && this.a(i, j, k) >= 0.0F;
+	}
+
+	/* (non-Javadoc)
+	 * @see myz.mobs.SmartEntity#see(org.bukkit.Location, int)
+	 */
+	@Override
+	public void see(Location location, int priority) {
+		if (random.nextInt(priority + 1) >= 1) {
+			setGoalTarget(null);
+			target = null;
+			PathingSupport.setTarget(this, location, Configuration.getZombieSpeed());
+		}
 	}
 }

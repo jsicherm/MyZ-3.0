@@ -1,6 +1,21 @@
 MyZ 3.0
 =======
 
+Key Players
+===========
+
+Without these people, MyZ wouldn't be able to get anywhere. These guys are helping me bring you guys this plugin simply because they want to help. Big thanks go out to all of them.
+
+Artwork:
+CraftySubZero
+ImTotallyTechy
+
+Web Design:
+Bars96
+
+MineZ-chests:
+SirAntony
+
 How can I help with development?
 ================================
 

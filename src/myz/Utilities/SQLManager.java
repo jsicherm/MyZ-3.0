@@ -12,8 +12,9 @@ import java.util.Map;
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class SQLManager {
@@ -71,7 +72,7 @@ public class SQLManager {
 			setup();
 		} catch (Exception e) {
 			// Couldn't connect to the database
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to connect.");
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to connect: " + e.getMessage());
 		}
 	}
 
@@ -103,7 +104,7 @@ public class SQLManager {
 		if (!isConnected())
 			return;
 		try {
-			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED, zombie_kills SMALLINT UNSIGNED, pigman_kills SMALLINT UNSIGNED, giant_kills SMALLINT UNSIGNED, player_kills_life SMALLINT UNSIGNED, zombie_kills_life SMALLINT UNSIGNED, pigman_kills_life SMALLINT UNSIGNED, giant_kills_life SMALLINT UNSIGNED, plays SMALLINT UNSIGNED, deaths SMALLINT UNSIGNED, rank SMALLINT UNSIGNED, isBleeding TINYINT(1), isPoisoned TINYINT(1), wasNPCKilled TINYINT(1), timeOfKickban BIGINT(20), friends VARCHAR(255), heals_life SMALLINT UNSIGNED, thirst SMALLINT UNSIGNED)");
+			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(17) PRIMARY KEY, player_kills SMALLINT UNSIGNED, zombie_kills SMALLINT UNSIGNED, pigman_kills SMALLINT UNSIGNED, giant_kills SMALLINT UNSIGNED, player_kills_life SMALLINT UNSIGNED, zombie_kills_life SMALLINT UNSIGNED, pigman_kills_life SMALLINT UNSIGNED, giant_kills_life SMALLINT UNSIGNED, plays SMALLINT UNSIGNED, deaths SMALLINT UNSIGNED, rank SMALLINT UNSIGNED, isBleeding TINYINT(1), isPoisoned TINYINT(1), wasNPCKilled TINYINT(1), timeOfKickban BIGINT(20), friends VARCHAR(255), heals_life SMALLINT UNSIGNED, thirst SMALLINT UNSIGNED, clan VARCHAR(20))");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
 		}
@@ -130,11 +131,11 @@ public class SQLManager {
 		if (!isIn(player.getName()))
 			try {
 				cachedKeyValues.add(player.getName());
-				executeQuery("INSERT INTO playerdata (username, player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life, giant_kills_life, plays, rank, isBleeding, isPoisoned, wasNPCKilled, timeOfKickban, friends, heals_life, thirst) VALUES ('"
+				executeQuery("INSERT INTO playerdata (username, player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life, giant_kills_life, plays, deaths, rank, isBleeding, isPoisoned, wasNPCKilled, timeOfKickban, friends, heals_life, thirst, clan) VALUES ('"
 						+ player.getName()
-						+ "', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0,"
+						+ "', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0,"
 						+ Configuration.getMaxThirstLevel()
-						+ ")");
+						+ ", '')");
 			} catch (Exception e) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
 			}
@@ -243,20 +244,35 @@ public class SQLManager {
 	 * @param aSync
 	 *            Whether or not to use an aSync thread to execute the command.
 	 */
-	public void set(final String name, final String field, final Object value, boolean aSync) {
+	public void set(String name, String field, Object value, boolean aSync) {
+		set(name, field, value, aSync, false);
+	}
+
+	/**
+	 * @see set(String name, String field, Object value, boolean aSync).
+	 * 
+	 * @param forcingaSync
+	 *            A distinguisher to ensure we update the cache because it
+	 *            wasn't update aSynchronously.
+	 */
+	public void set(final String name, final String field, final Object value, boolean aSync, boolean forcingaSync) {
 		if (aSync) {
+			// Make sure we update our cached values when we set new ones. Do it
+			// before we execute the query in case of async demands.
+			doUpdateCache(name, field, value);
 			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
 				@Override
 				public void run() {
-					set(name, field, value, false);
+					set(name, field, value, false, true);
 				}
 			}, 0L);
 			return;
 		}
 		try {
-			// Make sure we update our cached values when we set new ones. Do it
-			// before we execute the query in case of async demands.
-			doUpdateCache(name, field, value);
+			if (forcingaSync) {
+				// Make sure we update our cached values when we set new ones.
+				doUpdateCache(name, field, value);
+			}
 			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + name + "' LIMIT 1");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + name + "." + field + ": "
@@ -557,5 +573,100 @@ public class SQLManager {
 		cachedStringValues.put(name, received);
 
 		return returnList;
+	}
+
+	/**
+	 * @return the clan
+	 */
+	public String getClan(String name) {
+		return getString(name, "clan");
+	}
+
+	/**
+	 * @return True if this player is in a clan, false otherwise.
+	 */
+	public boolean inClan(String name) {
+		String clan = getClan(name);
+		return clan != null && !clan.isEmpty();
+	}
+
+	/**
+	 * @return The number of players in the same clan as this player.
+	 */
+	public int getNumberInClan(String name) {
+		String clan = getClan(name);
+		if (clan == null || clan.isEmpty()) { return 0; }
+		List<String> playersInClan = new ArrayList<String>();
+		playersInClan.add(name);
+		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+			if (playersInClan.contains(player.getName())) {
+				continue;
+			}
+			String clan1 = getClan(player.getName());
+			if (clan1 != null && clan1.equals(clan)) {
+				playersInClan.add(player.getName());
+			}
+		}
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (playersInClan.contains(player.getName())) {
+				continue;
+			}
+			String clan1 = getClan(player.getName());
+			if (clan1 != null && clan1.equals(clan)) {
+				playersInClan.add(player.getName());
+			}
+		}
+		return playersInClan.size();
+	}
+
+	/**
+	 * @return All the online players in the same clan as this player.
+	 */
+	public List<Player> getOnlinePlayersInClan(String name) {
+		String clan = getClan(name);
+		List<Player> playersInClan = new ArrayList<Player>();
+		if (clan == null || clan.isEmpty()) { return playersInClan; }
+
+		playersInClan.add(Bukkit.getPlayerExact(name));
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (playersInClan.contains(player)) {
+				continue;
+			}
+			String clan1 = getClan(player.getName());
+			if (clan1 != null && clan1.equals(clan)) {
+				playersInClan.add(player);
+			}
+		}
+		return playersInClan;
+	}
+
+	/**
+	 * Set the clan of the player but force asynchronous in order to create the
+	 * caches without causing lag.
+	 * 
+	 * @param name
+	 *            The player name.
+	 * @param clan
+	 *            The clan name.
+	 */
+	public void setClan(final String name, final String clan) {
+		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+			public void run() {
+				final Player player = Bukkit.getPlayer(name);
+				if (player == null || !player.isOnline()) { return; }
+				set(name, "clan", "'" + clan + "'", false);
+				// Force the caches to be created.
+				getNumberInClan(name);
+				// Force a sync message to be delivered.
+				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+					public void run() {
+						if (player.isOnline()) {
+							Messenger.sendMessage(player, Messenger.getConfigMessage("clan.joined", clan));
+						}
+					}
+				}, 0L);
+			}
+		}, 0L);
 	}
 }

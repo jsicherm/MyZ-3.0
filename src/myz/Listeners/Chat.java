@@ -5,8 +5,10 @@ package myz.Listeners;
 
 import java.util.Set;
 
+import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
 
 import org.bukkit.ChatColor;
@@ -35,7 +37,7 @@ public class Chat implements Listener {
 			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix().replace("%s", "" + radio_frequency)) + " "
 					+ prefix + ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
 		}
-		e.setFormat(prefix + " " + e.getMessage());
+		e.setFormat(prefix + ": " + e.getMessage());
 
 		// Cache and clear the recipients.
 		Set<Player> original_recipients = e.getRecipients();
@@ -99,7 +101,7 @@ public class Chat implements Listener {
 				player.sendMessage(toMessage + finalMessage);
 				recipient.sendMessage(fromMessage + finalMessage);
 				e.setFormat(Configuration.getPrefixForPlayerRank(player) + ChatColor.RESET + " to "
-						+ Configuration.getPrefixForPlayerRank(recipient) + ChatColor.RESET + e.getMessage());
+						+ Configuration.getPrefixForPlayerRank(recipient) + " " + ChatColor.RESET + e.getMessage());
 				e.setMessage(ChatColor.GRAY + toMessage + finalMessage);
 				break;
 			default:
@@ -108,6 +110,22 @@ public class Chat implements Listener {
 				break;
 			}
 			return true;
+		} else if (e.getMessage().startsWith(".")) {
+			PlayerData data = PlayerData.getDataFor(player);
+			if (data != null) {
+				e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
+						+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
+				e.getRecipients().clear();
+				e.getRecipients().addAll(data.getOnlinePlayersInClan());
+				return true;
+			}
+			if (MyZ.instance.getSQLManager().isConnected()) {
+				e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
+						+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
+				e.getRecipients().clear();
+				e.getRecipients().addAll(MyZ.instance.getSQLManager().getOnlinePlayersInClan(e.getPlayer().getName()));
+				return true;
+			}
 		}
 		return false;
 	}

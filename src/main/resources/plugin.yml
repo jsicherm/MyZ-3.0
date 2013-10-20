@@ -1,8 +1,9 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.31
+version: 3.0.35
 depend: [WorldEdit, TagAPI]
-author: TeeePeee
+description: MyZ 3.0 with chest support by SirAntony.
+authors: [TeeePeee, SirAntony]
 
 commands:
   start:
@@ -49,6 +50,10 @@ commands:
     permission: MyZ.admin
     permission-message: You don't have permission.
     aliases: [setplayerrank]
+  joinclan:
+    description: Join a clan.
+  clan:
+    description: The name of your clan.
 
 permissions:
   MyZ.*:

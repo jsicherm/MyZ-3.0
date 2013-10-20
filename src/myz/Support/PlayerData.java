@@ -10,6 +10,8 @@ import java.util.List;
 
 import myz.MyZ;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -25,11 +27,12 @@ public class PlayerData {
 			giant_kills_life, plays, deaths, rank, heals_life, thirst;
 	private boolean isBleeding, isPoisoned, wasKilledNPC, autosave = true;
 	private long timeOfKickban;
+	private String clan;
 	private List<String> friends = new ArrayList<String>();
 
 	private PlayerData(String name, int player_kills, int zombie_kills, int pigman_kills, int giant_kills, int player_kills_life,
 			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int plays, int deaths, int rank, boolean isBleeding,
-			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst) {
+			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan) {
 		this.name = name;
 		this.player_kills = player_kills;
 		this.zombie_kills = zombie_kills;
@@ -48,6 +51,7 @@ public class PlayerData {
 		this.timeOfKickban = timeOfKickban;
 		this.heals_life = heals_life;
 		this.thirst = thirst;
+		this.clan = clan;
 		this.friends = new ArrayList<String>(friends);
 	}
 
@@ -76,7 +80,7 @@ public class PlayerData {
 				section.getInt("pigman_kills_life"), section.getInt("giant_kills_life"), section.getInt("plays"), section.getInt("deaths"),
 				section.getInt("rank"), section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"),
 				section.getBoolean("wasKilledNPC"), section.getLong("timeOfKickban"), section.getStringList("friends"),
-				section.getInt("heals_life"), section.getInt("thirst"));
+				section.getInt("heals_life"), section.getInt("thirst"), section.getString("clan"));
 	}
 
 	/**
@@ -118,12 +122,14 @@ public class PlayerData {
 	 *            The player's heals in the current life.
 	 * @param thirst
 	 *            The player's thirst level.
+	 * @param clan
+	 *            The player's clan or an empty string.
 	 * @return The PlayerData object created.
 	 */
 	public static PlayerData createDataFor(Player player, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
 			int player_kills_life, int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int plays, int deaths, int rank,
 			boolean isBleeding, boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life,
-			int thirst) {
+			int thirst, String clan) {
 		if (!Configuration.usePlayerData())
 			return null;
 		if (!playerDataExists(player)) {
@@ -146,6 +152,7 @@ public class PlayerData {
 			section.set("friends", friends);
 			section.set("heals_life", heals_life);
 			section.set("thirst", thirst);
+			section.set("clan", clan);
 			try {
 				MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
 			} catch (IOException e) {
@@ -213,6 +220,7 @@ public class PlayerData {
 				section.set("timeOfKickban", timeOfKickban);
 				section.set("friends", friends);
 				section.set("thirst", thirst);
+				section.set("clan", clan);
 				try {
 					MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
 				} catch (IOException e) {
@@ -226,6 +234,75 @@ public class PlayerData {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * @return the clan
+	 */
+	public String getClan() {
+		return clan;
+	}
+
+	/**
+	 * @return True if this player is in a clan, false otherwise.
+	 */
+	public boolean inClan() {
+		return clan != null && !clan.isEmpty();
+	}
+
+	/**
+	 * @return The number of players in the same clan as this player.
+	 */
+	public int getNumberInClan() {
+		if (!inClan()) { return 0; }
+		List<String> playersInClan = new ArrayList<String>();
+		playersInClan.add(name);
+		PlayerData data;
+		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+			if (playersInClan.contains(player.getName())) {
+				continue;
+			}
+			data = getDataFor(player.getName());
+			if (data != null) {
+				if (data.inClan() && data.getClan().equals(getClan())) {
+					playersInClan.add(player.getName());
+				}
+			}
+		}
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (playersInClan.contains(player.getName())) {
+				continue;
+			}
+			data = getDataFor(player.getName());
+			if (data != null) {
+				if (data.inClan() && data.getClan().equals(getClan())) {
+					playersInClan.add(player.getName());
+				}
+			}
+		}
+		return playersInClan.size();
+	}
+
+	/**
+	 * @return All the online players in the same clan as this player.
+	 */
+	public List<Player> getOnlinePlayersInClan() {
+		List<Player> playersInClan = new ArrayList<Player>();
+		if (!inClan()) { return playersInClan; }
+		playersInClan.add(Bukkit.getPlayerExact(name));
+		PlayerData data;
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (playersInClan.contains(player.getName())) {
+				continue;
+			}
+			data = getDataFor(player.getName());
+			if (data != null) {
+				if (data.inClan() && data.getClan().equals(getClan())) {
+					playersInClan.add(player);
+				}
+			}
+		}
+		return playersInClan;
 	}
 
 	/**
@@ -564,6 +641,16 @@ public class PlayerData {
 	 */
 	public void setHealsLife(int heals_life) {
 		this.heals_life = heals_life;
+		save();
+	}
+
+	/**
+	 * @param clan
+	 *            the clan to set
+	 */
+	public void setClan(String clan) {
+		this.clan = clan;
+		save();
 	}
 
 	/**
