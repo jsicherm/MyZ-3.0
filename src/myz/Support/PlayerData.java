@@ -24,15 +24,18 @@ public class PlayerData {
 
 	private final String name;
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
-			giant_kills_life, plays, deaths, rank, heals_life, thirst;
+			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record, plays,
+			deaths, rank, heals_life, thirst, minutes_alive_life, minutes_alive_life_record;
 	private boolean isBleeding, isPoisoned, wasKilledNPC, autosave = true;
-	private long timeOfKickban;
+	private long timeOfKickban, minutes_alive;
 	private String clan;
 	private List<String> friends = new ArrayList<String>();
 
 	private PlayerData(String name, int player_kills, int zombie_kills, int pigman_kills, int giant_kills, int player_kills_life,
 			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int plays, int deaths, int rank, boolean isBleeding,
-			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan) {
+			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan,
+			long minutes_alive, int minutes_alive_life, int minutes_alive_life_record, int player_kills_life_record,
+			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record) {
 		this.name = name;
 		this.player_kills = player_kills;
 		this.zombie_kills = zombie_kills;
@@ -42,6 +45,10 @@ public class PlayerData {
 		this.zombie_kills_life = zombie_kills_life;
 		this.pigman_kills_life = pigman_kills_life;
 		this.giant_kills_life = giant_kills_life;
+		this.player_kills_life_record = player_kills_life_record;
+		this.zombie_kills_life_record = zombie_kills_life_record;
+		this.pigman_kills_life_record = pigman_kills_life_record;
+		this.giant_kills_life_record = giant_kills_life_record;
 		this.plays = plays;
 		this.deaths = deaths;
 		this.rank = rank;
@@ -53,6 +60,9 @@ public class PlayerData {
 		this.thirst = thirst;
 		this.clan = clan;
 		this.friends = new ArrayList<String>(friends);
+		this.minutes_alive = minutes_alive;
+		this.minutes_alive_life = minutes_alive_life;
+		this.minutes_alive_life_record = minutes_alive_life_record;
 	}
 
 	/**
@@ -75,12 +85,15 @@ public class PlayerData {
 		if (!playerDataExists(player))
 			return null;
 		ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(player);
-		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie_kills"), section.getInt("pigman_kills"),
-				section.getInt("giant_kills"), section.getInt("player_kills_life"), section.getInt("zombie_kills_life"),
-				section.getInt("pigman_kills_life"), section.getInt("giant_kills_life"), section.getInt("plays"), section.getInt("deaths"),
+		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie.kills"), section.getInt("pigman.kills"),
+				section.getInt("giant.kills"), section.getInt("player.kills_life"), section.getInt("zombie.kills_life"),
+				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("plays"), section.getInt("deaths"),
 				section.getInt("rank"), section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"),
 				section.getBoolean("wasKilledNPC"), section.getLong("timeOfKickban"), section.getStringList("friends"),
-				section.getInt("heals_life"), section.getInt("thirst"), section.getString("clan"));
+				section.getInt("heals_life"), section.getInt("thirst"), section.getString("clan"), section.getInt("minutes.played"),
+				section.getInt("minutes.played_life"), section.getInt("minutes.played_life_record"),
+				section.getInt("player.kills_life_record"), section.getInt("zombie.kills_life_record"),
+				section.getInt("pigman.kills_life_record"), section.getInt("giant.kills_life_record"));
 	}
 
 	/**
@@ -124,24 +137,43 @@ public class PlayerData {
 	 *            The player's thirst level.
 	 * @param clan
 	 *            The player's clan or an empty string.
+	 * @param minutes_alive
+	 *            The number of minutes alive total.
+	 * @param minutes_alive_life
+	 *            The number of minutes alive this life.
+	 * @param minutes_alive_life_record
+	 *            The highest number of minutes survived in one life.
+	 * @param player_kills_life_record
+	 *            The highest number of players killed in one life.
+	 * @param zombie_kills_life_record
+	 *            The highest number of zombies killed in one life.
+	 * @param pigman_kills_life_record
+	 *            The highest number of pigmen killed in one life.
+	 * @param giant_kills_life_record
+	 *            The highest number of giants killed in one life.
 	 * @return The PlayerData object created.
 	 */
 	public static PlayerData createDataFor(Player player, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
 			int player_kills_life, int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int plays, int deaths, int rank,
 			boolean isBleeding, boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life,
-			int thirst, String clan) {
+			int thirst, String clan, long minutes_alive, int minutes_alive_life, int minutes_alive_life_record,
+			int player_kills_life_record, int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record) {
 		if (!Configuration.usePlayerData())
 			return null;
 		if (!playerDataExists(player)) {
 			ConfigurationSection section = MyZ.instance.getPlayerDataConfig().createSection(player.getName());
-			section.set("player_kills", player_kills);
-			section.set("zombie_kills", zombie_kills);
-			section.set("pigman_kills", pigman_kills);
-			section.set("giant_kills", giant_kills);
-			section.set("player_kills_life", player_kills_life);
-			section.set("zombie_kills_life", zombie_kills_life);
-			section.set("pigman_kills_life", pigman_kills_life);
-			section.set("giant_kills_life", giant_kills_life);
+			section.set("player.kills", player_kills);
+			section.set("zombie.kills", zombie_kills);
+			section.set("pigman.kills", pigman_kills);
+			section.set("giant.kills", giant_kills);
+			section.set("player.kills_life", player_kills_life);
+			section.set("zombie.kills_life", zombie_kills_life);
+			section.set("pigman.kills_life", pigman_kills_life);
+			section.set("giant.kills_life", giant_kills_life);
+			section.set("player.kills_life_record", player_kills_life_record);
+			section.set("zombie.kills_life_record", zombie_kills_life_record);
+			section.set("pigman.kills_life_record", pigman_kills_life_record);
+			section.set("giant.kills_life_record", giant_kills_life_record);
 			section.set("plays", plays);
 			section.set("deaths", deaths);
 			section.set("rank", rank);
@@ -153,6 +185,9 @@ public class PlayerData {
 			section.set("heals_life", heals_life);
 			section.set("thirst", thirst);
 			section.set("clan", clan);
+			section.set("minutes.played", minutes_alive);
+			section.set("minutes.played_life", minutes_alive_life);
+			section.set("minutes.played_life_record", minutes_alive_life_record);
 			try {
 				MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
 			} catch (IOException e) {
@@ -203,14 +238,18 @@ public class PlayerData {
 		if (bypass_autosave || autosave)
 			if (playerDataExists(name)) {
 				ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(name);
-				section.set("player_kills", player_kills);
-				section.set("zombie_kills", zombie_kills);
-				section.set("pigman_kills", pigman_kills);
-				section.set("giant_kills", giant_kills);
-				section.set("player_kills_life", player_kills_life);
-				section.set("zombie_kills_life", zombie_kills_life);
-				section.set("pigman_kills_life", pigman_kills_life);
-				section.set("giant_kills_life", giant_kills_life);
+				section.set("player.kills", player_kills);
+				section.set("zombie.kills", zombie_kills);
+				section.set("pigman.kills", pigman_kills);
+				section.set("giant.kills", giant_kills);
+				section.set("player.kills_life", player_kills_life);
+				section.set("zombie.kills_life", zombie_kills_life);
+				section.set("pigman.kills_life", pigman_kills_life);
+				section.set("giant.kills_life", giant_kills_life);
+				section.set("player.kills_life_record", player_kills_life_record);
+				section.set("zombie.kills_life_record", zombie_kills_life_record);
+				section.set("pigman.kills_life_record", pigman_kills_life_record);
+				section.set("giant.kills_life_record", giant_kills_life_record);
 				section.set("plays", plays);
 				section.set("deaths", deaths);
 				section.set("rank", rank);
@@ -219,8 +258,12 @@ public class PlayerData {
 				section.set("wasKilledNPC", wasKilledNPC);
 				section.set("timeOfKickban", timeOfKickban);
 				section.set("friends", friends);
+				section.set("heals_life", heals_life);
 				section.set("thirst", thirst);
 				section.set("clan", clan);
+				section.set("minutes.played", minutes_alive);
+				section.set("minutes.played_life", minutes_alive_life);
+				section.set("minutes.played_life_record", minutes_alive_life_record);
 				try {
 					MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
 				} catch (IOException e) {
@@ -582,6 +625,70 @@ public class PlayerData {
 	}
 
 	/**
+	 * @return the player_kills_life_record
+	 */
+	public int getPlayerKillsLifeRecord() {
+		return player_kills_life_record;
+	}
+
+	/**
+	 * @param player_kills_life_record
+	 *            the player_kills_life_record to set
+	 */
+	public void setPlayerKillsLifeRecord(int player_kills_life_record) {
+		this.player_kills_life_record = player_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @return the zombie_kills_life_record
+	 */
+	public int getZombieKillsLifeRecord() {
+		return zombie_kills_life_record;
+	}
+
+	/**
+	 * @param zombie_kills_life_record
+	 *            the zombie_kills_life_record to set
+	 */
+	public void setZombieKillsLifeRecord(int zombie_kills_life_record) {
+		this.zombie_kills_life_record = zombie_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @return the pigman_kills_life_record
+	 */
+	public int getPigmanKillsLifeRecord() {
+		return pigman_kills_life_record;
+	}
+
+	/**
+	 * @param pigman_kills_life_record
+	 *            the pigman_kills_life_record to set
+	 */
+	public void setPigmanKillsLifeRecord(int pigman_kills_life_record) {
+		this.pigman_kills_life_record = pigman_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @return the giant_kills_life_record
+	 */
+	public int getGiantKillsLifeRecord() {
+		return giant_kills_life_record;
+	}
+
+	/**
+	 * @param giant_kills_life_record
+	 *            the pigman_kills_life_record to set
+	 */
+	public void setGiantKillsLifeRecord(int giant_kills_life_record) {
+		this.giant_kills_life_record = giant_kills_life_record;
+		save();
+	}
+
+	/**
 	 * @return the pigman_kills_life
 	 */
 	public int getPigmanKillsLife() {
@@ -641,6 +748,54 @@ public class PlayerData {
 	 */
 	public void setHealsLife(int heals_life) {
 		this.heals_life = heals_life;
+		save();
+	}
+
+	/**
+	 * @return the minutes_alive
+	 */
+	public long getMinutesAlive() {
+		return minutes_alive;
+	}
+
+	/**
+	 * @param minutes_alive
+	 *            the minutes_alive to set.
+	 */
+	public void setMinutesAlive(long minutes_alive) {
+		this.minutes_alive = minutes_alive;
+		save();
+	}
+
+	/**
+	 * @return the minutes_alive_life
+	 */
+	public int getMinutesAliveLife() {
+		return minutes_alive_life;
+	}
+
+	/**
+	 * @param minutes_alive_life
+	 *            the minutes_alive_life to set.
+	 */
+	public void setMinutesAliveLife(int minutes_alive_life) {
+		this.minutes_alive_life = minutes_alive_life;
+		save();
+	}
+
+	/**
+	 * @return the minutes_alive_life_record
+	 */
+	public int getMinutesAliveLifeRecord() {
+		return minutes_alive_life_record;
+	}
+
+	/**
+	 * @param minutes_alive_life_record
+	 *            the minutes_alive_life_record to set.
+	 */
+	public void setMinutesAliveLifeRecord(int minutes_alive_life_record) {
+		this.minutes_alive_life_record = minutes_alive_life_record;
 		save();
 	}
 

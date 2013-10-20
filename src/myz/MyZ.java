@@ -178,7 +178,7 @@ public class MyZ extends JavaPlugin {
 					if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 						if (data == null && Configuration.usePlayerData()) {
 							PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "");
+									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0);
 							putPlayerAtSpawn(player, false);
 						}
 						if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -421,7 +421,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (playerdata == null && Configuration.usePlayerData()) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-					new ArrayList<String>(), 0, 20, "");
+					new ArrayList<String>(), 0, 20, "", 0, 0, 0, 0, 0, 0, 0);
 			putPlayerAtSpawn(player, false);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -457,14 +457,16 @@ public class MyZ extends JavaPlugin {
 		if (online_players.contains(player.getName())) {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null) {
+				data.setAutosave(false, true);
 				data.setBleeding(false);
 				data.setPoisoned(false);
-				data.setThirst(20);
+				data.setThirst(Configuration.getMaxThirstLevel());
+				data.setAutosave(true, true);
 			}
 			if (sql.isConnected()) {
 				sql.set(player.getName(), "isBleeding", false, true);
 				sql.set(player.getName(), "isPoisoned", false, true);
-				sql.set(player.getName(), "thirst", 20, true);
+				sql.set(player.getName(), "thirst", Configuration.getMaxThirstLevel(), true);
 			}
 
 			if (Configuration.isKickBan()) {
@@ -482,13 +484,20 @@ public class MyZ extends JavaPlugin {
 					data.setDeaths(0);
 					data.setGiantKills(0);
 					data.setGiantKillsLife(0);
+					data.setGiantKillsLifeRecord(0);
 					data.setPigmanKills(0);
 					data.setPigmanKillsLife(0);
+					data.setPigmanKillsLifeRecord(0);
 					data.setPlayerKills(0);
 					data.setPlayerKillsLife(0);
+					data.setPlayerKillsLifeRecord(0);
 					data.setPlays(0);
 					data.setZombieKills(0);
 					data.setZombieKillsLife(0);
+					data.setZombieKillsLifeRecord(0);
+					data.setMinutesAlive(0);
+					data.setMinutesAliveLife(0);
+					data.setMinutesAliveLifeRecord(0);
 					data.setAutosave(true, true);
 				}
 				if (sql.isConnected()) {
@@ -496,13 +505,20 @@ public class MyZ extends JavaPlugin {
 					sql.set(player.getName(), "deaths", 0, true);
 					sql.set(player.getName(), "giant_kills", 0, true);
 					sql.set(player.getName(), "giant_kills_life", 0, true);
+					sql.set(player.getName(), "giant_kills_life_record", 0, true);
 					sql.set(player.getName(), "pigman_kills", 0, true);
 					sql.set(player.getName(), "pigman_kills_life", 0, true);
+					sql.set(player.getName(), "pigman_kills_life_record", 0, true);
 					sql.set(player.getName(), "player_kills", 0, true);
 					sql.set(player.getName(), "player_kills_life", 0, true);
+					sql.set(player.getName(), "player_kills_life_record", 0, true);
 					sql.set(player.getName(), "plays", 0, true);
 					sql.set(player.getName(), "zombie_kills", 0, true);
 					sql.set(player.getName(), "zombie_kills_life", 0, true);
+					sql.set(player.getName(), "zombie_kills_life_record", 0, true);
+					sql.set(player.getName(), "minutes_alive", 0L, true);
+					sql.set(player.getName(), "minutes_alive_life", 0, true);
+					sql.set(player.getName(), "minutes_alive_record", 0, true);
 				}
 			}
 			online_players.remove(player.getName());
@@ -528,18 +544,32 @@ public class MyZ extends JavaPlugin {
 
 		if (wasDeath) {
 			PlayerData data = PlayerData.getDataFor(player);
-			if (data != null)
-				data.setDeaths(data.getDeaths() + 1);
-			if (sql.isConnected())
-				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1, true);
 
 			setThirst(player, Configuration.getMaxThirstLevel());
 
 			boolean wasNPCKilled = false;
-			if (data != null)
+			if (data != null) {
 				wasNPCKilled = data.wasKilledNPC();
-			if (sql.isConnected())
+				data.setAutosave(false, true);
+				data.setWasKilledNPC(false);
+				data.setDeaths(data.getDeaths() + 1);
+				data.setMinutesAliveLife(0);
+				data.setPlayerKillsLife(0);
+				data.setZombieKillsLife(0);
+				data.setPigmanKillsLife(0);
+				data.setGiantKillsLife(0);
+				data.setAutosave(true, true);
+			}
+			if (sql.isConnected()) {
 				wasNPCKilled = sql.getBoolean(player.getName(), "wasNPCKilled");
+				sql.set(player.getName(), "wasNPCKilled", false, true);
+				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1, true);
+				sql.set(player.getName(), "player_kills_life", 0, true);
+				sql.set(player.getName(), "zombie_kills_life", 0, true);
+				sql.set(player.getName(), "pigman_kills_life", 0, true);
+				sql.set(player.getName(), "giant_kills_life", 0, true);
+				sql.set(player.getName(), "minutes_alive_life", 0, true);
+			}
 			/*
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
@@ -553,10 +583,6 @@ public class MyZ extends JavaPlugin {
 					flags.add(player.getName());
 					player.kickPlayer(Messenger.getConfigMessage("kick.come_back", Configuration.getKickBanSeconds()));
 				}
-			if (data != null)
-				data.setWasKilledNPC(false);
-			if (sql.isConnected())
-				sql.set(player.getName(), "wasNPCKilled", false, true);
 		}
 	}
 
@@ -667,10 +693,14 @@ public class MyZ extends JavaPlugin {
 				player.addPotionEffect(potioneffect);
 
 			int rank = 0;
-			if (data != null)
+			if (data != null) {
 				rank = data.getRank();
-			if (sql.isConnected())
+				data.setPlays(data.getPlays() + 1);
+			}
+			if (sql.isConnected()) {
 				rank = sql.getInt(player.getName(), "rank");
+				sql.set(player.getName(), "plays", sql.getInt(player.getName(), "plays") + 1, true);
+			}
 
 			try {
 				player.getInventory().setArmorContents(Configuration.getArmorContents(rank));

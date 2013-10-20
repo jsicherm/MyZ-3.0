@@ -40,17 +40,23 @@ public class PlayerKillEntity implements Listener {
 	private void incrementKills(EntityType typeFor, Player playerFor) {
 		PlayerData data = PlayerData.getDataFor(playerFor);
 		int amount = 0;
+		if (data != null)
+			data.setAutosave(false, true);
 		switch (typeFor) {
 		case ZOMBIE:
 			if (data != null) {
 				data.setZombieKillsLife(amount = data.getZombieKillsLife() + 1);
 				data.setZombieKills(data.getZombieKills() + 1);
+				if (amount > data.getZombieKillsLifeRecord())
+					data.setZombieKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life",
 						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life") + 1, true);
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills",
 						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life_record", amount, true);
 			}
 			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("zombie.kill_amount", amount));
 			break;
@@ -58,12 +64,16 @@ public class PlayerKillEntity implements Listener {
 			if (data != null) {
 				data.setPigmanKillsLife(amount = data.getPigmanKillsLife() + 1);
 				data.setPigmanKills(data.getPigmanKills() + 1);
+				if (amount > data.getPigmanKillsLifeRecord())
+					data.setPigmanKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life",
 						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life") + 1, true);
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills",
 						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life_record", amount, true);
 			}
 			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("pigman.kill_amount", amount));
 			break;
@@ -71,12 +81,16 @@ public class PlayerKillEntity implements Listener {
 			if (data != null) {
 				data.setGiantKillsLife(amount = data.getGiantKillsLife() + 1);
 				data.setGiantKills(data.getGiantKills() + 1);
+				if (amount > data.getGiantKillsLifeRecord())
+					data.setGiantKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life",
 						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life") + 1, true);
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills",
 						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life_record", amount, true);
 			}
 			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("giant.kill_amount", amount));
 			break;
@@ -84,12 +98,16 @@ public class PlayerKillEntity implements Listener {
 			if (data != null) {
 				data.setPlayerKillsLife(amount = data.getPlayerKillsLife() + 1);
 				data.setPlayerKills(data.getPlayerKills() + 1);
+				if (amount > data.getPlayerKillsLifeRecord())
+					data.setPlayerKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life",
 						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life") + 1, true);
 				MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills",
 						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life_record", amount, true);
 			}
 			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("bandit.amount", amount));
 			Utilities.colorName(playerFor);
@@ -97,5 +115,7 @@ public class PlayerKillEntity implements Listener {
 		default:
 			break;
 		}
+		if (data != null)
+			data.setAutosave(true, true);
 	}
 }

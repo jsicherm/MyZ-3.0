@@ -7,14 +7,14 @@ Key Players
 Without these people, MyZ wouldn't be able to get anywhere. These guys are helping me bring you guys this plugin simply because they want to help. Big thanks go out to all of them.
 
 Artwork:
-CraftySubZero
-ImTotallyTechy
+* CraftySubZero
+* ImTotallyTechy
 
 Web Design:
-Bars96
+* Bars96
 
 MineZ-chests:
-SirAntony
+* SirAntony
 
 How can I help with development?
 ================================
@@ -59,8 +59,6 @@ What's left?
 So far, here are the base features that haven't yet been added.
 
 - [ ] Overridden Giant behaviour
-- [ ] Clans
-- [ ] Zombie attraction to sound
 
 Known Caveats
 =============

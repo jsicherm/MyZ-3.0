@@ -12,6 +12,7 @@ import myz.API.PlayerTakePoisonDamageEvent;
 import myz.API.PlayerTakeWaterDamageEvent;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Support.PlayerData;
 import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.Bukkit;
@@ -38,6 +39,28 @@ public class aSync implements Runnable {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			if (player.getGameMode() == GameMode.CREATIVE || Configuration.isInLobby(player))
 				continue;
+
+			// Increment minutes alive.
+			if (ticks % 60 == 0) {
+				PlayerData data = PlayerData.getDataFor(player);
+				int amount;
+				if (data != null) {
+					data.setAutosave(false, true);
+					data.setMinutesAlive(data.getMinutesAlive() + 1);
+					data.setMinutesAliveLife(amount = data.getMinutesAliveLife() + 1);
+					if (amount > data.getMinutesAliveLifeRecord())
+						data.setMinutesAliveLifeRecord(amount);
+					data.setAutosave(true, true);
+				}
+				if (MyZ.instance.getSQLManager().isConnected()) {
+					MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive",
+							MyZ.instance.getSQLManager().getLong(player.getName(), "minutes_alive") + 1, true);
+					MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive_life",
+							amount = MyZ.instance.getSQLManager().getInt(player.getName(), "minutes_alive_life") + 1, true);
+					if (amount > MyZ.instance.getSQLManager().getInt(player.getName(), "minutes_alive_record"))
+						MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive_record", amount, true);
+				}
+			}
 
 			player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
 
