@@ -7,6 +7,7 @@ import java.util.Random;
 
 import myz.MyZ;
 import myz.Support.Configuration;
+import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,12 +28,13 @@ public class PlayerTakeDamage implements Listener {
 		if (e.getEntity() instanceof Player)
 			if (random.nextDouble() <= Configuration.getBleedChance() && Configuration.getBleedChance() != 0.0)
 				switch (e.getCause()) {
+				case FALL:
+					PathingSupport.elevatePlayer((Player) e.getEntity(), 10);
 				case BLOCK_EXPLOSION:
 				case CONTACT:
 				case CUSTOM:
 				case ENTITY_ATTACK:
 				case ENTITY_EXPLOSION:
-				case FALL:
 				case FALLING_BLOCK:
 				case PROJECTILE:
 				case THORNS:

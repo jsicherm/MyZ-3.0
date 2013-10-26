@@ -10,6 +10,7 @@ import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
+import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -58,6 +59,7 @@ public class Chat implements Listener {
 				if (player_on_server.getInventory().getItem(radio_frequency - 1) != null
 						&& player_on_server.getInventory().getItem(radio_frequency - 1).isSimilar(Configuration.getRadioItem()))
 					e.getRecipients().add(player_on_server);
+		PathingSupport.elevatePlayer(player, 10);
 	}
 
 	/**

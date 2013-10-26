@@ -80,8 +80,9 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO giants
-	// TODO block/entity protection
-	// TODO sound attraction (50%)
+	// TODO block protection
+	// TODO sound attraction to (trap)doors.
+	// TODO increase zombie spawn regions.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();

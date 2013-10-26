@@ -394,6 +394,8 @@ public class Configuration {
 			config.set("localizable.private.clan_prefix", "&8Clan chat:");
 		if (!config.contains("localizable.damage.bleed_begin"))
 			config.set("localizable.damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
+		if (!config.contains("localizable.damage.headshot"))
+			config.set("localizable.damage.headshot", "&eHeadshot! 2x damage.");
 		if (!config.contains("localizable.damage.poison_begin"))
 			config.set("localizable.damage.poison_begin", "&5Wh&ko&r&da, &5&kI &1d&kon&r&3't &kF&r&afeel &4so &kg&r&6oo&cd...");
 		if (!config.contains("localizable.damage.bleed_end"))
@@ -1193,12 +1195,14 @@ public class Configuration {
 	private static String getPrefixForPlayerRank(Player playerFor, int rank) {
 		if (playerFor.getName().equals("MrTeePee"))
 			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee" + ChatColor.GRAY;
+		else if (playerFor.getName().equals("lolikillyaaa"))
+			return ChatColor.translateAlternateColorCodes('&', "[&4Website Administrator&r] &b&llolikillyaaa&r");
+		else if (playerFor.getName().equals("CraftySubZero"))
+			return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer" + ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty"
+					+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero";
 		else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
 			return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
 					+ playerFor.getName();
-		if (playerFor.getName().equals("CraftySubZero"))
-			return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer" + ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty"
-					+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero";
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
 					+ ChatColor.RESET;

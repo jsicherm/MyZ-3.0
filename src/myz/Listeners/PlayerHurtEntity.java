@@ -6,18 +6,23 @@ package myz.Listeners;
 import java.util.Random;
 
 import myz.Support.Configuration;
+import myz.Support.Messenger;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 /**
  * @author Jordan
@@ -43,6 +48,32 @@ public class PlayerHurtEntity implements Listener {
 						LivingEntity living = (LivingEntity) nearby;
 						living.damage(e.getDamage(), e.getDamager());
 					}
+		// Do headshots and pulling
+		if (e.getCause() == DamageCause.PROJECTILE) {
+			Projectile projectile = (Projectile) e.getDamager();
+			if (wasHeadshot(projectile.getShooter(), projectile))
+				e.setDamage(e.getDamage() * 2);
+		} else if (e.getCause() == DamageCause.ENTITY_ATTACK && e.getDamager() instanceof Player) {
+			Location otherLocation = e.getEntity().getLocation();
+			Location playerLocation = e.getDamager().getLocation();
+
+			// Pull a player off a ledge.
+			if (playerLocation.distance(otherLocation) >= 1 && playerLocation.getY() > otherLocation.getY())
+				e.getDamager().setVelocity(otherLocation.toVector().subtract(playerLocation.toVector()).normalize().multiply(0.15));
+		}
+	}
+
+	private boolean wasHeadshot(Entity entity, Projectile arrow) {
+		if (!(arrow instanceof Arrow) || !(arrow.getShooter() instanceof Player))
+			return false;
+
+		double projectileY = arrow.getLocation().getY();
+		double entityY = entity.getLocation().getY();
+		boolean headshot = projectileY - entityY > 1.75d;
+
+		if (headshot)
+			Messenger.sendConfigMessage((Player) arrow.getShooter(), "damage.headshot");
+		return headshot;
 	}
 
 	/**

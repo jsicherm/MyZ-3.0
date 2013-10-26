@@ -17,7 +17,6 @@ import net.minecraft.server.v1_6_R3.EntityPigZombie;
 import net.minecraft.server.v1_6_R3.EntityVillager;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
-import net.minecraft.server.v1_6_R3.MathHelper;
 import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
 import net.minecraft.server.v1_6_R3.PathfinderGoalHurtByTarget;
 import net.minecraft.server.v1_6_R3.PathfinderGoalMoveThroughVillage;
@@ -86,12 +85,13 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 
 	@Override
 	public boolean canSpawn() {
-		int i = MathHelper.floor(locX);
-		int j = MathHelper.floor(boundingBox.b);
-		int k = MathHelper.floor(locZ);
+		// int i = MathHelper.floor(locX);
+		// int j = MathHelper.floor(boundingBox.b);
+		// int k = MathHelper.floor(locZ);
 
 		return world.difficulty > 0 && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
-				&& !world.containsLiquid(boundingBox) && this.a(i, j, k) >= 0.0F;
+				&& !world.containsLiquid(boundingBox);// && this.a(i, j, k) >=
+														// 0.0F;
 	}
 
 	/* (non-Javadoc)

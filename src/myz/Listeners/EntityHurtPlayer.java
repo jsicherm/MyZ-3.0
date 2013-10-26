@@ -33,5 +33,9 @@ public class EntityHurtPlayer implements Listener {
 			if (random.nextDouble() <= Configuration.getPoisonChanceZombie() && Configuration.getPoisonChanceZombie() != 0.0)
 				MyZ.instance.startPoison((Player) e.getEntity());
 		}
+
+		if (e.getDamager() instanceof Player && e.getEntity() instanceof Player)
+			if (MyZ.instance.isFriend(((Player) e.getDamager()).getName(), ((Player) e.getEntity()).getName()))
+				e.setCancelled(true);
 	}
 }
