@@ -214,7 +214,7 @@ public class Configuration {
 		// Multiworld begin.
 		if (!config.contains("multiworld.worlds")) {
 			List<String> worldList = new ArrayList<String>();
-			worldList.add(MyZ.instance.getWorlds().get(0));
+			worldList.add(MyZ.instance.getServer().getWorlds().get(0).getName());
 			config.set("multiworld.worlds", worldList);
 		}
 
