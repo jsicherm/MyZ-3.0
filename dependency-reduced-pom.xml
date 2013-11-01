@@ -23,7 +23,6 @@
         <version>2.3.1</version>
         <configuration>
           <finalName>MyZ-3</finalName>
-          <outputDirectory>D:/Users/Jordan/Minecraft/Server/plugins/</outputDirectory>
         </configuration>
       </plugin>
       <plugin>
@@ -61,7 +60,7 @@
       <url>http://repo.bukkit.org/content/groups/public/</url>
     </repository>
     <repository>
-      <id>worldedit-repo</id>
+      <id>sk89q-repo</id>
       <url>http://maven.sk89q.com/repo/</url>
     </repository>
     <repository>
@@ -69,7 +68,7 @@
       <url>http://repo.kitteh.org/content/repositories/public/</url>
     </repository>
     <repository>
-      <id>Plugin Metrics</id>
+      <id>mcstats-repo</id>
       <url>http://repo.mcstats.org/content/repositories/public/</url>
     </repository>
   </repositories>
@@ -95,6 +94,12 @@
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi</artifactId>
+      <version>LATEST</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sk89q</groupId>
+      <artifactId>worldguard</artifactId>
       <version>LATEST</version>
       <scope>compile</scope>
     </dependency>
