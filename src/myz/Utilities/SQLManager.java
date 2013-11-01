@@ -147,6 +147,8 @@ public class SQLManager {
 				executeQuery("INSERT INTO playerdata (username) VALUES ('" + player.getName() + "')");
 			} catch (Exception e) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
+				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+				connect();
 			}
 	}
 
@@ -164,6 +166,8 @@ public class SQLManager {
 			return sql.createStatement().executeQuery(cmd);
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL query command '" + cmd + "': " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 			return null;
 		}
 	}
@@ -201,6 +205,8 @@ public class SQLManager {
 			isin = query("SELECT * FROM playerdata WHERE username = '" + name + "' LIMIT 1").next();
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL isin command: " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 			isin = false;
 		}
 
@@ -234,6 +240,8 @@ public class SQLManager {
 						list.add(rs.getString("username"));
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 
 		// We didn't have any key values stored so let's add all of them.
@@ -285,6 +293,8 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + name + "." + field + ": "
 					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 	}
 
@@ -381,6 +391,8 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + name + "." + field + ": "
 					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 
 		// Update the keyset because we don't have the current value.
@@ -427,6 +439,8 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + name + "." + field + ": "
 					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 
 		// Update the keyset because we don't have the current value.
@@ -473,6 +487,8 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getlong command for " + name + "." + field + ": "
 					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 
 		// Update the keyset because we don't have the current value.
@@ -519,6 +535,8 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstring commandfor " + name + "." + field + ": "
 					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 
 		// Update the keyset because we don't have the current value.
@@ -573,6 +591,8 @@ public class SQLManager {
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstringlist command for" + name + "." + field + ": "
 					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
 		}
 
 		// Update the keyset because we don't have the current value.

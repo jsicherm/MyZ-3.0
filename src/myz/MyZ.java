@@ -18,6 +18,7 @@ import myz.Commands.ClanCommand;
 import myz.Commands.CreateMedKitCommand;
 import myz.Commands.FriendCommand;
 import myz.Commands.FriendsCommand;
+import myz.Commands.GetUIDCommand;
 import myz.Commands.JoinClanCommand;
 import myz.Commands.RemoveSpawnCommand;
 import myz.Commands.SaveKitCommand;
@@ -155,6 +156,7 @@ public class MyZ extends JavaPlugin {
 		getCommand("setrank").setExecutor(new SetRankCommand());
 		getCommand("clan").setExecutor(new ClanCommand());
 		getCommand("joinclan").setExecutor(new JoinClanCommand());
+		getCommand("getid").setExecutor(new GetUIDCommand());
 
 		/*
 		 * Connect to SQL or use PlayerData.

@@ -1,6 +1,6 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.38
+version: 3.0.4
 softdepend: [WorldEdit, TagAPI]
 description: MyZ 3.0 with chest support by SirAntony.
 authors: [TeeePeee, SirAntony]
@@ -54,6 +54,8 @@ commands:
     description: Join a clan.
   clan:
     description: The name of your clan.
+  getid:
+    description: The ID for use on my-z.org.
 
 permissions:
   MyZ.*:
