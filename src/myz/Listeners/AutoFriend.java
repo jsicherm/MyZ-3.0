@@ -3,6 +3,7 @@
  */
 package myz.Listeners;
 
+import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Utilities.Utilities;
 
@@ -19,6 +20,7 @@ public class AutoFriend implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	private void onSneak(PlayerToggleSneakEvent e) {
+		if(!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
 		if (e.isSneaking() && Configuration.isAutofriend())
 			Utilities.sneakAddFriend(e.getPlayer());
 	}

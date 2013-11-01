@@ -21,6 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -52,12 +53,34 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onJoin(PlayerJoinEvent e) {
-		MyZ.instance.addPlayer(e.getPlayer());
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		doJoin(e);
+	}
+
+	/**
+	 * Run all join actions for a player join event.
+	 * 
+	 * @param e
+	 *            The event.
+	 */
+	private void doJoin(PlayerJoinEvent e) {
+		playerJoin(e.getPlayer());
+		e.setJoinMessage(null);
+	}
+
+	/**
+	 * Standardized join sequence for a player.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+	private void playerJoin(Player player) {
+		MyZ.instance.addPlayer(player);
 
 		// Ensure our NPC doesn't remain on when we log in.
 		CustomEntityPlayer ourNPC = null;
 		for (CustomEntityPlayer npc : MyZ.instance.getNPCs())
-			if (npc.getName().equals(e.getPlayer().getName())) {
+			if (npc.getName().equals(player.getName())) {
 				ourNPC = npc;
 				break;
 			}
@@ -66,18 +89,16 @@ public class JoinQuit implements Listener {
 			MyZ.instance.getNPCs().remove(ourNPC);
 		}
 
-		e.setJoinMessage(null);
-
 		// Update name colors for this player and all of their online friends.
 		if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
-			KittehTag.colorName(e.getPlayer());
+			KittehTag.colorName(player);
 
 		List<String> friends = new ArrayList<String>();
-		PlayerData data = PlayerData.getDataFor(e.getPlayer());
+		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null)
 			friends = data.getFriends();
 		if (MyZ.instance.getSQLManager().isConnected())
-			friends = MyZ.instance.getSQLManager().getStringList(e.getPlayer().getName(), "friends");
+			friends = MyZ.instance.getSQLManager().getStringList(player.getName(), "friends");
 		for (String friend : friends) {
 			Player online_friend = Bukkit.getPlayer(friend);
 			if (online_friend != null && online_friend.isOnline())
@@ -88,8 +109,20 @@ public class JoinQuit implements Listener {
 	}
 
 	@EventHandler
+	private void onWorldChange(PlayerChangedWorldEvent e) {
+		if (!MyZ.instance.isPlayer(e.getPlayer())) {
+			if (MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+				playerJoin(e.getPlayer());
+		} else {
+			if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) {
+				MyZ.instance.removePlayer(e.getPlayer(), false);
+			}
+		}
+	}
+
+	@EventHandler
 	private void onLeave(PlayerQuitEvent e) {
-		if (MyZ.instance.removePlayer(e.getPlayer())) {
+		if (MyZ.instance.removePlayer(e.getPlayer(), false)) {
 			e.setQuitMessage(null);
 
 			if (e.getPlayer().getVehicle() != null)

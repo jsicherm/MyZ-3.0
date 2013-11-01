@@ -5,6 +5,7 @@ package myz.Listeners;
 
 import java.util.Random;
 
+import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 
@@ -34,6 +35,7 @@ public class PlayerHurtEntity implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onDamage(EntityDamageByEntityEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		// Cancel damage inside spawn room.
 		if (Configuration.isInLobby(e.getDamager().getLocation()))
 			e.setCancelled(true);

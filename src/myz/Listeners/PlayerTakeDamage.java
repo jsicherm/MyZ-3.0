@@ -25,6 +25,7 @@ public class PlayerTakeDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		if (e.getEntity() instanceof Player)
 			if (random.nextDouble() <= Configuration.getBleedChance() && Configuration.getBleedChance() != 0.0)
 				switch (e.getCause()) {

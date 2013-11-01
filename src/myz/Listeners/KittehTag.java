@@ -21,6 +21,8 @@ public class KittehTag implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onNameTagsReceived(PlayerReceiveNameTagEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getNamedPlayer().getWorld().getName())) { return; }
+		
 		Player player = e.getNamedPlayer();
 
 		if (MyZ.instance.isBandit(player))

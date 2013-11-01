@@ -42,7 +42,8 @@ public class Configuration {
 			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time;
 	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage, water_damage, bleed_damage,
 			zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage, pigman_damage, bandage_heal;
-	private static List<String> spawnpoints = new ArrayList<String>(), spawn_potion_effects = new ArrayList<String>();
+	private static List<String> spawnpoints = new ArrayList<String>(), spawn_potion_effects = new ArrayList<String>(),
+			worlds = new ArrayList<String>();
 	private static ItemStack radio, safe_logout_item, bandage;
 
 	private static Map<Integer, String> rank_prefix = new HashMap<Integer, String>();
@@ -84,6 +85,7 @@ public class Configuration {
 			food_potion.put(entry, effectList);
 		}
 
+		worlds = new ArrayList<String>(config.getStringList("multiworld.worlds"));
 		minez_chests = config.getBoolean("download.minez_chests");
 		bandage = config.getItemStack("heal.bandage");
 		bandage_heal = config.getDouble("heal.bandage_heal_amount");
@@ -208,6 +210,13 @@ public class Configuration {
 			config.set("mysql.password", "alpine");
 		if (!config.contains("mysql.port"))
 			config.set("mysql.port", 3306);
+
+		// Multiworld begin.
+		if (!config.contains("multiworld.worlds")) {
+			List<String> worldList = new ArrayList<String>();
+			worldList.add(MyZ.instance.getWorlds().get(0));
+			config.set("multiworld.worlds", worldList);
+		}
 
 		// Statistics begin.
 		if (!config.contains("statistics.bandit_kills"))
@@ -1370,5 +1379,12 @@ public class Configuration {
 	 */
 	public static boolean isDownloadMineZChests() {
 		return minez_chests;
+	}
+
+	/**
+	 * @return the worlds.
+	 */
+	public static List<String> getWorlds() {
+		return worlds;
 	}
 }

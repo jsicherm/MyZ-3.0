@@ -27,6 +27,7 @@ public class PlayerSummonGiant implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onSummon(final BlockPlaceEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
 		if (!e.getPlayer().hasPermission("MyZ.spawn_giant")) {
 			Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summon_permission");
 			e.setCancelled(true);

@@ -27,6 +27,7 @@ public class Chat implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onChat(AsyncPlayerChatEvent e) {
+		if(!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
 		Player player = e.getPlayer();
 		String prefix = Configuration.getPrefixForPlayerRank(player);
 		int radio_frequency = -1;

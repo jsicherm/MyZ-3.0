@@ -34,6 +34,8 @@ public class EntitySpawn implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
+		if(!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName())) { return; }
+		
 		EntityType type = e.getEntityType();
 
 		// Override mooshroom spawns with giant spawns.

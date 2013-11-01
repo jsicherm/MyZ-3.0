@@ -242,6 +242,15 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * The list of enabled worlds (for MultiWorld).
+	 * 
+	 * @return The list of all enabled worlds (by name).
+	 */
+	public List<String> getWorlds() {
+		return Configuration.getWorlds();
+	}
+
+	/**
 	 * Gets the SQLManager object.
 	 * 
 	 * @return the SQLManager.
@@ -457,30 +466,43 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * Whether or not the player is currently playing MyZ.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @return True if the player is playing MyZ.
+	 */
+	public boolean isPlayer(Player player) {
+		return online_players.contains(player.getName());
+	}
+
+	/**
 	 * Remove a player from the MyZ game. Will fail if the player is not in the
 	 * game.
 	 * 
 	 * @param player
 	 *            The player.
+	 * @param wasDeath
+	 *            Whether or not the removal reason was due to a death.
 	 * @return True if the player was removed, false otherwise.
 	 */
-	public boolean removePlayer(Player player) {
-		if (online_players.contains(player.getName())) {
+	public boolean removePlayer(Player player, boolean wasDeath) {
+		if (isPlayer(player)) {
 			PlayerData data = PlayerData.getDataFor(player);
-			if (data != null) {
+			if (data != null && wasDeath) {
 				data.setAutosave(false, true);
 				data.setBleeding(false);
 				data.setPoisoned(false);
 				data.setThirst(Configuration.getMaxThirstLevel());
 				data.setAutosave(true, true);
 			}
-			if (sql.isConnected()) {
+			if (sql.isConnected() && wasDeath) {
 				sql.set(player.getName(), "isBleeding", false, true);
 				sql.set(player.getName(), "isPoisoned", false, true);
 				sql.set(player.getName(), "thirst", Configuration.getMaxThirstLevel(), true);
 			}
 
-			if (Configuration.isKickBan()) {
+			if (Configuration.isKickBan() && wasDeath) {
 				if (data != null)
 					data.setTimeOfKickban(System.currentTimeMillis());
 				if (sql.isConnected())
@@ -584,7 +606,7 @@ public class MyZ extends JavaPlugin {
 			 */
 			if (Configuration.isKickBan() && !wasNPCKilled)
 				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0) {
-					removePlayer(player);
+					removePlayer(player, wasDeath);
 					if (data != null)
 						data.setTimeOfKickban(System.currentTimeMillis());
 					if (sql.isConnected())

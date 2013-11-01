@@ -6,6 +6,7 @@ package myz.Listeners;
 import java.util.ArrayList;
 import java.util.List;
 
+import myz.MyZ;
 import myz.Support.Configuration;
 import myz.mobs.SmartEntity;
 import myz.mobs.pathing.PathingSupport;
@@ -35,6 +36,7 @@ public class Visibility implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onShootArrow(ProjectileLaunchEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		if (e.getEntity().getShooter() instanceof Player && e.getEntity() instanceof Arrow)
 			PathingSupport.elevatePlayer((Player) e.getEntity().getShooter(), 20);
 		/*
@@ -47,6 +49,7 @@ public class Visibility implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onProjectileLand(ProjectileHitEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		for (Entity nearby : e.getEntity().getNearbyEntities(10, 5, 10))
 			if (nearby instanceof SmartEntity)
 				((SmartEntity) nearby).see(e.getEntity().getLocation(), e.getEntity() instanceof Snowball ? 3 : 1);
@@ -54,6 +57,7 @@ public class Visibility implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onGrenadeLand(PlayerTeleportEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
 		if (e.getCause() == TeleportCause.ENDER_PEARL && Configuration.isUsingGrenades()) {
 			e.setCancelled(true);
 			e.getTo().getWorld().createExplosion(e.getTo(), 4f);
@@ -68,12 +72,14 @@ public class Visibility implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	private void onChestOpen(PlayerInteractEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.CHEST)
 			PathingSupport.elevatePlayer(e.getPlayer(), 10);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	private void onExplodeBlocks(EntityExplodeEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		List<Block> explodedBlocks = new ArrayList<Block>();
 
 		for (Block block : e.blockList())

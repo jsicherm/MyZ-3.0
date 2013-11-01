@@ -28,6 +28,7 @@ public class PlayerDeath implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDeath(PlayerDeathEvent e) {
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		// Get rid of our horse.
 		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class))
 			if (horse.getOwner() != null && horse.getOwner().getName() != null
