@@ -38,7 +38,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
-			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed;
+			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed, is_auto;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
@@ -91,6 +91,7 @@ public class Configuration {
 			food_potion.put(entry, effectList);
 		}
 
+		is_auto = config.getBoolean("autoupdate.enable");
 		worlds = new ArrayList<String>(config.getStringList("multiworld.worlds"));
 		minez_chests = config.getBoolean("download.minez_chests");
 		bandage = config.getItemStack("heal.bandage");
@@ -252,6 +253,11 @@ public class Configuration {
 		// Ranks begin.
 		if (!config.contains("ranks.names.0"))
 			config.set("ranks.names.0", "[%s]");
+
+		// AutoUpdate begin.
+		if (!config.contains("autoupdate.enable")) {
+			config.set("autoupdate.enable", true);
+		}
 
 		// Radio begin.
 		if (!config.contains("radio.itemstack"))
@@ -1666,6 +1672,13 @@ public class Configuration {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return the is_auto
+	 */
+	public static boolean isAutoUpdate() {
+		return is_auto;
 	}
 
 	private static class DestroyPair {

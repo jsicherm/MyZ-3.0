@@ -228,6 +228,16 @@ public class MyZ extends JavaPlugin {
 						new Downloader(getDataFolder());
 				}
 			}, 0L);
+
+		/*
+		 * Autoupdate.
+		 */
+		if (Configuration.isAutoUpdate())
+			try {
+				new Updater(this);
+			} catch (Exception e) {
+				Messenger.sendConfigConsoleMessage("&4Unable to run AutoUpdate: " + e.getMessage());
+			}
 	}
 
 	@Override
