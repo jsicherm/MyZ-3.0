@@ -882,7 +882,7 @@ public class MyZ extends JavaPlugin {
 	 * @see isFriend(String player, String name)
 	 */
 	public boolean isFriend(Player player, String name) {
-		return isFriend(player, name);
+		return isFriend(player.getName(), name);
 	}
 
 	/**
