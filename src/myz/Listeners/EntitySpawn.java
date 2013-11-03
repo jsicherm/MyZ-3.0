@@ -6,10 +6,10 @@ package myz.Listeners;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.Support.Configuration;
-import myz.Utilities.WorldGuardManager;
 import myz.mobs.CustomEntityGiantZombie;
 import myz.mobs.CustomEntityPigZombie;
+import myz.Support.Configuration;
+import myz.Utilities.WorldGuardManager;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Location;

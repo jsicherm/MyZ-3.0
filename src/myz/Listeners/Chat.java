@@ -6,11 +6,11 @@ package myz.Listeners;
 import java.util.Set;
 
 import myz.MyZ;
+import myz.mobs.pathing.PathingSupport;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
-import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import myz.MyZ;
-import myz.Support.Configuration;
 import myz.mobs.SmartEntity;
 import myz.mobs.pathing.PathingSupport;
+import myz.Support.Configuration;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;

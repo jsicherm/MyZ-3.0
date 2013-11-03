@@ -9,6 +9,7 @@ import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
@@ -33,7 +34,7 @@ public class PlayerHurtEntity implements Listener {
 
 	private Random random = new Random();
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageByEntityEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
 		// Cancel damage inside spawn room.
@@ -62,6 +63,12 @@ public class PlayerHurtEntity implements Listener {
 			// Pull a player off a ledge.
 			if (playerLocation.distance(otherLocation) >= 1 && playerLocation.getY() > otherLocation.getY())
 				e.getDamager().setVelocity(otherLocation.toVector().subtract(playerLocation.toVector()).normalize().multiply(0.15));
+		}
+
+		// Bleeding effect (not PDE but for general EDE)
+		if (Configuration.isBleed()) {
+			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
+			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 		}
 	}
 

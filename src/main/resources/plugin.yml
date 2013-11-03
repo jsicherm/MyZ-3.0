@@ -1,6 +1,6 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.438
+version: 3.0.45
 softdepend: [WorldEdit, WorldGuard, TagAPI]
 description: MyZ 3.0 with chest support by SirAntony.
 authors: [TeeePeee, SirAntony]
@@ -9,21 +9,27 @@ commands:
   start:
     description: Spawn into the world.
     aliases: [begin]
+  blockallow:
+    description: Allow breaking/placing of blocks.
+    permission: MyZ.world_admin
+    permission-message: You don't have permission.
+  blocks:
+    description: Block help.
   friend:
     description: Add a friend.
   friends:
     description: List friends.
   setlobby:
     description: Set the lobby region.
-    permission: MyZ.admin
+    permission: MyZ.world_admin
     permission-message: You don't have permission.
   addspawn:
     description: Add a spawnpoint.
-    permission: MyZ.admin
+    permission: MyZ.world_admin
     permission-message: You don't have permission.
   removespawn:
     description: Remove a spawnpoint.
-    permission: MyZ.admin
+    permission: MyZ.world_admin
     permission-message: You don't have permission.
     aliases: [delspawn]
   spawnpoints:
@@ -31,13 +37,13 @@ commands:
     aliases: [spawns]
   savemedkit:
     description: Save a MedKit.
-    permission: MyZ.admin
+    permission: MyZ.kit_admin
     permission-message: You don't have permission.
     aliases: [setmedkit, medkit]
     usage: /<command> <name>
   savekit:
     description: Save a starting kit.
-    permission: MyZ.admin
+    permission: MyZ.kit_admin
     permission-message: You don't have permission.
     aliases: [setkit]
   saverank:
@@ -59,16 +65,24 @@ commands:
 
 permissions:
   MyZ.*:
-    description: All MyZ permissions.
+    description: All things MyZ.
     default: op
     children:
       MyZ.admin: true
   MyZ.admin:
-    description: All MyZ admin permissions.
+    description: All things MyZ.
     default: op
     children:
       MyZ.spawn_giant: true
+      MyZ.world_admin: true
+      MyZ.kit_admin: true
   MyZ.spawn_giant:
     description: Spawn giants.
+    default: op
+  MyZ.kit_admin:
+    description: All things kit-related.
+    default: op
+  MyZ.world_admin:
+    description: All things world-related.
     default: op
     

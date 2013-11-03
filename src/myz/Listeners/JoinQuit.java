@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import myz.MyZ;
+import myz.mobs.CustomEntityPlayer;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
-import myz.mobs.CustomEntityPlayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Horse;

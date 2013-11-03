@@ -6,8 +6,8 @@ package myz.Listeners;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.Support.Configuration;
 import myz.mobs.pathing.PathingSupport;
+import myz.Support.Configuration;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

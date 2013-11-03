@@ -13,12 +13,15 @@ import java.util.Set;
 
 import myz.MyZ;
 import myz.Listeners.ConsumeFood;
+import myz.Scheduling.Sync;
 import myz.Utilities.WorldlessLocation;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -35,7 +38,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
-			numbered_spawn_requires_rank, grenade, local_chat, minez_chests;
+			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
@@ -55,6 +58,9 @@ public class Configuration {
 	private static Map<String, Integer> food_thirst = new HashMap<String, Integer>();
 	private static Map<String, List<PotionEffect>> food_potion = new HashMap<String, List<PotionEffect>>();
 	private static Map<String, Double> food_potion_chance = new HashMap<String, Double>();
+
+	private static Map<ItemStack, Integer> allow_place = new HashMap<ItemStack, Integer>();
+	private static Map<ItemStack, DestroyPair> allow_destroy = new HashMap<ItemStack, DestroyPair>();
 
 	// TODO ensure all new values are added in reload(), writeUnwrittenValues()
 	// and save()
@@ -136,6 +142,7 @@ public class Configuration {
 		spawn_potion_effects = new ArrayList<String>(config.getStringList("spawn.potion_effects"));
 		numbered_spawn_requires_rank = config.getBoolean("spawn.numbered_requires_rank");
 
+		is_bleed = config.getBoolean("mobs.bleed");
 		grenade = config.getBoolean("projectile.enderpearl.become_grenade");
 
 		ointment_color = config.getString("heal.medkit.ointment_color");
@@ -190,6 +197,18 @@ public class Configuration {
 				} catch (Exception exc) {
 					Messenger.sendConsoleMessage("&4spawn.kit_" + entry + " could not be resolved. Please re-configure or remove.");
 				}
+
+		for (String entry : config.getConfigurationSection("blocks.place").getKeys(false)) {
+			ItemStack block = config.getItemStack("blocks.place." + entry + ".block", new ItemStack(Material.AIR));
+			allow_place.put(block, config.getInt("blocks.place." + entry + ".despawn"));
+		}
+
+		for (String entry : config.getConfigurationSection("blocks.destroy").getKeys(false)) {
+			ItemStack block = config.getItemStack("blocks.destroy." + entry + ".block", new ItemStack(Material.AIR));
+			ItemStack with = config.getItemStack("blocks.destroy." + entry + ".with", new ItemStack(Material.AIR));
+			DestroyPair pair = new DestroyPair(with, config.getInt("blocks.destroy." + entry + ".respawn"));
+			allow_destroy.put(block, pair);
+		}
 	}
 
 	/**
@@ -273,6 +292,8 @@ public class Configuration {
 			config.set("mobs.pigman.speed", 1.15);
 		if (!config.contains("mobs.giant.speed"))
 			config.set("mobs.giant.speed", 1.3);
+		if (!config.contains("mobs.bleed"))
+			config.set("mobs.bleed", true);
 
 		// Kickban begin.
 		if (!config.contains("kickban.kick_on_death"))
@@ -419,6 +440,42 @@ public class Configuration {
 			config.set("localizable.kick.recur", "&4Stop stressing. %s seconds to go.");
 		if (!config.contains("localizable.command.spawn.unable_to_spawn"))
 			config.set("localizable.command.spawn.unable_to_spawn", "&4Unable to spawn there. Please try again shortly.");
+		if (!config.contains("localizable.command.allowed.breakable"))
+			config.set("localizable.command.allowed.breakable", "&eYou can break:");
+		if (!config.contains("localizable.command.allowed.placeable"))
+			config.set("localizable.command.allowed.placeable", "&eYou can place:");
+		if (!config.contains("localizable.command.block.arguments"))
+			config.set("localizable.command.block.arguments", "&4Usage: /blockallow <place/destroy>");
+		if (!config.contains("localizable.command.block.place.arguments"))
+			config.set("localizable.command.block.place.arguments", "&4Usage: /blockallow place <add [seconds until respawn]/remove>");
+		if (!config.contains("localizable.command.block.destroy.arguments"))
+			config.set("localizable.command.block.destroy.arguments", "&4Usage: /blockallow destroy <add [seconds until respawn]/remove>");
+		if (!config.contains("localizable.command.block.destroy.add.help"))
+			config.set("localizable.command.block.destroy.add.help",
+					"&eNow left-click the block you want to whitelist with the item you want to allow breaking with.");
+		if (!config.contains("localizable.command.block.destroy.remove.help"))
+			config.set("localizable.command.block.destroy.remove.help",
+					"&eNow left-click the block you want blacklist with the item that you can currently break with.");
+		if (!config.contains("localizable.command.block.place.add.help"))
+			config.set("localizable.command.block.place.add.help", "&eNow place the block you would like to whitelist.");
+		if (!config.contains("localizable.command.block.place.remove.help"))
+			config.set("localizable.command.block.place.remove.help", "&eNow place the block you would like to blacklist.");
+		if (!config.contains("localizable.command.block.destroy.add.summary"))
+			config.set("localizable.command.block.destroy.add.summary", "&ePlayers can now destroy %s blocks with %ss.");
+		if (!config.contains("localizable.command.block.destroy.remove.summary"))
+			config.set("localizable.command.block.destroy.remove.summary", "&ePlayers can no longer destroy %s blocks with %ss.");
+		if (!config.contains("localizable.command.block.place.add.summary"))
+			config.set("localizable.command.block.place.add.summary", "&ePlayers can now place %s blocks.");
+		if (!config.contains("localizable.command.block.place.remove.summary"))
+			config.set("localizable.command.block.place.remove.summary", "&ePlayers can no longer place %s blocks.");
+		if (!config.contains("localizable.command.block.destroy.add.fail"))
+			config.set("localizable.command.block.destroy.add.fail", "&ePlayers can already break %s blocks with %ss.");
+		if (!config.contains("localizable.command.block.destroy.remove.fail"))
+			config.set("localizable.command.block.destroy.remove.fail", "&ePlayers cannot destroy %s blocks with %ss.");
+		if (!config.contains("localizable.command.block.place.add.fail"))
+			config.set("localizable.command.block.place.add.fail", "&ePlayers can already place %s blocks.");
+		if (!config.contains("localizable.command.block.place.remove.fail"))
+			config.set("localizable.command.block.place.remove.fail", "&ePlayers cannot place %s blocks.");
 		if (!config.contains("localizable.command.setlobby.requires_cuboid"))
 			config.set("localizable.command.setlobby.requires_cuboid", "&4You must make a &ocuboid&r&4 selection with WorldEdit.");
 		if (!config.contains("localizable.command.setlobby.updated"))
@@ -504,6 +561,28 @@ public class Configuration {
 			config.set("localizable.friend.added", "&e%s &9has been added to your friends list.");
 		if (!config.contains("localizable.friend.removed"))
 			config.set("localizable.friend.removed", "&e%s &9has been removed from your friends list.");
+
+		// Block begin.
+		if (!config.contains("blocks.place")) {
+			config.set("blocks.place.0.block", new ItemStack(Material.WEB));
+			config.set("blocks.place.0.despawn", 3600);
+		}
+		for (String entry : config.getConfigurationSection("blocks.place").getKeys(false)) {
+			if (!config.contains("blocks.place." + entry + ".block") || !config.contains("blocks.place." + entry + ".despawn")) {
+				config.set("blocks.place." + entry, null);
+			}
+		}
+		if (!config.contains("blocks.destroy")) {
+			config.set("blocks.destroy.0.block", new ItemStack(Material.WEB));
+			config.set("blocks.destroy.0.with", new ItemStack(Material.ARROW));
+			config.set("blocks.destroy.0.respawn", 3600);
+		}
+		for (String entry : config.getConfigurationSection("blocks.destroy").getKeys(false)) {
+			if (!config.contains("blocks.destroy." + entry + ".block") || !config.contains("blocks.destroy." + entry + ".with")
+					|| !config.contains("blocks.destroy." + entry + ".respawn")) {
+				config.set("blocks.destroy." + entry, null);
+			}
+		}
 
 		// Spawning begin.
 		if (!config.contains("lobby.min"))
@@ -700,7 +779,7 @@ public class Configuration {
 	 *         hasInitializedConfigs() resolves to false.
 	 */
 	public static boolean isInLobby(Location the_location) {
-		if (!MyZ.instance.hasInitializedConfig())
+		if (MyZ.instance.getPlayerDataConfig() == null)
 			return false;
 
 		double minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
@@ -1386,5 +1465,217 @@ public class Configuration {
 	 */
 	public static List<String> getWorlds() {
 		return worlds;
+	}
+
+	/**
+	 * @return the is_bleed
+	 */
+	public static boolean isBleed() {
+		return is_bleed;
+	}
+
+	/**
+	 * A map of the blocks allowed to be broken with the key being the block and
+	 * the value being the item it must be broken with.
+	 * 
+	 * @return The map of breakable items.
+	 */
+	public static Map<ItemStack, ItemStack> getAllowedBroken() {
+		Map<ItemStack, ItemStack> returnMap = new HashMap<ItemStack, ItemStack>();
+		for (ItemStack key : allow_destroy.keySet()) {
+			returnMap.put(key, allow_destroy.get(key).item);
+		}
+		return returnMap;
+	}
+
+	/**
+	 * A set of the blocks players are allowed to place.
+	 * 
+	 * @return The list of placeable items.
+	 */
+	public static Set<ItemStack> getAllowedPlaced() {
+		return allow_place.keySet();
+	}
+
+	/**
+	 * Fired every time a player breaks a block to see if they're allowed to
+	 * break it.
+	 * 
+	 * @param block
+	 *            The block that they broke.
+	 * @param with
+	 *            The ItemStack they broke with
+	 * @return True if the enclosing event should be cancelled, false otherwise.
+	 */
+	public static boolean doBreak(Block block, ItemStack with) {
+		if (canBreak(block, with)) {
+			ItemStack compare = new ItemStack(block.getType());
+			compare.setDurability(block.getData());
+			int time = -1;
+			for (ItemStack key : allow_destroy.keySet()) {
+				if (key.isSimilar(compare)) {
+					time = allow_destroy.get(key).time;
+				}
+			}
+			Sync.addRespawningBlock(block, time);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * This method is the same as ItemStack.isSimilar but does not consider
+	 * durability.
+	 * 
+	 * @param stack
+	 *            The first ItemStack.
+	 * @param stack1
+	 *            The ItemStack to compare to.
+	 * @return True if both ItemStacks are equal, ignoring the amount and
+	 *         durability.
+	 */
+	private static boolean isVaguelySimilar(ItemStack stack, ItemStack stack1) {
+		return stack1.getType() == stack.getType() && stack1.hasItemMeta() == stack.hasItemMeta()
+				&& (stack1.hasItemMeta() ? Bukkit.getItemFactory().equals(stack1.getItemMeta(), stack.getItemMeta()) : true);
+	}
+
+	/**
+	 * Whether or not players can break blocks with specific items.
+	 * 
+	 * @param block
+	 *            The block.
+	 * @param with
+	 *            The itemstack in hand.
+	 * @return True if players can break the block, false otherwise.
+	 */
+	public static boolean canBreak(Block block, ItemStack with) {
+		for (ItemStack key : allow_destroy.keySet()) {
+			ItemStack compare = new ItemStack(block.getType());
+			compare.setDurability(block.getData());
+			if (key.isSimilar(compare)) {
+				if (isVaguelySimilar(allow_destroy.get(key).item, with)) { return true; }
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Fired every time a player places a block to see if they're allowed to
+	 * place it.
+	 * 
+	 * @param block
+	 *            The block that they placed.
+	 * @return True if the enclosing event should be cancelled, false otherwise.
+	 */
+	public static boolean doPlace(Block block) {
+		if (canPlace(block)) {
+			int time = -1;
+			for (ItemStack key : allow_place.keySet()) {
+				ItemStack compare = new ItemStack(block.getType());
+				compare.setDurability(block.getData());
+				if (key.isSimilar(compare)) {
+					time = allow_place.get(key);
+				}
+			}
+			Sync.addDespawningBlock(block, time);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Whether or not players can place blocks.
+	 * 
+	 * @param block
+	 *            The block.
+	 * @return True if players can place the block, false otherwise.
+	 */
+	public static boolean canPlace(Block block) {
+		for (ItemStack key : allow_place.keySet()) {
+			ItemStack compare = new ItemStack(block.getType());
+			compare.setDurability(block.getData());
+			if (key.isSimilar(compare)) { return true; }
+		}
+		return false;
+	}
+
+	public static void addPlace(Block block, int despawn) {
+		if (!canPlace(block)) {
+			FileConfiguration config = MyZ.instance.getConfig();
+			int position = 0;
+			Set<String> keys = config.getConfigurationSection("blocks.place").getKeys(false);
+			while (keys.contains(position + "")) {
+				position++;
+			}
+			ItemStack item = new ItemStack(block.getType());
+			item.setDurability(block.getData());
+			config.set("blocks.place." + position + ".block", item);
+			config.set("blocks.place." + position + ".despawn", despawn);
+			MyZ.instance.saveConfig();
+			allow_place.put(item, despawn);
+		}
+	}
+
+	public static void removePlace(Block block) {
+		if (canPlace(block)) {
+			FileConfiguration config = MyZ.instance.getConfig();
+			for (String key : config.getConfigurationSection("blocks.place").getKeys(false)) {
+				ItemStack test = config.getItemStack("blocks.place." + key + ".block");
+				if (test.getType() == block.getType() && (short) test.getDurability() == block.getData()) {
+					config.set("blocks.place." + key, null);
+					MyZ.instance.saveConfig();
+					allow_place.remove(test);
+					return;
+				}
+			}
+		}
+	}
+
+	public static void addDestroy(Block block, ItemStack with, int respawn) {
+		if (!canBreak(block, with)) {
+			FileConfiguration config = MyZ.instance.getConfig();
+			int position = 0;
+			Set<String> keys = config.getConfigurationSection("blocks.destroy").getKeys(false);
+			while (keys.contains(position + "")) {
+				position++;
+			}
+
+			ItemStack item = new ItemStack(block.getType());
+			item.setDurability(block.getData());
+			ItemStack otherItem = with.clone();
+			otherItem.setAmount(1);
+
+			config.set("blocks.destroy." + position + ".block", item);
+			config.set("blocks.destroy." + position + ".with", otherItem);
+			config.set("blocks.destroy." + position + ".respawn", respawn);
+			MyZ.instance.saveConfig();
+			allow_destroy.put(item, new DestroyPair(otherItem, respawn));
+		}
+	}
+
+	public static void removeDestroy(Block block, ItemStack with) {
+		if (canBreak(block, with)) {
+			FileConfiguration config = MyZ.instance.getConfig();
+			for (String key : config.getConfigurationSection("blocks.destroy").getKeys(false)) {
+				ItemStack test = config.getItemStack("blocks.destroy." + key + ".block");
+				if (test.getType() == block.getType() && (short) test.getDurability() == block.getData()) {
+					config.set("blocks.destroy." + key, null);
+					MyZ.instance.saveConfig();
+					allow_destroy.remove(test);
+					return;
+				}
+			}
+		}
+	}
+
+	private static class DestroyPair {
+
+		private ItemStack item;
+		private int time;
+
+		public DestroyPair(ItemStack item, int time) {
+			this.item = item;
+			this.time = time;
+		}
 	}
 }

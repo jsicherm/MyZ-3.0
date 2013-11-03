@@ -8,10 +8,6 @@ Without these people, MyZ wouldn't be able to get anywhere. These guys are helpi
 
 Graphic Design:
 * CraftySubZero
-* ImTotallyTechy
-
-Web Design:
-* Bars96
 
 MineZ-chests:
 * SirAntony
@@ -57,8 +53,10 @@ What's left?
 So far, here are the base features that haven't yet been added.
 
 - [ ] Overridden Giant behaviour
+- [ ] Complete sound attraction
+- [ ] Complete Multi-world support
 
 Known Caveats
 =============
 
-In some scenarios when you reload the server after updating the MyZ jar, mobs in unloaded chunks can cause the server to crash when those chunks become loaded. It does not corrupt your world, or is even harmful. Simply restart the server. For this reason, try to keep reloading MyZ to a minimum. 
+In some scenarios when you reload the server after updating the MyZ jar, mobs in unloaded chunks can cause the server to crash when those chunks become loaded. It does not corrupt your world, or is even harmful. Simply restart the server. For this reason, try to keep reloading MyZ to a minimum. Additionally, reloading many times will eventually result in an OutOfMemory: PermGen Space error. RESTART, not RELOAD.

@@ -9,12 +9,12 @@ import java.util.List;
 
 import myz.MyZ;
 import myz.API.PlayerFriendEvent;
+import myz.mobs.CustomEntityPlayer;
+import myz.mobs.CustomEntityZombie;
 import myz.Scheduling.Sync;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
-import myz.mobs.CustomEntityPlayer;
-import myz.mobs.CustomEntityZombie;
 import net.minecraft.server.v1_6_R3.PlayerInteractManager;
 import net.minecraft.server.v1_6_R3.World;
 import net.minecraft.server.v1_6_R3.WorldServer;
@@ -194,6 +194,21 @@ public class Utilities {
 				if (p.getLocation().distanceSquared(player.getLocation()) <= d2)
 					players.add(p);
 		return players;
+	}
+
+	/**
+	 * Get the name of an ItemStack.
+	 * 
+	 * @param item
+	 *            The ItemStack.
+	 * @return The name of the item material with data if applicable or, a
+	 *         display name, if present.
+	 */
+	public static String getNameOf(ItemStack item) {
+		if (item.getItemMeta() == null || item.getItemMeta().getDisplayName() == null || item.getItemMeta().getDisplayName().isEmpty())
+			return item.getType().toString().charAt(0) + item.getType().toString().substring(1).toLowerCase().replaceAll("_", " ")
+					+ (item.getDurability() != (short) 0 ? ":" + item.getDurability() : "");
+		return item.getItemMeta().getDisplayName() + "&r";
 	}
 
 	/**

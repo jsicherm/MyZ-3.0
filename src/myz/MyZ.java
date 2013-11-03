@@ -14,6 +14,8 @@ import myz.API.PlayerBeginPoisonEvent;
 import myz.API.PlayerSpawnInWorldEvent;
 import myz.API.PlayerWaterDecayEvent;
 import myz.Commands.AddSpawnCommand;
+import myz.Commands.AllowedCommand;
+import myz.Commands.BlockCommand;
 import myz.Commands.ClanCommand;
 import myz.Commands.CreateMedKitCommand;
 import myz.Commands.FriendCommand;
@@ -28,6 +30,7 @@ import myz.Commands.SetRankCommand;
 import myz.Commands.SpawnCommand;
 import myz.Commands.SpawnsCommand;
 import myz.Listeners.AutoFriend;
+import myz.Listeners.BlockEvent;
 import myz.Listeners.CancelPlayerEvents;
 import myz.Listeners.CancelZombieDamage;
 import myz.Listeners.Chat;
@@ -44,6 +47,8 @@ import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
 import myz.Listeners.PlayerTakeDamage;
 import myz.Listeners.Visibility;
+import myz.mobs.CustomEntityPlayer;
+import myz.mobs.CustomEntityType;
 import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
 import myz.Support.Configuration;
@@ -55,8 +60,6 @@ import myz.Utilities.Downloader;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
-import myz.mobs.CustomEntityPlayer;
-import myz.mobs.CustomEntityType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -81,12 +84,11 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO giants
-	// TODO block protection
 	// TODO sound attraction to (trap)doors.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
-	private FileConfiguration playerdata;
+	private FileConfiguration playerdata, blocks;
 	private SQLManager sql;
 	private static final Random random = new Random();
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
@@ -97,6 +99,7 @@ public class MyZ extends JavaPlugin {
 		instance = this;
 		saveDefaultConfig();
 		loadPlayerData();
+		loadBlocks();
 
 		/*
 		 * Register the new enchantment so that MedKits can have their glow.
@@ -113,29 +116,6 @@ public class MyZ extends JavaPlugin {
 		 */
 		getServer().getScheduler().runTaskTimerAsynchronously(this, new aSync(), 100L, 20L);
 		getServer().getScheduler().runTaskTimer(this, new Sync(), 100L, 20L);
-
-		/*
-		 * Register all listeners.
-		 */
-		PluginManager p = getServer().getPluginManager();
-		p.registerEvents(new JoinQuit(), this);
-		p.registerEvents(new AutoFriend(), this);
-		p.registerEvents(new Heal(), this);
-		p.registerEvents(new CancelZombieDamage(), this);
-		p.registerEvents(new ConsumeFood(), this);
-		p.registerEvents(new PlayerHurtEntity(), this);
-		p.registerEvents(new Visibility(), this);
-		p.registerEvents(new PlayerKillEntity(), this);
-		p.registerEvents(new EntityHurtPlayer(), this);
-		p.registerEvents(new PlayerDeath(), this);
-		p.registerEvents(new EntitySpawn(), this);
-		p.registerEvents(new PlayerSummonGiant(), this);
-		p.registerEvents(new Chat(), this);
-		p.registerEvents(new CancelPlayerEvents(), this);
-		p.registerEvents(new Movement(), this);
-		p.registerEvents(new PlayerTakeDamage(), this);
-		if (getServer().getPluginManager().getPlugin("TagAPI") != null && getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
-			p.registerEvents(new KittehTag(), this);
 
 		/*
 		 * Register all commands.
@@ -156,6 +136,32 @@ public class MyZ extends JavaPlugin {
 		getCommand("clan").setExecutor(new ClanCommand());
 		getCommand("joinclan").setExecutor(new JoinClanCommand());
 		getCommand("getid").setExecutor(new GetUIDCommand());
+		getCommand("blockallow").setExecutor(new BlockCommand());
+		getCommand("blocks").setExecutor(new AllowedCommand());
+
+		/*
+		 * Register all listeners.
+		 */
+		PluginManager p = getServer().getPluginManager();
+		p.registerEvents(new JoinQuit(), this);
+		p.registerEvents(new BlockEvent(), this);
+		p.registerEvents(new AutoFriend(), this);
+		p.registerEvents(new Heal(), this);
+		p.registerEvents(new CancelZombieDamage(), this);
+		p.registerEvents(new ConsumeFood(), this);
+		p.registerEvents(new PlayerHurtEntity(), this);
+		p.registerEvents(new Visibility(), this);
+		p.registerEvents(new PlayerKillEntity(), this);
+		p.registerEvents(new EntityHurtPlayer(), this);
+		p.registerEvents(new PlayerDeath(), this);
+		p.registerEvents(new EntitySpawn(), this);
+		p.registerEvents(new PlayerSummonGiant(), this);
+		p.registerEvents(new Chat(), this);
+		p.registerEvents(new CancelPlayerEvents(), this);
+		p.registerEvents(new Movement(), this);
+		p.registerEvents(new PlayerTakeDamage(), this);
+		if (getServer().getPluginManager().getPlugin("TagAPI") != null && getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+			p.registerEvents(new KittehTag(), this);
 
 		/*
 		 * Connect to SQL or use PlayerData.
@@ -270,7 +276,21 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (!playerdata_file.exists())
 			saveResource("playerdata.yml", true);
-		playerdata = YamlConfiguration.loadConfiguration(new File(getDataFolder() + File.separator + "playerdata.yml"));
+		playerdata = YamlConfiguration.loadConfiguration(playerdata_file);
+	}
+
+	/**
+	 * Load the blocks YAML file.
+	 */
+	private void loadBlocks() {
+		File blocks_file = new File(getDataFolder() + File.separator + "blocks.yml");
+
+		/*
+		 * Make sure the file exists.
+		 */
+		if (!blocks_file.exists())
+			saveResource("blocks.yml", true);
+		blocks = YamlConfiguration.loadConfiguration(blocks_file);
 	}
 
 	/**
@@ -284,12 +304,12 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
-	 * Ensure the playerdata YAML is loaded.
+	 * Get the blocks YAML.
 	 * 
-	 * @return True if the playerdata.yml is non-null.
+	 * @return The FileConfiguration for the blocks.yml or null if not loaded.
 	 */
-	public boolean hasInitializedConfig() {
-		return playerdata != null;
+	public FileConfiguration getBlocksConfig() {
+		return blocks;
 	}
 
 	/**

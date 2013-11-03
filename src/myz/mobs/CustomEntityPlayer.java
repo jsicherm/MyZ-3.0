@@ -6,9 +6,9 @@ package myz.mobs;
 import java.util.ArrayList;
 import java.util.List;
 
-import myz.Utilities.Utilities;
 import myz.mobs.support.NullEntityNetworkManager;
 import myz.mobs.support.NullNetServerHandler;
+import myz.Utilities.Utilities;
 import net.minecraft.server.v1_6_R3.DamageSource;
 import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityArrow;

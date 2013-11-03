@@ -5,8 +5,8 @@ package myz.Listeners;
 
 import myz.MyZ;
 import myz.API.PlayerSummonGiantEvent;
-import myz.Support.Messenger;
 import myz.mobs.CustomEntityGiantZombie;
+import myz.Support.Messenger;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Material;
