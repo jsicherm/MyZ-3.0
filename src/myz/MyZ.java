@@ -183,21 +183,22 @@ public class MyZ extends JavaPlugin {
 				/*
 				 * Add all players that weren't already in the playerdata to it (in case of a reload).
 				 */
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					addPlayer(player);
-					PlayerData data = null;
-					if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
-						if (data == null && Configuration.usePlayerData()) {
-							PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-									new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0);
-							putPlayerAtSpawn(player, false);
-						}
-						if (sql.isConnected() && !sql.isIn(player.getName())) {
-							sql.add(player);
-							putPlayerAtSpawn(player, false);
+				for (String world : Configuration.getWorlds())
+					for (Player player : Bukkit.getWorld(world).getPlayers()) {
+						addPlayer(player);
+						PlayerData data = null;
+						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
+							if (data == null && Configuration.usePlayerData()) {
+								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
+										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0);
+								putPlayerAtSpawn(player, false);
+							}
+							if (sql.isConnected() && !sql.isIn(player.getName())) {
+								sql.add(player);
+								putPlayerAtSpawn(player, false);
+							}
 						}
 					}
-				}
 			}
 		}, 0L);
 
