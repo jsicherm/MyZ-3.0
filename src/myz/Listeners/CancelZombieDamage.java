@@ -21,14 +21,16 @@ public class CancelZombieDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onBurnInSun(EntityCombustEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+			return;
 		if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.PIG_ZOMBIE || e.getEntityType() == EntityType.GIANT)
 			e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onTakeFallDamage(EntityDamageEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+			return;
 		if (e.getCause() == DamageCause.FALL
 				&& (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.PIG_ZOMBIE || e.getEntityType() == EntityType.GIANT))
 			e.setCancelled(true);

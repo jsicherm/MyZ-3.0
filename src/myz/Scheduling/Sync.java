@@ -3,8 +3,6 @@
  */
 package myz.Scheduling;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,13 +48,10 @@ public class Sync implements Runnable {
 			safeLogoutPlayers.put(player, timeRemaining - 1);
 		}
 
-		for (String location : MyZ.instance.getBlocksConfig().getKeys(false)) {
-			if (MyZ.instance.getBlocksConfig().contains(location + ".time")) {
-				if (ticks >= MyZ.instance.getBlocksConfig().getLong(location + ".time")) {
+		for (String location : MyZ.instance.getBlocksConfig().getKeys(false))
+			if (MyZ.instance.getBlocksConfig().contains(location + ".time"))
+				if (ticks >= MyZ.instance.getBlocksConfig().getLong(location + ".time"))
 					actOnBlock(location, true);
-				}
-			}
-		}
 
 		if (ticks == Long.MAX_VALUE || ticks == 0) {
 			ticks = 0;
@@ -73,14 +68,9 @@ public class Sync implements Runnable {
 	 * Restore all the blocks to the world from the blocks YAML file.
 	 */
 	public static void wipeBlocks() {
-		for (String location : MyZ.instance.getBlocksConfig().getKeys(false)) {
+		for (String location : MyZ.instance.getBlocksConfig().getKeys(false))
 			actOnBlock(location, false);
-		}
-		try {
-			MyZ.instance.getBlocksConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "blocks.yml"));
-		} catch (IOException e) {
-			Messenger.sendConsoleMessage("&4Unable to save blocks.yml: " + e.getMessage());
-		}
+		MyZ.instance.saveBlocksConfig();
 	}
 
 	/**
@@ -94,7 +84,7 @@ public class Sync implements Runnable {
 	 */
 	private static void actOnBlock(String slug, boolean autoSave) {
 		if (MyZ.instance.getBlocksConfig().contains(slug + ".respawn") && MyZ.instance.getBlocksConfig().contains(slug + ".type")
-				&& MyZ.instance.getBlocksConfig().contains(slug + ".data") && MyZ.instance.getBlocksConfig().contains(slug + ".time")) {
+				&& MyZ.instance.getBlocksConfig().contains(slug + ".data") && MyZ.instance.getBlocksConfig().contains(slug + ".time"))
 			try {
 				World world = Bukkit.getWorld(slug.split("_")[0]);
 				if (world != null) {
@@ -106,21 +96,15 @@ public class Sync implements Runnable {
 							loc.getBlock().setType(mat);
 							loc.getBlock().setData((byte) MyZ.instance.getBlocksConfig().getInt(slug + ".data"), true);
 						}
-					} else {
+					} else
 						loc.getBlock().setType(Material.AIR);
-					}
 				}
 			} catch (Exception exc) {
 				// Bury silently.
 			}
-		}
 		MyZ.instance.getBlocksConfig().set(slug, null);
 		if (autoSave)
-			try {
-				MyZ.instance.getBlocksConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "blocks.yml"));
-			} catch (IOException e) {
-				Messenger.sendConsoleMessage("&4Unable to save blocks.yml: " + e.getMessage());
-			}
+			MyZ.instance.saveBlocksConfig();
 	}
 
 	/**
@@ -178,12 +162,8 @@ public class Sync implements Runnable {
 		section.set("respawn", false);
 		section.set("type", block.getType().toString());
 		section.set("data", block.getData());
-		section.set("time", (long) (ticks + seconds));
-		try {
-			config.save(new File(MyZ.instance.getDataFolder() + File.separator + "blocks.yml"));
-		} catch (IOException e) {
-			Messenger.sendConsoleMessage("&4Unable to save blocks.yml: " + e.getMessage());
-		}
+		section.set("time", ticks + seconds);
+		MyZ.instance.saveBlocksConfig();
 	}
 
 	/**
@@ -202,11 +182,7 @@ public class Sync implements Runnable {
 		section.set("respawn", true);
 		section.set("type", block.getType().toString());
 		section.set("data", block.getData());
-		section.set("time", (long) (ticks + seconds));
-		try {
-			config.save(new File(MyZ.instance.getDataFolder() + File.separator + "blocks.yml"));
-		} catch (IOException e) {
-			Messenger.sendConsoleMessage("&4Unable to save blocks.yml: " + e.getMessage());
-		}
+		section.set("time", ticks + seconds);
+		MyZ.instance.saveBlocksConfig();
 	}
 }

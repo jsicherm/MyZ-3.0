@@ -10,10 +10,10 @@ import myz.API.PlayerDrinkWaterEvent;
 import myz.API.PlayerTakeBleedingDamageEvent;
 import myz.API.PlayerTakePoisonDamageEvent;
 import myz.API.PlayerTakeWaterDamageEvent;
-import myz.mobs.pathing.PathingSupport;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;

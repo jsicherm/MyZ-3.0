@@ -9,12 +9,12 @@ import java.util.List;
 
 import myz.MyZ;
 import myz.API.PlayerFriendEvent;
-import myz.mobs.CustomEntityPlayer;
-import myz.mobs.CustomEntityZombie;
 import myz.Scheduling.Sync;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.mobs.CustomEntityPlayer;
+import myz.mobs.CustomEntityZombie;
 import net.minecraft.server.v1_6_R3.PlayerInteractManager;
 import net.minecraft.server.v1_6_R3.World;
 import net.minecraft.server.v1_6_R3.WorldServer;
@@ -27,6 +27,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -319,5 +320,16 @@ public class Utilities {
 		if (MyZ.instance.getSQLManager().isConnected())
 			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
 		Messenger.sendMessage(player.getBukkitEntity().getWorld(), Messenger.getConfigMessage("player_npc_killed", player.getName()));
+	}
+
+	/**
+	 * Show the researching GUI to a player.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+	public static void showResearchDialog(Player player) {
+		Inventory gui = Bukkit.createInventory(null, 9, MyZ.instance.getLocalizableConfig().getString("localizable.science_gui"));
+		player.openInventory(gui);
 	}
 }

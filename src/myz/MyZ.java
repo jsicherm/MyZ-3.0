@@ -13,6 +13,7 @@ import myz.API.PlayerBeginBleedingEvent;
 import myz.API.PlayerBeginPoisonEvent;
 import myz.API.PlayerSpawnInWorldEvent;
 import myz.API.PlayerWaterDecayEvent;
+import myz.Commands.AddResearchCommand;
 import myz.Commands.AddSpawnCommand;
 import myz.Commands.AllowedCommand;
 import myz.Commands.BlockCommand;
@@ -23,6 +24,7 @@ import myz.Commands.FriendsCommand;
 import myz.Commands.GetUIDCommand;
 import myz.Commands.JoinClanCommand;
 import myz.Commands.RemoveSpawnCommand;
+import myz.Commands.ResearchCommand;
 import myz.Commands.SaveKitCommand;
 import myz.Commands.SaveRankCommand;
 import myz.Commands.SetLobbyCommand;
@@ -47,8 +49,6 @@ import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
 import myz.Listeners.PlayerTakeDamage;
 import myz.Listeners.Visibility;
-import myz.mobs.CustomEntityPlayer;
-import myz.mobs.CustomEntityType;
 import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
 import myz.Support.Configuration;
@@ -60,6 +60,8 @@ import myz.Utilities.Downloader;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
+import myz.mobs.CustomEntityPlayer;
+import myz.mobs.CustomEntityType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -88,7 +90,7 @@ public class MyZ extends JavaPlugin {
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
-	private FileConfiguration playerdata, blocks;
+	private FileConfiguration playerdata, blocks, localizable, spawn, research;
 	private SQLManager sql;
 	private static final Random random = new Random();
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
@@ -100,6 +102,9 @@ public class MyZ extends JavaPlugin {
 		saveDefaultConfig();
 		loadPlayerData();
 		loadBlocks();
+		loadLocalizable();
+		loadSpawn();
+		loadResearch();
 
 		/*
 		 * Register the new enchantment so that MedKits can have their glow.
@@ -138,6 +143,8 @@ public class MyZ extends JavaPlugin {
 		getCommand("getid").setExecutor(new GetUIDCommand());
 		getCommand("blockallow").setExecutor(new BlockCommand());
 		getCommand("blocks").setExecutor(new AllowedCommand());
+		getCommand("research").setExecutor(new ResearchCommand());
+		getCommand("setresearch").setExecutor(new AddResearchCommand());
 
 		/*
 		 * Register all listeners.
@@ -190,7 +197,7 @@ public class MyZ extends JavaPlugin {
 						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 							if (data == null && Configuration.usePlayerData()) {
 								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0);
+										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0, 0);
 								putPlayerAtSpawn(player, false);
 							}
 							if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -233,11 +240,7 @@ public class MyZ extends JavaPlugin {
 		 * Autoupdate.
 		 */
 		if (Configuration.isAutoUpdate())
-			try {
-				new Updater(this);
-			} catch (Exception e) {
-				Messenger.sendConfigConsoleMessage("&4Unable to run AutoUpdate: " + e.getMessage());
-			}
+			new Updater(this, 55557, getFile(), false);
 	}
 
 	@Override
@@ -305,6 +308,48 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * Load the localizable YAML file.
+	 */
+	private void loadLocalizable() {
+		File localizable_file = new File(getDataFolder() + File.separator + "localizable.yml");
+
+		/*
+		 * Make sure the file exists.
+		 */
+		if (!localizable_file.exists())
+			saveResource("localizable.yml", true);
+		localizable = YamlConfiguration.loadConfiguration(localizable_file);
+	}
+
+	/**
+	 * Load the spawn YAML file.
+	 */
+	private void loadSpawn() {
+		File spawn_file = new File(getDataFolder() + File.separator + "spawn.yml");
+
+		/*
+		 * Make sure the file exists.
+		 */
+		if (!spawn_file.exists())
+			saveResource("spawn.yml", true);
+		spawn = YamlConfiguration.loadConfiguration(spawn_file);
+	}
+
+	/**
+	 * Load the research YAML file.
+	 */
+	private void loadResearch() {
+		File research_file = new File(getDataFolder() + File.separator + "research.yml");
+
+		/*
+		 * Make sure the file exists.
+		 */
+		if (!research_file.exists())
+			saveResource("research.yml", true);
+		research = YamlConfiguration.loadConfiguration(research_file);
+	}
+
+	/**
 	 * Get the playerdata YAML.
 	 * 
 	 * @return The FileConfiguration for the playerdata.yml or null if not
@@ -321,6 +366,78 @@ public class MyZ extends JavaPlugin {
 	 */
 	public FileConfiguration getBlocksConfig() {
 		return blocks;
+	}
+
+	/**
+	 * Get the localizable YAML.
+	 * 
+	 * @return The FileConfiguration for the localizable.yml or null if not
+	 *         loaded.
+	 */
+	public FileConfiguration getLocalizableConfig() {
+		return localizable;
+	}
+
+	/**
+	 * Get the spawn YAML.
+	 * 
+	 * @return The FileConfiguration for the spawn.yml or null if not loaded.
+	 */
+	public FileConfiguration getSpawnConfig() {
+		return spawn;
+	}
+
+	/**
+	 * Get the research YAML.
+	 * 
+	 * @return The FileConfiguration for the research.yml or null if not loaded.
+	 */
+	public FileConfiguration getResearchConfig() {
+		return research;
+	}
+
+	/**
+	 * Save the blocks.yml
+	 */
+	public void saveBlocksConfig() {
+		try {
+			blocks.save(new File(MyZ.instance.getDataFolder() + File.separator + "blocks.yml"));
+		} catch (IOException e) {
+			Messenger.sendConsoleMessage("&4Unable to save blocks.yml: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Save the localizable.yml
+	 */
+	public void saveLocalizableConfig() {
+		try {
+			localizable.save(new File(MyZ.instance.getDataFolder() + File.separator + "localizable.yml"));
+		} catch (IOException e) {
+			Messenger.sendConsoleMessage("&4Unable to save localizable.yml: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Save the spawn.yml
+	 */
+	public void saveSpawnConfig() {
+		try {
+			spawn.save(new File(MyZ.instance.getDataFolder() + File.separator + "spawn.yml"));
+		} catch (IOException e) {
+			Messenger.sendConsoleMessage("&4Unable to save spawn.yml: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Save the research.yml
+	 */
+	public void saveResearchConfig() {
+		try {
+			research.save(new File(MyZ.instance.getDataFolder() + File.separator + "research.yml"));
+		} catch (IOException e) {
+			Messenger.sendConsoleMessage("&4Unable to save research.yml: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -466,7 +583,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (playerdata == null && Configuration.usePlayerData()) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
-					0, 20, "", 0, 0, 0, 0, 0, 0, 0);
+					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0);
 			putPlayerAtSpawn(player, false);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {

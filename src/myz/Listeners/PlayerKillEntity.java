@@ -22,7 +22,8 @@ public class PlayerKillEntity implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onEntityDeath(EntityDeathEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+			return;
 		e.setDroppedExp(0);
 		if (e.getEntity().getKiller() != null)
 			incrementKills(e.getEntityType(), e.getEntity().getKiller());

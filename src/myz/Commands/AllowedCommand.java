@@ -29,14 +29,12 @@ public class AllowedCommand implements CommandExecutor {
 
 		Map<ItemStack, ItemStack> broken = Configuration.getAllowedBroken();
 
-		for (ItemStack key : broken.keySet()) {
+		for (ItemStack key : broken.keySet())
 			Messenger.sendMessage(sender, Utilities.getNameOf(key) + " -> " + Utilities.getNameOf(broken.get(key)));
-		}
 		sender.sendMessage("");
 		Messenger.sendConfigMessage(sender, "command.allowed.placeable");
-		for (ItemStack item : Configuration.getAllowedPlaced()) {
+		for (ItemStack item : Configuration.getAllowedPlaced())
 			Messenger.sendMessage(sender, Utilities.getNameOf(item));
-		}
 
 		return true;
 	}

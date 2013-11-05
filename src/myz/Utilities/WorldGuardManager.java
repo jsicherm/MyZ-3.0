@@ -4,6 +4,7 @@
 package myz.Utilities;
 
 import org.bukkit.Location;
+
 import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -23,7 +24,8 @@ public class WorldGuardManager {
 	 * @return True if the location is in a WorldGuard flagged region.
 	 */
 	public static boolean isAmplifiedRegion(Location inLocation) {
-		if (WGBukkit.getRegionManager(inLocation.getWorld()) == null) { return false; }
+		if (WGBukkit.getRegionManager(inLocation.getWorld()) == null)
+			return false;
 
 		ApplicableRegionSet region = WGBukkit.getRegionManager(inLocation.getWorld()).getApplicableRegions(inLocation);
 		return region.allows(DefaultFlag.CHEST_ACCESS);

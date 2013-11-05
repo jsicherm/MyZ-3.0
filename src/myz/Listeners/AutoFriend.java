@@ -20,7 +20,8 @@ public class AutoFriend implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	private void onSneak(PlayerToggleSneakEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		if (e.isSneaking() && Configuration.isAutofriend())
 			Utilities.sneakAddFriend(e.getPlayer());
 	}

@@ -54,7 +54,7 @@ public class Messenger {
 	 */
 	public static void sendConfigMessage(CommandSender player, String uncolored_config_message) {
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-				MyZ.instance.getConfig().getString("localizable." + uncolored_config_message)));
+				MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message)));
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class Messenger {
 	 */
 	public static void sendConfigConsoleMessage(String uncolored_config_message) {
 		sendConsoleMessage(ChatColor.translateAlternateColorCodes('&',
-				MyZ.instance.getConfig().getString("localizable." + uncolored_config_message)));
+				MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message)));
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class Messenger {
 	 * @return The colored message with replaced variables.
 	 */
 	public static String getConfigMessage(String uncolored_config_message, Object... variables) {
-		String message = MyZ.instance.getConfig().getString("localizable." + uncolored_config_message);
+		String message = MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message);
 		if (variables != null)
 			try {
 				message = String.format(message, variables);

@@ -6,8 +6,8 @@ package myz.Listeners;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.mobs.pathing.PathingSupport;
 import myz.Support.Configuration;
+import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +25,8 @@ public class PlayerTakeDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+			return;
 		if (e.getEntity() instanceof Player)
 			if (random.nextDouble() <= Configuration.getBleedChance() && Configuration.getBleedChance() != 0.0)
 				switch (e.getCause()) {

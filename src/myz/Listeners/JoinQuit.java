@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import myz.MyZ;
-import myz.mobs.CustomEntityPlayer;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
+import myz.mobs.CustomEntityPlayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Horse;
@@ -53,7 +53,8 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onJoin(PlayerJoinEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		doJoin(e);
 	}
 
@@ -113,11 +114,8 @@ public class JoinQuit implements Listener {
 		if (!MyZ.instance.isPlayer(e.getPlayer())) {
 			if (MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 				playerJoin(e.getPlayer());
-		} else {
-			if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) {
-				MyZ.instance.removePlayer(e.getPlayer(), false);
-			}
-		}
+		} else if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			MyZ.instance.removePlayer(e.getPlayer(), false);
 	}
 
 	@EventHandler

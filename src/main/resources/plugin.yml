@@ -1,6 +1,6 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.45
+version: 3.0.5
 softdepend: [WorldEdit, WorldGuard, TagAPI]
 description: MyZ 3.0 with chest support by SirAntony.
 authors: [TeeePeee, SirAntony]
@@ -35,6 +35,12 @@ commands:
   spawnpoints:
     description: List spawnpoints.
     aliases: [spawns]
+  setresearch:
+    description: Add researchables.
+    permission: MyZ.scientist
+    permission-message: Perhaps you meant /research?
+  research:
+    description: Research items.
   savemedkit:
     description: Save a MedKit.
     permission: MyZ.kit_admin
@@ -76,6 +82,8 @@ permissions:
       MyZ.spawn_giant: true
       MyZ.world_admin: true
       MyZ.kit_admin: true
+      MyZ.scientist: true
+      MyZ.update: true
   MyZ.spawn_giant:
     description: Spawn giants.
     default: op
@@ -84,5 +92,8 @@ permissions:
     default: op
   MyZ.world_admin:
     description: All things world-related.
+    default: op
+  MyZ.scientist:
+    description: Science commands.
     default: op
     

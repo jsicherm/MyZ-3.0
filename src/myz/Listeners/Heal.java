@@ -32,7 +32,8 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onRightClick(PlayerInteractEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK)
 			return;
 		final Player player = e.getPlayer();

@@ -1,405 +1,195 @@
+/*
+ * Updater for Bukkit.
+ *
+ * This class provides the means to safely and easily update a plugin, or check to see if it is updated using dev.bukkit.org
+ */
+
 package myz;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.net.URLConnection;
+import java.util.Enumeration;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
-import org.bukkit.ChatColor;
+import myz.Support.Messenger;
+
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
-import org.bukkit.scheduler.BukkitScheduler;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.simple.JSONValue;
 
 /**
+ * Check dev.bukkit.org to find updates for a given plugin, and download the
+ * updates if needed.
+ * <p/>
+ * <b>VERY, VERY IMPORTANT</b>: Because there are no standards for adding
+ * auto-update toggles in your plugin's config, this system provides NO CHECK
+ * WITH YOUR CONFIG to make sure the user has allowed auto-updating. <br>
+ * It is a <b>BUKKIT POLICY</b> that you include a boolean value in your config
+ * that prevents the auto-updater from running <b>AT ALL</b>. <br>
+ * If you fail to include this option in your config, your plugin will be
+ * <b>REJECTED</b> when you attempt to submit it to dev.bukkit.org.
+ * <p/>
+ * An example of a good configuration option would be something similar to
+ * 'auto-update: true' - if this value is set to false you may NOT run the
+ * auto-updater. <br>
+ * If you are unsure about these rules, please read the plugin submission
+ * guidelines: http://goo.gl/8iU5l
  * 
- * @author V10lator
- * @version 1.4 website:
- *          http://forums.bukkit.org/threads/autoupdate-update-your-
- *          plugins.84421/
- * 
+ * @author Gravity
+ * @version 2.0
  */
-public class Updater implements Runnable, Listener, CommandExecutor, CommandSender {
-	/*
-	 * Configuration:
-	 * 
-	 * delay = The delay this class checks for new updates. This time is in ticks (1 tick = 1/20 second).
-	 * bukitdevSlug = The bukkitDev Slug. Leave empty for autodetection (uses plugin.getName().toLowerCase()).
-	 * COLOR_INFO = The default text color.
-	 * COLOR_OK = The text color for positive messages.
-	 * COLOR_ERROR = The text color for error messages.
-	 */
-	private long delay = 216000L;
-	private String bukkitdevSlug = "myz";
-	private final ChatColor COLOR_INFO = ChatColor.BLUE;
-	private final ChatColor COLOR_OK = ChatColor.GREEN;
-	private final ChatColor COLOR_ERROR = ChatColor.RED;
-	private boolean debug = false;
-	/*
-	 * End of configuration.
-	 * 
-	 * !!! Don't change anything below if you don't know what you are doing !!!
-	 * 
-	 * WARNING: If you change anything below you loose support.
-	 * Also you have to replace every "http://forums.bukkit.org/threads/autoupdate-update-your-plugins.84421/" with a link to your
-	 * plugin and change the version to something unique (like adding -<yourName>).
-	 */
 
-	private final String version = "1.4";
+public class Updater implements CommandExecutor, CommandSender {
 
-	private final Plugin plugin;
-	private int pid = -1;
-	private final String av;
-	private Configuration config;
+	private Plugin plugin;
+	private String versionName, newVersionName;
+	private String versionLink;
+	private String versionType;
+	private String versionGameVersion;
 
-	boolean enabled = false;
-	private final AtomicBoolean lock = new AtomicBoolean(false);
-	private boolean needUpdate = false;
-	private boolean updatePending = false;
-	private String updateURL;
-	private String updateVersion;
-	private String pluginURL;
-	private String type;
+	private boolean announce; // Whether to announce file downloads
 
-	private ArrayList<CommandExecutor> otherUpdaters;
+	private URL url; // Connecting to RSS
+	private File file; // The plugin's file
+	private Thread thread; // Updater thread
 
-	/**
-	 * This will use your main configuration (config.yml). Use this in
-	 * onEnable().
-	 * 
-	 * @param plugin
-	 *            The instance of your plugins main class.
-	 * @throws Exception
-	 */
-	public Updater(Plugin plugin) throws Exception {
-		this(plugin, plugin.getConfig());
-	}
+	private int id = -1; // Project's Curse ID
+	private static final String TITLE_VALUE = "name"; // Gets remote file's
+														// title
+	private static final String LINK_VALUE = "downloadUrl"; // Gets remote
+															// file's download
+															// link
+	private static final String TYPE_VALUE = "releaseType"; // Gets remote
+															// file's release
+															// type
+	private static final String VERSION_VALUE = "gameVersion"; // Gets remote
+																// file's build
+																// version
+	private static final String QUERY = "/servermods/files?projectIds="; // Path
+																			// to
+																			// GET
+	private static final String HOST = "https://api.curseforge.com"; // Slugs
+																		// will
+																		// be
+																		// appended
+																		// to
+																		// this
+																		// to
+																		// get
+																		// to
+																		// the
+																		// project's
+																		// RSS
+																		// feed
+	private boolean hasUpdate; // Whether or not an update was found
+
+	private static final int BYTE_SIZE = 1024; // Used for downloading files
+	private String updateFolder;// The folder that downloads will be placed in
 
 	/**
-	 * This will use a custom configuration. Use this in onEnable().
+	 * Initialize the updater
 	 * 
 	 * @param plugin
-	 *            The instance of your plugins main class.
-	 * @param config
-	 *            The configuration to use.
-	 * @throws Exception
+	 *            The plugin that is checking for an update.
+	 * @param id
+	 *            The dev.bukkit.org id of the project
+	 * @param file
+	 *            The file that the plugin is running from, get this by doing
+	 *            this.getFile() from within your main class.
+	 * @param type
+	 *            Specify the type of update this will be. See
+	 *            {@link UpdateType}
+	 * @param announce
+	 *            True if the program should announce the progress of new
+	 *            updates in console
 	 */
-	public Updater(Plugin plugin, Configuration config) throws Exception {
-		if (plugin == null)
-			throw new Exception("Plugin can not be null");
-		if (!plugin.isEnabled())
-			throw new Exception("Plugin not enabled");
+	public Updater(Plugin plugin, int id, File file, boolean announce) {
 		this.plugin = plugin;
-		av = plugin.getDescription().getVersion();
-		if (bukkitdevSlug == null || bukkitdevSlug.equals(""))
-			bukkitdevSlug = plugin.getName();
-		bukkitdevSlug = bukkitdevSlug.toLowerCase();
-		if (delay < 72000L) {
-			plugin.getLogger().info("[AutoUpdate] delay < 72000 ticks not supported. Setting delay to 72000.");
-			delay = 72000L;
+		this.announce = announce;
+		this.file = file;
+		this.id = id;
+		updateFolder = plugin.getServer().getUpdateFolder();
+
+		try {
+			url = new URL(Updater.HOST + Updater.QUERY + id);
+		} catch (final MalformedURLException e) {
+			plugin.getLogger().severe("The project ID provided for updating, " + id + " is invalid.");
+			e.printStackTrace();
 		}
-		setConfig(config);
+
+		thread = new Thread(new UpdateRunnable());
+		thread.start();
 		registerCommand();
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Use this to restart the main task. This is useful after
-	 * scheduler.cancelTasks(plugin); for example.
+	 * Get the latest version's release type (release, beta, or alpha).
 	 */
-	public boolean restartMainTask() {
-		try {
-			ResetTask rt = new ResetTask(enabled);
-			rt.setPid(plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, rt, 0L, 1L));
-			return enabled;
-		} catch (Throwable t) {
-			printStackTraceSync(t, false);
-			return false;
-		}
+	public String getLatestType() {
+		waitForThread();
+		return versionType;
 	}
 
-	private boolean checkState(boolean newState, boolean restart) {
-		if (enabled != newState) {
-			enabled = newState;
-			plugin.getLogger().info("[AutoUpdate] v" + version + (enabled ? " enabled" : " disabled") + "!");
-			if (restart)
-				return restartMainTask();
-		}
-		return enabled;
+	/**
+	 * Get the latest version's game version.
+	 */
+	public String getLatestGameVersion() {
+		waitForThread();
+		return versionGameVersion;
 	}
 
-	private class ResetTask implements Runnable {
-		private int pid;
-		private final boolean restart;
+	/**
+	 * Get the latest version's name.
+	 */
+	public String getLatestName() {
+		waitForThread();
+		return versionName;
+	}
 
-		private ResetTask(boolean restart) {
-			this.restart = restart;
-		}
+	/**
+	 * Get the latest version's file link.
+	 */
+	public String getLatestFileLink() {
+		waitForThread();
+		return versionLink;
+	}
 
-		private void setPid(int pid) {
-			this.pid = pid;
-		}
-
-		public void run() {
+	/**
+	 * As the result of Updater output depends on the thread's completion, it is
+	 * necessary to wait for the thread to finish before allowing anyone to
+	 * check the result.
+	 */
+	private void waitForThread() {
+		if (thread != null && thread.isAlive())
 			try {
-				if (!lock.compareAndSet(false, true))
-					return;
-				BukkitScheduler bs = plugin.getServer().getScheduler();
-				if (bs.isQueued(Updater.this.pid) || bs.isCurrentlyRunning(Updater.this.pid))
-					bs.cancelTask(Updater.this.pid);
-				if (restart)
-					Updater.this.pid = bs.scheduleAsyncRepeatingTask(plugin, Updater.this, 5L, delay);
-				else
-					Updater.this.pid = -1;
-				lock.set(false);
-				bs.cancelTask(pid);
-			} catch (Throwable t) {
-				printStackTraceSync(t, false);
+				thread.join();
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
 			}
-		}
-	}
-
-	/**
-	 * This will overwrite the pre-saved configuration. use this after
-	 * reloadConfig(), for example. This will use your main configuration
-	 * (config.yml). This will call {@link #restartMainTask()} internally.
-	 * 
-	 * @throws FileNotFoundException
-	 */
-	public void resetConfig() throws FileNotFoundException {
-		setConfig(plugin.getConfig());
-	}
-
-	/**
-	 * This will overwrite the pre-saved configuration. use this after
-	 * config.load(file), for example. This will use a custom configuration.
-	 * This will call {@link #restartMainTask()} internally.
-	 * 
-	 * @param config
-	 *            The new configuration to use.
-	 * @throws FileNotFoundException
-	 */
-	public void setConfig(Configuration config) throws FileNotFoundException {
-		if (config == null)
-			throw new FileNotFoundException("Config can not be null");
-		try {
-			if (!lock.compareAndSet(false, true)) {
-				ConfigSetter cf = new ConfigSetter(config);
-				cf.setPid(plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, cf, 0L, 1L));
-			} else {
-				setConfig2(config);
-				lock.set(false);
-			}
-		} catch (Throwable t) {
-			printStackTraceSync(t, false);
-		}
-	}
-
-	private class ConfigSetter implements Runnable {
-		private final Configuration config;
-		private int pid;
-
-		private ConfigSetter(Configuration config) {
-			this.config = config;
-		}
-
-		private void setPid(int pid) {
-			this.pid = pid;
-		}
-
-		public void run() {
-			if (!lock.compareAndSet(false, true))
-				return;
-			setConfig2(config);
-			lock.set(false);
-			plugin.getServer().getScheduler().cancelTask(pid);
-		}
-	}
-
-	private void setConfig2(Configuration config) {
-		if (!config.isSet("AutoUpdate"))
-			config.set("AutoUpdate", true);
-		checkState(config.getBoolean("AutoUpdate"), true);
-	}
-
-	/**
-	 * This is internal stuff. Don't call this directly!
-	 */
-	public void run() {
-		if (!plugin.isEnabled()) {
-			plugin.getServer().getScheduler().cancelTask(pid);
-			return;
-		}
-		try {
-			while (!lock.compareAndSet(false, true)) {
-				try {
-					Thread.sleep(1L);
-				} catch (InterruptedException e) {
-				}
-				continue;
-			}
-			try {
-				InputStreamReader ir;
-				URL url = new URL("http://api.bukget.org/api2/bukkit/plugin/" + bukkitdevSlug + "/latest");
-				HttpURLConnection con = (HttpURLConnection) url.openConnection();
-				con.connect();
-				int res = con.getResponseCode();
-				if (res != 200) {
-					if (debug)
-						plugin.getServer()
-								.getScheduler()
-								.scheduleSyncDelayedTask(plugin,
-										new SyncMessageDelayer(null, new String[] { "[AutoUpdate] WARNING: Bukget returned " + res }));
-					lock.set(false);
-					return;
-				}
-				ir = new InputStreamReader(con.getInputStream());
-
-				String nv;
-				try {
-					JSONParser jp = new JSONParser();
-					Object o = jp.parse(ir);
-
-					if (!(o instanceof JSONObject)) {
-						ir.close();
-						lock.set(false);
-						return;
-					}
-
-					JSONObject jo = (JSONObject) o;
-					jo = (JSONObject) jo.get("versions");
-					nv = (String) jo.get("version");
-					if (av.equals(nv) || (updateVersion != null && updateVersion.equals(nv))) {
-						ir.close();
-						pluginURL = null;
-						lock.set(false);
-						return;
-					}
-					updateURL = (String) jo.get("download");
-					pluginURL = (String) jo.get("link");
-					updateVersion = nv;
-					type = (String) jo.get("type");
-					needUpdate = true;
-					ir.close();
-				} catch (ParseException e) {
-					lock.set(false);
-					printStackTraceSync(e, true);
-					ir.close();
-					return;
-				}
-				final String[] out = new String[] { "[" + plugin.getName() + "] New " + type + " available!",
-						"If you want to update from " + av + " to " + updateVersion + " use /update " + plugin.getName(),
-						"See " + pluginURL + " for more information." };
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new SyncMessageDelayer(null, out));
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-					public void run() {
-						String[] rout = new String[3];
-						for (int i = 0; i < 3; i++)
-							rout[i] = COLOR_INFO + out[i];
-						for (Player p : plugin.getServer().getOnlinePlayers())
-							if (hasPermission(p, "autoupdate.announce"))
-								p.sendMessage(rout);
-					}
-				});
-			} catch (Exception e) {
-				printStackTraceSync(e, true);
-			}
-			lock.set(false);
-		} catch (Throwable t) {
-			printStackTraceSync(t, false);
-		}
-	}
-
-	/**
-	 * This is internal stuff. Don't call this directly!
-	 */
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void adminJoin(PlayerJoinEvent event) {
-		try {
-			if (!enabled || !lock.compareAndSet(false, true))
-				return;
-			Player p = event.getPlayer();
-			String[] out;
-			if (needUpdate) {
-				if (hasPermission(p, "autoupdate.announce")) {
-					out = new String[] { COLOR_INFO + "[" + plugin.getName() + "] New " + type + " available!",
-							COLOR_INFO + "If you want to update from " + av + " to " + updateVersion + " use /update " + plugin.getName(),
-							COLOR_INFO + "See " + pluginURL + " for more information." };
-				} else
-					out = null;
-			} else if (updatePending) {
-				if (hasPermission(p, "autoupdate.announce")) {
-					out = new String[] { COLOR_INFO + "Please restart the server to finish the update of " + plugin.getName(),
-							COLOR_INFO + "See " + pluginURL + " for more information." };
-				} else
-					out = null;
-			} else
-				out = null;
-			lock.set(false);
-			if (out != null)
-				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new SyncMessageDelayer(p.getName(), out));
-		} catch (Throwable t) {
-			printStackTraceSync(t, false);
-		}
-	}
-
-	private class SyncMessageDelayer implements Runnable {
-		private final String p;
-		private final String[] msgs;
-
-		private SyncMessageDelayer(String p, String[] msgs) {
-			this.p = p;
-			this.msgs = msgs;
-		}
-
-		public void run() {
-			try {
-				if (p != null) {
-					Player p = plugin.getServer().getPlayerExact(this.p);
-					if (p != null)
-						for (String msg : msgs)
-							if (msg != null)
-								p.sendMessage(msg);
-				} else {
-					Logger log = plugin.getLogger();
-					for (String msg : msgs)
-						if (msg != null)
-							log.info(msg);
-				}
-			} catch (Throwable t) {
-				printStackTraceSync(t, false);
-			}
-		}
 	}
 
 	private void registerCommand() {
@@ -417,343 +207,405 @@ public class Updater implements Runnable, Listener, CommandExecutor, CommandSend
 				c.setAccessible(false);
 				cmd.setExecutor(this);
 				cm.register("update", cmd);
-				otherUpdaters = new ArrayList<CommandExecutor>();
 			} else
 				plugin.getServer().dispatchCommand(this, "update [REGISTER]");
 		} catch (Throwable t) {
-			printStackTraceSync(t, false);
 		}
 	}
 
-	/**
-	 * This is internal stuff. Don't call this directly!
-	 */
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		try {
-			if (args.length > 0) {
-				if (args[0].equals("[REGISTER]")) {
-					otherUpdaters.add((CommandExecutor) sender);
-					return true;
-				}
-				if (!plugin.getName().equalsIgnoreCase(args[0])) {
-					informOtherUpdaters(sender, args);
-					return true;
-				}
-			} else
-				informOtherUpdaters(sender, args);
-			update(sender);
-		} catch (Throwable t) {
-			printStackTraceSync(t, false);
+	@Override
+	public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
+		if (!hasUpdate) {
+			sender.sendMessage("No update was found.");
+			return true;
 		}
+		if (sender.hasPermission("MyZ.update"))
+			if (args.length != 0)
+				if (args[0].equalsIgnoreCase("MyZ"))
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							String name = file.getName();
+							// If it's a zip file, it shouldn't be downloaded as
+							// the plugin's name
+							if (versionLink.endsWith(".zip")) {
+								final String[] split = versionLink.split("/");
+								name = split[split.length - 1];
+							}
+							Updater.this.saveFile(new File(plugin.getDataFolder().getParent(), updateFolder), name, versionLink, sender);
+						}
+					}).run();
 		return true;
 	}
 
-	private void informOtherUpdaters(CommandSender sender, String[] args) {
+	/**
+	 * Save an update from dev.bukkit.org into the server's update folder.
+	 */
+	private void saveFile(File folder, String file, String u, CommandSender updater) {
+		if (!folder.exists())
+			folder.mkdir();
+		BufferedInputStream in = null;
+		FileOutputStream fout = null;
 		try {
-			if (otherUpdaters != null)
-				for (CommandExecutor ou : otherUpdaters)
-					ou.onCommand(sender, null, null, args);
-		} catch (Throwable t) {
-			printStackTraceSync(t, false);
-		}
-	}
+			// Download the file
+			final URL url = new URL(u);
+			final int fileLength = url.openConnection().getContentLength();
+			in = new BufferedInputStream(url.openStream());
+			fout = new FileOutputStream(folder.getAbsolutePath() + "/" + file);
 
-	private void update(CommandSender sender) {
-		if (!hasPermission(sender, "autoupdate.update." + plugin.getName())) {
-			sender.sendMessage(COLOR_ERROR + plugin.getName() + ": You are not allowed to update me!");
-			return;
-		}
-		final BukkitScheduler bs = plugin.getServer().getScheduler();
-		final String pn = sender instanceof Player ? ((Player) sender).getName() : null;
-		bs.scheduleAsyncDelayedTask(plugin, new Runnable() {
-			public void run() {
-				try {
-					while (!lock.compareAndSet(false, true)) {
-						try {
-							Thread.sleep(1L);
-						} catch (InterruptedException e) {
-						}
-					}
-					String out;
-					try {
-						File to = new File(plugin.getServer().getUpdateFolderFile(), updateURL.substring(updateURL.lastIndexOf('/') + 1,
-								updateURL.length()));
-						File tmp = new File(to.getPath() + ".au");
-						if (!tmp.exists()) {
-							plugin.getServer().getUpdateFolderFile().mkdirs();
-							tmp.createNewFile();
-						}
-						URL url = new URL(updateURL);
-						InputStream is = url.openStream();
-						OutputStream os = new FileOutputStream(tmp);
-						byte[] buffer = new byte[4096];
-						int fetched;
-						while ((fetched = is.read(buffer)) != -1)
-							os.write(buffer, 0, fetched);
-						is.close();
-						os.flush();
-						os.close();
-						if (to.exists())
-							to.delete();
-						tmp.renameTo(to);
-						out = COLOR_OK + plugin.getName() + " ready! Restart server to finish the update.";
-						needUpdate = false;
-						updatePending = true;
-						updateURL = type = null;
-					} catch (Exception e) {
-						out = COLOR_ERROR + plugin.getName() + " failed to update!";
-						printStackTraceSync(e, true);
-					}
-					bs.scheduleSyncDelayedTask(plugin, new SyncMessageDelayer(pn, new String[] { out }));
-					lock.set(false);
-				} catch (Throwable t) {
-					printStackTraceSync(t, false);
+			final byte[] data = new byte[Updater.BYTE_SIZE];
+			int count;
+			if (announce) {
+				plugin.getLogger().info("About to download a new update: " + newVersionName);
+				if (!(updater instanceof ConsoleCommandSender))
+					updater.sendMessage("About to download a new update: " + newVersionName);
+			}
+			long downloaded = 0;
+			while ((count = in.read(data, 0, Updater.BYTE_SIZE)) != -1) {
+				downloaded += count;
+				fout.write(data, 0, count);
+				final int percent = (int) (downloaded * 100 / fileLength);
+				if (announce && percent % 10 == 0) {
+					plugin.getLogger().info("Downloading update: " + percent + "% of " + fileLength + " bytes.");
+					if (!(updater instanceof ConsoleCommandSender))
+						updater.sendMessage("Downloading update: " + percent + "% of " + fileLength + " bytes.");
 				}
 			}
-		});
+			// Just a quick check to make sure we didn't leave any files from
+			// last time...
+			for (final File xFile : new File(plugin.getDataFolder().getParent(), updateFolder).listFiles())
+				if (xFile.getName().endsWith(".zip"))
+					xFile.delete();
+			// Check to see if it's a zip file, if it is, unzip it.
+			final File dFile = new File(folder.getAbsolutePath() + "/" + file);
+			if (dFile.getName().endsWith(".zip"))
+				// Unzip
+				unzip(dFile.getCanonicalPath());
+			if (announce) {
+				plugin.getLogger().info("Restart your server to complete the update.");
+				if (!(updater instanceof ConsoleCommandSender))
+					updater.sendMessage("Restart your server to complete the update.");
+			}
+		} catch (final Exception ex) {
+			plugin.getLogger().warning("The auto-updater tried to download a new update, but was unsuccessful.");
+		} finally {
+			try {
+				if (in != null)
+					in.close();
+				if (fout != null)
+					fout.close();
+			} catch (final Exception ex) {
+			}
+		}
 	}
 
-	private void printStackTraceSync(Throwable t, boolean expected) {
-		BukkitScheduler bs = plugin.getServer().getScheduler();
+	/**
+	 * Part of Zip-File-Extractor, modified by Gravity for use with Bukkit
+	 */
+	private void unzip(String file) {
 		try {
-			String prefix = "[AutoUpdate] ";
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			t.printStackTrace(pw);
-			String[] sts = sw.toString().replace("\r", "").split("\n");
-			String[] out;
-			if (expected)
-				out = new String[sts.length + 25];
-			else
-				out = new String[sts.length + 27];
-			out[0] = prefix;
-			out[1] = prefix + "Internal error!";
-			out[2] = prefix
-					+ "If this bug hasn't been reported please open a ticket at http://forums.bukkit.org/threads/autoupdate-update-your-plugins.84421/";
-			out[3] = prefix + "Include the following into your bug report:";
-			out[4] = prefix + "          ======= SNIP HERE =======";
-			int i = 5;
-			for (; i - 5 < sts.length; i++)
-				out[i] = prefix + sts[i - 5];
-			out[++i] = prefix + "          ======= DUMP =======";
-			out[++i] = prefix + "version        : " + version;
-			out[++i] = prefix + "delay          : " + delay;
-			out[++i] = prefix + "bukkitdevSlug  : " + bukkitdevSlug;
-			out[++i] = prefix + "COLOR_INFO     : " + COLOR_INFO.name();
-			out[++i] = prefix + "COLO_OK        : " + COLOR_OK.name();
-			out[++i] = prefix + "COLOR_ERROR    : " + COLOR_ERROR.name();
-			out[++i] = prefix + "pid            : " + pid;
-			out[++i] = prefix + "av             : " + av;
-			out[++i] = prefix + "config         : " + config;
-			out[++i] = prefix + "lock           : " + lock.get();
-			out[++i] = prefix + "needUpdate     : " + needUpdate;
-			out[++i] = prefix + "updatePending  : " + updatePending;
-			out[++i] = prefix + "UpdateUrl      : " + updateURL;
-			out[++i] = prefix + "updateVersion  : " + updateVersion;
-			out[++i] = prefix + "pluginURL      : " + pluginURL;
-			out[++i] = prefix + "type           : " + type;
-			out[++i] = prefix + "          ======= SNIP HERE =======";
-			out[++i] = prefix;
-			if (!expected) {
-				out[++i] = prefix + "DISABLING UPDATER!";
-				out[++i] = prefix;
+			final File fSourceZip = new File(file);
+			final String zipPath = file.substring(0, file.length() - 4);
+			ZipFile zipFile = new ZipFile(fSourceZip);
+			Enumeration<? extends ZipEntry> e = zipFile.entries();
+			while (e.hasMoreElements()) {
+				ZipEntry entry = e.nextElement();
+				File destinationFilePath = new File(zipPath, entry.getName());
+				destinationFilePath.getParentFile().mkdirs();
+				if (entry.isDirectory())
+					continue;
+				else {
+					final BufferedInputStream bis = new BufferedInputStream(zipFile.getInputStream(entry));
+					int b;
+					final byte buffer[] = new byte[Updater.BYTE_SIZE];
+					final FileOutputStream fos = new FileOutputStream(destinationFilePath);
+					final BufferedOutputStream bos = new BufferedOutputStream(fos, Updater.BYTE_SIZE);
+					while ((b = bis.read(buffer, 0, Updater.BYTE_SIZE)) != -1)
+						bos.write(buffer, 0, b);
+					bos.flush();
+					bos.close();
+					bis.close();
+					final String name = destinationFilePath.getName();
+					if (name.endsWith(".jar") && pluginFile(name))
+						destinationFilePath.renameTo(new File(plugin.getDataFolder().getParent(), updateFolder + "/" + name));
+				}
+				entry = null;
+				destinationFilePath = null;
 			}
-			bs.scheduleSyncDelayedTask(plugin, new SyncMessageDelayer(null, out));
-		} catch (Throwable e) // This prevents endless loops.
-		{
+			e = null;
+			zipFile.close();
+			zipFile = null;
+
+			// Move any plugin data folders that were included to the right
+			// place, Bukkit won't do this for us.
+			for (final File dFile : new File(zipPath).listFiles()) {
+				if (dFile.isDirectory())
+					if (pluginFile(dFile.getName())) {
+						final File oFile = new File(plugin.getDataFolder().getParent(), dFile.getName()); // Get
+																											// current
+																											// dir
+						final File[] contents = oFile.listFiles(); // List of
+																	// existing
+																	// files in
+																	// the
+																	// current
+																	// dir
+						for (final File cFile : dFile.listFiles()) // Loop
+																	// through
+																	// all the
+																	// files in
+																	// the new
+																	// dir
+						{
+							boolean found = false;
+							for (final File xFile : contents)
+								if (xFile.getName().equals(cFile.getName())) {
+									found = true;
+									break;
+								}
+							if (!found)
+								// Move the new file into the current dir
+								cFile.renameTo(new File(oFile.getCanonicalFile() + "/" + cFile.getName()));
+							else
+								// This file already exists, so we don't need it
+								// anymore.
+								cFile.delete();
+						}
+					}
+				dFile.delete();
+			}
+			new File(zipPath).delete();
+			fSourceZip.delete();
+		} catch (final IOException ex) {
+			plugin.getLogger().warning("The auto-updater tried to unzip a new update file, but was unsuccessful.");
+			ex.printStackTrace();
+		}
+		new File(file).delete();
+	}
+
+	/**
+	 * Check if the name of a jar is one of the plugins currently installed,
+	 * used for extracting the correct files out of a zip.
+	 */
+	private boolean pluginFile(String name) {
+		for (final File file : new File("plugins").listFiles())
+			if (file.getName().equals(name))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Check to see if the program should continue by evaluation whether the
+	 * plugin is already updated, or shouldn't be updated
+	 */
+	private boolean versionCheck(String title) {
+		final String version = plugin.getDescription().getVersion();
+		if (version.equalsIgnoreCase(newVersionName = title.replaceAll("[^\\d.]", "").replaceAll(" ", "")))
+			return false;
+		return !newVersionName.startsWith("2");
+	}
+
+	private boolean read() {
+		try {
+			final URLConnection conn = url.openConnection();
+			conn.setConnectTimeout(5000);
+
+			conn.addRequestProperty("User-Agent", "Updater (by Gravity)");
+
+			conn.setDoOutput(true);
+
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			final String response = reader.readLine();
+
+			final JSONArray array = (JSONArray) JSONValue.parse(response);
+
+			if (array.size() == 0) {
+				plugin.getLogger().warning("The updater could not find any files for the project ID " + id);
+				return false;
+			}
+
+			versionName = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TITLE_VALUE);
+			versionLink = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.LINK_VALUE);
+			versionType = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TYPE_VALUE);
+			versionGameVersion = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.VERSION_VALUE);
+
+			return true;
+		} catch (final IOException e) {
+			if (e.getMessage().contains("HTTP response code: 403")) {
+				plugin.getLogger().warning("dev.bukkit.org rejected the API key provided in plugins/Updater/config.yml");
+				plugin.getLogger().warning("Please double-check your configuration to ensure it is correct.");
+			} else {
+				plugin.getLogger().warning("The updater could not contact dev.bukkit.org for updating.");
+				plugin.getLogger()
+						.warning(
+								"If you have not recently modified your configuration and this is the first time you are seeing this message, the site may be experiencing temporary downtime.");
+			}
 			e.printStackTrace();
+			return false;
 		}
-		if (!expected) {
-			bs.cancelTask(pid);
-			bs.scheduleAsyncDelayedTask(plugin, new Runnable() {
-				public void run() {
-					while (!lock.compareAndSet(false, true)) {
-						try {
-							Thread.sleep(1L);
-						} catch (InterruptedException e) {
+	}
+
+	private class UpdateRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			if (url != null)
+				// Obtain the results of the project's file feed
+				if (read())
+					if (versionCheck(versionName))
+						if (versionLink != null) {
+							hasUpdate = true;
+							Messenger.sendConsoleMessage("&aAn update was found for MyZ 3.0. If you wish to update from &e"
+									+ plugin.getDescription().getVersion() + "&a to &e" + newVersionName + "&a, use &e/update MyZ&a.");
 						}
-					}
-					pid = -1;
-					config = null;
-					needUpdate = updatePending = enabled = false;
-					updateURL = updateVersion = pluginURL = type = null;
-					lock.set(false);
-				}
-			});
 		}
 	}
 
-	private boolean hasPermission(Permissible player, String node) {
-		if (player.isPermissionSet(node))
-			return player.hasPermission(node);
-		while (node.contains(".")) {
-			node = node.substring(0, node.lastIndexOf("."));
-			if (player.isPermissionSet(node))
-				return player.hasPermission(node);
-			if (player.isPermissionSet(node + ".*"))
-				return player.hasPermission(node + ".*");
-		}
-		if (player.isPermissionSet("*"))
-			return player.hasPermission("*");
-		return player.isOp();
-	}
-
-	/**
-	 * Use this to enable/disable debugging mode at runtime.
-	 * 
-	 * @param mode
-	 *            True if you want to enable it, false otherwise.
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin)
 	 */
-	public void setDebug(boolean mode) {
-		debug = mode;
-	}
-
-	/**
-	 * Use this to get the debugging mode.
-	 * 
-	 * @return True if enabled, false otherwise.
-	 */
-	public boolean getDebug() {
-		return debug;
-	}
-
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
-	 */
+	@Override
 	public PermissionAttachment addAttachment(Plugin arg0) {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin, int)
 	 */
+	@Override
 	public PermissionAttachment addAttachment(Plugin arg0, int arg1) {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin, java.lang.String, boolean)
 	 */
+	@Override
 	public PermissionAttachment addAttachment(Plugin arg0, String arg1, boolean arg2) {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin, java.lang.String, boolean, int)
 	 */
+	@Override
 	public PermissionAttachment addAttachment(Plugin arg0, String arg1, boolean arg2, int arg3) {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#getEffectivePermissions()
 	 */
+	@Override
 	public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#hasPermission(java.lang.String)
 	 */
+	@Override
 	public boolean hasPermission(String arg0) {
+
 		return false;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#hasPermission(org.bukkit.permissions.Permission)
 	 */
+	@Override
 	public boolean hasPermission(Permission arg0) {
+
 		return false;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#isPermissionSet(java.lang.String)
 	 */
+	@Override
 	public boolean isPermissionSet(String arg0) {
+
 		return false;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#isPermissionSet(org.bukkit.permissions.Permission)
 	 */
+	@Override
 	public boolean isPermissionSet(Permission arg0) {
+
 		return false;
 	}
 
-	/**
-	 * This is a dummy. Don't use
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#recalculatePermissions()
 	 */
+	@Override
 	public void recalculatePermissions() {
+
 	}
 
-	/**
-	 * This is a dummy. Don't use
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.Permissible#removeAttachment(org.bukkit.permissions.PermissionAttachment)
 	 */
+	@Override
 	public void removeAttachment(PermissionAttachment arg0) {
+
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return false
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.ServerOperator#isOp()
 	 */
+	@Override
 	public boolean isOp() {
+
 		return false;
 	}
 
-	/**
-	 * This is a dummy. Don't use
+	/* (non-Javadoc)
+	 * @see org.bukkit.permissions.ServerOperator#setOp(boolean)
 	 */
+	@Override
 	public void setOp(boolean arg0) {
+
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.command.CommandSender#getName()
 	 */
+	@Override
 	public String getName() {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.command.CommandSender#getServer()
 	 */
+	@Override
 	public Server getServer() {
+
 		return null;
 	}
 
-	/**
-	 * This is a dummy. Don't use
+	/* (non-Javadoc)
+	 * @see org.bukkit.command.CommandSender#sendMessage(java.lang.String)
 	 */
+	@Override
 	public void sendMessage(String arg0) {
+
 	}
 
-	/**
-	 * This is a dummy. Don't use
-	 * 
-	 * @return null
+	/* (non-Javadoc)
+	 * @see org.bukkit.command.CommandSender#sendMessage(java.lang.String[])
 	 */
+	@Override
 	public void sendMessage(String[] arg0) {
+
 	}
 }

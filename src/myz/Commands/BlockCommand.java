@@ -8,6 +8,7 @@ import java.util.Map;
 
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -30,55 +31,48 @@ public class BlockCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (args.length == 0) {
+			if (args.length == 0)
 				Messenger.sendConfigMessage(sender, "command.block.arguments");
-			} else if (args[0].equalsIgnoreCase("place")) {
-				if (args.length == 1) {
+			else if (args[0].equalsIgnoreCase("place")) {
+				if (args.length == 1)
 					Messenger.sendConfigMessage(sender, "command.block.place.arguments");
-				} else {
-					if (args[1].equalsIgnoreCase("add")) {
-						if (args.length == 3) {
-							int seconds;
-							try {
-								seconds = Integer.parseInt(args[2]);
-							} catch (NumberFormatException exc) {
-								Messenger.sendConfigMessage(sender, "command.block.place.arguments");
-								return true;
-							}
-							blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_ADD, seconds));
-							Messenger.sendConfigMessage(sender, "command.block.place.add.help");
+				else if (args[1].equalsIgnoreCase("add")) {
+					if (args.length == 3) {
+						int seconds;
+						try {
+							seconds = Integer.parseInt(args[2]);
+						} catch (NumberFormatException exc) {
+							Messenger.sendConfigMessage(sender, "command.block.place.arguments");
+							return true;
 						}
-					} else if (args[1].equalsIgnoreCase("remove")) {
-						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_REMOVE, -1));
-						Messenger.sendConfigMessage(sender, "command.block.place.remove.help");
-					} else {
-						Messenger.sendConfigMessage(sender, "command.block.place.arguments");
+						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_ADD, seconds));
+						Messenger.sendConfigMessage(sender, "command.block.place.add.help");
 					}
-				}
-			} else if (args[0].equalsIgnoreCase("destroy")) {
-				if (args.length == 1) {
+				} else if (args[1].equalsIgnoreCase("remove")) {
+					blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_REMOVE, -1));
+					Messenger.sendConfigMessage(sender, "command.block.place.remove.help");
+				} else
+					Messenger.sendConfigMessage(sender, "command.block.place.arguments");
+			} else if (args[0].equalsIgnoreCase("destroy"))
+				if (args.length == 1)
 					Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
-				} else {
-					if (args[1].equalsIgnoreCase("add")) {
-						if (args.length == 3) {
-							int seconds;
-							try {
-								seconds = Integer.parseInt(args[2]);
-							} catch (NumberFormatException exc) {
-								Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
-								return true;
-							}
-							blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_ADD, seconds));
-							Messenger.sendConfigMessage(sender, "command.block.destroy.add.help");
+				else if (args[1].equalsIgnoreCase("add")) {
+					if (args.length == 3) {
+						int seconds;
+						try {
+							seconds = Integer.parseInt(args[2]);
+						} catch (NumberFormatException exc) {
+							Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
+							return true;
 						}
-					} else if (args[1].equalsIgnoreCase("remove")) {
-						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_REMOVE, -1));
-						Messenger.sendConfigMessage(sender, "command.block.destroy.remove.help");
-					} else {
-						Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
+						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_ADD, seconds));
+						Messenger.sendConfigMessage(sender, "command.block.destroy.add.help");
 					}
-				}
-			}
+				} else if (args[1].equalsIgnoreCase("remove")) {
+					blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_REMOVE, -1));
+					Messenger.sendConfigMessage(sender, "command.block.destroy.remove.help");
+				} else
+					Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
@@ -112,23 +106,24 @@ public class BlockCommand implements CommandExecutor {
 			String slug = "";
 			switch (function) {
 			case DESTROY_ADD:
-				if (contains) {
+				if (contains)
 					slug = "add.fail";
-				} else {
+				else {
 					slug = "add.summary";
 					Configuration.addDestroy(hit, hand, respawn);
 				}
 				break;
 			case DESTROY_REMOVE:
-				if (!contains) {
+				if (!contains)
 					slug = "remove.fail";
-				} else {
+				else {
 					slug = "remove.summary";
 					Configuration.removeDestroy(hit, hand);
 				}
 				break;
 			default:
 				return;
+
 			}
 			Messenger.sendMessage(
 					player,
@@ -151,17 +146,17 @@ public class BlockCommand implements CommandExecutor {
 			String slug = "";
 			switch (function) {
 			case PLACE_ADD:
-				if (contains) {
+				if (contains)
 					slug = "add.fail";
-				} else {
+				else {
 					slug = "add.summary";
 					Configuration.addPlace(placed, respawn);
 				}
 				break;
 			case PLACE_REMOVE:
-				if (!contains) {
+				if (!contains)
 					slug = "remove.fail";
-				} else {
+				else {
 					slug = "remove.summary";
 					Configuration.removePlace(placed);
 				}

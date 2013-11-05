@@ -27,7 +27,8 @@ public class EntityHurtPlayer implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onZombification(EntityDamageByEntityEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+			return;
 		if ((e.getDamager() instanceof Horse || e.getDamager() instanceof Zombie) && e.getEntity() instanceof Player) {
 			if (e.getDamager() instanceof Horse && ((Horse) e.getDamager()).getVariant() != Variant.UNDEAD_HORSE)
 				return;

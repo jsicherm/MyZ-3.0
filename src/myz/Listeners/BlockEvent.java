@@ -23,7 +23,8 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onPlace(BlockPlaceEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		if (BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
 			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnPlace(e.getBlockPlaced(), e.getPlayer());
 			e.setCancelled(true);
@@ -33,7 +34,8 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onClick(PlayerInteractEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK && BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
 			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnHit(e.getItem(), e.getClickedBlock(), e.getPlayer());
 			e.setCancelled(true);
@@ -47,17 +49,21 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	private void onPlacement(BlockPlaceEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		boolean state = Configuration.doPlace(e.getBlock());
-		if (state && e.getPlayer().hasPermission("MyZ.world_admin") && !e.getPlayer().isOp()) { return; }
+		if (state && e.getPlayer().hasPermission("MyZ.world_admin") && !e.getPlayer().isOp())
+			return;
 		e.setCancelled(state);
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	private void onDestroy(BlockBreakEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		boolean state = Configuration.doBreak(e.getBlock(), e.getPlayer().getItemInHand());
-		if (state && e.getPlayer().hasPermission("MyZ.world_admin") && !e.getPlayer().isOp()) { return; }
+		if (state && e.getPlayer().hasPermission("MyZ.world_admin") && !e.getPlayer().isOp())
+			return;
 		e.setCancelled(state);
 	}
 }

@@ -5,8 +5,8 @@ package myz.Listeners;
 
 import myz.MyZ;
 import myz.API.PlayerSummonGiantEvent;
-import myz.mobs.CustomEntityGiantZombie;
 import myz.Support.Messenger;
+import myz.mobs.CustomEntityGiantZombie;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Material;
@@ -27,7 +27,8 @@ public class PlayerSummonGiant implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onSummon(final BlockPlaceEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		if (!e.getPlayer().hasPermission("MyZ.spawn_giant")) {
 			Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summon_permission");
 			e.setCancelled(true);

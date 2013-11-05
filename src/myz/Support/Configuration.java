@@ -70,7 +70,9 @@ public class Configuration {
 	 */
 	public static void reload() {
 		FileConfiguration config = MyZ.instance.getConfig();
-		writeUnwrittenValues(config);
+		FileConfiguration localizableConfig = MyZ.instance.getLocalizableConfig();
+		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
+		writeUnwrittenValues();
 
 		playerdata_is_temporary = false;
 
@@ -98,10 +100,10 @@ public class Configuration {
 		bandage_heal = config.getDouble("heal.bandage_heal_amount");
 		local_chat = config.getBoolean("chat.local_enabled");
 		local_chat_distance = config.getInt("chat.local_distance");
-		radio_color_override = config.getString("localizable.radio_color_override");
-		to_prefix = config.getString("localizable.private.to_prefix");
-		from_prefix = config.getString("localizable.private.from_prefix");
-		radio_name = config.getString("localizable.radio_name");
+		radio_color_override = localizableConfig.getString("localizable.radio_color_override");
+		to_prefix = localizableConfig.getString("localizable.private.to_prefix");
+		from_prefix = localizableConfig.getString("localizable.private.from_prefix");
+		radio_name = localizableConfig.getString("localizable.radio_name");
 		radio = config.getItemStack("radio.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
 		safe_logout_time = config.getInt("safe_logout.time");
 		safe_logout_item = config.getItemStack("safe_logout.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
@@ -150,12 +152,12 @@ public class Configuration {
 		antiseptic_color = config.getString("heal.medkit.antiseptic_color");
 		food_heal = config.getDouble("heal.food_heal_amount");
 
-		ranked_helmet.put(0, config.getItemStack("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET)));
-		ranked_chestplate.put(0, config.getItemStack("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE)));
-		ranked_leggings.put(0, config.getItemStack("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS)));
-		ranked_boots.put(0, config.getItemStack("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS)));
+		ranked_helmet.put(0, spawnConfig.getItemStack("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET)));
+		ranked_chestplate.put(0, spawnConfig.getItemStack("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE)));
+		ranked_leggings.put(0, spawnConfig.getItemStack("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS)));
+		ranked_boots.put(0, spawnConfig.getItemStack("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS)));
 		try {
-			ranked_inventory.put(0, config.getList("spawn.default_kit.inventory_contents").toArray(new ItemStack[0]));
+			ranked_inventory.put(0, spawnConfig.getList("spawn.default_kit.inventory_contents").toArray(new ItemStack[0]));
 		} catch (Exception exc) {
 			Messenger.sendConsoleMessage(ChatColor.RED
 					+ "spawn.default.kit.inventory.contents could not be resolved to a list of items. Please re-configure or remove.");
@@ -181,20 +183,20 @@ public class Configuration {
 				Messenger.sendConsoleMessage("&4heal.medkit.kit." + entry + " could not be resolved. Please re-configure or remove.");
 			}
 
-		for (String entry : config.getConfigurationSection("spawn").getKeys(false))
+		for (String entry : spawnConfig.getConfigurationSection("spawn").getKeys(false))
 			if (entry.startsWith("kit_"))
 				try {
 					int position = Integer.parseInt(entry.replace("kit_", ""));
 					ranked_helmet.put(position,
-							config.getItemStack("spawn.kit_" + position + ".helmet", new ItemStack(Material.LEATHER_HELMET)));
+							spawnConfig.getItemStack("spawn.kit_" + position + ".helmet", new ItemStack(Material.LEATHER_HELMET)));
 					ranked_chestplate.put(position,
-							config.getItemStack("spawn.kit_" + position + ".chestplate", new ItemStack(Material.LEATHER_CHESTPLATE)));
+							spawnConfig.getItemStack("spawn.kit_" + position + ".chestplate", new ItemStack(Material.LEATHER_CHESTPLATE)));
 					ranked_leggings.put(position,
-							config.getItemStack("spawn.kit_" + position + ".leggings", new ItemStack(Material.LEATHER_LEGGINGS)));
+							spawnConfig.getItemStack("spawn.kit_" + position + ".leggings", new ItemStack(Material.LEATHER_LEGGINGS)));
 					ranked_boots.put(position,
-							config.getItemStack("spawn.kit_" + position + ".boots", new ItemStack(Material.LEATHER_BOOTS)));
-					ranked_inventory.put(position, config.getList("spawn.kit_" + position + ".inventory_contents")
-							.toArray(new ItemStack[0]));
+							spawnConfig.getItemStack("spawn.kit_" + position + ".boots", new ItemStack(Material.LEATHER_BOOTS)));
+					ranked_inventory.put(position,
+							spawnConfig.getList("spawn.kit_" + position + ".inventory_contents").toArray(new ItemStack[0]));
 				} catch (Exception exc) {
 					Messenger.sendConsoleMessage("&4spawn.kit_" + entry + " could not be resolved. Please re-configure or remove.");
 				}
@@ -218,7 +220,11 @@ public class Configuration {
 	 * @param config
 	 *            The FileConfiguration to write into.
 	 */
-	private static void writeUnwrittenValues(FileConfiguration config) {
+	private static void writeUnwrittenValues() {
+		FileConfiguration config = MyZ.instance.getConfig();
+		FileConfiguration localizableConfig = MyZ.instance.getLocalizableConfig();
+		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
+
 		// MySQL begin.
 		if (!config.contains("mysql.host"))
 			config.set("mysql.host", "127.0.0.1");
@@ -255,9 +261,8 @@ public class Configuration {
 			config.set("ranks.names.0", "[%s]");
 
 		// AutoUpdate begin.
-		if (!config.contains("autoupdate.enable")) {
+		if (!config.contains("autoupdate.enable"))
 			config.set("autoupdate.enable", true);
-		}
 
 		// Radio begin.
 		if (!config.contains("radio.itemstack"))
@@ -395,200 +400,215 @@ public class Configuration {
 			config.set("heal.food_heal_amount", 1);
 
 		// Spawn-related begin.
-		if (!config.contains("spawn.safespawn_radius"))
-			config.set("spawn.safespawn_radius", 30);
-		if (!config.contains("spawn.numbered_requires_rank"))
-			config.set("spawn.numbered_requires_rank", true);
-		if (!config.contains("spawn.default_kit.helmet"))
-			config.set("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET, 1));
-		if (!config.contains("spawn.default_kit.chestplate"))
-			config.set("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE, 1));
-		if (!config.contains("spawn.default_kit.leggings"))
-			config.set("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS, 1));
-		if (!config.contains("spawn.default_kit.boots"))
-			config.set("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS, 1));
-		if (!config.contains("spawn.default_kit.inventory_contents"))
-			config.set("spawn.default_kit.inventory_contents", new ArrayList<ItemStack>());
-		if (!config.contains("spawn.potion_effects")) {
+		if (!spawnConfig.contains("spawn.safespawn_radius"))
+			spawnConfig.set("spawn.safespawn_radius", 30);
+		if (!spawnConfig.contains("spawn.numbered_requires_rank"))
+			spawnConfig.set("spawn.numbered_requires_rank", true);
+		if (!spawnConfig.contains("spawn.default_kit.helmet"))
+			spawnConfig.set("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET, 1));
+		if (!spawnConfig.contains("spawn.default_kit.chestplate"))
+			spawnConfig.set("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE, 1));
+		if (!spawnConfig.contains("spawn.default_kit.leggings"))
+			spawnConfig.set("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS, 1));
+		if (!spawnConfig.contains("spawn.default_kit.boots"))
+			spawnConfig.set("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS, 1));
+		if (!spawnConfig.contains("spawn.default_kit.inventory_contents"))
+			spawnConfig.set("spawn.default_kit.inventory_contents", new ArrayList<ItemStack>());
+		if (!spawnConfig.contains("spawn.potion_effects")) {
 			List<String> potion_effects = new ArrayList<String>();
 			potion_effects.add("CONFUSION,3,4");
 			potion_effects.add("BLINDNESS,1,3");
 			potion_effects.add("ABSORPTION,1,5");
-			config.set("spawn.potion_effects", potion_effects);
+			spawnConfig.set("spawn.potion_effects", potion_effects);
 		}
 
 		// Localizable begin.
-		if (!config.contains("localizable.radio_name"))
-			config.set("localizable.radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
-		if (!config.contains("localizable.radio_color_override"))
-			config.set("localizable.radio_color_override", "&2");
-		if (!config.contains("localizable.private.to_prefix"))
-			config.set("localizable.private.to_prefix", "&7To %s:");
-		if (!config.contains("localizable.private.from_prefix"))
-			config.set("localizable.private.from_prefix", "&7From %s:");
-		if (!config.contains("localizable.private.clan_prefix"))
-			config.set("localizable.private.clan_prefix", "&8Clan chat:");
-		if (!config.contains("localizable.damage.bleed_begin"))
-			config.set("localizable.damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
-		if (!config.contains("localizable.damage.headshot"))
-			config.set("localizable.damage.headshot", "&eHeadshot! 2x damage.");
-		if (!config.contains("localizable.damage.poison_begin"))
-			config.set("localizable.damage.poison_begin", "&5Wh&ko&r&da, &5&kI &1d&kon&r&3't &kF&r&afeel &4so &kg&r&6oo&cd...");
-		if (!config.contains("localizable.damage.bleed_end"))
-			config.set("localizable.damage.bleed_end", "That ought to stop the bleeding.");
-		if (!config.contains("localizable.damage.poison_end"))
-			config.set("localizable.damage.poison_end", "Ah, much better!");
-		if (!config.contains("localizable.kick.come_back"))
-			config.set("localizable.kick.come_back", "&4Grab a drink. Come back in %s seconds.");
-		if (!config.contains("localizable.kick.safe_logout"))
-			config.set("localizable.kick.safe_logout", "&eYou have been safely logged out.");
-		if (!config.contains("localizable.kick.recur"))
-			config.set("localizable.kick.recur", "&4Stop stressing. %s seconds to go.");
-		if (!config.contains("localizable.command.spawn.unable_to_spawn"))
-			config.set("localizable.command.spawn.unable_to_spawn", "&4Unable to spawn there. Please try again shortly.");
-		if (!config.contains("localizable.command.allowed.breakable"))
-			config.set("localizable.command.allowed.breakable", "&eYou can break:");
-		if (!config.contains("localizable.command.allowed.placeable"))
-			config.set("localizable.command.allowed.placeable", "&eYou can place:");
-		if (!config.contains("localizable.command.block.arguments"))
-			config.set("localizable.command.block.arguments", "&4Usage: /blockallow <place/destroy>");
-		if (!config.contains("localizable.command.block.place.arguments"))
-			config.set("localizable.command.block.place.arguments", "&4Usage: /blockallow place <add [seconds until respawn]/remove>");
-		if (!config.contains("localizable.command.block.destroy.arguments"))
-			config.set("localizable.command.block.destroy.arguments", "&4Usage: /blockallow destroy <add [seconds until respawn]/remove>");
-		if (!config.contains("localizable.command.block.destroy.add.help"))
-			config.set("localizable.command.block.destroy.add.help",
+		if (!localizableConfig.contains("localizable.science_gui"))
+			localizableConfig.set("localizable.science_gui", "Research Centre");
+		if (!localizableConfig.contains("localizable.radio_name"))
+			localizableConfig.set("localizable.radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
+		if (!localizableConfig.contains("localizable.radio_color_override"))
+			localizableConfig.set("localizable.radio_color_override", "&2");
+		if (!localizableConfig.contains("localizable.private.to_prefix"))
+			localizableConfig.set("localizable.private.to_prefix", "&7To %s:");
+		if (!localizableConfig.contains("localizable.private.from_prefix"))
+			localizableConfig.set("localizable.private.from_prefix", "&7From %s:");
+		if (!localizableConfig.contains("localizable.private.clan_prefix"))
+			localizableConfig.set("localizable.private.clan_prefix", "&8Clan chat:");
+		if (!localizableConfig.contains("localizable.damage.bleed_begin"))
+			localizableConfig.set("localizable.damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
+		if (!localizableConfig.contains("localizable.damage.headshot"))
+			localizableConfig.set("localizable.damage.headshot", "&eHeadshot! 2x damage.");
+		if (!localizableConfig.contains("localizable.damage.poison_begin"))
+			localizableConfig.set("localizable.damage.poison_begin", "&5Wh&ko&r&da, &5&kI &1d&kon&r&3't &kF&r&afeel &4so &kg&r&6oo&cd...");
+		if (!localizableConfig.contains("localizable.damage.bleed_end"))
+			localizableConfig.set("localizable.damage.bleed_end", "That ought to stop the bleeding.");
+		if (!localizableConfig.contains("localizable.damage.poison_end"))
+			localizableConfig.set("localizable.damage.poison_end", "Ah, much better!");
+		if (!localizableConfig.contains("localizable.kick.come_back"))
+			localizableConfig.set("localizable.kick.come_back", "&4Grab a drink. Come back in %s seconds.");
+		if (!localizableConfig.contains("localizable.kick.safe_logout"))
+			localizableConfig.set("localizable.kick.safe_logout", "&eYou have been safely logged out.");
+		if (!localizableConfig.contains("localizable.kick.recur"))
+			localizableConfig.set("localizable.kick.recur", "&4Stop stressing. %s seconds to go.");
+		if (!localizableConfig.contains("localizable.command.spawn.unable_to_spawn"))
+			localizableConfig.set("localizable.command.spawn.unable_to_spawn", "&4Unable to spawn there. Please try again shortly.");
+		if (!localizableConfig.contains("localizable.command.allowed.breakable"))
+			localizableConfig.set("localizable.command.allowed.breakable", "&eYou can break:");
+		if (!localizableConfig.contains("localizable.command.allowed.placeable"))
+			localizableConfig.set("localizable.command.allowed.placeable", "&eYou can place:");
+		if (!localizableConfig.contains("localizable.command.block.arguments"))
+			localizableConfig.set("localizable.command.block.arguments", "&4Usage: /blockallow <place/destroy>");
+		if (!localizableConfig.contains("localizable.command.block.place.arguments"))
+			localizableConfig.set("localizable.command.block.place.arguments",
+					"&4Usage: /blockallow place <add [seconds until despawn]/remove>");
+		if (!localizableConfig.contains("localizable.command.research.arguments"))
+			localizableConfig.set("localizable.command.research.arguments", "&4Usage: /setresearch <add [point value]/remove>");
+		if (!localizableConfig.contains("localizable.command.research.added"))
+			localizableConfig.set("localizable.command.research.added", "&ePlayers can now research %s with %s research points.");
+		if (!localizableConfig.contains("localizable.command.research.removed"))
+			localizableConfig.set("localizable.command.research.removed", "&ePlayers can no longer research %s.");
+		if (!localizableConfig.contains("localizable.command.research.item"))
+			localizableConfig.set("localizable.command.research.item",
+					"&eYou must be holding the item you wish to add/remove from research.");
+		if (!localizableConfig.contains("localizable.command.research.item_exists"))
+			localizableConfig.set("localizable.command.research.item_exists", "&4That item is already researchable.");
+		if (!localizableConfig.contains("localizable.command.research.item_no_exists"))
+			localizableConfig.set("localizable.command.research.item_no_exists", "&4That item isn't researchable.");
+		if (!localizableConfig.contains("localizable.command.block.destroy.arguments"))
+			localizableConfig.set("localizable.command.block.destroy.arguments",
+					"&4Usage: /blockallow destroy <add [seconds until respawn]/remove>");
+		if (!localizableConfig.contains("localizable.command.block.destroy.add.help"))
+			localizableConfig.set("localizable.command.block.destroy.add.help",
 					"&eNow left-click the block you want to whitelist with the item you want to allow breaking with.");
-		if (!config.contains("localizable.command.block.destroy.remove.help"))
-			config.set("localizable.command.block.destroy.remove.help",
+		if (!localizableConfig.contains("localizable.command.block.destroy.remove.help"))
+			localizableConfig.set("localizable.command.block.destroy.remove.help",
 					"&eNow left-click the block you want blacklist with the item that you can currently break with.");
-		if (!config.contains("localizable.command.block.place.add.help"))
-			config.set("localizable.command.block.place.add.help", "&eNow place the block you would like to whitelist.");
-		if (!config.contains("localizable.command.block.place.remove.help"))
-			config.set("localizable.command.block.place.remove.help", "&eNow place the block you would like to blacklist.");
-		if (!config.contains("localizable.command.block.destroy.add.summary"))
-			config.set("localizable.command.block.destroy.add.summary", "&ePlayers can now destroy %s blocks with %ss.");
-		if (!config.contains("localizable.command.block.destroy.remove.summary"))
-			config.set("localizable.command.block.destroy.remove.summary", "&ePlayers can no longer destroy %s blocks with %ss.");
-		if (!config.contains("localizable.command.block.place.add.summary"))
-			config.set("localizable.command.block.place.add.summary", "&ePlayers can now place %s blocks.");
-		if (!config.contains("localizable.command.block.place.remove.summary"))
-			config.set("localizable.command.block.place.remove.summary", "&ePlayers can no longer place %s blocks.");
-		if (!config.contains("localizable.command.block.destroy.add.fail"))
-			config.set("localizable.command.block.destroy.add.fail", "&ePlayers can already break %s blocks with %ss.");
-		if (!config.contains("localizable.command.block.destroy.remove.fail"))
-			config.set("localizable.command.block.destroy.remove.fail", "&ePlayers cannot destroy %s blocks with %ss.");
-		if (!config.contains("localizable.command.block.place.add.fail"))
-			config.set("localizable.command.block.place.add.fail", "&ePlayers can already place %s blocks.");
-		if (!config.contains("localizable.command.block.place.remove.fail"))
-			config.set("localizable.command.block.place.remove.fail", "&ePlayers cannot place %s blocks.");
-		if (!config.contains("localizable.command.setlobby.requires_cuboid"))
-			config.set("localizable.command.setlobby.requires_cuboid", "&4You must make a &ocuboid&r&4 selection with WorldEdit.");
-		if (!config.contains("localizable.command.setlobby.updated"))
-			config.set("localizable.command.setlobby.updated", "&2The lobby region has been updated.");
-		if (!config.contains("localizable.command.spawn.too_far_from_lobby"))
-			config.set("localizable.command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
-		if (!config.contains("localizable.command.setrank.success"))
-			config.set("localizable.command.setrank.success", "&eYou have successfully updated the player's rank.");
-		if (!config.contains("localizable.command.setrank.failure"))
-			config.set("localizable.command.setrank.failure",
+		if (!localizableConfig.contains("localizable.command.block.place.add.help"))
+			localizableConfig.set("localizable.command.block.place.add.help", "&eNow place the block you would like to whitelist.");
+		if (!localizableConfig.contains("localizable.command.block.place.remove.help"))
+			localizableConfig.set("localizable.command.block.place.remove.help", "&eNow place the block you would like to blacklist.");
+		if (!localizableConfig.contains("localizable.command.block.destroy.add.summary"))
+			localizableConfig.set("localizable.command.block.destroy.add.summary", "&ePlayers can now destroy %s blocks with %ss.");
+		if (!localizableConfig.contains("localizable.command.block.destroy.remove.summary"))
+			localizableConfig
+					.set("localizable.command.block.destroy.remove.summary", "&ePlayers can no longer destroy %s blocks with %ss.");
+		if (!localizableConfig.contains("localizable.command.block.place.add.summary"))
+			localizableConfig.set("localizable.command.block.place.add.summary", "&ePlayers can now place %s blocks.");
+		if (!localizableConfig.contains("localizable.command.block.place.remove.summary"))
+			localizableConfig.set("localizable.command.block.place.remove.summary", "&ePlayers can no longer place %s blocks.");
+		if (!localizableConfig.contains("localizable.command.block.destroy.add.fail"))
+			localizableConfig.set("localizable.command.block.destroy.add.fail", "&ePlayers can already break %s blocks with %ss.");
+		if (!localizableConfig.contains("localizable.command.block.destroy.remove.fail"))
+			localizableConfig.set("localizable.command.block.destroy.remove.fail", "&ePlayers cannot destroy %s blocks with %ss.");
+		if (!localizableConfig.contains("localizable.command.block.place.add.fail"))
+			localizableConfig.set("localizable.command.block.place.add.fail", "&ePlayers can already place %s blocks.");
+		if (!localizableConfig.contains("localizable.command.block.place.remove.fail"))
+			localizableConfig.set("localizable.command.block.place.remove.fail", "&ePlayers cannot place %s blocks.");
+		if (!localizableConfig.contains("localizable.command.setlobby.requires_cuboid"))
+			localizableConfig.set("localizable.command.setlobby.requires_cuboid",
+					"&4You must make a &ocuboid&r&4 selection with WorldEdit.");
+		if (!localizableConfig.contains("localizable.command.setlobby.updated"))
+			localizableConfig.set("localizable.command.setlobby.updated", "&2The lobby region has been updated.");
+		if (!localizableConfig.contains("localizable.command.spawn.too_far_from_lobby"))
+			localizableConfig.set("localizable.command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
+		if (!localizableConfig.contains("localizable.command.setrank.success"))
+			localizableConfig.set("localizable.command.setrank.success", "&eYou have successfully updated the player's rank.");
+		if (!localizableConfig.contains("localizable.command.setrank.failure"))
+			localizableConfig.set("localizable.command.setrank.failure",
 					"&4You must specify the name of a player that has played before and a rank value greater or equal to 0.");
-		if (!config.contains("localizable.private.no_player"))
-			config.set("localizable.private.no_player", "&4The player could not be found.");
-		if (!config.contains("localizable.safe_logout.cancelled"))
-			config.set("localizable.safe_logout.cancelled", "&4Safe logout cancelled due to movement.");
-		if (!config.contains("localizable.heal.amount"))
-			config.set("localizable.heal.amount", "&ePlayer &2healed&e. You now have %s heals this life.");
-		if (!config.contains("localizable.bandit.amount"))
-			config.set("localizable.bandit.amount", "&ePlayer &4killed&e. You now have %s kills this life.");
-		if (!config.contains("localizable.zombie.kill_amount"))
-			config.set("localizable.zombie.kill_amount", "&eZombie down. %s this life.");
-		if (!config.contains("localizable.pigman.kill_amount"))
-			config.set("localizable.pigman.kill_amount", "&ePigman down. %s this life.");
-		if (!config.contains("localizable.giant.kill_amount"))
-			config.set("localizable.giant.kill_amount", "&eGiant down. %s this life.");
-		if (!config.contains("localizable.safe_logout.beginning"))
-			config.set("localizable.safe_logout.beginning", "&2Safe logout will occur in:");
-		if (!config.contains("localizable.private.many_players"))
-			config.set("localizable.private.many_players", "&4More than one player was found.");
-		if (!config.contains("localizable.command.spawn.requires_rank"))
-			config.set("localizable.command.spawn.requires_rank",
+		if (!localizableConfig.contains("localizable.private.no_player"))
+			localizableConfig.set("localizable.private.no_player", "&4The player could not be found.");
+		if (!localizableConfig.contains("localizable.safe_logout.cancelled"))
+			localizableConfig.set("localizable.safe_logout.cancelled", "&4Safe logout cancelled due to movement.");
+		if (!localizableConfig.contains("localizable.heal.amount"))
+			localizableConfig.set("localizable.heal.amount", "&ePlayer &2healed&e. You now have %s heals this life.");
+		if (!localizableConfig.contains("localizable.bandit.amount"))
+			localizableConfig.set("localizable.bandit.amount", "&ePlayer &4killed&e. You now have %s kills this life.");
+		if (!localizableConfig.contains("localizable.zombie.kill_amount"))
+			localizableConfig.set("localizable.zombie.kill_amount", "&eZombie down. %s this life.");
+		if (!localizableConfig.contains("localizable.pigman.kill_amount"))
+			localizableConfig.set("localizable.pigman.kill_amount", "&ePigman down. %s this life.");
+		if (!localizableConfig.contains("localizable.giant.kill_amount"))
+			localizableConfig.set("localizable.giant.kill_amount", "&eGiant down. %s this life.");
+		if (!localizableConfig.contains("localizable.safe_logout.beginning"))
+			localizableConfig.set("localizable.safe_logout.beginning", "&2Safe logout will occur in:");
+		if (!localizableConfig.contains("localizable.private.many_players"))
+			localizableConfig.set("localizable.private.many_players", "&4More than one player was found.");
+		if (!localizableConfig.contains("localizable.command.spawn.requires_rank"))
+			localizableConfig.set("localizable.command.spawn.requires_rank",
 					"&4This is a donator-only feature. Donate today for the ability to spawn near your friends!");
-		if (!config.contains("localizable.command.addspawn.added"))
-			config.set("localizable.command.addspawn.added", "&eYour location has been added to the spawnpoints.");
-		if (!config.contains("localizable.command.removespawn.removed"))
-			config.set("localizable.command.removespawn.removed", "&eThe spawnpoint has been removed.");
-		if (!config.contains("localizable.command.removespawn.unable_to_remove"))
-			config.set("localizable.command.removespawn.unable_to_remove", "&4The number you specified is out of range.");
-		if (!config.contains("localizable.command.removespawn.requires_number"))
-			config.set("localizable.command.removespawn.requires_number",
+		if (!localizableConfig.contains("localizable.command.addspawn.added"))
+			localizableConfig.set("localizable.command.addspawn.added", "&eYour location has been added to the spawnpoints.");
+		if (!localizableConfig.contains("localizable.command.removespawn.removed"))
+			localizableConfig.set("localizable.command.removespawn.removed", "&eThe spawnpoint has been removed.");
+		if (!localizableConfig.contains("localizable.command.removespawn.unable_to_remove"))
+			localizableConfig.set("localizable.command.removespawn.unable_to_remove", "&4The number you specified is out of range.");
+		if (!localizableConfig.contains("localizable.command.removespawn.requires_number"))
+			localizableConfig.set("localizable.command.removespawn.requires_number",
 					"&4You must specify a spawnpoint number to remove. See numbers using /spawnpoints.");
-		if (!config.contains("localizable.command.addspawn.already_exists"))
-			config.set("localizable.command.addspawn.already_exists", "&4This location is already a spawnpoint.");
-		if (!config.contains("localizable.special.giant_summoned"))
-			config.set("localizable.special.giant_summoned", "&eYou hear the ground shake. A giant is about be summoned.");
-		if (!config.contains("localizable.special.giant_could_not_summon"))
-			config.set("localizable.special.giant_could_not_summon", "&eThere is not enough space here to summon a giant.");
-		if (!config.contains("localizable.special.giant_summon_permission"))
-			config.set("localizable.special.giant_summon_permission",
+		if (!localizableConfig.contains("localizable.command.addspawn.already_exists"))
+			localizableConfig.set("localizable.command.addspawn.already_exists", "&4This location is already a spawnpoint.");
+		if (!localizableConfig.contains("localizable.special.giant_summoned"))
+			localizableConfig.set("localizable.special.giant_summoned", "&eYou hear the ground shake. A giant is about be summoned.");
+		if (!localizableConfig.contains("localizable.special.giant_could_not_summon"))
+			localizableConfig.set("localizable.special.giant_could_not_summon", "&eThere is not enough space here to summon a giant.");
+		if (!localizableConfig.contains("localizable.special.giant_summon_permission"))
+			localizableConfig.set("localizable.special.giant_summon_permission",
 					"&4This is a donator-only feature. Donate today for the ability to spawn the fabled boss mobs.");
-		if (!config.contains("localizable.player_npc_killed"))
-			config.set("localizable.player_npc_killed", "&e%s has been killed while combat logging.");
-		if (!config.contains("localizable.clan.name.too_long"))
-			config.set("localizable.clan.name.too_long", "&4Clan names must be less than 20 characters.");
-		if (!config.contains("localizable.clan.joined"))
-			config.set("localizable.clan.joined", "You have joined '&e%s&r'.");
-		if (!config.contains("localizable.clan.joining"))
-			config.set("localizable.clan.joining", "Joining clan. Please wait...");
-		if (!config.contains("localizable.command.clan.leave"))
-			config.set("localizable.command.clan.leave", "You are no longer in a clan.");
-		if (!config.contains("localizable.command.clan.not_in"))
-			config.set("localizable.command.clan.not_in", "You are not in a clan.");
-		if (!config.contains("localizable.command.clan.in"))
-			config.set("localizable.command.clan.in", "You are in '&e%s&r' (%s online / %s).");
-		if (!config.contains("localizable.player_was_killed_npc"))
-			config.set("localizable.player_was_killed_npc", "&eYou were killed while combat logging.");
-		if (!config.contains("localizable.command.friend.requires_name"))
-			config.set("localizable.command.friend.requires_name", "&4You must specify a name to friend.");
-		if (!config.contains("localizable.command.savekit.requires_number"))
-			config.set("localizable.command.savekit.requires_number", "&4You must specify a rank number to save for.");
-		if (!config.contains("localizable.command.savekit.saved"))
-			config.set("localizable.command.savekit.saved",
+		if (!localizableConfig.contains("localizable.player_npc_killed"))
+			localizableConfig.set("localizable.player_npc_killed", "&e%s has been killed while combat logging.");
+		if (!localizableConfig.contains("localizable.clan.name.too_long"))
+			localizableConfig.set("localizable.clan.name.too_long", "&4Clan names must be less than 20 characters.");
+		if (!localizableConfig.contains("localizable.clan.joined"))
+			localizableConfig.set("localizable.clan.joined", "You have joined '&e%s&r'.");
+		if (!localizableConfig.contains("localizable.clan.joining"))
+			localizableConfig.set("localizable.clan.joining", "Joining clan. Please wait...");
+		if (!localizableConfig.contains("localizable.command.clan.leave"))
+			localizableConfig.set("localizable.command.clan.leave", "You are no longer in a clan.");
+		if (!localizableConfig.contains("localizable.command.clan.not_in"))
+			localizableConfig.set("localizable.command.clan.not_in", "You are not in a clan.");
+		if (!localizableConfig.contains("localizable.command.clan.in"))
+			localizableConfig.set("localizable.command.clan.in", "You are in '&e%s&r' (%s online / %s).");
+		if (!localizableConfig.contains("localizable.player_was_killed_npc"))
+			localizableConfig.set("localizable.player_was_killed_npc", "&eYou were killed while combat logging.");
+		if (!localizableConfig.contains("localizable.command.friend.requires_name"))
+			localizableConfig.set("localizable.command.friend.requires_name", "&4You must specify a name to friend.");
+		if (!localizableConfig.contains("localizable.command.savekit.requires_number"))
+			localizableConfig.set("localizable.command.savekit.requires_number", "&4You must specify a rank number to save for.");
+		if (!localizableConfig.contains("localizable.command.savekit.saved"))
+			localizableConfig.set("localizable.command.savekit.saved",
 					"&eThe starting kit for rank %s has been saved as your current inventory contents.");
-		if (!config.contains("localizable.command.saverank.requires_number"))
-			config.set("localizable.command.saverank.requires_number", "&4You must specify a rank number to save for.");
-		if (!config.contains("localizable.command.saverank.requires_prefix"))
-			config.set("localizable.command.saverank.requires_prefix", "&4You must specify a prefix to set.");
-		if (!config.contains("localizable.command.saverank.saved"))
-			config.set("localizable.command.saverank.saved", "&eThe chat prefix for rank number %s has been set to %s.");
-		if (!config.contains("localizable.command.friend.non_exist"))
-			config.set("localizable.command.friend.non_exist", "&4%s has never played before.");
-		if (!config.contains("localizable.friend.added"))
-			config.set("localizable.friend.added", "&e%s &9has been added to your friends list.");
-		if (!config.contains("localizable.friend.removed"))
-			config.set("localizable.friend.removed", "&e%s &9has been removed from your friends list.");
+		if (!localizableConfig.contains("localizable.command.saverank.requires_number"))
+			localizableConfig.set("localizable.command.saverank.requires_number", "&4You must specify a rank number to save for.");
+		if (!localizableConfig.contains("localizable.command.saverank.requires_prefix"))
+			localizableConfig.set("localizable.command.saverank.requires_prefix", "&4You must specify a prefix to set.");
+		if (!localizableConfig.contains("localizable.command.saverank.saved"))
+			localizableConfig.set("localizable.command.saverank.saved", "&eThe chat prefix for rank number %s has been set to %s.");
+		if (!localizableConfig.contains("localizable.command.friend.non_exist"))
+			localizableConfig.set("localizable.command.friend.non_exist", "&4%s has never played before.");
+		if (!localizableConfig.contains("localizable.friend.added"))
+			localizableConfig.set("localizable.friend.added", "&e%s &9has been added to your friends list.");
+		if (!localizableConfig.contains("localizable.friend.removed"))
+			localizableConfig.set("localizable.friend.removed", "&e%s &9has been removed from your friends list.");
 
 		// Block begin.
 		if (!config.contains("blocks.place")) {
 			config.set("blocks.place.0.block", new ItemStack(Material.WEB));
 			config.set("blocks.place.0.despawn", 3600);
 		}
-		for (String entry : config.getConfigurationSection("blocks.place").getKeys(false)) {
-			if (!config.contains("blocks.place." + entry + ".block") || !config.contains("blocks.place." + entry + ".despawn")) {
+		for (String entry : config.getConfigurationSection("blocks.place").getKeys(false))
+			if (!config.contains("blocks.place." + entry + ".block") || !config.contains("blocks.place." + entry + ".despawn"))
 				config.set("blocks.place." + entry, null);
-			}
-		}
 		if (!config.contains("blocks.destroy")) {
 			config.set("blocks.destroy.0.block", new ItemStack(Material.WEB));
 			config.set("blocks.destroy.0.with", new ItemStack(Material.ARROW));
 			config.set("blocks.destroy.0.respawn", 3600);
 		}
-		for (String entry : config.getConfigurationSection("blocks.destroy").getKeys(false)) {
+		for (String entry : config.getConfigurationSection("blocks.destroy").getKeys(false))
 			if (!config.contains("blocks.destroy." + entry + ".block") || !config.contains("blocks.destroy." + entry + ".with")
-					|| !config.contains("blocks.destroy." + entry + ".respawn")) {
+					|| !config.contains("blocks.destroy." + entry + ".respawn"))
 				config.set("blocks.destroy." + entry, null);
-			}
-		}
 
 		// Spawning begin.
 		if (!config.contains("lobby.min"))
@@ -599,6 +619,8 @@ public class Configuration {
 			config.set("spawnpoints", new ArrayList<String>());
 
 		MyZ.instance.saveConfig();
+		MyZ.instance.saveLocalizableConfig();
+		MyZ.instance.saveSpawnConfig();
 	}
 
 	/**
@@ -606,94 +628,33 @@ public class Configuration {
 	 */
 	public static void save() {
 		FileConfiguration config = MyZ.instance.getConfig();
+		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
 
 		if (!playerdata_is_temporary)
 			config.set("datastorage.use_server_specific", use_playerdata);
-		/*
-		config.set("chat.local_enabled", local_chat);
-		config.set("chat.local_distance", local_chat_distance);
-		config.set("mobs.zombie.damage", zombie_damage);
-		config.set("mobs.giant.damage", giant_damage);
-		config.set("mobs.pigman.damage", pigman_damage);
-		config.set("mobs.horse.damage", horse_damage);
-		config.set("statistics.bandit_kills", bandit_kills);
-		config.set("statistics.healer_heals", healer_heals);
-		config.set("mobs.zombie.speed", zombie_speed);
-		config.set("mobs.horse.speed", horse_speed);
-		config.set("performance.use_prelogin_kickban", use_prelogin);
-		config.set("kickban.kick_on_death", use_kickban);
-		config.set("damage.bleed_damage", bleed_damage);
-		config.set("damage.poison_damage", poison_damage);
-		config.set("damage.water_damage", water_damage);
-		config.set("damage.poison_damage_frequency", poison_damage_frequency);
-		config.set("damage.bleed_damage_frequency", bleed_damage_frequency);
-		config.set("water.decay_time_seconds", water_decrease);
-		config.set("kickban.ban_time_seconds", kickban_seconds);
-		config.set("damage.chance_of_bleeding", bleed_chance);
-		config.set("damage.chance_of_poison_from_zombie", poison_chance_zombie);
-		config.set("damage.chance_of_poison_from_flesh", poison_chance_flesh);
-		/*
-		config.set("lobby.min", lobby_min);
-		config.set("lobby.max", lobby_max);
-		/*
-		config.set("mysql.user", user);
-		config.set("mysql.password", password);
-		config.set("mysql.host", host);
-		config.set("mysql.database", database);
-		config.set("mysql.port", port);
-		*/
-		config.set("spawnpoints", spawnpoints);
-		/*
-		config.set("spawn.safespawn_radius", safespawn_radius);
-		config.set("friends.autofriend", autofriend);
-		config.set("ranks.save_data_of_unranked_players", save_data);
-		config.set("water.max_level", max_thirst);
-		config.set("spawn.potion_effects", spawn_potion_effects);
-		config.set("spawn.numbered_requires_rank", numbered_spawn_requires_rank);
 
-		config.set("radio.itemstack", radio);
-		config.set("safe_logout.time", safe_logout_time);
-		config.set("safe_logout.itemstack", safe_logout_item);
-		*/
-		config.set("spawn.default_kit.helmet", ranked_helmet.get(0));
-		config.set("spawn.default_kit.chestplate", ranked_chestplate.get(0));
-		config.set("spawn.default_kit.leggings", ranked_leggings.get(0));
-		config.set("spawn.default_kit.boots", ranked_boots.get(0));
-		config.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
-		/*
-		config.set("heal.bandage", bandage);
-		config.set("heal.bandage_heal_amount", bandage_heal); 
-		config.set("heal.medkit.ointment_color", ointment_color);
-		config.set("heal.medkit.antiseptic_color", antiseptic_color);
+		spawnConfig.set("spawnpoints", spawnpoints);
 
-		config.set("heal.food_heal_amount", food_heal);
-		config.set("projectile.enderpearl.become_grenade", grenade);
-		*/
-
-		/*
-		int pos = 0;
-		for (String prefix : rank_prefix.values()) {
-			config.set("ranks.names." + pos, prefix);
-			pos++;
-		}
-
-				for (MedKit kit : MedKit.getKits()) {
-					kit.save();
-				}
-				*/
+		spawnConfig.set("spawn.default_kit.helmet", ranked_helmet.get(0));
+		spawnConfig.set("spawn.default_kit.chestplate", ranked_chestplate.get(0));
+		spawnConfig.set("spawn.default_kit.leggings", ranked_leggings.get(0));
+		spawnConfig.set("spawn.default_kit.boots", ranked_boots.get(0));
+		spawnConfig.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
 
 		for (int position = 1; position < ranked_helmet.size(); position++)
-			config.set("spawn.kit_" + position + ".helmet", ranked_helmet.get(position));
+			spawnConfig.set("spawn.kit_" + position + ".helmet", ranked_helmet.get(position));
 		for (int position = 1; position < ranked_chestplate.size(); position++)
-			config.set("spawn.kit_" + position + ".chestplate", ranked_chestplate.get(position));
+			spawnConfig.set("spawn.kit_" + position + ".chestplate", ranked_chestplate.get(position));
 		for (int position = 1; position < ranked_leggings.size(); position++)
-			config.set("spawn.kit_" + position + ".leggings", ranked_leggings.get(position));
+			spawnConfig.set("spawn.kit_" + position + ".leggings", ranked_leggings.get(position));
 		for (int position = 1; position < ranked_boots.size(); position++)
-			config.set("spawn.kit_" + position + ".boots", ranked_boots.get(position));
+			spawnConfig.set("spawn.kit_" + position + ".boots", ranked_boots.get(position));
 		for (int position = 1; position < ranked_inventory.size(); position++)
-			config.set("spawn.kit_" + position + ".inventory_contents", ranked_inventory.get(position));
+			spawnConfig.set("spawn.kit_" + position + ".inventory_contents", ranked_inventory.get(position));
 
 		MyZ.instance.saveConfig();
+		MyZ.instance.saveLocalizableConfig();
+		MyZ.instance.saveSpawnConfig();
 	}
 
 	/**
@@ -1488,9 +1449,8 @@ public class Configuration {
 	 */
 	public static Map<ItemStack, ItemStack> getAllowedBroken() {
 		Map<ItemStack, ItemStack> returnMap = new HashMap<ItemStack, ItemStack>();
-		for (ItemStack key : allow_destroy.keySet()) {
+		for (ItemStack key : allow_destroy.keySet())
 			returnMap.put(key, allow_destroy.get(key).item);
-		}
 		return returnMap;
 	}
 
@@ -1518,11 +1478,9 @@ public class Configuration {
 			ItemStack compare = new ItemStack(block.getType());
 			compare.setDurability(block.getData());
 			int time = -1;
-			for (ItemStack key : allow_destroy.keySet()) {
-				if (key.isSimilar(compare)) {
+			for (ItemStack key : allow_destroy.keySet())
+				if (key.isSimilar(compare))
 					time = allow_destroy.get(key).time;
-				}
-			}
 			Sync.addRespawningBlock(block, time);
 			return false;
 		}
@@ -1558,9 +1516,9 @@ public class Configuration {
 		for (ItemStack key : allow_destroy.keySet()) {
 			ItemStack compare = new ItemStack(block.getType());
 			compare.setDurability(block.getData());
-			if (key.isSimilar(compare)) {
-				if (isVaguelySimilar(allow_destroy.get(key).item, with)) { return true; }
-			}
+			if (key.isSimilar(compare))
+				if (isVaguelySimilar(allow_destroy.get(key).item, with))
+					return true;
 		}
 		return false;
 	}
@@ -1579,9 +1537,8 @@ public class Configuration {
 			for (ItemStack key : allow_place.keySet()) {
 				ItemStack compare = new ItemStack(block.getType());
 				compare.setDurability(block.getData());
-				if (key.isSimilar(compare)) {
+				if (key.isSimilar(compare))
 					time = allow_place.get(key);
-				}
 			}
 			Sync.addDespawningBlock(block, time);
 			return false;
@@ -1600,7 +1557,8 @@ public class Configuration {
 		for (ItemStack key : allow_place.keySet()) {
 			ItemStack compare = new ItemStack(block.getType());
 			compare.setDurability(block.getData());
-			if (key.isSimilar(compare)) { return true; }
+			if (key.isSimilar(compare))
+				return true;
 		}
 		return false;
 	}
@@ -1610,9 +1568,8 @@ public class Configuration {
 			FileConfiguration config = MyZ.instance.getConfig();
 			int position = 0;
 			Set<String> keys = config.getConfigurationSection("blocks.place").getKeys(false);
-			while (keys.contains(position + "")) {
+			while (keys.contains(position + ""))
 				position++;
-			}
 			ItemStack item = new ItemStack(block.getType());
 			item.setDurability(block.getData());
 			config.set("blocks.place." + position + ".block", item);
@@ -1627,7 +1584,7 @@ public class Configuration {
 			FileConfiguration config = MyZ.instance.getConfig();
 			for (String key : config.getConfigurationSection("blocks.place").getKeys(false)) {
 				ItemStack test = config.getItemStack("blocks.place." + key + ".block");
-				if (test.getType() == block.getType() && (short) test.getDurability() == block.getData()) {
+				if (test.getType() == block.getType() && test.getDurability() == block.getData()) {
 					config.set("blocks.place." + key, null);
 					MyZ.instance.saveConfig();
 					allow_place.remove(test);
@@ -1642,9 +1599,8 @@ public class Configuration {
 			FileConfiguration config = MyZ.instance.getConfig();
 			int position = 0;
 			Set<String> keys = config.getConfigurationSection("blocks.destroy").getKeys(false);
-			while (keys.contains(position + "")) {
+			while (keys.contains(position + ""))
 				position++;
-			}
 
 			ItemStack item = new ItemStack(block.getType());
 			item.setDurability(block.getData());
@@ -1664,7 +1620,7 @@ public class Configuration {
 			FileConfiguration config = MyZ.instance.getConfig();
 			for (String key : config.getConfigurationSection("blocks.destroy").getKeys(false)) {
 				ItemStack test = config.getItemStack("blocks.destroy." + key + ".block");
-				if (test.getType() == block.getType() && (short) test.getDurability() == block.getData()) {
+				if (test.getType() == block.getType() && test.getDurability() == block.getData()) {
 					config.set("blocks.destroy." + key, null);
 					MyZ.instance.saveConfig();
 					allow_destroy.remove(test);

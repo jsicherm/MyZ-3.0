@@ -36,7 +36,8 @@ public class PlayerHurtEntity implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageByEntityEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+			return;
 		// Cancel damage inside spawn room.
 		if (Configuration.isInLobby(e.getDamager().getLocation()))
 			e.setCancelled(true);

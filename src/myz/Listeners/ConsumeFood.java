@@ -33,7 +33,8 @@ public class ConsumeFood implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onConsume(PlayerItemConsumeEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 		final Player player = e.getPlayer();
 		ItemStack item = e.getItem();
 

@@ -6,10 +6,10 @@ package myz.Listeners;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.mobs.CustomEntityGiantZombie;
-import myz.mobs.CustomEntityPigZombie;
 import myz.Support.Configuration;
 import myz.Utilities.WorldGuardManager;
+import myz.mobs.CustomEntityGiantZombie;
+import myz.mobs.CustomEntityPigZombie;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Location;
@@ -34,8 +34,9 @@ public class EntitySpawn implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
-		if(!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName())) { return; }
-		
+		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName()))
+			return;
+
 		EntityType type = e.getEntityType();
 
 		// Override mooshroom spawns with giant spawns.
@@ -49,9 +50,10 @@ public class EntitySpawn implements Listener {
 		}
 
 		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
-			&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION) { return; }
+				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION)
+			return;
 
-		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard"))
 			if (WorldGuardManager.isAmplifiedRegion(e.getLocation())) {
 				// Increase natural spawns inside towns.
 				if (random.nextDouble() >= 0.5) {
@@ -69,14 +71,11 @@ public class EntitySpawn implements Listener {
 					if (doSpawn)
 						e.getLocation().getWorld().spawnEntity(newLocation, e.getEntityType());
 				}
-			} else {
-				// Decrease natural spawns outside of towns.
-				if (random.nextDouble() <= 0.3) {
-					e.setCancelled(true);
-					return;
-				}
+			} else // Decrease natural spawns outside of towns.
+			if (random.nextDouble() <= 0.3) {
+				e.setCancelled(true);
+				return;
 			}
-		}
 		// Make sure we only spawn our desired mobs.
 		if (type != EntityType.ZOMBIE && type != EntityType.GIANT && type != EntityType.HORSE && type != EntityType.PLAYER
 				&& type != EntityType.PIG_ZOMBIE) {
