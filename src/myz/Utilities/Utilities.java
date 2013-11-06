@@ -20,6 +20,7 @@ import net.minecraft.server.v1_6_R3.World;
 import net.minecraft.server.v1_6_R3.WorldServer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
@@ -327,15 +328,66 @@ public class Utilities {
 	 * 
 	 * @param player
 	 *            The player.
+	 * @param pg
+	 *            The page to show, starting at 1 (not 0).
 	 */
-	public static void showResearchDialog(Player player) {
+	public static void showResearchDialog(Player player, int pg) {
+		// Load points.
 		int points = 0;
 		PlayerData data = PlayerData.getDataFor(player.getName());
 		if (data != null)
 			points = data.getResearchPoints();
 		if (MyZ.instance.getSQLManager().isConnected())
 			points = MyZ.instance.getSQLManager().getInt(player.getName(), "research");
-		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points));
-		player.openInventory(gui);
+
+		// Create inventories and initial arrows.
+		ItemStack leftArrow = new ItemStack(Material.PISTON_EXTENSION);
+		ItemMeta meta = leftArrow.getItemMeta();
+		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage("gui.previous_page"));
+		leftArrow.setItemMeta(meta);
+		ItemStack rightArrow = new ItemStack(Material.PISTON_EXTENSION);
+		meta = rightArrow.getItemMeta();
+		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage("gui.next_page"));
+		rightArrow.setItemMeta(meta);
+
+		List<Inventory> inventories = new ArrayList<Inventory>();
+		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points) + " (1)");
+		inventories.add(gui);
+		gui.setItem(0, leftArrow);
+		gui.setItem(8, rightArrow);
+
+		// Start loading items.
+		int position = 1;
+		int page = 1;
+		for (String key : MyZ.instance.getResearchConfig().getConfigurationSection("item").getKeys(false)) {
+			if (MyZ.instance.getResearchConfig().contains("item." + key + ".cost")) {
+				ItemStack item = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item").clone();
+				meta = item.getItemMeta();
+				meta.setLore(Arrays.asList(ChatColor.WHITE
+						+ Messenger.getConfigMessage("gui.cost", MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
+				item.setItemMeta(meta);
+				gui.setItem(position, item);
+				position++;
+				if (position == 8) {
+					// Wrap to new page.
+					page++;
+					gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points) + " (" + page + ")");
+					inventories.add(gui);
+					gui.setItem(0, leftArrow);
+					gui.setItem(8, rightArrow);
+					position = 1;
+				}
+			}
+		}
+
+		// Show page.
+		if (page > inventories.size()) {
+			page = 1;
+		}
+		if (page < 1) {
+			page = inventories.size();
+		}
+		page--;
+		player.openInventory(inventories.get(page));
 	}
 }

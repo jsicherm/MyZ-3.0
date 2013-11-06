@@ -3,6 +3,7 @@
  */
 package myz.Commands;
 
+import myz.MyZ;
 import myz.Support.Messenger;
 import myz.Utilities.Utilities;
 
@@ -23,9 +24,11 @@ public class ResearchCommand implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (sender instanceof Player)
-			Utilities.showResearchDialog((Player) sender);
-		else
+		if (sender instanceof Player) {
+			if (!MyZ.instance.getWorlds().contains(((Player) sender).getWorld().getName()))
+				return true;
+			Utilities.showResearchDialog((Player) sender, 1);
+		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
 	}

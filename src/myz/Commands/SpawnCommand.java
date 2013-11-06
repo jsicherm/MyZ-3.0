@@ -25,6 +25,8 @@ public class SpawnCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
+			if (!MyZ.instance.getWorlds().contains(((Player)sender).getWorld().getName()))
+				return true;
 			if (Configuration.isInLobby((Player) sender)) {
 				int spawnpoint = -1;
 				if (args.length != 0)

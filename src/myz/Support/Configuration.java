@@ -424,7 +424,17 @@ public class Configuration {
 
 		// Localizable begin.
 		if (!localizableConfig.contains("localizable.science_gui"))
-			localizableConfig.set("localizable.science_gui", "Research Centre - %s points");
+			localizableConfig.set("localizable.science_gui", "Science Centre - %s pts.");
+		if (!localizableConfig.contains("localizable.gui.purchased"))
+			localizableConfig.set("localizable.gui.purchased", "You now have &e%s&r points.");
+		if (!localizableConfig.contains("localizable.gui.afford"))
+			localizableConfig.set("localizable.gui.afford", "You don't know enough to use that.");
+		if (!localizableConfig.contains("localizable.gui.next_page"))
+			localizableConfig.set("localizable.gui.next_page", "Next Page");
+		if (!localizableConfig.contains("localizable.gui.previous_page"))
+			localizableConfig.set("localizable.gui.previous_page", "Previous Page");
+		if (!localizableConfig.contains("localizable.gui.cost"))
+			localizableConfig.set("localizable.gui.cost", "%s Research Points");
 		if (!localizableConfig.contains("localizable.research.fail"))
 			localizableConfig.set("localizable.research.fail", "The Science Gods refuse your offering.");
 		if (!localizableConfig.contains("localizable.research.success"))
