@@ -1,6 +1,6 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.5
+version: 3.0.53
 softdepend: [WorldEdit, WorldGuard, TagAPI]
 description: MyZ 3.0 with chest support by SirAntony.
 authors: [TeeePeee, SirAntony]
@@ -9,6 +9,10 @@ commands:
   start:
     description: Spawn into the world.
     aliases: [begin]
+  myz:
+    description: Show help for MyZ.
+  stats:
+    description: Player statistics.
   blockallow:
     description: Allow breaking/placing of blocks.
     permission: MyZ.world_admin

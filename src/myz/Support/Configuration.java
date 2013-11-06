@@ -424,7 +424,11 @@ public class Configuration {
 
 		// Localizable begin.
 		if (!localizableConfig.contains("localizable.science_gui"))
-			localizableConfig.set("localizable.science_gui", "Research Centre");
+			localizableConfig.set("localizable.science_gui", "Research Centre - %s points");
+		if (!localizableConfig.contains("localizable.research.fail"))
+			localizableConfig.set("localizable.research.fail", "The Science Gods refuse your offering.");
+		if (!localizableConfig.contains("localizable.research.success"))
+			localizableConfig.set("localizable.research.success", "You gain a better understanding of the disease and %s research points.");
 		if (!localizableConfig.contains("localizable.radio_name"))
 			localizableConfig.set("localizable.radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
 		if (!localizableConfig.contains("localizable.radio_color_override"))
@@ -455,6 +459,20 @@ public class Configuration {
 			localizableConfig.set("localizable.command.spawn.unable_to_spawn", "&4Unable to spawn there. Please try again shortly.");
 		if (!localizableConfig.contains("localizable.command.allowed.breakable"))
 			localizableConfig.set("localizable.command.allowed.breakable", "&eYou can break:");
+		if (!localizableConfig.contains("localizable.command.base.help"))
+			localizableConfig.set("localizable.command.base.help", "=== MyZ Help ===");
+		if (!localizableConfig.contains("localizable.command.stats.header"))
+			localizableConfig.set("localizable.command.stats.header", "==== Statistics for &e%s&r ====");
+		if (!localizableConfig.contains("localizable.command.stats.kills_header"))
+			localizableConfig.set("localizable.command.stats.kills_header", "==== &eKILLS&r ====");
+		if (!localizableConfig.contains("localizable.command.stats.kills"))
+			localizableConfig.set("localizable.command.stats.kills", "Zombie: &e%s&r  Pigman: &e%s&r  Giant: &e%s&r  Player: &e%s");
+		if (!localizableConfig.contains("localizable.command.stats.time_header"))
+			localizableConfig.set("localizable.command.stats.time_header", "==== &eTIME SURVIVED&r ====");
+		if (!localizableConfig.contains("localizable.command.stats.time"))
+			localizableConfig.set("localizable.command.stats.time", "Total: &e%s minutes&r  This life: &e%s minutes");
+		if (!localizableConfig.contains("localizable.command.stats.footer"))
+			localizableConfig.set("localizable.command.stats.footer", "See complete stats at http://my-z.org/scores.php?user=%s");
 		if (!localizableConfig.contains("localizable.command.allowed.placeable"))
 			localizableConfig.set("localizable.command.allowed.placeable", "&eYou can place:");
 		if (!localizableConfig.contains("localizable.command.block.arguments"))
@@ -463,9 +481,12 @@ public class Configuration {
 			localizableConfig.set("localizable.command.block.place.arguments",
 					"&4Usage: /blockallow place <add [seconds until despawn]/remove>");
 		if (!localizableConfig.contains("localizable.command.research.arguments"))
-			localizableConfig.set("localizable.command.research.arguments", "&4Usage: /setresearch <add [point value]/remove>");
+			localizableConfig.set("localizable.command.research.arguments",
+					"&4Usage: /setresearch <addreward [point cost]/add [point value]/remove>");
+		if (!localizableConfig.contains("localizable.command.research.reward.added"))
+			localizableConfig.set("localizable.command.research.reward.added", "&ePlayers can now research %s with %s research points.");
 		if (!localizableConfig.contains("localizable.command.research.added"))
-			localizableConfig.set("localizable.command.research.added", "&ePlayers can now research %s with %s research points.");
+			localizableConfig.set("localizable.command.research.added", "&ePlayers can now do research with %s for %s research points.");
 		if (!localizableConfig.contains("localizable.command.research.removed"))
 			localizableConfig.set("localizable.command.research.removed", "&ePlayers can no longer research %s.");
 		if (!localizableConfig.contains("localizable.command.research.item"))

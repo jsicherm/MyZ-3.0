@@ -105,7 +105,7 @@ public class Messenger {
 		if (variables != null)
 			try {
 				message = String.format(message, variables);
-			} catch (MissingFormatArgumentException exc) {
+			} catch (Exception exc) {
 				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat.");
 				message = message.replaceAll("%s", "");
 			}

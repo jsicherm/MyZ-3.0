@@ -29,13 +29,12 @@ public class PlayerSummonGiant implements Listener {
 	private void onSummon(final BlockPlaceEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
-		if (!e.getPlayer().hasPermission("MyZ.spawn_giant")) {
-			Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summon_permission");
-			e.setCancelled(true);
-			return;
-		}
-
 		if (e.getItemInHand().isSimilar(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2))) {
+			if (!e.getPlayer().hasPermission("MyZ.spawn_giant")) {
+				Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summon_permission");
+				e.setCancelled(true);
+				return;
+			}
 			for (int y = e.getBlockPlaced().getY() + 1; y < e.getBlockPlaced().getY() + 16; y++)
 				if (e.getBlockPlaced().getWorld().getBlockAt(e.getBlockPlaced().getX(), y, e.getBlockPlaced().getZ()).getType() != Material.AIR) {
 					Messenger.sendConfigMessage(e.getPlayer(), "special.giant_could_not_summon");

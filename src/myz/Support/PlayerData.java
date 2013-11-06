@@ -817,5 +817,6 @@ public class PlayerData {
 	 */
 	public void setResearchPoints(int research) {
 		this.research = research;
+		save();
 	}
 }

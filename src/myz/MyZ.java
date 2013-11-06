@@ -16,6 +16,7 @@ import myz.API.PlayerWaterDecayEvent;
 import myz.Commands.AddResearchCommand;
 import myz.Commands.AddSpawnCommand;
 import myz.Commands.AllowedCommand;
+import myz.Commands.BaseCommand;
 import myz.Commands.BlockCommand;
 import myz.Commands.ClanCommand;
 import myz.Commands.CreateMedKitCommand;
@@ -31,6 +32,7 @@ import myz.Commands.SetLobbyCommand;
 import myz.Commands.SetRankCommand;
 import myz.Commands.SpawnCommand;
 import myz.Commands.SpawnsCommand;
+import myz.Commands.StatsCommand;
 import myz.Listeners.AutoFriend;
 import myz.Listeners.BlockEvent;
 import myz.Listeners.CancelPlayerEvents;
@@ -48,6 +50,7 @@ import myz.Listeners.PlayerHurtEntity;
 import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
 import myz.Listeners.PlayerTakeDamage;
+import myz.Listeners.ResearchItem;
 import myz.Listeners.Visibility;
 import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
@@ -87,6 +90,8 @@ public class MyZ extends JavaPlugin {
 
 	// TODO giants
 	// TODO sound attraction to (trap)doors.
+	// TODO researching
+	// TODO complete MultiWorld
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -145,6 +150,8 @@ public class MyZ extends JavaPlugin {
 		getCommand("blocks").setExecutor(new AllowedCommand());
 		getCommand("research").setExecutor(new ResearchCommand());
 		getCommand("setresearch").setExecutor(new AddResearchCommand());
+		getCommand("stats").setExecutor(new StatsCommand());
+		getCommand("myz").setExecutor(new BaseCommand());
 
 		/*
 		 * Register all listeners.
@@ -167,6 +174,7 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new CancelPlayerEvents(), this);
 		p.registerEvents(new Movement(), this);
 		p.registerEvents(new PlayerTakeDamage(), this);
+		p.registerEvents(new ResearchItem(), this);
 		if (getServer().getPluginManager().getPlugin("TagAPI") != null && getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 			p.registerEvents(new KittehTag(), this);
 

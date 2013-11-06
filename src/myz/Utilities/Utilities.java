@@ -329,7 +329,13 @@ public class Utilities {
 	 *            The player.
 	 */
 	public static void showResearchDialog(Player player) {
-		Inventory gui = Bukkit.createInventory(null, 9, MyZ.instance.getLocalizableConfig().getString("localizable.science_gui"));
+		int points = 0;
+		PlayerData data = PlayerData.getDataFor(player.getName());
+		if (data != null)
+			points = data.getResearchPoints();
+		if (MyZ.instance.getSQLManager().isConnected())
+			points = MyZ.instance.getSQLManager().getInt(player.getName(), "research");
+		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points));
 		player.openInventory(gui);
 	}
 }

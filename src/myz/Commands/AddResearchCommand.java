@@ -66,21 +66,28 @@ public class AddResearchCommand implements CommandExecutor {
 					return true;
 				}
 			} else if (args.length == 2)
-				if (args[0].equalsIgnoreCase("add")) {
-					int key = 1;
-					while (keys.contains(key + ""))
-						key++;
+				if (args[0].equalsIgnoreCase("addreward") || args[0].equalsIgnoreCase("add")) {
+					boolean reward = args[0].equalsIgnoreCase("addreward");
+					String key = "1";
+					while (keys.contains(key))
+						key = (Integer.parseInt(key) + 1) + "";
 					for (String entry : keys)
 						if (config.getItemStack("item." + entry + ".item").equals(hand)) {
-							Messenger.sendConfigMessage(sender, "command.research.item_exists");
-							return true;
+							if (config.contains("item." + entry + (reward ? ".cost" : ".value"))) {
+								Messenger.sendConfigMessage(sender, "command.research.item_exists");
+								return true;
+							} else {
+								key = entry;
+								break;
+							}
 						}
 
 					try {
 						int points = Integer.parseInt(args[1]);
 						config.set("item." + key + ".item", hand);
-						config.set("item." + key + ".cost", points);
-						Messenger.sendMessage(sender, Messenger.getConfigMessage("command.research.added", value, points));
+						config.set("item." + key + (reward ? ".cost" : ".value"), points);
+						Messenger.sendMessage(sender,
+								Messenger.getConfigMessage("command.research." + (reward ? "reward." : "") + "added", value, points));
 						MyZ.instance.saveResearchConfig();
 					} catch (NumberFormatException exc) {
 						Messenger.sendConfigMessage(sender, "command.research.arguments");

@@ -51,9 +51,10 @@ public class BlockEvent implements Listener {
 	private void onPlacement(BlockPlaceEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
-		boolean state = Configuration.doPlace(e.getBlock());
-		if (state && e.getPlayer().hasPermission("MyZ.world_admin") && !e.getPlayer().isOp())
+		boolean state = !Configuration.canPlace(e.getBlock());
+		if (state && e.getPlayer().hasPermission("MyZ.world_admin"))
 			return;
+		state = Configuration.doPlace(e.getBlock());
 		e.setCancelled(state);
 	}
 
@@ -61,9 +62,10 @@ public class BlockEvent implements Listener {
 	private void onDestroy(BlockBreakEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
-		boolean state = Configuration.doBreak(e.getBlock(), e.getPlayer().getItemInHand());
-		if (state && e.getPlayer().hasPermission("MyZ.world_admin") && !e.getPlayer().isOp())
+		boolean state = !Configuration.canBreak(e.getBlock(), e.getPlayer().getItemInHand());
+		if (state && e.getPlayer().hasPermission("MyZ.world_admin"))
 			return;
+		state = Configuration.doBreak(e.getBlock(), e.getPlayer().getItemInHand());
 		e.setCancelled(state);
 	}
 }
