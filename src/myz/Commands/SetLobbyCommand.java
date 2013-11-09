@@ -38,7 +38,7 @@ public class SetLobbyCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!MyZ.instance.getWorlds().contains(((Player)sender).getWorld().getName()))
+			if (!MyZ.instance.getWorlds().contains(((Player) sender).getWorld().getName()))
 				return true;
 			if (plugin != null && plugin.isEnabled()) {
 				Selection selection = plugin.getSelection((Player) sender);

@@ -33,6 +33,11 @@ Are you a skilled graphic designer/videographer?
 * Yes: Any MyZ-related artwork that you send to jordan.sicherman@brentwood.bc.ca, I will be sure to include either on http://My-Z.org or on the dev.bukkit page. Please don't use this for self-advertising though.
 * No: Refer to the previous answer for No ;). 
 
+Are you a good builder?
+
+* Yes: MyZ is making a map! Send any and all MyZ dedicated buildings to jordan.sicherman@brentwood.bc.ca in WorldEdit .schematic form to be included in the official map.
+* No: You're probably just not giving yourself enough credit.
+
 What about donating?
 ====================
 
@@ -59,4 +64,5 @@ So far, here are the base features that haven't yet been added.
 Known Caveats
 =============
 
-In some scenarios when you reload the server after updating the MyZ jar, mobs in unloaded chunks can cause the server to crash when those chunks become loaded. It does not corrupt your world, or is even harmful. Simply restart the server. For this reason, try to keep reloading MyZ to a minimum. Additionally, reloading many times will eventually result in an OutOfMemory: PermGen Space error. RESTART, not RELOAD.
+* In some scenarios when you reload the server after updating the MyZ jar, mobs in unloaded chunks can cause the server to crash when those chunks become loaded. It does not corrupt your world, or is even harmful. Simply restart the server. For this reason, try to keep reloading MyZ to a minimum. Additionally, reloading many times will eventually result in an OutOfMemory: PermGen Space error. RESTART, not RELOAD.
+* NPC's drop their death loot twice due to a Minecraft packet weirdness deal. The second set is a 'ghost' set (it can't be picked up) and will disappear after a relog. This is being investigated.

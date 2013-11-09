@@ -265,8 +265,9 @@ public class MyZ extends JavaPlugin {
 			for (Entity entity : world.getEntities())
 				if (entity instanceof LivingEntity
 						&& (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT
-								|| entity.getType() == EntityType.HORSE || entity.getType() == EntityType.PIG_ZOMBIE))
+								|| entity.getType() == EntityType.HORSE || entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.SKELETON))
 					entity.remove();
+		Utilities.packets.clear();
 	}
 
 	/**

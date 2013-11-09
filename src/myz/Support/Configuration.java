@@ -44,7 +44,8 @@ public class Configuration {
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
 			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time;
 	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage, water_damage, bleed_damage,
-			zombie_speed, horse_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, giant_damage, pigman_damage, bandage_heal;
+			zombie_speed, horse_speed, npc_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, npc_damage, giant_damage,
+			pigman_damage, bandage_heal;
 	private static List<String> spawnpoints = new ArrayList<String>(), spawn_potion_effects = new ArrayList<String>(),
 			worlds = new ArrayList<String>();
 	private static ItemStack radio, safe_logout_item, bandage;
@@ -109,11 +110,13 @@ public class Configuration {
 		safe_logout_item = config.getItemStack("safe_logout.itemstack", new ItemStack(Material.EYE_OF_ENDER, 1));
 		zombie_damage = config.getDouble("mobs.zombie.damage");
 		pigman_damage = config.getDouble("mobs.pigman.damage");
+		npc_damage = config.getDouble("mobs.npc.damage");
 		giant_damage = config.getDouble("mobs.giant.damage");
 		horse_damage = config.getDouble("mobs.horse.damage");
 		bandit_kills = config.getInt("statistics.bandit_kills");
 		healer_heals = config.getInt("statistics.healer_heals");
 		zombie_speed = config.getDouble("mobs.zombie.speed");
+		npc_speed = config.getDouble("mobs.npc.speed");
 		horse_speed = config.getDouble("mobs.horse.speed");
 		pigman_speed = config.getDouble("mobs.pigman.speed");
 		giant_speed = config.getDouble("mobs.giant.speed");
@@ -295,6 +298,8 @@ public class Configuration {
 			config.set("mobs.pigman.damage", 3.0);
 		if (!config.contains("mobs.horse.damage"))
 			config.set("mobs.horse.damage", 1.0);
+		if (!config.contains("mobs.npc.damage"))
+			config.set("mobs.npc.damage", 1.0);
 		if (!config.contains("mobs.zombie.speed"))
 			config.set("mobs.zombie.speed", 1.2);
 		if (!config.contains("mobs.horse.speed"))
@@ -303,6 +308,8 @@ public class Configuration {
 			config.set("mobs.pigman.speed", 1.15);
 		if (!config.contains("mobs.giant.speed"))
 			config.set("mobs.giant.speed", 1.3);
+		if (!config.contains("mobs.npc.speed"))
+			config.set("mobs.npc.speed", 1.2);
 		if (!config.contains("mobs.bleed"))
 			config.set("mobs.bleed", true);
 
@@ -423,6 +430,24 @@ public class Configuration {
 		}
 
 		// Localizable begin.
+		if (!localizableConfig.contains("localizable.npc_names.archer.friendly"))
+			localizableConfig.set("localizable.npc_names.archer.friendly",
+					new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
+		if (!localizableConfig.contains("localizable.npc_names.archer.enemy"))
+			localizableConfig.set("localizable.npc_names.archer.enemy",
+					new ArrayList<String>(Arrays.asList("Evil Bob", "Stephen", "Monte")));
+		if (!localizableConfig.contains("localizable.npc_names.swordsman.friendly"))
+			localizableConfig.set("localizable.npc_names.swordsman.friendly",
+					new ArrayList<String>(Arrays.asList("Knight Phil", "Petko", "Isocrates")));
+		if (!localizableConfig.contains("localizable.npc_names.swordsman.enemy"))
+			localizableConfig.set("localizable.npc_names.swordsman.enemy",
+					new ArrayList<String>(Arrays.asList("Amadeus", "Jason", "Clayton")));
+		if (!localizableConfig.contains("localizable.npc_names.wanderer.friendly"))
+			localizableConfig.set("localizable.npc_names.wanderer.friendly",
+					new ArrayList<String>(Arrays.asList("Frederico", "Arthur", "Virgil")));
+		if (!localizableConfig.contains("localizable.npc_names.wanderer.enemy"))
+			localizableConfig
+					.set("localizable.npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
 		if (!localizableConfig.contains("localizable.science_gui"))
 			localizableConfig.set("localizable.science_gui", "Science Centre - %s pts.");
 		if (!localizableConfig.contains("localizable.gui.purchased"))
@@ -1160,31 +1185,38 @@ public class Configuration {
 	}
 
 	/**
-	 * @return the zombie speed
+	 * @return the zombie_speed
 	 */
 	public static double getZombieSpeed() {
 		return zombie_speed;
 	}
 
 	/**
-	 * @return the horse speed
+	 * @return the horse_speed
 	 */
 	public static double getHorseSpeed() {
 		return horse_speed;
 	}
 
 	/**
-	 * @return the pigman speed
+	 * @return the pigman_speed
 	 */
 	public static double getPigmanSpeed() {
 		return pigman_speed;
 	}
 
 	/**
-	 * @return the giant speed
+	 * @return the giant_speed
 	 */
 	public static double getGiantSpeed() {
 		return giant_speed;
+	}
+
+	/**
+	 * @return the npc_speed
+	 */
+	public static double getNPCSpeed() {
+		return npc_speed;
 	}
 
 	/**
@@ -1206,6 +1238,13 @@ public class Configuration {
 	 */
 	public static double getGiantDamage() {
 		return giant_damage;
+	}
+
+	/**
+	 * @return the npc_damage
+	 */
+	public static double getNPCDamage() {
+		return npc_damage;
 	}
 
 	/**

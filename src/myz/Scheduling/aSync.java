@@ -15,7 +15,6 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.pathing.PathingSupport;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -37,7 +36,7 @@ public class aSync implements Runnable {
 		ticks++;
 
 		for (String world : MyZ.instance.getWorlds())
-			for (Player player : Bukkit.getWorld(world).getPlayers()) {
+			for (Player player : MyZ.instance.getServer().getWorld(world).getPlayers()) {
 				if (player.getGameMode() == GameMode.CREATIVE || Configuration.isInLobby(player))
 					continue;
 

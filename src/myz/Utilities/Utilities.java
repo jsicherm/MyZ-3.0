@@ -3,9 +3,13 @@
  */
 package myz.Utilities;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.API.PlayerFriendEvent;
@@ -15,6 +19,9 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityZombie;
+import net.minecraft.server.v1_6_R3.EntityInsentient;
+import net.minecraft.server.v1_6_R3.Packet;
+import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
 import net.minecraft.server.v1_6_R3.PlayerInteractManager;
 import net.minecraft.server.v1_6_R3.World;
 import net.minecraft.server.v1_6_R3.WorldServer;
@@ -24,8 +31,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftSkeleton;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.Inventory;
@@ -39,6 +49,8 @@ import org.bukkit.inventory.meta.SkullMeta;
  */
 public class Utilities {
 
+	public static Map<Packet, WorldUUID> packets;
+
 	/**
 	 * Get a skull for a given player.
 	 * 
@@ -50,7 +62,7 @@ public class Utilities {
 		ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
 		ItemMeta itemMeta = head.getItemMeta();
 		((SkullMeta) itemMeta).setOwner(name);
-		itemMeta.setDisplayName(name + "'s Head");
+		itemMeta.setDisplayName(name);
 		head.setItemMeta(itemMeta);
 		return head;
 	}
@@ -359,7 +371,7 @@ public class Utilities {
 		// Start loading items.
 		int position = 1;
 		int page = 1;
-		for (String key : MyZ.instance.getResearchConfig().getConfigurationSection("item").getKeys(false)) {
+		for (String key : MyZ.instance.getResearchConfig().getConfigurationSection("item").getKeys(false))
 			if (MyZ.instance.getResearchConfig().contains("item." + key + ".cost")) {
 				ItemStack item = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item").clone();
 				meta = item.getItemMeta();
@@ -378,16 +390,90 @@ public class Utilities {
 					position = 1;
 				}
 			}
-		}
 
 		// Show page.
-		if (page > inventories.size()) {
+		if (page > inventories.size())
 			page = 1;
-		}
-		if (page < 1) {
+		if (page < 1)
 			page = inventories.size();
-		}
 		page--;
 		player.openInventory(inventories.get(page));
+	}
+
+	/**
+	 * Save a packet and distribute it to all the players in the world. Players
+	 * will be sent this packet when they log in as well.
+	 * 
+	 * @param packet
+	 *            The packet.
+	 * @param world
+	 *            The World.
+	 */
+	public static void saveAndDistributePacket(Packet packet, Entity entity) {
+		if (packets == null)
+			packets = new HashMap<Packet, WorldUUID>();
+		packets.put(packet, new WorldUUID(entity.getWorld().getName(), entity.getUniqueId()));
+		for (Player player : entity.getWorld().getPlayers())
+			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+	}
+
+	/**
+	 * Send a player a packet.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @param packet
+	 *            The packet.
+	 */
+	public static void sendPacket(final Player player, final Object packet) {
+		if (packets == null)
+			packets = new HashMap<Packet, WorldUUID>();
+
+		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			@Override
+			public void run() {
+				Packet20NamedEntitySpawn cp = new Packet20NamedEntitySpawn();
+				EntityInsentient npc = null;
+				for (Entity entity : player.getWorld().getEntitiesByClass(Skeleton.class))
+					if (entity.getUniqueId() == packets.get(packet).uuid) {
+						npc = ((CraftSkeleton) entity).getHandle();
+						break;
+					}
+				if (npc == null)
+					return;
+
+				cp.a = npc.getBukkitEntity().getEntityId();
+				cp.b = ((Packet20NamedEntitySpawn) packet).b;
+				cp.c = (int) (npc.getBukkitEntity().getLocation().getX() * 32);
+				cp.d = (int) (npc.getBukkitEntity().getLocation().getY() * 32);
+				cp.e = (int) (npc.getBukkitEntity().getLocation().getZ() * 32);
+				cp.f = (byte) npc.getBukkitEntity().getLocation().getPitch();
+				cp.g = (byte) npc.getBukkitEntity().getLocation().getYaw();
+				cp.h = npc.getEquipment(0) != null ? npc.getEquipment(0).id : 0;
+
+				try {
+					Field f = cp.getClass().getDeclaredField("i");
+					f.setAccessible(true);
+					f.set(cp, f.get(packet));
+					((CraftPlayer) player).getHandle().playerConnection.sendPacket(cp);
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				}
+			}
+		}, 5L);
+	}
+
+	public static class WorldUUID {
+		private String world;
+		private UUID uuid;
+
+		public WorldUUID(String world, UUID uuid) {
+			this.world = world;
+			this.uuid = uuid;
+		}
+
+		public String getWorld() {
+			return world;
+		}
 	}
 }

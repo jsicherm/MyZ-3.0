@@ -107,6 +107,11 @@ public class JoinQuit implements Listener {
 						&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 					KittehTag.colorName(online_friend);
 		}
+
+		if (Utilities.packets != null)
+			for (Object packet : Utilities.packets.keySet())
+				if (player.getWorld().getName().equals(Utilities.packets.get(packet).getWorld()))
+					Utilities.sendPacket(player, packet);
 	}
 
 	@EventHandler

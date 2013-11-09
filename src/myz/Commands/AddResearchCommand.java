@@ -70,9 +70,9 @@ public class AddResearchCommand implements CommandExecutor {
 					boolean reward = args[0].equalsIgnoreCase("addreward");
 					String key = "1";
 					while (keys.contains(key))
-						key = (Integer.parseInt(key) + 1) + "";
+						key = Integer.parseInt(key) + 1 + "";
 					for (String entry : keys)
-						if (config.getItemStack("item." + entry + ".item").equals(hand)) {
+						if (config.getItemStack("item." + entry + ".item").equals(hand))
 							if (config.contains("item." + entry + (reward ? ".cost" : ".value"))) {
 								Messenger.sendConfigMessage(sender, "command.research.item_exists");
 								return true;
@@ -80,7 +80,6 @@ public class AddResearchCommand implements CommandExecutor {
 								key = entry;
 								break;
 							}
-						}
 
 					try {
 						int points = Integer.parseInt(args[1]);

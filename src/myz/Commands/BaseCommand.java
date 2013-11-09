@@ -30,11 +30,11 @@ public class BaseCommand implements CommandExecutor {
 		Map<String, Map<String, Object>> map = MyZ.instance.getDescription().getCommands();
 
 		Messenger.sendConfigMessage(sender, "command.base.help");
-		
-		for (String cmd : map.keySet()) {
+
+		for (String cmd : map.keySet())
 			if (!map.get(cmd).containsKey("permission") || sender.hasPermission((String) map.get(cmd).get("permission")))
 				sender.sendMessage(ChatColor.YELLOW + cmd + ": " + ChatColor.RESET + map.get(cmd).get("description"));
-		}
+
 		return true;
 	}
 }

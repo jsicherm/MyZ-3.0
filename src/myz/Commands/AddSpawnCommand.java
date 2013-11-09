@@ -26,9 +26,9 @@ public class AddSpawnCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!MyZ.instance.getWorlds().contains(((Player)sender).getWorld().getName()))
+			if (!MyZ.instance.getWorlds().contains(((Player) sender).getWorld().getName()))
 				return true;
-			
+
 			Location new_location = ((Player) sender).getLocation();
 			if (Configuration.addSpawnpoint(new_location))
 				Messenger.sendConfigMessage(sender, "command.addspawn.added");

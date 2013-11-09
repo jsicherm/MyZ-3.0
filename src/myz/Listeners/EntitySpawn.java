@@ -3,13 +3,20 @@
  */
 package myz.Listeners;
 
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
 import myz.Support.Configuration;
+import myz.Utilities.Utilities;
 import myz.Utilities.WorldGuardManager;
 import myz.mobs.CustomEntityGiantZombie;
+import myz.mobs.CustomEntityNPC;
 import myz.mobs.CustomEntityPigZombie;
+import myz.mobs.NPCType;
+import net.minecraft.server.v1_6_R3.DataWatcher;
+import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Location;
@@ -18,6 +25,7 @@ import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -49,9 +57,54 @@ public class EntitySpawn implements Listener {
 			return;
 		}
 
-		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
-				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION)
+		if (type == EntityType.SKELETON && e.getSpawnReason() != SpawnReason.CUSTOM) {
+			e.setCancelled(true);
+			if (random.nextDouble() <= 0.75) { return; }
+			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
+			NPCType npctype;
+			CustomEntityNPC npc = new CustomEntityNPC(world, npctype = NPCType.getRandom());
+			npc.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
+
+			if (world.addEntity(npc, SpawnReason.CUSTOM)) {
+				Packet20NamedEntitySpawn packet = new Packet20NamedEntitySpawn();
+				packet.a = npc.getBukkitEntity().getEntityId();
+				packet.b = getRandomName(npctype);
+				packet.c = (int) e.getLocation().getX() * 32;
+				packet.d = (int) e.getLocation().getY() * 32;
+				packet.e = (int) e.getLocation().getZ() * 32;
+				packet.f = 0;
+				packet.g = 0;
+				packet.h = npc.getEquipment(0) != null ? npc.getEquipment(0).id : 0;
+
+				DataWatcher datawatcher = new DataWatcher();
+				datawatcher.a(0, (Object) (byte) 0);
+				datawatcher.a(1, (Object) (short) 0);
+				datawatcher.a(8, (Object) (byte) 0);
+
+				try {
+					Field f = packet.getClass().getDeclaredField("i");
+					f.setAccessible(true);
+					f.set(packet, datawatcher);
+					Utilities.saveAndDistributePacket(packet, npc.getBukkitEntity());
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				}
+
+				((Skeleton) npc.getBukkitEntity()).setRemoveWhenFarAway(true);
+				((Skeleton) npc.getBukkitEntity()).getEquipment().setBootsDropChance(1);
+				((Skeleton) npc.getBukkitEntity()).getEquipment().setLeggingsDropChance(1);
+				((Skeleton) npc.getBukkitEntity()).getEquipment().setChestplateDropChance(1);
+				((Skeleton) npc.getBukkitEntity()).getEquipment().setHelmetDropChance(1);
+				((Skeleton) npc.getBukkitEntity()).getEquipment().setItemInHandDropChance(1);
+			}
 			return;
+		} else if (type == EntityType.SKELETON && e.getSpawnReason() == SpawnReason.CUSTOM) { return; }
+
+		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
+				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION) {
+			System.out.println(e.getSpawnReason() + " (" + e.getEntityType() + ")");
+			return;
+		}
 
 		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard"))
 			if (WorldGuardManager.isAmplifiedRegion(e.getLocation())) {
@@ -78,7 +131,7 @@ public class EntitySpawn implements Listener {
 			}
 		// Make sure we only spawn our desired mobs.
 		if (type != EntityType.ZOMBIE && type != EntityType.GIANT && type != EntityType.HORSE && type != EntityType.PLAYER
-				&& type != EntityType.PIG_ZOMBIE) {
+				&& type != EntityType.PIG_ZOMBIE && type != EntityType.SKELETON) {
 			e.setCancelled(true);
 			return;
 		}
@@ -116,5 +169,35 @@ public class EntitySpawn implements Listener {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Get a random name for an NPC.
+	 * 
+	 * @return The name.
+	 */
+	private String getRandomName(NPCType type) {
+		List<String> possibilities = null;
+		switch (type) {
+		case ENEMY_ARCHER:
+			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.archer.enemy");
+			break;
+		case ENEMY_SWORDSMAN:
+			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.swordsman.enemy");
+			break;
+		case ENEMY_WANDERER:
+			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.wanderer.enemy");
+			break;
+		case FRIEND_ARCHER:
+			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.archer.friendly");
+			break;
+		case FRIEND_SWORDSMAN:
+			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.swordsman.friendly");
+			break;
+		default:
+			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.wanderer.friendly");
+			break;
+		}
+		return possibilities == null ? "Notch" : possibilities.get(random.nextInt(possibilities.size() == 0 ? 1 : possibilities.size()));
 	}
 }

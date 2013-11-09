@@ -23,7 +23,8 @@ public class CancelZombieDamage implements Listener {
 	private void onBurnInSun(EntityCombustEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
 			return;
-		if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.PIG_ZOMBIE || e.getEntityType() == EntityType.GIANT)
+		if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.PIG_ZOMBIE || e.getEntityType() == EntityType.GIANT
+				|| e.getEntityType() == EntityType.SKELETON)
 			e.setCancelled(true);
 	}
 

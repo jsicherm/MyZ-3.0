@@ -15,11 +15,9 @@ import myz.Utilities.Utilities;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -47,8 +45,8 @@ public class ResearchItem implements Listener {
 		if (!MyZ.instance.getWorlds().contains(e.getItem().getWorld().getName()))
 			return;
 		if (e.getInventory().getType() == InventoryType.HOPPER)
-			if (lastDropped.containsValue(e.getItem().getUniqueId())) {
-				for (String entry : lastDropped.keySet()) {
+			if (lastDropped.containsValue(e.getItem().getUniqueId()))
+				for (String entry : lastDropped.keySet())
 					if (lastDropped.get(entry).equals(e.getItem().getUniqueId())) {
 						lastDropped.remove(entry);
 						Player player = Bukkit.getPlayerExact(entry);
@@ -61,9 +59,8 @@ public class ResearchItem implements Listener {
 									int points = config.getInt("item." + key + ".value");
 									Messenger.sendMessage(player, Messenger.getConfigMessage("research.success", points));
 									PlayerData data = PlayerData.getDataFor(player);
-									if (data != null) {
+									if (data != null)
 										data.setResearchPoints(data.getResearchPoints() + points);
-									}
 									if (MyZ.instance.getSQLManager().isConnected())
 										MyZ.instance.getSQLManager().set(player.getName(), "research",
 												MyZ.instance.getSQLManager().getInt(player.getName(), "research"), true);
@@ -73,12 +70,9 @@ public class ResearchItem implements Listener {
 							e.getItem().teleport(player);
 							e.getItem().setPickupDelay(0);
 
-						} else {
+						} else
 							e.getItem().remove();
-						}
 					}
-				}
-			}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -105,12 +99,10 @@ public class ResearchItem implements Listener {
 								&& isSimilar(configured, item)) {
 							int points = 0;
 							PlayerData data = PlayerData.getDataFor(e.getWhoClicked().getName());
-							if (data != null) {
+							if (data != null)
 								points = data.getResearchPoints();
-							}
-							if (MyZ.instance.getSQLManager().isConnected()) {
+							if (MyZ.instance.getSQLManager().isConnected())
 								points = MyZ.instance.getSQLManager().getInt(e.getWhoClicked().getName(), "research");
-							}
 
 							if (points > MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")) {
 								if (e.getWhoClicked().getInventory().firstEmpty() >= 0)
@@ -118,22 +110,20 @@ public class ResearchItem implements Listener {
 								else
 									e.getWhoClicked().getWorld().dropItem(e.getWhoClicked().getLocation(), configured.clone());
 
-								if (data != null) {
+								if (data != null)
 									data.setResearchPoints(points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost"));
-								}
 								if (MyZ.instance.getSQLManager().isConnected())
 									MyZ.instance.getSQLManager().set(e.getWhoClicked().getName(), "research",
-											(points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")), true);
+											points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost"), true);
 
 								e.getWhoClicked().closeInventory();
 								Utilities.showResearchDialog((Player) e.getWhoClicked(), page);
 								Messenger.sendMessage(
 										(Player) e.getWhoClicked(),
 										Messenger.getConfigMessage("gui.purchased",
-												(points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost"))));
-							} else {
+												points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")));
+							} else
 								Messenger.sendConfigMessage((Player) e.getWhoClicked(), "gui.afford");
-							}
 							return;
 						}
 					}
@@ -155,17 +145,17 @@ public class ResearchItem implements Listener {
 				&& stack1.getDurability() == stack.getDurability()) {
 			ItemMeta one = stack1.getItemMeta();
 			ItemMeta two = stack.getItemMeta();
-			if (one == null && two == null) { return true; }
-			if (one != null && two != null) {
+			if (one == null && two == null)
+				return true;
+			if (one != null && two != null)
 				return one.getEnchants().equals(two.getEnchants())
 						&& (one.getDisplayName() != null ? one.getDisplayName().equals(two.getDisplayName()) : two.getDisplayName() == null);
-			} else {
-				if (one != null) { return one.getLore() != null
-						&& one.getLore().contains(Messenger.getConfigMessage("research_gui", 69).split("69")[0]); }
+			else {
+				if (one != null)
+					return one.getLore() != null && one.getLore().contains(Messenger.getConfigMessage("research_gui", 69).split("69")[0]);
 				return two.getLore() != null && two.getLore().contains(Messenger.getConfigMessage("research_gui", 69).split("69")[0]);
 			}
-		} else {
+		} else
 			return false;
-		}
 	}
 }

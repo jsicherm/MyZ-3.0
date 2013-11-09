@@ -77,34 +77,12 @@ public class Updater implements CommandExecutor, CommandSender {
 	private File file; // The plugin's file
 	private Thread thread; // Updater thread
 
-	private int id = -1; // Project's Curse ID
-	private static final String TITLE_VALUE = "name"; // Gets remote file's
-														// title
-	private static final String LINK_VALUE = "downloadUrl"; // Gets remote
-															// file's download
-															// link
-	private static final String TYPE_VALUE = "releaseType"; // Gets remote
-															// file's release
-															// type
-	private static final String VERSION_VALUE = "gameVersion"; // Gets remote
-																// file's build
-																// version
-	private static final String QUERY = "/servermods/files?projectIds="; // Path
-																			// to
-																			// GET
-	private static final String HOST = "https://api.curseforge.com"; // Slugs
-																		// will
-																		// be
-																		// appended
-																		// to
-																		// this
-																		// to
-																		// get
-																		// to
-																		// the
-																		// project's
-																		// RSS
-																		// feed
+	public static final String TITLE_VALUE = "name";
+	public static final String LINK_VALUE = "downloadUrl";
+	public static final String TYPE_VALUE = "releaseType";
+	public static final String VERSION_VALUE = "gameVersion";
+	private static final String QUERY = "/servermods/files?projectIds=";
+	private static final String HOST = "https://api.curseforge.com";
 	private boolean hasUpdate; // Whether or not an update was found
 
 	private static final int BYTE_SIZE = 1024; // Used for downloading files
@@ -131,13 +109,12 @@ public class Updater implements CommandExecutor, CommandSender {
 		this.plugin = plugin;
 		this.announce = announce;
 		this.file = file;
-		this.id = id;
 		updateFolder = plugin.getServer().getUpdateFolder();
 
 		try {
 			url = new URL(Updater.HOST + Updater.QUERY + id);
 		} catch (final MalformedURLException e) {
-			plugin.getLogger().severe("The project ID provided for updating, " + id + " is invalid.");
+			Messenger.sendConsoleMessage("&4Unable to find MyZ on dev.bukkit");
 			e.printStackTrace();
 		}
 
@@ -207,8 +184,7 @@ public class Updater implements CommandExecutor, CommandSender {
 				c.setAccessible(false);
 				cmd.setExecutor(this);
 				cm.register("update", cmd);
-			} else
-				plugin.getServer().dispatchCommand(this, "update [REGISTER]");
+			}
 		} catch (Throwable t) {
 		}
 	}
@@ -255,18 +231,13 @@ public class Updater implements CommandExecutor, CommandSender {
 
 			final byte[] data = new byte[Updater.BYTE_SIZE];
 			int count;
-			if (announce) {
-				plugin.getLogger().info("About to download a new update: " + newVersionName);
-				if (!(updater instanceof ConsoleCommandSender))
-					updater.sendMessage("About to download a new update: " + newVersionName);
-			}
 			long downloaded = 0;
 			while ((count = in.read(data, 0, Updater.BYTE_SIZE)) != -1) {
 				downloaded += count;
 				fout.write(data, 0, count);
 				final int percent = (int) (downloaded * 100 / fileLength);
 				if (announce && percent % 10 == 0) {
-					plugin.getLogger().info("Downloading update: " + percent + "% of " + fileLength + " bytes.");
+					Messenger.sendConsoleMessage("&eDownloading update: " + percent + "% of " + fileLength + " bytes.");
 					if (!(updater instanceof ConsoleCommandSender))
 						updater.sendMessage("Downloading update: " + percent + "% of " + fileLength + " bytes.");
 				}
@@ -282,12 +253,12 @@ public class Updater implements CommandExecutor, CommandSender {
 				// Unzip
 				unzip(dFile.getCanonicalPath());
 			if (announce) {
-				plugin.getLogger().info("Restart your server to complete the update.");
+				Messenger.sendConsoleMessage("&eRestart your server to complete the update.");
 				if (!(updater instanceof ConsoleCommandSender))
 					updater.sendMessage("Restart your server to complete the update.");
 			}
 		} catch (final Exception ex) {
-			plugin.getLogger().warning("The auto-updater tried to download a new update, but was unsuccessful.");
+			Messenger.sendConsoleMessage("&4The auto-updater tried to download a new update, but was unsuccessful.");
 		} finally {
 			try {
 				if (in != null)
@@ -341,22 +312,9 @@ public class Updater implements CommandExecutor, CommandSender {
 			for (final File dFile : new File(zipPath).listFiles()) {
 				if (dFile.isDirectory())
 					if (pluginFile(dFile.getName())) {
-						final File oFile = new File(plugin.getDataFolder().getParent(), dFile.getName()); // Get
-																											// current
-																											// dir
-						final File[] contents = oFile.listFiles(); // List of
-																	// existing
-																	// files in
-																	// the
-																	// current
-																	// dir
-						for (final File cFile : dFile.listFiles()) // Loop
-																	// through
-																	// all the
-																	// files in
-																	// the new
-																	// dir
-						{
+						final File oFile = new File(plugin.getDataFolder().getParent(), dFile.getName());
+						final File[] contents = oFile.listFiles();
+						for (final File cFile : dFile.listFiles()) {
 							boolean found = false;
 							for (final File xFile : contents)
 								if (xFile.getName().equals(cFile.getName())) {
@@ -367,8 +325,7 @@ public class Updater implements CommandExecutor, CommandSender {
 								// Move the new file into the current dir
 								cFile.renameTo(new File(oFile.getCanonicalFile() + "/" + cFile.getName()));
 							else
-								// This file already exists, so we don't need it
-								// anymore.
+								// This file already exists.
 								cFile.delete();
 						}
 					}
@@ -377,7 +334,7 @@ public class Updater implements CommandExecutor, CommandSender {
 			new File(zipPath).delete();
 			fSourceZip.delete();
 		} catch (final IOException ex) {
-			plugin.getLogger().warning("The auto-updater tried to unzip a new update file, but was unsuccessful.");
+			Messenger.sendConsoleMessage("&4The auto-updater tried to unzip a new update file, but was unsuccessful.");
 			ex.printStackTrace();
 		}
 		new File(file).delete();
@@ -420,7 +377,7 @@ public class Updater implements CommandExecutor, CommandSender {
 			final JSONArray array = (JSONArray) JSONValue.parse(response);
 
 			if (array.size() == 0) {
-				plugin.getLogger().warning("The updater could not find any files for the project ID " + id);
+				Messenger.sendConsoleMessage("&4The updater could not find any files for MyZ");
 				return false;
 			}
 
@@ -431,14 +388,11 @@ public class Updater implements CommandExecutor, CommandSender {
 
 			return true;
 		} catch (final IOException e) {
-			if (e.getMessage().contains("HTTP response code: 403")) {
-				plugin.getLogger().warning("dev.bukkit.org rejected the API key provided in plugins/Updater/config.yml");
-				plugin.getLogger().warning("Please double-check your configuration to ensure it is correct.");
-			} else {
-				plugin.getLogger().warning("The updater could not contact dev.bukkit.org for updating.");
-				plugin.getLogger()
-						.warning(
-								"If you have not recently modified your configuration and this is the first time you are seeing this message, the site may be experiencing temporary downtime.");
+			if (e.getMessage().contains("HTTP response code: 403"))
+				plugin.getLogger().warning("dev.bukkit.org rejected the API key for downloading plugins.");
+			else {
+				Messenger.sendConsoleMessage("&4The updater could not contact dev.bukkit.org for updating.");
+				Messenger.sendConsoleMessage("&4The site may be experiencing temporary downtime.");
 			}
 			e.printStackTrace();
 			return false;

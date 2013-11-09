@@ -13,6 +13,7 @@ import net.minecraft.server.v1_6_R3.EntityGiantZombie;
 import net.minecraft.server.v1_6_R3.EntityHorse;
 import net.minecraft.server.v1_6_R3.EntityInsentient;
 import net.minecraft.server.v1_6_R3.EntityPigZombie;
+import net.minecraft.server.v1_6_R3.EntitySkeleton;
 import net.minecraft.server.v1_6_R3.EntityTypes;
 import net.minecraft.server.v1_6_R3.EntityZombie;
 
@@ -26,7 +27,8 @@ public enum CustomEntityType {
 
 	ZOMBIE("Zombie", 54, EntityType.ZOMBIE, EntityZombie.class, CustomEntityZombie.class), GIANT("Giant", 53, EntityType.GIANT,
 			EntityGiantZombie.class, CustomEntityGiantZombie.class), PIGMAN("PigZombie", 57, EntityType.PIG_ZOMBIE, EntityPigZombie.class,
-			CustomEntityPigZombie.class), HORSE("Horse", 100, EntityType.HORSE, EntityHorse.class, CustomEntityHorse.class);
+			CustomEntityPigZombie.class), HORSE("Horse", 100, EntityType.HORSE, EntityHorse.class, CustomEntityHorse.class), NPC(
+			"Skeleton", 51, EntityType.SKELETON, EntitySkeleton.class, CustomEntityNPC.class);
 
 	private String name;
 	private int id;
