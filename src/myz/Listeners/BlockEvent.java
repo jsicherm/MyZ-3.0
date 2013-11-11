@@ -7,6 +7,7 @@ import myz.MyZ;
 import myz.Commands.BlockCommand;
 import myz.Support.Configuration;
 
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,6 +26,7 @@ public class BlockEvent implements Listener {
 	private void onPlace(BlockPlaceEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
+		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST) { return; }
 		if (BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
 			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnPlace(e.getBlockPlaced(), e.getPlayer());
 			e.setCancelled(true);
@@ -47,10 +49,11 @@ public class BlockEvent implements Listener {
 	 *  Below are the methods for reacting to the links.
 	 */
 
-	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPlacement(BlockPlaceEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
+		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST) { return; }
 		boolean state = !Configuration.canPlace(e.getBlock());
 		if (state && e.getPlayer().hasPermission("MyZ.world_admin"))
 			return;
@@ -58,7 +61,7 @@ public class BlockEvent implements Listener {
 		e.setCancelled(state);
 	}
 
-	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDestroy(BlockBreakEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;

@@ -16,6 +16,8 @@ import net.minecraft.server.v1_6_R3.DamageSource;
 import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityHorse;
 import net.minecraft.server.v1_6_R3.EntityHuman;
+import net.minecraft.server.v1_6_R3.EntitySkeleton;
+import net.minecraft.server.v1_6_R3.EntityVillager;
 import net.minecraft.server.v1_6_R3.EntityLiving;
 import net.minecraft.server.v1_6_R3.GenericAttributes;
 import net.minecraft.server.v1_6_R3.Item;
@@ -65,6 +67,8 @@ public class CustomEntityHorse extends EntityHorse {
 		goalSelector.a(0, new PathfinderGoalFloat(this));
 		goalSelector.a(1, new PathfinderGoalPanic(this, 1.2D));
 		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getHorseSpeed(), false));
+		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getHorseSpeed(), false));
+		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, Configuration.getHorseSpeed(), false));
 		goalSelector.a(1, new PathfinderGoalTame(this, 1.2D));
 		goalSelector.a(2, new PathfinderGoalBreed(this, 1.0D));
 		goalSelector.a(3, new PathfinderGoalTempt(this, 1.0D, Item.ROTTEN_FLESH.id, false));
@@ -74,6 +78,8 @@ public class CustomEntityHorse extends EntityHorse {
 		goalSelector.a(7, new PathfinderGoalRandomLookaround(this));
 		targetSelector.a(1, new PathfinderGoalHurtByTarget(this, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntityHuman.class, 0, true));
+		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntityVillager.class, 0, true));
+		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntitySkeleton.class, 0, true));
 	}
 
 	@Override

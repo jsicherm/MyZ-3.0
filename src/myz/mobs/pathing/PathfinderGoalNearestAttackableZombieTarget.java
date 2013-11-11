@@ -9,6 +9,7 @@ import java.util.List;
 import net.minecraft.server.v1_6_R3.DistanceComparator;
 import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityCreature;
+import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityLiving;
 import net.minecraft.server.v1_6_R3.IEntitySelector;
 import net.minecraft.server.v1_6_R3.PathfinderGoalTarget;
@@ -87,7 +88,7 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 			if (!(entity instanceof EntityLiving))
 				return false;
 			Entity target = PathingSupport.findNearbyVulnerablePlayer(d.cc);
-			if (target != null && target.equals(entity))
+			if (target != null && target.equals(entity) || !(target instanceof EntityHuman))
 				return true;
 			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
 		}

@@ -15,6 +15,7 @@ import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityPigZombie;
 import net.minecraft.server.v1_6_R3.EntityVillager;
+import net.minecraft.server.v1_6_R3.EntitySkeleton;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
 import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
@@ -54,6 +55,7 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		goalSelector.a(0, new PathfinderGoalFloat(this));
 		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getPigmanSpeed(), false));
 		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getPigmanSpeed(), true));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, Configuration.getPigmanSpeed(), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(3, new PathfinderGoalRestrictOpenDoor(this));
@@ -64,6 +66,7 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		targetSelector.a(1, new PathfinderGoalHurtByTarget(this, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityHuman.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityVillager.class, 0, false));
+		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntitySkeleton.class, 0, false));
 	}
 
 	@Override

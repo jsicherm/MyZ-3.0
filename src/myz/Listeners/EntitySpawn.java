@@ -16,21 +16,32 @@ import myz.mobs.CustomEntityNPC;
 import myz.mobs.CustomEntityPigZombie;
 import myz.mobs.NPCType;
 import net.minecraft.server.v1_6_R3.DataWatcher;
+import net.minecraft.server.v1_6_R3.EntityVillager;
+import net.minecraft.server.v1_6_R3.Item;
+import net.minecraft.server.v1_6_R3.ItemStack;
+import net.minecraft.server.v1_6_R3.MerchantRecipe;
+import net.minecraft.server.v1_6_R3.MerchantRecipeList;
 import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_6_R3.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Villager;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionType;
 
 /**
  * @author Jordan
@@ -45,6 +56,12 @@ public class EntitySpawn implements Listener {
 		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName()))
 			return;
 
+		// Cancel spawning inside spawn room.
+		if (Configuration.isInLobby(e.getEntity().getLocation())) {
+			e.setCancelled(true);
+			return;
+		}
+
 		EntityType type = e.getEntityType();
 
 		// Override mooshroom spawns with giant spawns.
@@ -52,14 +69,65 @@ public class EntitySpawn implements Listener {
 			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
 			CustomEntityGiantZombie giant = new CustomEntityGiantZombie(world);
 			giant.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
-			world.addEntity(giant, SpawnReason.NATURAL);
+			world.addEntity(giant, SpawnReason.CUSTOM);
 			e.setCancelled(true);
 			return;
 		}
 
+		// Override villager trades.
+		if (e.getEntityType() == EntityType.VILLAGER) {
+			EntityVillager villager = ((CraftVillager) e.getEntity()).getHandle();
+			try {
+				Field recipes = villager.getClass().getDeclaredField("bu");
+				recipes.setAccessible(true);
+				MerchantRecipeList list = new MerchantRecipeList();
+				Potion health = new Potion(PotionType.INSTANT_HEAL);
+				Potion strength = new Potion(PotionType.STRENGTH);
+				Potion regen = new Potion(PotionType.REGEN);
+
+				switch (((Villager) e.getEntity()).getProfession()) {
+				case BLACKSMITH:
+					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_SWORD, 1), new ItemStack(Item.IRON_SWORD, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_NUGGET, 3), new ItemStack(Item.GOLD_INGOT, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_INGOT, 5), new ItemStack(Item.IRON_INGOT, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.IRON_INGOT, 10), new ItemStack(Item.DIAMOND, 1)));
+					break;
+				case BUTCHER:
+					list.a(new MerchantRecipe(new ItemStack(Item.ROTTEN_FLESH, 3), new ItemStack(Item.RAW_BEEF, 3)));
+					list.a(new MerchantRecipe(new ItemStack(Item.RAW_BEEF, 5), new ItemStack(Item.LEATHER, 2)));
+					list.a(new MerchantRecipe(new ItemStack(Item.SHEARS, 1), new ItemStack(Item.SADDLE, 1)));
+					break;
+				case FARMER:
+					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_NUGGET, 1), new ItemStack(Item.MILK_BUCKET, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.LEATHER, 3), new ItemStack(Item.LEASH, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.COOKED_BEEF, 3), new ItemStack(Item.EGG, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.MILK_BUCKET, 2), new ItemStack(Item.EGG, 1), new ItemStack(Item.CAKE, 2)));
+					break;
+				case LIBRARIAN:
+					list.a(new MerchantRecipe(new ItemStack(Item.PAPER, 1), new ItemStack(Item.BOOK_AND_QUILL, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.PAPER, 3), new ItemStack(Item.LEATHER_CHESTPLATE, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.BOOK, 2), new ItemStack(Item.STICK, 3)));
+					break;
+				case PRIEST:
+					list.a(new MerchantRecipe(new ItemStack(Item.NETHER_STAR, 1), CraftItemStack.asNMSCopy(health.toItemStack(1))));
+					list.a(new MerchantRecipe(new ItemStack(Item.NETHER_STAR, 2), CraftItemStack.asNMSCopy(strength.toItemStack(1))));
+					list.a(new MerchantRecipe(CraftItemStack.asNMSCopy(health.toItemStack(1)), CraftItemStack.asNMSCopy(strength
+							.toItemStack(1)), CraftItemStack.asNMSCopy(regen.toItemStack(1))));
+					break;
+				default:
+					break;
+
+				}
+				recipes.set(villager, list);
+			} catch (Exception exc) {
+				exc.printStackTrace();
+			}
+		}
+
+		// Spawn NPCs
 		if (type == EntityType.SKELETON && e.getSpawnReason() != SpawnReason.CUSTOM) {
 			e.setCancelled(true);
-			if (random.nextDouble() <= 0.75) { return; }
+			if (random.nextDouble() <= 0.9) { return; }
 			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
 			NPCType npctype;
 			CustomEntityNPC npc = new CustomEntityNPC(world, npctype = NPCType.getRandom());
@@ -101,10 +169,7 @@ public class EntitySpawn implements Listener {
 		} else if (type == EntityType.SKELETON && e.getSpawnReason() == SpawnReason.CUSTOM) { return; }
 
 		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
-				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION) {
-			System.out.println(e.getSpawnReason() + " (" + e.getEntityType() + ")");
-			return;
-		}
+				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION) { return; }
 
 		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard"))
 			if (WorldGuardManager.isAmplifiedRegion(e.getLocation())) {
@@ -131,15 +196,13 @@ public class EntitySpawn implements Listener {
 			}
 		// Make sure we only spawn our desired mobs.
 		if (type != EntityType.ZOMBIE && type != EntityType.GIANT && type != EntityType.HORSE && type != EntityType.PLAYER
-				&& type != EntityType.PIG_ZOMBIE && type != EntityType.SKELETON) {
+				&& type != EntityType.PIG_ZOMBIE && type != EntityType.SKELETON && type != EntityType.VILLAGER) {
 			e.setCancelled(true);
 			return;
 		}
 
-		// Cancel spawning inside spawn room.
-		if (Configuration.isInLobby(e.getEntity().getLocation())) {
-			e.setCancelled(true);
-			return;
+		if (e.getEntityType() == EntityType.ZOMBIE) {
+			((Zombie) e.getEntity()).setBaby(random.nextInt(5) < 3);
 		}
 
 		// Make some natural pigmen spawn.
@@ -147,6 +210,7 @@ public class EntitySpawn implements Listener {
 			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
 			CustomEntityPigZombie pigman = new CustomEntityPigZombie(world);
 			pigman.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
+			pigman.setBaby(random.nextInt(5) < 3);
 			world.addEntity(pigman, SpawnReason.NATURAL);
 			e.setCancelled(true);
 			return;

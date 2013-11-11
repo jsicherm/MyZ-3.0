@@ -17,6 +17,7 @@ import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityLiving;
 import net.minecraft.server.v1_6_R3.EntityVillager;
+import net.minecraft.server.v1_6_R3.EntitySkeleton;
 import net.minecraft.server.v1_6_R3.EntityZombie;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
@@ -61,6 +62,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 		goalSelector.a(0, new PathfinderGoalFloat(this));
 		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getZombieSpeed(), false));
 		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getZombieSpeed(), true));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, Configuration.getZombieSpeed(), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(6, new PathfinderGoalRandomStroll(this, 1.0D));
@@ -72,6 +74,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 		targetSelector.a(1, new PathfinderGoalHurtByTarget(this, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityHuman.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityVillager.class, 0, false));
+		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntitySkeleton.class, 0, false));
 	}
 
 	@Override

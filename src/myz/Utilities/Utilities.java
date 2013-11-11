@@ -434,8 +434,9 @@ public class Utilities {
 			public void run() {
 				Packet20NamedEntitySpawn cp = new Packet20NamedEntitySpawn();
 				EntityInsentient npc = null;
+				UUID uid = packets.get(packet).uuid;
 				for (Entity entity : player.getWorld().getEntitiesByClass(Skeleton.class))
-					if (entity.getUniqueId() == packets.get(packet).uuid) {
+					if (entity.getUniqueId() == uid) {
 						npc = ((CraftSkeleton) entity).getHandle();
 						break;
 					}
@@ -460,7 +461,7 @@ public class Utilities {
 					exc.printStackTrace();
 				}
 			}
-		}, 5L);
+		}, 20L);
 	}
 
 	public static class WorldUUID {
