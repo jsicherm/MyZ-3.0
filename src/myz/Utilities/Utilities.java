@@ -418,6 +418,19 @@ public class Utilities {
 	}
 
 	/**
+	 * Send a packet to every player in the world without saving it.
+	 * 
+	 * @param world
+	 *            The world.
+	 * @param packet
+	 *            The packet.
+	 */
+	public static void distributePacket(org.bukkit.World world, Packet packet) {
+		for (Player player : world.getPlayers())
+			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+	}
+
+	/**
 	 * Send a player a packet.
 	 * 
 	 * @param player
@@ -475,6 +488,10 @@ public class Utilities {
 
 		public String getWorld() {
 			return world;
+		}
+
+		public UUID getUUID() {
+			return uuid;
 		}
 	}
 }

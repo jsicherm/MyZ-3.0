@@ -29,6 +29,7 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_6_R3.entity.CraftVillager;
 import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
@@ -84,10 +85,12 @@ public class EntitySpawn implements Listener {
 				Potion health = new Potion(PotionType.INSTANT_HEAL);
 				Potion strength = new Potion(PotionType.STRENGTH);
 				Potion regen = new Potion(PotionType.REGEN);
+				org.bukkit.inventory.ItemStack sword = new org.bukkit.inventory.ItemStack(Material.STONE_SWORD);
+				sword.addEnchantment(Enchantment.DAMAGE_ALL, 2);
 
 				switch (((Villager) e.getEntity()).getProfession()) {
 				case BLACKSMITH:
-					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_SWORD, 1), new ItemStack(Item.IRON_SWORD, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Item.IRON_SWORD, 1), CraftItemStack.asNMSCopy(sword)));
 					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_NUGGET, 3), new ItemStack(Item.GOLD_INGOT, 1)));
 					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_INGOT, 5), new ItemStack(Item.IRON_INGOT, 1)));
 					list.a(new MerchantRecipe(new ItemStack(Item.IRON_INGOT, 10), new ItemStack(Item.DIAMOND, 1)));
@@ -110,7 +113,7 @@ public class EntitySpawn implements Listener {
 					break;
 				case PRIEST:
 					list.a(new MerchantRecipe(new ItemStack(Item.NETHER_STAR, 1), CraftItemStack.asNMSCopy(health.toItemStack(1))));
-					list.a(new MerchantRecipe(new ItemStack(Item.NETHER_STAR, 2), CraftItemStack.asNMSCopy(strength.toItemStack(1))));
+					list.a(new MerchantRecipe(new ItemStack(Item.GOLDEN_APPLE, 2), CraftItemStack.asNMSCopy(strength.toItemStack(1))));
 					list.a(new MerchantRecipe(CraftItemStack.asNMSCopy(health.toItemStack(1)), CraftItemStack.asNMSCopy(strength
 							.toItemStack(1)), CraftItemStack.asNMSCopy(regen.toItemStack(1))));
 					break;
@@ -202,7 +205,7 @@ public class EntitySpawn implements Listener {
 		}
 
 		if (e.getEntityType() == EntityType.ZOMBIE) {
-			((Zombie) e.getEntity()).setBaby(random.nextInt(5) < 3);
+			((Zombie) e.getEntity()).setBaby(random.nextInt(20) < 3);
 		}
 
 		// Make some natural pigmen spawn.
@@ -210,7 +213,7 @@ public class EntitySpawn implements Listener {
 			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
 			CustomEntityPigZombie pigman = new CustomEntityPigZombie(world);
 			pigman.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
-			pigman.setBaby(random.nextInt(5) < 3);
+			pigman.setBaby(random.nextInt(20) < 3);
 			world.addEntity(pigman, SpawnReason.NATURAL);
 			e.setCancelled(true);
 			return;

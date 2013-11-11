@@ -4,8 +4,11 @@
 package myz.mobs;
 
 import java.lang.reflect.Field;
+import java.util.UUID;
 
+import myz.MyZ;
 import myz.Support.Configuration;
+import myz.Utilities.Utilities;
 import myz.mobs.pathing.PathfinderGoalFollow;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
@@ -18,6 +21,9 @@ import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntitySkeleton;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
+import net.minecraft.server.v1_6_R3.Packet;
+import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
+import net.minecraft.server.v1_6_R3.Packet29DestroyEntity;
 import net.minecraft.server.v1_6_R3.PathfinderGoalArrowAttack;
 import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
 import net.minecraft.server.v1_6_R3.PathfinderGoalHurtByTarget;
@@ -123,12 +129,12 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 
 	@Override
 	protected String r() {
-		return "random.breathe";
+		return "mob.villager.idle";
 	}
 
 	@Override
 	protected String aO() {
-		return "damage.hit"; // random.classic_hurt
+		return "mob.villager.hit"; // random.classic_hurt
 	}
 
 	@Override
@@ -281,6 +287,44 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		Entity entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
 
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
+	}
+
+	@Override
+	public void die() {
+		destroySelf();
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		destroySelf();
+	}
+
+	/**
+	 * Destroy our packet. Did someone say GARBAGE CLEANUP? Hopefully.
+	 */
+	private void destroySelf() {
+		final UUID uid = getBukkitEntity().getUniqueId();
+		int a = 0;
+
+		for (Packet packet : Utilities.packets.keySet()) {
+			if (Utilities.packets.get(packet).getUUID().equals(uid)) {
+				Utilities.packets.remove(packet);
+				a = ((Packet20NamedEntitySpawn) packet).a;
+				break;
+			}
+		}
+
+		final int A = a;
+
+		// Send a destroy packet 3 seconds later (give entity time to do death
+		// animation).
+		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			public void run() {
+				if (A == 0) { return; }
+				Packet29DestroyEntity packet = new Packet29DestroyEntity(A);
+				Utilities.distributePacket(getBukkitEntity().getWorld(), packet);
+			}
+		}, 20 * 3);
 	}
 
 	@Override
