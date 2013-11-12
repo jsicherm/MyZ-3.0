@@ -306,13 +306,14 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		final UUID uid = getBukkitEntity().getUniqueId();
 		int a = 0;
 
-		for (Packet packet : Utilities.packets.keySet()) {
-			if (Utilities.packets.get(packet).getUUID().equals(uid)) {
-				Utilities.packets.remove(packet);
-				a = ((Packet20NamedEntitySpawn) packet).a;
-				break;
+		if (Utilities.packets != null)
+			for (Packet packet : Utilities.packets.keySet()) {
+				if (Utilities.packets.get(packet).getUUID().equals(uid)) {
+					Utilities.packets.remove(packet);
+					a = ((Packet20NamedEntitySpawn) packet).a;
+					break;
+				}
 			}
-		}
 
 		final int A = a;
 

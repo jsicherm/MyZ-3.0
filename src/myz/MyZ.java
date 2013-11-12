@@ -269,7 +269,8 @@ public class MyZ extends JavaPlugin {
 						&& (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT
 								|| entity.getType() == EntityType.HORSE || entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.SKELETON))
 					entity.remove();
-		Utilities.packets.clear();
+		if (Utilities.packets != null)
+			Utilities.packets.clear();
 	}
 
 	/**
