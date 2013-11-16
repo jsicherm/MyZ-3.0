@@ -125,11 +125,11 @@ public class BlockCommand implements CommandExecutor {
 				return;
 
 			}
+			String item = hand.getType().toString().toLowerCase().replaceAll("_", " ");
 			Messenger.sendMessage(
 					player,
 					Messenger.getConfigMessage("command.block.destroy." + slug, hit.getType().toString().toLowerCase().replaceAll("_", " ")
-							+ (hit.getData() != (byte) 0 ? ":" + hit.getData() : ""),
-							hand.getType().toString().toLowerCase().replaceAll("_", " ")));
+							+ (hit.getData() != (byte) 0 ? ":" + hit.getData() : ""), item == "air" ? "anything" : item));
 		}
 
 		/**

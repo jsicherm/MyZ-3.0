@@ -536,10 +536,10 @@ public class Configuration {
 					"&4Usage: /blockallow destroy <add [seconds until respawn]/remove>");
 		if (!localizableConfig.contains("localizable.command.block.destroy.add.help"))
 			localizableConfig.set("localizable.command.block.destroy.add.help",
-					"&eNow left-click the block you want to whitelist with the item you want to allow breaking with.");
+					"&eNow break the block you want to whitelist with the item you want to allow breaking with.");
 		if (!localizableConfig.contains("localizable.command.block.destroy.remove.help"))
 			localizableConfig.set("localizable.command.block.destroy.remove.help",
-					"&eNow left-click the block you want blacklist with the item that you can currently break with.");
+					"&eNow break the block you want blacklist with the item that you can currently break with.");
 		if (!localizableConfig.contains("localizable.command.block.place.add.help"))
 			localizableConfig.set("localizable.command.block.place.add.help", "&eNow place the block you would like to whitelist.");
 		if (!localizableConfig.contains("localizable.command.block.place.remove.help"))
@@ -697,6 +697,13 @@ public class Configuration {
 		spawnConfig.set("spawn.default_kit.boots", ranked_boots.get(0));
 		spawnConfig.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
 
+		for (int entry : rank_prefix.keySet()) {
+			config.set("ranks.names." + entry, rank_prefix.get(entry));
+		}
+
+		spawnConfig.set("lobby.min", lobby_min);
+		spawnConfig.set("lobby.max", lobby_max);
+
 		for (int position = 1; position < ranked_helmet.size(); position++)
 			spawnConfig.set("spawn.kit_" + position + ".helmet", ranked_helmet.get(position));
 		for (int position = 1; position < ranked_chestplate.size(); position++)
@@ -709,7 +716,6 @@ public class Configuration {
 			spawnConfig.set("spawn.kit_" + position + ".inventory_contents", ranked_inventory.get(position));
 
 		MyZ.instance.saveConfig();
-		MyZ.instance.saveLocalizableConfig();
 		MyZ.instance.saveSpawnConfig();
 	}
 
@@ -779,8 +785,8 @@ public class Configuration {
 		Location min = selection.getMinimumPoint();
 		Location max = selection.getMaximumPoint();
 
-		Configuration.lobby_min = min.getX() + "," + min.getY() + "," + min.getZ();
-		Configuration.lobby_max = max.getX() + "," + max.getY() + "," + max.getZ();
+		lobby_min = min.getX() + "," + min.getY() + "," + min.getZ();
+		lobby_max = max.getX() + "," + max.getY() + "," + max.getZ();
 
 		save();
 	}
@@ -1549,8 +1555,11 @@ public class Configuration {
 			compare.setDurability(block.getData());
 			int time = -1;
 			for (ItemStack key : allow_destroy.keySet())
-				if (key.isSimilar(compare))
-					time = allow_destroy.get(key).time;
+				if (key.isSimilar(compare)) {
+					if (isVaguelySimilar(allow_destroy.get(key).item, with))
+						time = allow_destroy.get(key).time;
+					break;
+				}
 			Sync.addRespawningBlock(block, time);
 			return false;
 		}
@@ -1569,7 +1578,7 @@ public class Configuration {
 	 *         durability.
 	 */
 	private static boolean isVaguelySimilar(ItemStack stack, ItemStack stack1) {
-		return stack1.getType() == stack.getType() && stack1.hasItemMeta() == stack.hasItemMeta()
+		return (stack1.getType() == stack.getType() || stack1.getType() == Material.AIR) && stack1.hasItemMeta() == stack.hasItemMeta()
 				&& (stack1.hasItemMeta() ? Bukkit.getItemFactory().equals(stack1.getItemMeta(), stack.getItemMeta()) : true);
 	}
 
@@ -1583,9 +1592,9 @@ public class Configuration {
 	 * @return True if players can break the block, false otherwise.
 	 */
 	public static boolean canBreak(Block block, ItemStack with) {
+		ItemStack compare = new ItemStack(block.getType());
+		compare.setDurability(block.getData());
 		for (ItemStack key : allow_destroy.keySet()) {
-			ItemStack compare = new ItemStack(block.getType());
-			compare.setDurability(block.getData());
 			if (key.isSimilar(compare))
 				if (isVaguelySimilar(allow_destroy.get(key).item, with))
 					return true;
