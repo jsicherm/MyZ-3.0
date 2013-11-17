@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
@@ -39,7 +40,7 @@ public class PlayerHurtEntity implements Listener {
 		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
 			return;
 		// Cancel damage inside spawn room.
-		if (Configuration.isInLobby(e.getDamager().getLocation()))
+		if (Configuration.isInLobby(e.getDamager().getLocation()) && e.getEntityType() == EntityType.PLAYER)
 			e.setCancelled(true);
 
 		// Do widespread hits with axes when crouched.

@@ -38,7 +38,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
-			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed, is_auto;
+			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed, is_auto, npc;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
@@ -115,6 +115,7 @@ public class Configuration {
 		horse_damage = config.getDouble("mobs.horse.damage");
 		bandit_kills = config.getInt("statistics.bandit_kills");
 		healer_heals = config.getInt("statistics.healer_heals");
+		npc = config.getBoolean("mobs.npc.enabled");
 		zombie_speed = config.getDouble("mobs.zombie.speed");
 		npc_speed = config.getDouble("mobs.npc.speed");
 		horse_speed = config.getDouble("mobs.horse.speed");
@@ -298,6 +299,8 @@ public class Configuration {
 			config.set("mobs.pigman.damage", 3.0);
 		if (!config.contains("mobs.horse.damage"))
 			config.set("mobs.horse.damage", 1.0);
+		if (!config.contains("mobs.npc.enabled"))
+			config.set("mobs.npc.enabled", true);
 		if (!config.contains("mobs.npc.damage"))
 			config.set("mobs.npc.damage", 1.0);
 		if (!config.contains("mobs.zombie.speed"))
@@ -1707,6 +1710,13 @@ public class Configuration {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return the npc
+	 */
+	public static boolean isNPC() {
+		return npc;
 	}
 
 	/**

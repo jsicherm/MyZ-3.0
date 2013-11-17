@@ -128,6 +128,11 @@ public class EntitySpawn implements Listener {
 		}
 
 		// Spawn NPCs
+		if (type == EntityType.SKELETON && !Configuration.isNPC()) {
+			e.setCancelled(true);
+			return;
+		}
+		
 		if (type == EntityType.SKELETON && e.getSpawnReason() != SpawnReason.CUSTOM) {
 			e.setCancelled(true);
 			if (random.nextDouble() <= 0.9) { return; }
@@ -193,7 +198,7 @@ public class EntitySpawn implements Listener {
 						e.getLocation().getWorld().spawnEntity(newLocation, e.getEntityType());
 				}
 			} else // Decrease natural spawns outside of towns.
-			if (random.nextDouble() <= 0.3) {
+			if (random.nextDouble() <= 0.45) {
 				e.setCancelled(true);
 				return;
 			}

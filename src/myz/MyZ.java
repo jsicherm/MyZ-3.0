@@ -93,7 +93,6 @@ public class MyZ extends JavaPlugin {
 	// TODO complete MultiWorld
 	// TODO air pollution random event
 	// TODO random objectives/events
-	// TODO baby zombie packs
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
