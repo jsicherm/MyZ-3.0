@@ -3,6 +3,9 @@
  */
 package myz.mobs.pathing;
 
+import org.bukkit.entity.Player;
+
+import myz.MyZ;
 import net.minecraft.server.v1_6_R3.EntityCreature;
 import net.minecraft.server.v1_6_R3.EntityLiving;
 import net.minecraft.server.v1_6_R3.MathHelper;
@@ -74,6 +77,14 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 
 	@Override
 	public void e() {
+		boolean disguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
+		if (b.getGoalTarget().getBukkitEntity() instanceof Player && disguise
+				&& myz.Utilities.DisguiseUtilities.isZombie((Player) b.getGoalTarget().getBukkitEntity())) {
+			b.setGoalTarget(null);
+			return;
+		}
+
 		EntityLiving entityliving = b.getGoalTarget();
 
 		b.getControllerLook().a(entityliving, 30.0F, 30.0F);

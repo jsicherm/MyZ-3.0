@@ -10,6 +10,7 @@ import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.DisguiseUtilities;
 import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityPlayer;
 
@@ -112,6 +113,13 @@ public class JoinQuit implements Listener {
 			for (Object packet : Utilities.packets.keySet())
 				if (player.getWorld().getName().equals(Utilities.packets.get(packet).getWorld()))
 					Utilities.sendPacket(player, packet);
+		if (MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
+			if ((data != null && data.isZombie())
+					|| (MyZ.instance.getSQLManager().isConnected() && MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))) {
+				DisguiseUtilities.becomeZombie(player);
+			}
+		}
 	}
 
 	@EventHandler

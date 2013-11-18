@@ -3,12 +3,8 @@
  */
 package myz.Listeners;
 
-import java.lang.reflect.Field;
-
 import myz.MyZ;
 import myz.Utilities.Utilities;
-import net.minecraft.server.v1_6_R3.Connection;
-import net.minecraft.server.v1_6_R3.EntityPlayer;
 import net.minecraft.server.v1_6_R3.Packet205ClientCommand;
 
 import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
@@ -45,6 +41,7 @@ public class PlayerDeath implements Listener {
 		revive(e.getEntity());
 		MyZ.instance.putPlayerAtSpawn(e.getEntity(), true);
 
+		e.setDeathMessage(e.getDeathMessage().replaceAll("Skeleton", "NPC"));
 		e.setDroppedExp(0);
 		e.getDrops().clear();
 	}
@@ -55,23 +52,11 @@ public class PlayerDeath implements Listener {
 	 * @param p
 	 *            The player to respawn immediately.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void revive(Player p) {
 		if (!p.isDead())
 			return;
-		try {
-			Class packet = Packet205ClientCommand.class;
-			Object name = packet.getConstructor(new Class[0]).newInstance(new Object[0]);
-			Field a = packet.getDeclaredField("a");
-			a.setAccessible(true);
-			a.set(name, 1);
-			Object nmsPlayer = CraftPlayer.class.getMethod("getHandle", new Class[0]).invoke(p, new Object[0]);
-			Field con = EntityPlayer.class.getDeclaredField("playerConnection");
-			con.setAccessible(true);
-			Object handle = con.get(nmsPlayer);
-			packet.getDeclaredMethod("handle", Connection.class).invoke(name, handle);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Packet205ClientCommand packet = new Packet205ClientCommand();
+		packet.a = 1;
+		((CraftPlayer) p).getHandle().playerConnection.a(packet);
 	}
 }

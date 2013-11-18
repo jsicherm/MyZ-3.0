@@ -68,6 +68,11 @@ public class SetRankCommand implements CommandExecutor {
 				Messenger.sendConfigMessage(sender, "command.setrank.success");
 			else
 				Messenger.sendConfigConsoleMessage("command.setrank.success");
+		} else {
+			if (sender instanceof Player)
+				Messenger.sendConfigMessage(sender, "command.setrank.failure");
+			else
+				Messenger.sendConfigConsoleMessage("command.setrank.failure");
 		}
 		return true;
 	}

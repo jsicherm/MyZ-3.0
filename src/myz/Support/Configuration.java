@@ -134,15 +134,15 @@ public class Configuration {
 		bleed_chance = config.getDouble("damage.chance_of_bleeding");
 		poison_chance_flesh = config.getDouble("damage.chance_of_poison_from_flesh");
 		poison_chance_zombie = config.getDouble("damage.chance_of_poison_from_zombie");
-		lobby_min = config.getString("lobby.min");
-		lobby_max = config.getString("lobby.max");
+		lobby_min = spawnConfig.getString("lobby.min");
+		lobby_max = spawnConfig.getString("lobby.max");
 		host = config.getString("mysql.host");
 		database = config.getString("mysql.database");
 		user = config.getString("mysql.user");
 		password = config.getString("mysql.password");
 		port = config.getInt("mysql.port");
 		save_data = config.getBoolean("ranks.save_data_of_unranked_players");
-		spawnpoints = new ArrayList<String>(config.getStringList("spawnpoints"));
+		spawnpoints = new ArrayList<String>(spawnConfig.getStringList("spawnpoints"));
 		autofriend = config.getBoolean("friends.autofriend");
 		safespawn_radius = config.getInt("spawn.safespawn_radius");
 		max_thirst = config.getInt("water.max_level");
@@ -451,6 +451,10 @@ public class Configuration {
 		if (!localizableConfig.contains("localizable.npc_names.wanderer.enemy"))
 			localizableConfig
 					.set("localizable.npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
+		if (!localizableConfig.contains("localizable.spawn.zombie"))
+			localizableConfig
+					.set("localizable.spawn.zombie",
+							"You are &2infected&r! As a zombie, you aren't targetted by other zombies. You never get thirsty or bleed but don't start with a spawn kit and are hunted by the living.");
 		if (!localizableConfig.contains("localizable.science_gui"))
 			localizableConfig.set("localizable.science_gui", "Science Centre - %s pts.");
 		if (!localizableConfig.contains("localizable.gui.purchased"))
@@ -670,12 +674,12 @@ public class Configuration {
 				config.set("blocks.destroy." + entry, null);
 
 		// Spawning begin.
-		if (!config.contains("lobby.min"))
-			config.set("lobby.min", "0,0,0");
-		if (!config.contains("lobby.max"))
-			config.set("lobby.max", "0,0,0");
-		if (!config.contains("spawnpoints"))
-			config.set("spawnpoints", new ArrayList<String>());
+		if (!spawnConfig.contains("lobby.min"))
+			spawnConfig.set("lobby.min", "0,0,0");
+		if (!spawnConfig.contains("lobby.max"))
+			spawnConfig.set("lobby.max", "0,0,0");
+		if (!spawnConfig.contains("spawnpoints"))
+			spawnConfig.set("spawnpoints", new ArrayList<String>());
 
 		MyZ.instance.saveConfig();
 		MyZ.instance.saveLocalizableConfig();

@@ -26,7 +26,7 @@ public class PlayerData {
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
 			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record,
 			deaths, rank, heals_life, thirst, minutes_alive_life, minutes_alive_life_record, research;
-	private boolean isBleeding, isPoisoned, wasKilledNPC, autosave = true;
+	private boolean isBleeding, isPoisoned, wasKilledNPC, isZombie, autosave = true;
 	private long timeOfKickban, minutes_alive;
 	private String clan;
 	private List<String> friends = new ArrayList<String>();
@@ -35,7 +35,7 @@ public class PlayerData {
 			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int deaths, int rank, boolean isBleeding,
 			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan,
 			long minutes_alive, int minutes_alive_life, int minutes_alive_life_record, int player_kills_life_record,
-			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record, int research) {
+			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record, int research, boolean isZombie) {
 		this.name = name;
 		this.player_kills = player_kills;
 		this.zombie_kills = zombie_kills;
@@ -59,6 +59,7 @@ public class PlayerData {
 		this.heals_life = heals_life;
 		this.thirst = thirst;
 		this.clan = clan;
+		this.isZombie = isZombie;
 		this.friends = new ArrayList<String>(friends);
 		this.minutes_alive = minutes_alive;
 		this.minutes_alive_life = minutes_alive_life;
@@ -93,7 +94,7 @@ public class PlayerData {
 				section.getString("clan"), section.getInt("minutes.played"), section.getInt("minutes.played_life"),
 				section.getInt("minutes.played_life_record"), section.getInt("player.kills_life_record"),
 				section.getInt("zombie.kills_life_record"), section.getInt("pigman.kills_life_record"),
-				section.getInt("giant.kills_life_record"), section.getInt("research"));
+				section.getInt("giant.kills_life_record"), section.getInt("research"), section.getBoolean("zombie"));
 	}
 
 	/**
@@ -151,6 +152,8 @@ public class PlayerData {
 	 *            The highest number of giants killed in one life.
 	 * @param research
 	 *            The number of research points owned.
+	 * @param isZombie
+	 *            Whether or not the player is a zombie.
 	 * @return The PlayerData object created.
 	 */
 	public static PlayerData createDataFor(Player player, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
@@ -158,7 +161,7 @@ public class PlayerData {
 			boolean isBleeding, boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life,
 			int thirst, String clan, long minutes_alive, int minutes_alive_life, int minutes_alive_life_record,
 			int player_kills_life_record, int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record,
-			int research) {
+			int research, boolean isZombie) {
 		if (!Configuration.usePlayerData())
 			return null;
 		if (!playerDataExists(player)) {
@@ -189,6 +192,7 @@ public class PlayerData {
 			section.set("minutes.played_life", minutes_alive_life);
 			section.set("minutes.played_life_record", minutes_alive_life_record);
 			section.set("research", research);
+			section.set("zombie", isZombie);
 			try {
 				MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
 			} catch (IOException e) {
@@ -265,6 +269,7 @@ public class PlayerData {
 				section.set("minutes.played_life", minutes_alive_life);
 				section.set("minutes.played_life_record", minutes_alive_life_record);
 				section.set("research", research);
+				section.set("zombie", isZombie);
 				try {
 					MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
 				} catch (IOException e) {
@@ -809,6 +814,21 @@ public class PlayerData {
 	 */
 	public int getResearchPoints() {
 		return research;
+	}
+
+	/**
+	 * @return the isZombie
+	 */
+	public boolean isZombie() {
+		return isZombie;
+	}
+
+	/**
+	 * @param isZombie
+	 *            the isZombie to set
+	 */
+	public void setZombie(boolean isZombie) {
+		this.isZombie = isZombie;
 	}
 
 	/**

@@ -21,6 +21,10 @@
       <id>mcstats-repo</id>
       <url>http://repo.mcstats.org/content/repositories/public/</url>
     </repository>
+    <repository>
+      <id>disguisecraft-repo</id>
+      <url>http://build.yu8.me:8080/plugin/repository/everything/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -50,10 +54,15 @@
 	  <version>LATEST</version>
 	</dependency>
 	<dependency>
-        <groupId>org.mcstats.bukkit</groupId>
-        <artifactId>metrics-lite</artifactId>
-        <version>LATEST</version>
-        <scope>compile</scope>
+      <groupId>org.mcstats.bukkit</groupId>
+      <artifactId>metrics-lite</artifactId>
+      <version>LATEST</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>pgDev</groupId>
+      <artifactId>DisguiseCraft</artifactId>
+      <version>5.0</version>
     </dependency>
   </dependencies>
   	

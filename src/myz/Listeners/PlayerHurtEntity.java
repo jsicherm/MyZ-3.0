@@ -68,7 +68,7 @@ public class PlayerHurtEntity implements Listener {
 		}
 
 		// Bleeding effect (not PDE but for general EDE)
-		if (Configuration.isBleed()) {
+		if (Configuration.isBleed() && e.getDamage() > 0) {
 			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 		}

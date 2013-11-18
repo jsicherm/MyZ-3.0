@@ -1,7 +1,7 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.6.12
-softdepend: [WorldEdit, WorldGuard, TagAPI, BuildInABox]
+version: 3.0.6.13
+softdepend: [WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft]
 description: MyZ 3.0 with chest support by SirAntony.
 authors: [TeeePeee, SirAntony]
 

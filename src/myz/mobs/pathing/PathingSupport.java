@@ -57,9 +57,16 @@ public class PathingSupport {
 		double shortest_distance = -1.0D;
 		EntityHuman entityhuman = null;
 
+		boolean disguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
+
 		for (int i = 0; i < world.players.size(); ++i) {
 			EntityHuman player = (EntityHuman) world.players.get(i);
 
+			if (disguise && myz.Utilities.DisguiseUtilities.isZombie((Player) player.getBukkitEntity())) {
+				continue;
+			}
+			
 			if (!player.abilities.isInvulnerable && player.isAlive()) {
 				// Make sure we don't target our owner if we're a horse.
 				if (entity instanceof EntityHorse

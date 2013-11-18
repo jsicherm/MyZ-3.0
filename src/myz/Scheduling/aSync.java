@@ -30,6 +30,12 @@ public class aSync implements Runnable {
 
 	private static int ticks = 0;
 	private static final Random random = new Random();
+	private final boolean isDisguise;
+
+	public aSync() {
+		isDisguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
+	}
 
 	@Override
 	public void run() {
@@ -59,6 +65,12 @@ public class aSync implements Runnable {
 								amount = MyZ.instance.getSQLManager().getInt(player.getName(), "minutes_alive_life") + 1, true);
 						if (amount > MyZ.instance.getSQLManager().getInt(player.getName(), "minutes_alive_record"))
 							MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive_record", amount, true);
+					}
+				}
+
+				if (isDisguise) {
+					if (myz.Utilities.DisguiseUtilities.isZombie(player)) {
+						continue;
 					}
 				}
 

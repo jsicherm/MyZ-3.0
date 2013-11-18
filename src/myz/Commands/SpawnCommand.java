@@ -38,6 +38,7 @@ public class SpawnCommand implements CommandExecutor {
 						if (spawnpoint > numberOfSpawns)
 							spawnpoint = numberOfSpawns;
 					} catch (NumberFormatException exc) {
+						
 					}
 				MyZ.instance.spawnPlayer((Player) sender, spawnpoint, spawnpoint != -1, 0);
 			} else

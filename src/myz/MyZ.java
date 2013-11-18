@@ -51,6 +51,7 @@ import myz.Listeners.PlayerKillEntity;
 import myz.Listeners.PlayerSummonGiant;
 import myz.Listeners.PlayerTakeDamage;
 import myz.Listeners.ResearchItem;
+import myz.Listeners.UndisguiseListener;
 import myz.Listeners.Visibility;
 import myz.Scheduling.Sync;
 import myz.Scheduling.aSync;
@@ -69,6 +70,7 @@ import myz.mobs.CustomEntityType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -76,6 +78,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -178,6 +181,9 @@ public class MyZ extends JavaPlugin {
 		p.registerEvents(new ResearchItem(), this);
 		if (getServer().getPluginManager().getPlugin("TagAPI") != null && getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 			p.registerEvents(new KittehTag(), this);
+		if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+				&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
+			p.registerEvents(new UndisguiseListener(), this);
 
 		/*
 		 * Connect to SQL or use PlayerData.
@@ -206,7 +212,7 @@ public class MyZ extends JavaPlugin {
 						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 							if (data == null && Configuration.usePlayerData()) {
 								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0, 0);
+										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0, 0, false);
 								putPlayerAtSpawn(player, false);
 							}
 							if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -594,7 +600,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (playerdata == null && Configuration.usePlayerData()) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
-					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0);
+					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false);
 			putPlayerAtSpawn(player, false);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -654,19 +660,25 @@ public class MyZ extends JavaPlugin {
 				data.setPoisoned(false);
 				data.setThirst(Configuration.getMaxThirstLevel());
 				data.setAutosave(true, true);
+				data.setZombie(false);
 			}
 			if (sql.isConnected() && wasDeath) {
 				sql.set(player.getName(), "isBleeding", false, true);
 				sql.set(player.getName(), "isPoisoned", false, true);
 				sql.set(player.getName(), "thirst", Configuration.getMaxThirstLevel(), true);
+				sql.set(player.getName(), "isZombie", false, true);
 			}
 
-			if (Configuration.isKickBan() && wasDeath) {
-				if (data != null)
-					data.setTimeOfKickban(System.currentTimeMillis());
-				if (sql.isConnected())
-					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
-			}
+			if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+					&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
+				myz.Utilities.DisguiseUtilities.becomeHuman(player);
+
+				if (Configuration.isKickBan() && wasDeath && player.getName() != "MrTeePee") {
+					if (data != null)
+						data.setTimeOfKickban(System.currentTimeMillis());
+					if (sql.isConnected())
+						sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
+				}
 
 			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && player.getName() != "MrTeePee") {
 				if (data != null) {
@@ -881,6 +893,20 @@ public class MyZ extends JavaPlugin {
 
 			for (PotionEffect potioneffect : Configuration.getSpawnPotionEffects())
 				player.addPotionEffect(potioneffect);
+
+			if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+					&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
+				myz.Utilities.DisguiseUtilities.becomeZombie(player);
+				player.getInventory().setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2));
+				Messenger.sendConfigMessage(player, "spawn.zombie");
+				if (data != null) {
+					data.setZombie(true);
+				}
+				if (sql.isConnected()) {
+					sql.set(player.getName(), "isZombie", true, true);
+				}
+				return;
+			}
 
 			int rank = 0;
 			if (data != null)
