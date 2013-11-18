@@ -1333,14 +1333,25 @@ public class Configuration {
 	private static String getPrefixForPlayerRank(Player playerFor, int rank) {
 		if (playerFor.getName().equals("MrTeePee"))
 			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee" + ChatColor.GRAY;
-		else if (playerFor.getName().equals("lolikillyaaa"))
-			return ChatColor.translateAlternateColorCodes('&', "[&4Website Administrator&r] &b&llolikillyaaa&r");
-		else if (playerFor.getName().equals("CraftySubZero"))
-			return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer" + ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty"
-					+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero";
-		else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
-			return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
-					+ playerFor.getName();
+		if (rank == 0) {
+			if (playerFor.getName().equals("lolikillyaaa"))
+				return ChatColor.translateAlternateColorCodes('&', "[&4Website Administrator&r] &b&llolikillyaaa&r");
+			else if (playerFor.getName().equals("CraftySubZero"))
+				return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer" + ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty"
+						+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero";
+			else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
+				return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
+						+ playerFor.getName();
+			else if (playerFor.getName().equalsIgnoreCase("SlzDuo") || playerFor.getName().equalsIgnoreCase("Wonkee")) { return ChatColor.GOLD
+					+ "["
+					+ ChatColor.GRAY
+					+ "Supporter"
+					+ ChatColor.GOLD
+					+ "] "
+					+ ChatColor.DARK_GRAY
+					+ playerFor.getName()
+					+ ChatColor.RESET; }
+		}
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
 					+ ChatColor.RESET;
