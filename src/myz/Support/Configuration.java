@@ -3,6 +3,9 @@
  */
 package myz.Support;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,12 +62,31 @@ public class Configuration {
 	private static Map<String, Integer> food_thirst = new HashMap<String, Integer>();
 	private static Map<String, List<PotionEffect>> food_potion = new HashMap<String, List<PotionEffect>>();
 	private static Map<String, Double> food_potion_chance = new HashMap<String, Double>();
+	private static List<String> donators = new ArrayList<String>();
 
 	private static Map<ItemStack, Integer> allow_place = new HashMap<ItemStack, Integer>();
 	private static Map<ItemStack, DestroyPair> allow_destroy = new HashMap<ItemStack, DestroyPair>();
 
 	// TODO ensure all new values are added in reload(), writeUnwrittenValues()
 	// and save()
+
+	private static void loadDonators() {
+		MyZ.instance.getServer().getScheduler().runTaskAsynchronously(MyZ.instance, new Runnable() {
+			public void run() {
+				try {
+					URL url = new URL("http://www.my-z.org/donators.txt");
+					BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+					String str;
+					while ((str = in.readLine()) != null) {
+						donators.add(str);
+					}
+					in.close();
+				} catch (Exception exc) {
+
+				}
+			}
+		});
+	}
 
 	/**
 	 * Setup this configuration object.
@@ -74,6 +96,8 @@ public class Configuration {
 		FileConfiguration localizableConfig = MyZ.instance.getLocalizableConfig();
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
 		writeUnwrittenValues();
+
+		loadDonators();
 
 		playerdata_is_temporary = false;
 
@@ -1342,15 +1366,8 @@ public class Configuration {
 			else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
 				return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
 						+ playerFor.getName();
-			else if (playerFor.getName().equalsIgnoreCase("SlzDuo") || playerFor.getName().equalsIgnoreCase("Wonkee")) { return ChatColor.GOLD
-					+ "["
-					+ ChatColor.GRAY
-					+ "Supporter"
-					+ ChatColor.GOLD
-					+ "] "
-					+ ChatColor.DARK_GRAY
-					+ playerFor.getName()
-					+ ChatColor.RESET; }
+			else if (donators.contains(playerFor.getName())) { return ChatColor.GOLD + "[" + ChatColor.GRAY + "Supporter" + ChatColor.GOLD
+					+ "] " + ChatColor.DARK_GRAY + playerFor.getName() + ChatColor.RESET; }
 		}
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))

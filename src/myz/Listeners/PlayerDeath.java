@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 /**
  * Does not include player-kill-player events.
@@ -48,6 +49,11 @@ public class PlayerDeath implements Listener {
 				revive(player);
 			}
 		}, 20L);
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	private void onRespawn(PlayerRespawnEvent e) {
+		MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true);
 	}
 
 	/**
