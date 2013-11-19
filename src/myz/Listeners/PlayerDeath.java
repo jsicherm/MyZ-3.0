@@ -39,7 +39,8 @@ public class PlayerDeath implements Listener {
 		// Become a zombie and teleport back to spawn to be kicked.
 		Utilities.spawnPlayerZombie(e.getEntity(), null);
 
-		e.setDeathMessage(e.getDeathMessage().replaceAll("Skeleton", "NPC"));
+		if (e.getDeathMessage() != null && e.getDeathMessage().contains("Skeleton"))
+			e.setDeathMessage(e.getDeathMessage().replaceAll("Skeleton", "NPC"));
 		e.setDroppedExp(0);
 		e.getDrops().clear();
 
@@ -62,12 +63,17 @@ public class PlayerDeath implements Listener {
 	 * @param p
 	 *            The player to respawn immediately.
 	 */
-	private void revive(Player p) {
+	private void revive(final Player p) {
 		if (!p.isDead())
 			return;
 		Packet205ClientCommand packet = new Packet205ClientCommand();
 		packet.a = 1;
 		((CraftPlayer) p).getHandle().playerConnection.a(packet);
-		MyZ.instance.putPlayerAtSpawn(p, true);
+		
+		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			public void run() {
+				MyZ.instance.putPlayerAtSpawn(p, true);
+			}
+		}, 2L);
 	}
 }

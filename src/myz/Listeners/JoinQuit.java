@@ -91,22 +91,23 @@ public class JoinQuit implements Listener {
 			MyZ.instance.getNPCs().remove(ourNPC);
 		}
 
+		PlayerData data = PlayerData.getDataFor(player);
+
 		// Update name colors for this player and all of their online friends.
-		if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+		if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled()) {
 			KittehTag.colorName(player);
 
-		List<String> friends = new ArrayList<String>();
-		PlayerData data = PlayerData.getDataFor(player);
-		if (data != null)
-			friends = data.getFriends();
-		if (MyZ.instance.getSQLManager().isConnected())
-			friends = MyZ.instance.getSQLManager().getStringList(player.getName(), "friends");
-		for (String friend : friends) {
-			Player online_friend = Bukkit.getPlayer(friend);
-			if (online_friend != null && online_friend.isOnline())
-				if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
-						&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
+			List<String> friends = new ArrayList<String>();
+			if (data != null)
+				friends = data.getFriends();
+			if (MyZ.instance.getSQLManager().isConnected())
+				friends = MyZ.instance.getSQLManager().getStringList(player.getName(), "friends");
+			for (String friend : friends) {
+				Player online_friend = Bukkit.getPlayer(friend);
+				if (online_friend != null && online_friend.isOnline())
 					KittehTag.colorName(online_friend);
+			}
 		}
 
 		if (Utilities.packets != null)

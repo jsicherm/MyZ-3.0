@@ -302,6 +302,7 @@ public class Utilities {
 		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
 
 		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
+		((Player) player.getBukkitEntity()).setMaxHealth(playerDuplicate.getMaxHealth());
 		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
 		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
 
