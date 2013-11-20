@@ -53,7 +53,7 @@ public class DisguiseUtilities {
 	 * @param player
 	 *            The player.
 	 */
-	public static void becomeHuman(Player player) {
+	public static void undisguise(Player player) {
 		if (api == null) {
 			api = DisguiseCraft.getAPI();
 		}

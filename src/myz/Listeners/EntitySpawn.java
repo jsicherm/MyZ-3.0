@@ -33,6 +33,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
@@ -132,7 +133,7 @@ public class EntitySpawn implements Listener {
 			e.setCancelled(true);
 			return;
 		}
-		
+
 		if (type == EntityType.SKELETON && e.getSpawnReason() != SpawnReason.CUSTOM) {
 			e.setCancelled(true);
 			if (random.nextDouble() <= 0.9) { return; }
@@ -142,28 +143,36 @@ public class EntitySpawn implements Listener {
 			npc.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
 
 			if (world.addEntity(npc, SpawnReason.CUSTOM)) {
-				Packet20NamedEntitySpawn packet = new Packet20NamedEntitySpawn();
-				packet.a = npc.getBukkitEntity().getEntityId();
-				packet.b = getRandomName(npctype);
-				packet.c = (int) e.getLocation().getX() * 32;
-				packet.d = (int) e.getLocation().getY() * 32;
-				packet.e = (int) e.getLocation().getZ() * 32;
-				packet.f = 0;
-				packet.g = 0;
-				packet.h = npc.getEquipment(0) != null ? npc.getEquipment(0).id : 0;
+				if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") == null
+						|| !MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
+					Packet20NamedEntitySpawn packet = new Packet20NamedEntitySpawn();
+					packet.a = npc.getBukkitEntity().getEntityId();
+					packet.b = getRandomName(npctype);
+					packet.c = (int) e.getLocation().getX() * 32;
+					packet.d = (int) e.getLocation().getY() * 32;
+					packet.e = (int) e.getLocation().getZ() * 32;
+					packet.f = 0;
+					packet.g = 0;
+					packet.h = npc.getEquipment(0) != null ? npc.getEquipment(0).id : 0;
 
-				DataWatcher datawatcher = new DataWatcher();
-				datawatcher.a(0, (Object) (byte) 0);
-				datawatcher.a(1, (Object) (short) 0);
-				datawatcher.a(8, (Object) (byte) 0);
+					DataWatcher datawatcher = new DataWatcher();
+					datawatcher.a(0, (Object) (byte) 0);
+					datawatcher.a(1, (Object) (short) 0);
+					datawatcher.a(8, (Object) (byte) 0);
 
-				try {
-					Field f = packet.getClass().getDeclaredField("i");
-					f.setAccessible(true);
-					f.set(packet, datawatcher);
-					Utilities.saveAndDistributePacket(packet, npc.getBukkitEntity());
-				} catch (Exception exc) {
-					exc.printStackTrace();
+					try {
+						Field f = packet.getClass().getDeclaredField("i");
+						f.setAccessible(true);
+						f.set(packet, datawatcher);
+						Utilities.saveAndDistributePacket(packet, npc.getBukkitEntity());
+					} catch (Exception exc) {
+						exc.printStackTrace();
+					}
+				} else {
+					if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
+							&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
+						myz.Utilities.LibsDisguiseUtilities.becomeNPC((LivingEntity) npc.getBukkitEntity(), getRandomName(npctype));
+					}
 				}
 
 				((Skeleton) npc.getBukkitEntity()).setRemoveWhenFarAway(true);

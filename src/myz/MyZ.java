@@ -44,6 +44,7 @@ import myz.Listeners.EntitySpawn;
 import myz.Listeners.Heal;
 import myz.Listeners.JoinQuit;
 import myz.Listeners.KittehTag;
+import myz.Listeners.LibsUndisguiseListener;
 import myz.Listeners.Movement;
 import myz.Listeners.PlayerDeath;
 import myz.Listeners.PlayerHurtEntity;
@@ -184,6 +185,11 @@ public class MyZ extends JavaPlugin {
 		if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 				&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
 			p.registerEvents(new UndisguiseListener(), this);
+		if (getServer().getPluginManager().getPlugin("LibsDisguises") != null
+				&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
+			myz.Utilities.LibsDisguiseUtilities.setup();
+			p.registerEvents(new LibsUndisguiseListener(), this);
+		}
 
 		/*
 		 * Connect to SQL or use PlayerData.
@@ -261,19 +267,26 @@ public class MyZ extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getServer().getScheduler().cancelTasks(this);
+		boolean disguise = getServer().getPluginManager().getPlugin("LibsDisguises") != null
+				&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled();
 
 		// Remove all entities in all worlds as reloads will cause classloader
 		// issues to
 		// do with overriding the pathfinding and entity.
 		for (CustomEntityPlayer player : NPCs)
 			player.getBukkitEntity().remove();
+		if (disguise)
+			for (Player player : getServer().getOnlinePlayers())
+				myz.Utilities.LibsDisguiseUtilities.undisguise(player);
 		NPCs.clear();
 		for (World world : getServer().getWorlds())
-			for (Entity entity : world.getEntities())
-				if (entity instanceof LivingEntity
-						&& (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT
-								|| entity.getType() == EntityType.HORSE || entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.SKELETON))
+			for (Entity entity : world.getEntitiesByClass(LivingEntity.class))
+				if (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT || entity.getType() == EntityType.HORSE
+						|| entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.SKELETON) {
+					if (disguise)
+						myz.Utilities.LibsDisguiseUtilities.undisguise((LivingEntity) entity);
 					entity.remove();
+				}
 		if (Utilities.packets != null)
 			Utilities.packets.clear();
 	}
@@ -671,14 +684,17 @@ public class MyZ extends JavaPlugin {
 
 			if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 					&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
-				myz.Utilities.DisguiseUtilities.becomeHuman(player);
+				myz.Utilities.DisguiseUtilities.undisguise(player);
+			if (getServer().getPluginManager().getPlugin("LibsDisguises") != null
+					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
+				myz.Utilities.LibsDisguiseUtilities.undisguise(player);
 
-				if (Configuration.isKickBan() && wasDeath && player.getName() != "MrTeePee") {
-					if (data != null)
-						data.setTimeOfKickban(System.currentTimeMillis());
-					if (sql.isConnected())
-						sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
-				}
+			if (Configuration.isKickBan() && wasDeath && player.getName() != "MrTeePee") {
+				if (data != null)
+					data.setTimeOfKickban(System.currentTimeMillis());
+				if (sql.isConnected())
+					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
+			}
 
 			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && player.getName() != "MrTeePee") {
 				if (data != null) {
@@ -898,6 +914,17 @@ public class MyZ extends JavaPlugin {
 					&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
 				myz.Utilities.DisguiseUtilities.becomeZombie(player);
 				player.getInventory().setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2));
+				Messenger.sendConfigMessage(player, "spawn.zombie");
+				if (data != null) {
+					data.setZombie(true);
+				}
+				if (sql.isConnected()) {
+					sql.set(player.getName(), "isZombie", true, true);
+				}
+				return;
+			} else if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("LibsDisguises") != null
+					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
+				myz.Utilities.LibsDisguiseUtilities.becomeZombie(player);
 				Messenger.sendConfigMessage(player, "spawn.zombie");
 				if (data != null) {
 					data.setZombie(true);

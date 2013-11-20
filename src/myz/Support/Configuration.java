@@ -3,9 +3,6 @@
  */
 package myz.Support;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,7 +42,7 @@ public class Configuration {
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
-			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time;
+			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time, heal_delay;
 	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage, water_damage, bleed_damage,
 			zombie_speed, horse_speed, npc_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, npc_damage, giant_damage,
 			pigman_damage, bandage_heal;
@@ -62,31 +59,12 @@ public class Configuration {
 	private static Map<String, Integer> food_thirst = new HashMap<String, Integer>();
 	private static Map<String, List<PotionEffect>> food_potion = new HashMap<String, List<PotionEffect>>();
 	private static Map<String, Double> food_potion_chance = new HashMap<String, Double>();
-	private static List<String> donators = new ArrayList<String>();
 
 	private static Map<ItemStack, Integer> allow_place = new HashMap<ItemStack, Integer>();
 	private static Map<ItemStack, DestroyPair> allow_destroy = new HashMap<ItemStack, DestroyPair>();
 
 	// TODO ensure all new values are added in reload(), writeUnwrittenValues()
 	// and save()
-
-	private static void loadDonators() {
-		MyZ.instance.getServer().getScheduler().runTaskAsynchronously(MyZ.instance, new Runnable() {
-			public void run() {
-				try {
-					URL url = new URL("http://www.my-z.org/donators.txt");
-					BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-					String str;
-					while ((str = in.readLine()) != null) {
-						donators.add(str);
-					}
-					in.close();
-				} catch (Exception exc) {
-
-				}
-			}
-		});
-	}
 
 	/**
 	 * Setup this configuration object.
@@ -96,8 +74,6 @@ public class Configuration {
 		FileConfiguration localizableConfig = MyZ.instance.getLocalizableConfig();
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
 		writeUnwrittenValues();
-
-		loadDonators();
 
 		playerdata_is_temporary = false;
 
@@ -121,6 +97,7 @@ public class Configuration {
 		is_auto = config.getBoolean("autoupdate.enable");
 		worlds = new ArrayList<String>(config.getStringList("multiworld.worlds"));
 		minez_chests = config.getBoolean("download.minez_chests");
+		heal_delay = config.getInt("heal.delay_seconds");
 		bandage = config.getItemStack("heal.bandage");
 		bandage_heal = config.getDouble("heal.bandage_heal_amount");
 		local_chat = config.getBoolean("chat.local_enabled");
@@ -397,10 +374,14 @@ public class Configuration {
 			config.set("projectile.enderpearl.become_grenade", true);
 
 		// Heal begin.
-		if (!config.contains("heal.bandage"))
-			config.set("heal.bandage", new ItemStack(Material.PAPER));
 		if (!config.contains("heal.bandage_heal_amount"))
 			config.set("heal.bandage_heal_amount", 1);
+		if (!config.contains("heal.wait"))
+			config.set("heal.wait", "Please wait %s seconds before healing another player again.");
+		if (!config.contains("heal.delay_seconds"))
+			config.set("heal.delay_seconds", 30);
+		if (!config.contains("heal.bandage"))
+			config.set("heal.bandage", new ItemStack(Material.PAPER));
 		if (!config.contains("heal.medkit.localizable.regeneration"))
 			config.set("heal.medkit.localizable.regeneration", "Regeneration");
 		if (!config.contains("heal.medkit.localizable.heal"))
@@ -1366,8 +1347,6 @@ public class Configuration {
 			else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
 				return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
 						+ playerFor.getName();
-			else if (donators.contains(playerFor.getName())) { return ChatColor.GOLD + "[" + ChatColor.GRAY + "Supporter" + ChatColor.GOLD
-					+ "] " + ChatColor.DARK_GRAY + playerFor.getName() + ChatColor.RESET; }
 		}
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
@@ -1756,6 +1735,13 @@ public class Configuration {
 	 */
 	public static boolean isAutoUpdate() {
 		return is_auto;
+	}
+
+	/**
+	 * @return the heal_delay
+	 */
+	public static int getHealDelay() {
+		return heal_delay;
 	}
 
 	private static class DestroyPair {

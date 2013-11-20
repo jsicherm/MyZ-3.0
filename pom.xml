@@ -25,6 +25,10 @@
       <id>disguisecraft-repo</id>
       <url>http://build.yu8.me:8080/plugin/repository/everything/</url>
     </repository>
+    <repository>
+      <id>md5-repo</id>
+      <url>http://repo.md-5.net/content/groups/public/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -63,6 +67,11 @@
       <groupId>pgDev</groupId>
       <artifactId>DisguiseCraft</artifactId>
       <version>5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>LibsDisguises</groupId>
+      <artifactId>LibsDisguises</artifactId>
+      <version>LATEST</version>
     </dependency>
   </dependencies>
   	

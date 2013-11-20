@@ -3,6 +3,9 @@
  */
 package myz.Listeners;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.MedKit;
@@ -30,7 +33,9 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class Heal implements Listener {
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	private Map<String, Long> lastHeals = new HashMap<String, Long>();
+
+	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onRightClick(PlayerInteractEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
@@ -101,24 +106,61 @@ public class Heal implements Listener {
 		final Player healer = e.getPlayer();
 		final ItemStack item = healer.getItemInHand();
 		boolean flag = false;
+		long now = System.currentTimeMillis();
 
 		// Handle MedKits.
 		if (player.getGameMode() != GameMode.CREATIVE && item != null) {
 			MedKit kit;
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
-				MyZ.instance.stopBleeding(player);
-				if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
-					if (player.getHealth() + 1 <= player.getMaxHealth())
-						player.setHealth(player.getHealth() + 1);
+				if (lastHeals.containsKey(healer.getName())
+						&& (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay()) {
+					Messenger.sendMessage(
+							healer,
+							Messenger.getConfigMessage("heal.wait", Configuration.getHealDelay() - (now - lastHeals.get(healer.getName()))
+									/ 1000));
 				} else {
-					int antiLevel = kit.getAntisepticRequired(), regenLevel = kit.getOintmentRequired();
-					if (regenLevel != 0)
-						player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenLevel * 40, regenLevel));
-					if (antiLevel != 0) {
-						MyZ.instance.stopPoison(player);
-						player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, antiLevel * 100, antiLevel));
+					MyZ.instance.stopBleeding(player);
+					if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
+						if (player.getHealth() + 1 <= player.getMaxHealth())
+							player.setHealth(player.getHealth() + 1);
+					} else {
+						int antiLevel = kit.getAntisepticRequired(), regenLevel = kit.getOintmentRequired();
+						if (regenLevel != 0)
+							player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenLevel * 40, regenLevel));
+						if (antiLevel != 0) {
+							MyZ.instance.stopPoison(player);
+							player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, antiLevel * 100, antiLevel));
+						}
 					}
+					if (item.getAmount() != 1)
+						item.setAmount(item.getAmount() - 1);
+					else
+						MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+							@Override
+							public void run() {
+								player.setItemInHand(null);
+							}
+						}, 0L);
 				}
+				flag = true;
+			}
+		} else if (player.getGameMode() != GameMode.CREATIVE && item != null
+				&& item.isSimilar(Configuration.getBandageItem() != null ? Configuration.getBandageItem() : new ItemStack(Material.PAPER))) {
+			if (lastHeals.containsKey(healer.getName()) && (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay()) {
+				Messenger.sendMessage(
+						healer,
+						Messenger.getConfigMessage("heal.wait", Configuration.getHealDelay() - (now - lastHeals.get(healer.getName()))
+								/ 1000));
+			} else {
+				MyZ.instance.stopBleeding(player);
+				if (player.getHealth() + Configuration.getBandageHealAmount() <= player.getMaxHealth()) {
+					EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getBandageHealAmount(),
+							RegainReason.CUSTOM);
+					MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
+					if (!regainEvent.isCancelled())
+						player.setHealth(player.getHealth() + Configuration.getBandageHealAmount());
+				}
+
 				if (item.getAmount() != 1)
 					item.setAmount(item.getAmount() - 1);
 				else
@@ -128,36 +170,13 @@ public class Heal implements Listener {
 							player.setItemInHand(null);
 						}
 					}, 0L);
-				flag = true;
 			}
-		}
-
-		// Handle bandage healing.
-		if (player.getGameMode() != GameMode.CREATIVE && item != null
-				&& item.isSimilar(Configuration.getBandageItem() != null ? Configuration.getBandageItem() : new ItemStack(Material.PAPER))) {
-
-			MyZ.instance.stopBleeding(player);
-			if (player.getHealth() + Configuration.getBandageHealAmount() <= player.getMaxHealth()) {
-				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getBandageHealAmount(),
-						RegainReason.CUSTOM);
-				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
-				if (!regainEvent.isCancelled())
-					player.setHealth(player.getHealth() + Configuration.getBandageHealAmount());
-			}
-
-			if (item.getAmount() != 1)
-				item.setAmount(item.getAmount() - 1);
-			else
-				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
-					@Override
-					public void run() {
-						player.setItemInHand(null);
-					}
-				}, 0L);
 			flag = true;
 		}
 
 		if (flag) {
+			lastHeals.put(healer.getName(), now);
+
 			PlayerData data = PlayerData.getDataFor(healer);
 			int amount = 0;
 			if (data != null)
