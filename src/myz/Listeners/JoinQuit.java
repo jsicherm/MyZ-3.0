@@ -144,10 +144,8 @@ public class JoinQuit implements Listener {
 					horse.setDomestication(0);
 				}
 
-			System.out.println("A player left");
 			// Spawn our NPC unless we were flagged.
 			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getName())) {
-				System.out.println("Spawning an NPC now");
 				Utilities.spawnNPC(e.getPlayer());
 			}
 			MyZ.instance.getFlagged().remove(e.getPlayer().getName());
