@@ -286,7 +286,12 @@ public class MyZ extends JavaPlugin {
 			for (Player player : getServer().getOnlinePlayers())
 				myz.Utilities.LibsDisguiseUtilities.undisguise(player);
 		NPCs.clear();
-		for (World world : getServer().getWorlds())
+		for (String name : Configuration.getWorlds()) {
+			World world = Bukkit.getWorld(name);
+			if (world == null) {
+				Messenger.sendConsoleMessage("&4Specified world (" + name + ") does not exist! Please update your config.yml");
+				continue;
+			}
 			for (Entity entity : world.getEntitiesByClass(LivingEntity.class))
 				if (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT || entity.getType() == EntityType.HORSE
 						|| entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.SKELETON) {
@@ -294,6 +299,7 @@ public class MyZ extends JavaPlugin {
 						myz.Utilities.LibsDisguiseUtilities.undisguise((LivingEntity) entity);
 					entity.remove();
 				}
+		}
 		// Attempt to clean up the custom classes.
 		CustomEntityType.unregisterEntities();
 		if (Utilities.packets != null)
