@@ -290,6 +290,8 @@ public class Utilities {
 		if (Configuration.getSafeLogoutTime() <= 0)
 			return;
 
+		System.out.println("Spawning an NPC");
+
 		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
 		final CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, playerDuplicate.getName(),
 				new PlayerInteractManager(worldServer));
@@ -315,6 +317,7 @@ public class Utilities {
 			public void run() {
 				MyZ.instance.getNPCs().remove(player);
 				player.getBukkitEntity().remove();
+				System.out.println("A NPC despawned");
 			}
 		}, Configuration.getSafeLogoutTime() * 20L);
 	}
@@ -448,7 +451,10 @@ public class Utilities {
 			public void run() {
 				Packet20NamedEntitySpawn cp = new Packet20NamedEntitySpawn();
 				EntityInsentient npc = null;
-				UUID uid = packets.get(packet).uuid;
+				UUID uid = null;
+				if (packets.containsKey(packet)) {
+					uid = packets.get(packet).uuid;
+				}
 				for (Entity entity : player.getWorld().getEntitiesByClass(Skeleton.class))
 					if (entity.getUniqueId() == uid) {
 						npc = ((CraftSkeleton) entity).getHandle();

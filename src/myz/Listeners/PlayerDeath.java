@@ -50,12 +50,17 @@ public class PlayerDeath implements Listener {
 			public void run() {
 				revive(player);
 			}
-		}, 10L);
+		}, 15L);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
-	private void onRespawn(PlayerRespawnEvent e) {
-		MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true);
+	private void onRespawn(final PlayerRespawnEvent e) {
+		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			public void run() {
+				if (e.getPlayer().isOnline())
+					MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true);
+			}
+		}, 10L);
 	}
 
 	/**
@@ -64,18 +69,12 @@ public class PlayerDeath implements Listener {
 	 * @param p
 	 *            The player to respawn immediately.
 	 */
-	private void revive(final Player p) {
+	private void revive(Player p) {
 		if (!p.isDead())
 			return;
 		Packet205ClientCommand packet = new Packet205ClientCommand();
 		packet.a = 1;
 		((CraftPlayer) p).getHandle().playerConnection.a(packet);
-
-		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
-			@Override
-			public void run() {
-				MyZ.instance.putPlayerAtSpawn(p, true);
-			}
-		}, 2L);
+		MyZ.instance.putPlayerAtSpawn(p, true);
 	}
 }

@@ -796,6 +796,7 @@ public class MyZ extends JavaPlugin {
 	 *            Whether or not the return to spawn was a result of a death.
 	 */
 	public void putPlayerAtSpawn(Player player, boolean wasDeath) {
+		if (!player.isOnline()) { return; }
 		Teleport.teleport(player, player.getWorld().getSpawnLocation(), false);
 		if (getServer().getPluginManager().isPluginEnabled("essentials"))
 			Bukkit.dispatchCommand(player, "spawn");
@@ -834,11 +835,6 @@ public class MyZ extends JavaPlugin {
 			 */
 			if (Configuration.isKickBan() && !wasNPCKilled)
 				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0) {
-					removePlayer(player, wasDeath);
-					if (data != null)
-						data.setTimeOfKickban(System.currentTimeMillis());
-					if (sql.isConnected())
-						sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
 					flags.add(player.getName());
 					player.kickPlayer(Messenger.getConfigMessage("kick.come_back", Configuration.getKickBanSeconds()));
 				}

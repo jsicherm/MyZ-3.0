@@ -110,6 +110,8 @@ public class JoinQuit implements Listener {
 			}
 		}
 
+		MyZ.instance.getFlagged().remove(player.getName());
+
 		if (Utilities.packets != null)
 			for (Object packet : Utilities.packets.keySet())
 				if (player.getWorld().getName().equals(Utilities.packets.get(packet).getWorld()))
@@ -127,7 +129,7 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onLeave(PlayerQuitEvent e) {
-		if (MyZ.instance.removePlayer(e.getPlayer(), false)) {
+		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getName()))) {
 			e.setQuitMessage(null);
 
 			if (e.getPlayer().getVehicle() != null)
@@ -142,9 +144,12 @@ public class JoinQuit implements Listener {
 					horse.setDomestication(0);
 				}
 
+			System.out.println("A player left");
 			// Spawn our NPC unless we were flagged.
-			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getName()))
+			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getName())) {
+				System.out.println("Spawning an NPC now");
 				Utilities.spawnNPC(e.getPlayer());
+			}
 			MyZ.instance.getFlagged().remove(e.getPlayer().getName());
 		}
 	}

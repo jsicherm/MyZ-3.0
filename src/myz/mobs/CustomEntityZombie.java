@@ -171,9 +171,10 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 	}
 
 	private void emptyInventory() {
-		for (org.bukkit.inventory.ItemStack item : inventory)
-			if (item != null)
-				getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
+		if (inventory != null)
+			for (org.bukkit.inventory.ItemStack item : inventory)
+				if (item != null)
+					getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
 		inventory = null;
 	}
 
