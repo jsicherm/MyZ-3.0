@@ -3,6 +3,7 @@
  */
 package myz.mobs.pathing;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import net.minecraft.server.v1_6_R3.EntityHorse;
 import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityInsentient;
 import net.minecraft.server.v1_6_R3.PathEntity;
+import net.minecraft.server.v1_6_R3.PathfinderGoalSelector;
 import net.minecraft.server.v1_6_R3.World;
 
 import org.bukkit.Location;
@@ -28,6 +30,15 @@ import org.bukkit.inventory.ItemStack;
 public class PathingSupport {
 
 	private static Map<String, Double> visibility_override = new HashMap<String, Double>();
+	private static Field field;
+
+	public static Field getField() throws NoSuchFieldException, SecurityException {
+		if (field == null) {
+			field = PathfinderGoalSelector.class.getDeclaredField("a");
+			field.setAccessible(true);
+		}
+		return field;
+	}
 
 	/**
 	 * @see findNearbyVulnerablePlayer(Entity entity, double x, double y, double
@@ -63,10 +74,9 @@ public class PathingSupport {
 		for (int i = 0; i < world.players.size(); ++i) {
 			EntityHuman player = (EntityHuman) world.players.get(i);
 
-			if (disguise && myz.Utilities.DisguiseUtilities.isZombie((Player) player.getBukkitEntity())) {
+			if (disguise && myz.Utilities.DisguiseUtilities.isZombie((Player) player.getBukkitEntity()))
 				continue;
-			}
-			
+
 			if (!player.abilities.isInvulnerable && player.isAlive()) {
 				// Make sure we don't target our owner if we're a horse.
 				if (entity instanceof EntityHorse

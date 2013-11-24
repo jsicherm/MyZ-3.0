@@ -17,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -55,7 +56,7 @@ public class PlayerSummonGiant implements Listener {
 						World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
 						CustomEntityGiantZombie zombie = new CustomEntityGiantZombie(world);
 						zombie.setPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ());
-						world.addEntity(zombie);
+						world.addEntity(zombie, SpawnReason.NATURAL);
 					}
 				}, 10 * 20L);
 			}

@@ -61,7 +61,9 @@ import myz.Support.MedKit;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Support.Teleport;
+import myz.Utilities.DisguiseUtilities;
 import myz.Utilities.Downloader;
+import myz.Utilities.LibsDisguiseUtilities;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
@@ -211,7 +213,11 @@ public class MyZ extends JavaPlugin {
 				/*
 				 * Add all players that weren't already in the playerdata to it (in case of a reload).
 				 */
-				for (String world : Configuration.getWorlds())
+				for (String world : Configuration.getWorlds()) {
+					if (Bukkit.getWorld(world) == null) {
+						Messenger.sendConsoleMessage("&4Specified world (" + world + ") does not exist! Please update your config.yml");
+						continue;
+					}
 					for (Player player : Bukkit.getWorld(world).getPlayers()) {
 						addPlayer(player);
 						PlayerData data = null;
@@ -227,6 +233,7 @@ public class MyZ extends JavaPlugin {
 							}
 						}
 					}
+				}
 			}
 		}, 0L);
 
@@ -287,8 +294,25 @@ public class MyZ extends JavaPlugin {
 						myz.Utilities.LibsDisguiseUtilities.undisguise((LivingEntity) entity);
 					entity.remove();
 				}
+		// Attempt to clean up the custom classes.
+		CustomEntityType.unregisterEntities();
 		if (Utilities.packets != null)
 			Utilities.packets.clear();
+		nullifyStatics();
+	}
+
+	/**
+	 * Clean up all of the static variables that have the potential to hold a
+	 * lot of space in memory.
+	 */
+	private void nullifyStatics() {
+		BlockCommand.blockChangers = null;
+		Sync.safeLogoutPlayers = null;
+		Configuration.disable();
+		CustomEntityType.method = null;
+		MedKit.clearKits();
+		myz.Utilities.DisguiseUtilities.disable();
+		Utilities.packets = null;
 	}
 
 	/**
@@ -641,6 +665,17 @@ public class MyZ extends JavaPlugin {
 			Messenger.sendConfigMessage(player, "player_was_killed_npc");
 			putPlayerAtSpawn(player, true);
 		}
+
+		if (MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
+			if (playerdata != null && playerdata.isZombie() || MyZ.instance.getSQLManager().isConnected()
+					&& MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))
+				DisguiseUtilities.becomeZombie(player);
+		if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
+			if (playerdata != null && playerdata.isZombie() || MyZ.instance.getSQLManager().isConnected()
+					&& MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))
+				LibsDisguiseUtilities.becomeZombie(player);
 	}
 
 	/**
@@ -915,23 +950,19 @@ public class MyZ extends JavaPlugin {
 				myz.Utilities.DisguiseUtilities.becomeZombie(player);
 				player.getInventory().setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2));
 				Messenger.sendConfigMessage(player, "spawn.zombie");
-				if (data != null) {
+				if (data != null)
 					data.setZombie(true);
-				}
-				if (sql.isConnected()) {
+				if (sql.isConnected())
 					sql.set(player.getName(), "isZombie", true, true);
-				}
 				return;
 			} else if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("LibsDisguises") != null
 					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
 				myz.Utilities.LibsDisguiseUtilities.becomeZombie(player);
 				Messenger.sendConfigMessage(player, "spawn.zombie");
-				if (data != null) {
+				if (data != null)
 					data.setZombie(true);
-				}
-				if (sql.isConnected()) {
+				if (sql.isConnected())
 					sql.set(player.getName(), "isZombie", true, true);
-				}
 				return;
 			}
 

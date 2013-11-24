@@ -3,7 +3,6 @@
  */
 package myz.mobs;
 
-import java.lang.reflect.Field;
 import java.util.UUID;
 
 import myz.MyZ;
@@ -63,11 +62,8 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		this.type = type;
 
 		try {
-			Field field = PathfinderGoalSelector.class.getDeclaredField("a");
-			field.setAccessible(true);
-
-			field.set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			field.set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -307,25 +303,27 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		int a = 0;
 
 		if (Utilities.packets != null)
-			for (Packet packet : Utilities.packets.keySet()) {
+			for (Packet packet : Utilities.packets.keySet())
 				if (Utilities.packets.get(packet).getUUID().equals(uid)) {
 					Utilities.packets.remove(packet);
 					a = ((Packet20NamedEntitySpawn) packet).a;
 					break;
 				}
-			}
 
 		final int A = a;
 
 		// Send a destroy packet 3 seconds later (give entity time to do death
 		// animation).
-		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
-			public void run() {
-				if (A == 0) { return; }
-				Packet29DestroyEntity packet = new Packet29DestroyEntity(A);
-				Utilities.distributePacket(getBukkitEntity().getWorld(), packet);
-			}
-		}, 20 * 3);
+		if (MyZ.instance.isEnabled())
+			MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+				@Override
+				public void run() {
+					if (A == 0)
+						return;
+					Packet29DestroyEntity packet = new Packet29DestroyEntity(A);
+					Utilities.distributePacket(getBukkitEntity().getWorld(), packet);
+				}
+			}, 20 * 3);
 	}
 
 	@Override
@@ -335,18 +333,16 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 
 	@Override
 	protected void dropDeathLoot(boolean flag, int i) {
-		int j = this.getLootId();
+		int j = getLootId();
 
 		if (j > 0) {
-			int k = this.random.nextInt(3);
+			int k = random.nextInt(3);
 
-			if (i > 0) {
-				k += this.random.nextInt(i + 1);
-			}
+			if (i > 0)
+				k += random.nextInt(i + 1);
 
-			for (int l = 0; l < k; ++l) {
+			for (int l = 0; l < k; ++l)
 				this.b(j, 1);
-			}
 		}
 	}
 

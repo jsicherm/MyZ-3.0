@@ -29,10 +29,10 @@ public class SQLManager {
 	private Map<String, Map<String, Boolean>> cachedBooleanValues = new HashMap<String, Map<String, Boolean>>();
 	private Map<String, Map<String, Long>> cachedLongValues = new HashMap<String, Map<String, Long>>();
 	private List<String> cachedKeyValues = new ArrayList<String>();
-	private static final List<String> stringcolumns = new ArrayList<String>();
-	private static final List<String> intcolumns = new ArrayList<String>();
-	private static final List<String> booleancolumns = new ArrayList<String>();
-	private static final List<String> longcolumns = new ArrayList<String>();
+	private List<String> stringcolumns = new ArrayList<String>();
+	private List<String> intcolumns = new ArrayList<String>();
+	private List<String> booleancolumns = new ArrayList<String>();
+	private List<String> longcolumns = new ArrayList<String>();
 
 	/**
 	 * A simple MySQL tool for ease of access.

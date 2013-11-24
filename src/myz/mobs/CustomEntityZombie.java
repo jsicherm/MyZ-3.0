@@ -3,7 +3,6 @@
  */
 package myz.mobs;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +15,8 @@ import net.minecraft.server.v1_6_R3.DamageSource;
 import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.EntityVillager;
 import net.minecraft.server.v1_6_R3.EntitySkeleton;
+import net.minecraft.server.v1_6_R3.EntityVillager;
 import net.minecraft.server.v1_6_R3.EntityZombie;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
@@ -49,11 +48,8 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 		super(world);
 
 		try {
-			Field field = PathfinderGoalSelector.class.getDeclaredField("a");
-			field.setAccessible(true);
-
-			field.set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			field.set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -178,7 +174,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 		for (org.bukkit.inventory.ItemStack item : inventory)
 			if (item != null)
 				getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
-		inventory.clear();
+		inventory = null;
 	}
 
 	@Override

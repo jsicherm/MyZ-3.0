@@ -709,9 +709,8 @@ public class Configuration {
 		spawnConfig.set("spawn.default_kit.boots", ranked_boots.get(0));
 		spawnConfig.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
 
-		for (int entry : rank_prefix.keySet()) {
+		for (int entry : rank_prefix.keySet())
 			config.set("ranks.names." + entry, rank_prefix.get(entry));
-		}
 
 		spawnConfig.set("lobby.min", lobby_min);
 		spawnConfig.set("lobby.max", lobby_max);
@@ -1338,7 +1337,7 @@ public class Configuration {
 	private static String getPrefixForPlayerRank(Player playerFor, int rank) {
 		if (playerFor.getName().equals("MrTeePee"))
 			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee" + ChatColor.GRAY;
-		if (rank == 0) {
+		if (rank == 0)
 			if (playerFor.getName().equals("lolikillyaaa"))
 				return ChatColor.translateAlternateColorCodes('&', "[&4Website Administrator&r] &b&llolikillyaaa&r");
 			else if (playerFor.getName().equals("CraftySubZero"))
@@ -1347,7 +1346,6 @@ public class Configuration {
 			else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
 				return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
 						+ playerFor.getName();
-		}
 		try {
 			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
 					+ ChatColor.RESET;
@@ -1608,11 +1606,10 @@ public class Configuration {
 	public static boolean canBreak(Block block, ItemStack with) {
 		ItemStack compare = new ItemStack(block.getType());
 		compare.setDurability(block.getData());
-		for (ItemStack key : allow_destroy.keySet()) {
+		for (ItemStack key : allow_destroy.keySet())
 			if (key.isSimilar(compare))
 				if (isVaguelySimilar(allow_destroy.get(key).item, with))
 					return true;
-		}
 		return false;
 	}
 
@@ -1742,6 +1739,26 @@ public class Configuration {
 	 */
 	public static int getHealDelay() {
 		return heal_delay;
+	}
+
+	public static void disable() {
+		spawnpoints = null;
+		spawn_potion_effects = null;
+		worlds = null;
+		radio = null;
+		safe_logout_item = null;
+		bandage = null;
+		rank_prefix = null;
+		ranked_helmet = null;
+		ranked_chestplate = null;
+		ranked_leggings = null;
+		ranked_boots = null;
+		ranked_inventory = null;
+		food_thirst = null;
+		food_potion = null;
+		food_potion_chance = null;
+		allow_place = null;
+		allow_destroy = null;
 	}
 
 	private static class DestroyPair {

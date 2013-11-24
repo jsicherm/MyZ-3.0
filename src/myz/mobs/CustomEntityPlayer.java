@@ -61,6 +61,7 @@ public class CustomEntityPlayer extends EntityPlayer {
 	public void die(DamageSource source) {
 		Utilities.playerNPCDied(this);
 		Utilities.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
+		inventoryItems = null;
 
 		EntityLiving entityliving = aS();
 		if (entityliving != null)
@@ -74,6 +75,7 @@ public class CustomEntityPlayer extends EntityPlayer {
 	public void die() {
 		Utilities.playerNPCDied(this);
 		Utilities.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
+		inventoryItems = null;
 
 		EntityLiving entityliving = aS();
 		if (entityliving != null)

@@ -29,7 +29,7 @@ import org.bukkit.potion.PotionEffect;
  */
 public class ConsumeFood implements Listener {
 
-	private static final Random random = new Random();
+	private Random random = new Random();
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onConsume(PlayerItemConsumeEvent e) {

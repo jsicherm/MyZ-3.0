@@ -253,7 +253,7 @@ public class Utilities {
 		World world = ((CraftWorld) player.getWorld()).getHandle();
 		CustomEntityZombie zombie = new CustomEntityZombie(world);
 		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
-		world.addEntity(zombie);
+		world.addEntity(zombie, SpawnReason.CUSTOM);
 
 		zombie.setBaby(false);
 		zombie.setVillager(false);

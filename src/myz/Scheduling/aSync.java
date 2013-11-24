@@ -15,6 +15,7 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.pathing.PathingSupport;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,7 +30,7 @@ import org.bukkit.entity.Player;
 public class aSync implements Runnable {
 
 	private static int ticks = 0;
-	private static final Random random = new Random();
+	private Random random = new Random();
 	private final boolean isDisguise;
 
 	public aSync() {
@@ -41,7 +42,11 @@ public class aSync implements Runnable {
 	public void run() {
 		ticks++;
 
-		for (String world : MyZ.instance.getWorlds())
+		for (String world : MyZ.instance.getWorlds()) {
+			if (Bukkit.getWorld(world) == null) {
+				Messenger.sendConsoleMessage("&4Specified world (" + world + ") does not exist! Please update your config.yml");
+				continue;
+			}
 			for (Player player : MyZ.instance.getServer().getWorld(world).getPlayers()) {
 				if (player.getGameMode() == GameMode.CREATIVE || Configuration.isInLobby(player))
 					continue;
@@ -68,11 +73,9 @@ public class aSync implements Runnable {
 					}
 				}
 
-				if (isDisguise) {
-					if (myz.Utilities.DisguiseUtilities.isZombie(player)) {
+				if (isDisguise)
+					if (myz.Utilities.DisguiseUtilities.isZombie(player))
 						continue;
-					}
-				}
 
 				player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
 
@@ -119,9 +122,10 @@ public class aSync implements Runnable {
 					}
 			}
 
-		// Ensure we don't exceed the integer size.
-		if (ticks >= Integer.MAX_VALUE)
-			ticks = 0;
+			// Ensure we don't exceed the integer size.
+			if (ticks >= Integer.MAX_VALUE)
+				ticks = 0;
+		}
 	}
 
 	/**

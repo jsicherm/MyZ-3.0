@@ -3,8 +3,6 @@
  */
 package myz.mobs;
 
-import java.lang.reflect.Field;
-
 import myz.Support.Configuration;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
@@ -14,8 +12,8 @@ import net.minecraft.server.v1_6_R3.DamageSource;
 import net.minecraft.server.v1_6_R3.Entity;
 import net.minecraft.server.v1_6_R3.EntityHuman;
 import net.minecraft.server.v1_6_R3.EntityPigZombie;
-import net.minecraft.server.v1_6_R3.EntityVillager;
 import net.minecraft.server.v1_6_R3.EntitySkeleton;
+import net.minecraft.server.v1_6_R3.EntityVillager;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
 import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
@@ -42,11 +40,8 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		super(world);
 
 		try {
-			Field field = PathfinderGoalSelector.class.getDeclaredField("a");
-			field.setAccessible(true);
-
-			field.set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			field.set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}

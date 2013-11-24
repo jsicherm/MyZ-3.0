@@ -25,7 +25,7 @@ public class MedKit {
 
 	private static int uuid = 50;
 	private static List<MedKit> medkits = new ArrayList<MedKit>();
-	private final static Enchantment glow = new GlowEnchant(69);
+	private static Enchantment glow = new GlowEnchant(69);
 	private int uid;
 	private String configID, name;
 	private List<String> lore = new ArrayList<String>();
@@ -76,6 +76,11 @@ public class MedKit {
 
 	public static List<MedKit> getKits() {
 		return medkits;
+	}
+
+	public static void clearKits() {
+		medkits = null;
+		glow = null;
 	}
 
 	public String getName() {

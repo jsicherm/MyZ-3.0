@@ -41,6 +41,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.comphenix.protocol.metrics.Updater.UpdateType;
+
 /**
  * Check dev.bukkit.org to find updates for a given plugin, and download the
  * updates if needed.

@@ -26,7 +26,8 @@ public class BlockEvent implements Listener {
 	private void onPlace(BlockPlaceEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
-		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST) { return; }
+		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
+			return;
 		if (BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
 			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnPlace(e.getBlockPlaced(), e.getPlayer());
 			e.setCancelled(true);
@@ -53,7 +54,8 @@ public class BlockEvent implements Listener {
 	private void onPlacement(BlockPlaceEvent e) {
 		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
 			return;
-		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST) { return; }
+		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
+			return;
 		boolean state = !Configuration.canPlace(e.getBlock());
 		if (state && e.getPlayer().hasPermission("MyZ.world_admin"))
 			return;

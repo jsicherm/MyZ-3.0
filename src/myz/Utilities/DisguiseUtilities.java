@@ -26,11 +26,15 @@ public class DisguiseUtilities {
 	 * @return True if the player has a DisguiseCraft disguise on.
 	 */
 	public static boolean isZombie(Player player) {
-		if (api == null) {
+		if (api == null)
 			api = DisguiseCraft.getAPI();
-		}
-		if (api == null) { return false; }
+		if (api == null)
+			return false;
 		return api.isDisguised(player);
+	}
+
+	public static void disable() {
+		api = null;
 	}
 
 	/**
@@ -40,9 +44,8 @@ public class DisguiseUtilities {
 	 *            The player to zombify.
 	 */
 	public static void becomeZombie(Player player) {
-		if (api == null) {
+		if (api == null)
 			api = DisguiseCraft.getAPI();
-		}
 		if (api != null)
 			api.disguisePlayer(player, new Disguise(DisguiseCraft.getAPI().newEntityID(), DisguiseType.Zombie));
 	}
@@ -54,9 +57,8 @@ public class DisguiseUtilities {
 	 *            The player.
 	 */
 	public static void undisguise(Player player) {
-		if (api == null) {
+		if (api == null)
 			api = DisguiseCraft.getAPI();
-		}
 		if (api != null && api.isDisguised(player))
 			api.undisguisePlayer(player);
 	}

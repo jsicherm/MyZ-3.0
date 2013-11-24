@@ -46,10 +46,11 @@ public class PlayerDeath implements Listener {
 
 		final Player player = e.getEntity();
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			@Override
 			public void run() {
 				revive(player);
 			}
-		}, 20L);
+		}, 10L);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -69,8 +70,9 @@ public class PlayerDeath implements Listener {
 		Packet205ClientCommand packet = new Packet205ClientCommand();
 		packet.a = 1;
 		((CraftPlayer) p).getHandle().playerConnection.a(packet);
-		
+
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			@Override
 			public void run() {
 				MyZ.instance.putPlayerAtSpawn(p, true);
 			}

@@ -3,8 +3,6 @@
  */
 package myz.mobs.pathing;
 
-import org.bukkit.entity.Player;
-
 import myz.MyZ;
 import net.minecraft.server.v1_6_R3.EntityCreature;
 import net.minecraft.server.v1_6_R3.EntityLiving;
@@ -12,6 +10,8 @@ import net.minecraft.server.v1_6_R3.MathHelper;
 import net.minecraft.server.v1_6_R3.PathEntity;
 import net.minecraft.server.v1_6_R3.PathfinderGoal;
 import net.minecraft.server.v1_6_R3.World;
+
+import org.bukkit.entity.Player;
 
 /**
  * @author Jordan *

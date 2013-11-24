@@ -23,7 +23,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
  */
 public class EntityHurtPlayer implements Listener {
 
-	private static final Random random = new Random();
+	private Random random = new Random();
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onZombification(EntityDamageByEntityEvent e) {

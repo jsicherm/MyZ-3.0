@@ -24,7 +24,7 @@ import com.sk89q.worldedit.bukkit.selections.Selection;
  */
 public class SetLobbyCommand implements CommandExecutor {
 
-	WorldEditPlugin plugin;
+	private WorldEditPlugin plugin;
 
 	public SetLobbyCommand() {
 		Plugin plugin = MyZ.instance.getServer().getPluginManager().getPlugin("WorldEdit");

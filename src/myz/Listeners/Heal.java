@@ -113,12 +113,12 @@ public class Heal implements Listener {
 			MedKit kit;
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
 				if (lastHeals.containsKey(healer.getName())
-						&& (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay()) {
+						&& (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay())
 					Messenger.sendMessage(
 							healer,
 							Messenger.getConfigMessage("heal.wait", Configuration.getHealDelay() - (now - lastHeals.get(healer.getName()))
 									/ 1000));
-				} else {
+				else {
 					MyZ.instance.stopBleeding(player);
 					if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
 						if (player.getHealth() + 1 <= player.getMaxHealth())
@@ -146,12 +146,12 @@ public class Heal implements Listener {
 			}
 		} else if (player.getGameMode() != GameMode.CREATIVE && item != null
 				&& item.isSimilar(Configuration.getBandageItem() != null ? Configuration.getBandageItem() : new ItemStack(Material.PAPER))) {
-			if (lastHeals.containsKey(healer.getName()) && (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay()) {
+			if (lastHeals.containsKey(healer.getName()) && (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay())
 				Messenger.sendMessage(
 						healer,
 						Messenger.getConfigMessage("heal.wait", Configuration.getHealDelay() - (now - lastHeals.get(healer.getName()))
 								/ 1000));
-			} else {
+			else {
 				MyZ.instance.stopBleeding(player);
 				if (player.getHealth() + Configuration.getBandageHealAmount() <= player.getMaxHealth()) {
 					EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getBandageHealAmount(),

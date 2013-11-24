@@ -6,6 +6,7 @@ package myz.mobs;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.server.v1_6_R3.BiomeBase;
 import net.minecraft.server.v1_6_R3.BiomeMeta;
@@ -35,6 +36,8 @@ public enum CustomEntityType {
 	private EntityType entityType;
 	private Class<? extends EntityInsentient> nmsClass;
 	private Class<? extends EntityInsentient> customClass;
+
+	public static Method method;
 
 	private CustomEntityType(String name, int id, EntityType entityType, Class<? extends EntityInsentient> nmsClass,
 			Class<? extends EntityInsentient> customClass) {
@@ -68,9 +71,11 @@ public enum CustomEntityType {
 	public static void registerEntities() {
 		for (CustomEntityType entity : values())
 			try {
-				Method a = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
-				a.setAccessible(true);
-				a.invoke(null, entity.getCustomClass(), entity.getName(), entity.getID());
+				if (method == null) {
+					method = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
+					method.setAccessible(true);
+				}
+				method.invoke(null, entity.getCustomClass(), entity.getName(), entity.getID());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -90,6 +95,88 @@ public enum CustomEntityType {
 						for (CustomEntityType entity : values())
 							if (entity.getNMSClass().equals(meta.b))
 								meta.b = entity.getCustomClass();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+		}
+	}
+
+	public static void registerEntities(CustomEntityType entity) {
+		try {
+			if (method == null) {
+				method = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
+				method.setAccessible(true);
+			}
+			method.invoke(null, entity.getCustomClass(), entity.getName(), entity.getID());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		for (BiomeBase biomeBase : BiomeBase.biomes) {
+			if (biomeBase == null)
+				break;
+
+			for (String field : new String[] { "K", "J", "L", "M" })
+				try {
+					Field list = BiomeBase.class.getDeclaredField(field);
+					list.setAccessible(true);
+					@SuppressWarnings("unchecked")
+					List<BiomeMeta> mobList = (List<BiomeMeta>) list.get(biomeBase);
+
+					for (BiomeMeta meta : mobList)
+						if (entity.getNMSClass().equals(meta.b))
+							meta.b = entity.getCustomClass();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+		}
+	}
+
+	public static void unregisterEntities() {
+		for (CustomEntityType entity : values()) {
+			try {
+				Field c = EntityTypes.class.getDeclaredField("c");
+				c.setAccessible(true);
+				((Map) c.get(null)).remove(entity.getCustomClass());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			try {
+				Field e = EntityTypes.class.getDeclaredField("e");
+				e.setAccessible(true);
+				((Map) e.get(null)).remove(entity.getCustomClass());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		for (CustomEntityType entity : values())
+			try {
+				if (method == null) {
+					method = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
+					method.setAccessible(true);
+				}
+				method.invoke(null, entity.getNMSClass(), entity.getName(), entity.getID());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		for (BiomeBase biomeBase : BiomeBase.biomes) {
+			if (biomeBase == null)
+				break;
+
+			for (String field : new String[] { "K", "J", "L", "M" })
+				try {
+					Field list = BiomeBase.class.getDeclaredField(field);
+					list.setAccessible(true);
+					@SuppressWarnings("unchecked")
+					List<BiomeMeta> mobList = (List<BiomeMeta>) list.get(biomeBase);
+
+					for (BiomeMeta meta : mobList)
+						for (CustomEntityType entity : values())
+							if (entity.getCustomClass().equals(meta.b))
+								meta.b = entity.getNMSClass();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

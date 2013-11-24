@@ -19,7 +19,8 @@ public class UndisguiseListener implements Listener {
 
 	@EventHandler
 	private void onUndisguise(PlayerUndisguiseEvent e) {
-		if (MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName())) { return; }
+		if (MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			return;
 
 		e.setCancelled(!Configuration.isInLobby(e.getPlayer()));
 	}

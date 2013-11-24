@@ -40,11 +40,8 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 		this.a(width * 6.0F, length * 6.0F);
 
 		//try {
-			//Field field = PathfinderGoalSelector.class.getDeclaredField("a");
-			//field.setAccessible(true);
-
-			//field.set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			//field.set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			//PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			//PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		//} catch (Exception exc) {
 		//	exc.printStackTrace();
 		//}

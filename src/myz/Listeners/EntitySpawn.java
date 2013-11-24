@@ -16,7 +16,12 @@ import myz.mobs.CustomEntityNPC;
 import myz.mobs.CustomEntityPigZombie;
 import myz.mobs.NPCType;
 import net.minecraft.server.v1_6_R3.DataWatcher;
+import net.minecraft.server.v1_6_R3.EntityHorse;
+import net.minecraft.server.v1_6_R3.EntityPigZombie;
+import net.minecraft.server.v1_6_R3.EntitySkeleton;
 import net.minecraft.server.v1_6_R3.EntityVillager;
+import net.minecraft.server.v1_6_R3.EntityZombie;
+import net.minecraft.server.v1_6_R3.GroupDataEntity;
 import net.minecraft.server.v1_6_R3.Item;
 import net.minecraft.server.v1_6_R3.ItemStack;
 import net.minecraft.server.v1_6_R3.MerchantRecipe;
@@ -42,6 +47,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 
@@ -51,12 +58,58 @@ import org.bukkit.potion.PotionType;
  */
 public class EntitySpawn implements Listener {
 
-	private static final Random random = new Random();
+	private Random random = new Random();
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName()))
-			return;
+		World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
+		
+		// MultiWorld support, yay!
+		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName())) {
+			if (e.getEntity().getMetadata("MyZ.bypass") != null && !e.getEntity().getMetadata("MyZ.bypass").isEmpty()) { return; }
+			switch (e.getEntityType()) {
+			case HORSE:
+				EntityHorse horse = new EntityHorse(world);
+				horse.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
+				if (horse.canSpawn()) {
+					horse.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
+					world.addEntity(horse, e.getSpawnReason());
+				}
+				e.setCancelled(true);
+				return;
+			case PIG_ZOMBIE:
+				EntityPigZombie pigman = new EntityPigZombie(world);
+				pigman.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
+				if (pigman.canSpawn()) {
+					pigman.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
+					world.addEntity(pigman, e.getSpawnReason());
+				}
+				e.setCancelled(true);
+				return;
+			case ZOMBIE:
+				EntityZombie zombie = new EntityZombie(world);
+				zombie.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
+				if (zombie.canSpawn()) {
+					zombie.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
+					world.addEntity(zombie, e.getSpawnReason());
+				}
+				e.setCancelled(true);
+				return;
+			case SKELETON:
+				EntitySkeleton skeleton = new EntitySkeleton(world);
+				skeleton.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
+				if (skeleton.canSpawn()) {
+					skeleton.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
+					skeleton.a((GroupDataEntity) null);
+					skeleton.bT();
+					world.addEntity(skeleton, e.getSpawnReason());
+				}
+				e.setCancelled(true);
+				return;
+			default:
+				return;
+			}
+		}
 
 		// Cancel spawning inside spawn room.
 		if (Configuration.isInLobby(e.getEntity().getLocation())) {
@@ -68,7 +121,6 @@ public class EntitySpawn implements Listener {
 
 		// Override mooshroom spawns with giant spawns.
 		if (e.getSpawnReason() == SpawnReason.SPAWNER_EGG && e.getEntityType() == EntityType.MUSHROOM_COW) {
-			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
 			CustomEntityGiantZombie giant = new CustomEntityGiantZombie(world);
 			giant.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
 			world.addEntity(giant, SpawnReason.CUSTOM);
@@ -136,8 +188,8 @@ public class EntitySpawn implements Listener {
 
 		if (type == EntityType.SKELETON && e.getSpawnReason() != SpawnReason.CUSTOM) {
 			e.setCancelled(true);
-			if (random.nextDouble() <= 0.9) { return; }
-			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
+			if (random.nextDouble() <= 0.9)
+				return;
 			NPCType npctype;
 			CustomEntityNPC npc = new CustomEntityNPC(world, npctype = NPCType.getRandom());
 			npc.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
@@ -168,12 +220,9 @@ public class EntitySpawn implements Listener {
 					} catch (Exception exc) {
 						exc.printStackTrace();
 					}
-				} else {
-					if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
-							&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
-						myz.Utilities.LibsDisguiseUtilities.becomeNPC((LivingEntity) npc.getBukkitEntity(), getRandomName(npctype));
-					}
-				}
+				} else if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
+						&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
+					myz.Utilities.LibsDisguiseUtilities.becomeNPC((LivingEntity) npc.getBukkitEntity(), getRandomName(npctype));
 
 				((Skeleton) npc.getBukkitEntity()).setRemoveWhenFarAway(true);
 				((Skeleton) npc.getBukkitEntity()).getEquipment().setBootsDropChance(1);
@@ -183,10 +232,12 @@ public class EntitySpawn implements Listener {
 				((Skeleton) npc.getBukkitEntity()).getEquipment().setItemInHandDropChance(1);
 			}
 			return;
-		} else if (type == EntityType.SKELETON && e.getSpawnReason() == SpawnReason.CUSTOM) { return; }
+		} else if (type == EntityType.SKELETON && e.getSpawnReason() == SpawnReason.CUSTOM)
+			return;
 
 		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
-				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION) { return; }
+				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION)
+			return;
 
 		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard"))
 			if (WorldGuardManager.isAmplifiedRegion(e.getLocation())) {
@@ -218,13 +269,11 @@ public class EntitySpawn implements Listener {
 			return;
 		}
 
-		if (e.getEntityType() == EntityType.ZOMBIE) {
+		if (e.getEntityType() == EntityType.ZOMBIE)
 			((Zombie) e.getEntity()).setBaby(random.nextInt(20) < 3);
-		}
 
 		// Make some natural pigmen spawn.
 		if (e.getLocation().getZ() >= 2000 && type == EntityType.ZOMBIE && random.nextInt(30) == 1) {
-			World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
 			CustomEntityPigZombie pigman = new CustomEntityPigZombie(world);
 			pigman.setPosition(e.getLocation().getX(), e.getLocation().getY(), e.getLocation().getZ());
 			pigman.setBaby(random.nextInt(20) < 3);

@@ -26,7 +26,7 @@ import org.bukkit.entity.Player;
  */
 public class Sync implements Runnable {
 
-	private static Map<String, Integer> safeLogoutPlayers = new HashMap<String, Integer>();
+	public static Map<String, Integer> safeLogoutPlayers = new HashMap<String, Integer>();
 	private static long ticks = 0;
 
 	@Override

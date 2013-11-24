@@ -114,13 +114,6 @@ public class JoinQuit implements Listener {
 			for (Object packet : Utilities.packets.keySet())
 				if (player.getWorld().getName().equals(Utilities.packets.get(packet).getWorld()))
 					Utilities.sendPacket(player, packet);
-		if (MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
-				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
-			if ((data != null && data.isZombie())
-					|| (MyZ.instance.getSQLManager().isConnected() && MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))) {
-				DisguiseUtilities.becomeZombie(player);
-			}
-		}
 	}
 
 	@EventHandler
