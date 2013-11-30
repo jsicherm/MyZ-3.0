@@ -38,7 +38,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
-			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed, is_auto, npc;
+			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed, is_auto, npc, zombie_spawn;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
@@ -51,6 +51,7 @@ public class Configuration {
 	private static ItemStack radio, safe_logout_item, bandage;
 
 	private static Map<Integer, String> rank_prefix = new HashMap<Integer, String>();
+	private static Map<Integer, String> rank_spawnmessage = new HashMap<Integer, String>();
 	private static Map<Integer, ItemStack> ranked_helmet = new HashMap<Integer, ItemStack>();
 	private static Map<Integer, ItemStack> ranked_chestplate = new HashMap<Integer, ItemStack>();
 	private static Map<Integer, ItemStack> ranked_leggings = new HashMap<Integer, ItemStack>();
@@ -94,6 +95,7 @@ public class Configuration {
 			food_potion.put(entry, effectList);
 		}
 
+		zombie_spawn = spawnConfig.getBoolean("zombie_spawn");
 		is_auto = config.getBoolean("autoupdate.enable");
 		worlds = new ArrayList<String>(config.getStringList("multiworld.worlds"));
 		minez_chests = config.getBoolean("download.minez_chests");
@@ -173,6 +175,13 @@ public class Configuration {
 				rank_prefix.put(Integer.parseInt(entry), config.getString("ranks.names." + entry));
 			} catch (Exception exc) {
 				Messenger.sendConsoleMessage("&4The entry " + entry + "(ranks.names." + entry + ") must be an integer.");
+			}
+
+		for (String entry : config.getConfigurationSection("ranks.spawnmessage").getKeys(false))
+			try {
+				rank_spawnmessage.put(Integer.parseInt(entry), config.getString("ranks.spawnmessage." + entry));
+			} catch (Exception exc) {
+				Messenger.sendConsoleMessage("&4The entry " + entry + "(ranks.spawnmessage." + entry + ") must be an integer.");
 			}
 
 		for (String entry : config.getConfigurationSection("heal.medkit.kit").getKeys(false))
@@ -264,6 +273,8 @@ public class Configuration {
 		// Ranks begin.
 		if (!config.contains("ranks.names.0"))
 			config.set("ranks.names.0", "[%s]");
+		if (!config.contains("ranks.spawnmessage.0"))
+			config.set("ranks.spawnmessage.0", "You have spawned in the world, find food and water.");
 
 		// AutoUpdate begin.
 		if (!config.contains("autoupdate.enable"))
@@ -655,6 +666,8 @@ public class Configuration {
 			localizableConfig.set("localizable.command.saverank.saved", "&eThe chat prefix for rank number %s has been set to %s.");
 		if (!localizableConfig.contains("localizable.command.friend.non_exist"))
 			localizableConfig.set("localizable.command.friend.non_exist", "&4%s has never played before.");
+		if (!localizableConfig.contains("localizable.command.friend.empty"))
+			localizableConfig.set("localizable.command.friend.empty", "&4You have no friends.");
 		if (!localizableConfig.contains("localizable.friend.added"))
 			localizableConfig.set("localizable.friend.added", "&e%s &9has been added to your friends list.");
 		if (!localizableConfig.contains("localizable.friend.removed"))
@@ -679,6 +692,8 @@ public class Configuration {
 				config.set("blocks.destroy." + entry, null);
 
 		// Spawning begin.
+		if (!spawnConfig.contains("zombie_spawn"))
+			spawnConfig.set("zombie_spawn", false);
 		if (!spawnConfig.contains("lobby.min"))
 			spawnConfig.set("lobby.min", "0,0,0");
 		if (!spawnConfig.contains("lobby.max"))
@@ -1347,8 +1362,7 @@ public class Configuration {
 				return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
 						+ playerFor.getName();
 		try {
-			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()))
-					+ ChatColor.RESET;
+			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()));
 		} catch (Exception exc) {
 			return getPrefixForPlayerRank(playerFor, nearestInt(rank, rank_prefix.keySet()));
 		}
@@ -1739,6 +1753,29 @@ public class Configuration {
 	 */
 	public static int getHealDelay() {
 		return heal_delay;
+	}
+
+	/**
+	 * @return the zombie_spawn
+	 */
+	public static boolean zombieSpawn() {
+		return zombie_spawn;
+	}
+
+	/**
+	 * Send a spawn message to a player, specific to their rank.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @param rank
+	 *            Their rank.
+	 */
+	public static void sendSpawnMessage(Player player, int rank) {
+		if (rank_spawnmessage.containsKey(rank)) {
+			Messenger.sendMessage(player, rank_spawnmessage.get(rank));
+		} else {
+			Messenger.sendMessage(player, rank_spawnmessage.get(nearestInt(rank, rank_spawnmessage.keySet())));
+		}
 	}
 
 	public static void disable() {

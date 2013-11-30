@@ -92,7 +92,7 @@ public class ResearchItem implements Listener {
 					return;
 				}
 				ItemStack item = e.getInventory().getItem(e.getRawSlot());
-				if (item != null)
+				if (item != null && MyZ.instance.getResearchConfig().getConfigurationSection("item") != null)
 					for (String key : MyZ.instance.getResearchConfig().getConfigurationSection("item").getKeys(false)) {
 						ItemStack configured = null;
 						if ((configured = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item")) != null

@@ -26,7 +26,37 @@ public class Messenger {
 	 *            The uncolored message.
 	 */
 	public static void sendMessage(CommandSender player, String uncolored_message) {
+		if (player instanceof Player)
+			uncolored_message = processForArguments((Player) player, uncolored_message);
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_message));
+	}
+
+	/**
+	 * Process a string and replace all applicable arguments.
+	 * 
+	 * @param msg
+	 *            The input message.
+	 * @return The message with all arguments replaced.
+	 */
+	private static String processForArguments(Player player, String msg) {
+		PlayerData data = PlayerData.getDataFor(player);
+		if (data != null) {
+			msg = msg.replaceAll("%CLAN%", data.getClan());
+			msg = msg.replaceAll("%RANK%", "" + data.getRank());
+			msg = msg.replaceAll("%RESEARCH%", "" + data.getResearchPoints());
+		}
+
+		if (MyZ.instance.getSQLManager().isConnected()) {
+			msg = msg.replaceAll("%CLAN%", MyZ.instance.getSQLManager().getClan(player.getName()));
+			msg = msg.replaceAll("%RANK%", "" + MyZ.instance.getSQLManager().getInt(player.getName(), "rank"));
+			msg = msg.replaceAll("%RESEARCH%", "" + MyZ.instance.getSQLManager().getInt(player.getName(), "research"));
+		}
+
+		msg = msg.replaceAll("%NAME%", player.getName());
+		msg = msg.replaceAll("%THIRST%", "" + player.getLevel());
+		msg = msg.replaceAll("%HEALTH%", "" + (int) player.getHealth());
+
+		return msg;
 	}
 
 	/**
@@ -51,8 +81,10 @@ public class Messenger {
 	 *            The uncolored config message.
 	 */
 	public static void sendConfigMessage(CommandSender player, String uncolored_config_message) {
-		player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-				MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message)));
+		if (player instanceof Player)
+			uncolored_config_message = processForArguments((Player) player,
+					MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message));
+		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_config_message));
 	}
 
 	/**

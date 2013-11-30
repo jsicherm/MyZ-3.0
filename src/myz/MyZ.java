@@ -947,26 +947,27 @@ public class MyZ extends JavaPlugin {
 			for (PotionEffect potioneffect : Configuration.getSpawnPotionEffects())
 				player.addPotionEffect(potioneffect);
 
-			if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("DisguiseCraft") != null
-					&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
-				myz.Utilities.DisguiseUtilities.becomeZombie(player);
-				player.getInventory().setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2));
-				Messenger.sendConfigMessage(player, "spawn.zombie");
-				if (data != null)
-					data.setZombie(true);
-				if (sql.isConnected())
-					sql.set(player.getName(), "isZombie", true, true);
-				return;
-			} else if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("LibsDisguises") != null
-					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
-				myz.Utilities.LibsDisguiseUtilities.becomeZombie(player);
-				Messenger.sendConfigMessage(player, "spawn.zombie");
-				if (data != null)
-					data.setZombie(true);
-				if (sql.isConnected())
-					sql.set(player.getName(), "isZombie", true, true);
-				return;
-			}
+			if (Configuration.zombieSpawn())
+				if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("DisguiseCraft") != null
+						&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
+					myz.Utilities.DisguiseUtilities.becomeZombie(player);
+					player.getInventory().setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2));
+					Messenger.sendConfigMessage(player, "spawn.zombie");
+					if (data != null)
+						data.setZombie(true);
+					if (sql.isConnected())
+						sql.set(player.getName(), "isZombie", true, true);
+					return;
+				} else if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("LibsDisguises") != null
+						&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
+					myz.Utilities.LibsDisguiseUtilities.becomeZombie(player);
+					Messenger.sendConfigMessage(player, "spawn.zombie");
+					if (data != null)
+						data.setZombie(true);
+					if (sql.isConnected())
+						sql.set(player.getName(), "isZombie", true, true);
+					return;
+				}
 
 			int rank = 0;
 			if (data != null)
@@ -984,6 +985,8 @@ public class MyZ extends JavaPlugin {
 			} catch (NullPointerException exc) {
 
 			}
+
+			Configuration.sendSpawnMessage(player, rank);
 		}
 	}
 

@@ -372,25 +372,26 @@ public class Utilities {
 		// Start loading items.
 		int position = 1;
 		int page = 1;
-		for (String key : MyZ.instance.getResearchConfig().getConfigurationSection("item").getKeys(false))
-			if (MyZ.instance.getResearchConfig().contains("item." + key + ".cost")) {
-				ItemStack item = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item").clone();
-				meta = item.getItemMeta();
-				meta.setLore(Arrays.asList(ChatColor.WHITE
-						+ Messenger.getConfigMessage("gui.cost", MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
-				item.setItemMeta(meta);
-				gui.setItem(position, item);
-				position++;
-				if (position == 8) {
-					// Wrap to new page.
-					page++;
-					gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points) + " (" + page + ")");
-					inventories.add(gui);
-					gui.setItem(0, leftArrow);
-					gui.setItem(8, rightArrow);
-					position = 1;
+		if (MyZ.instance.getResearchConfig().getConfigurationSection("item") != null)
+			for (String key : MyZ.instance.getResearchConfig().getConfigurationSection("item").getKeys(false))
+				if (MyZ.instance.getResearchConfig().contains("item." + key + ".cost")) {
+					ItemStack item = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item").clone();
+					meta = item.getItemMeta();
+					meta.setLore(Arrays.asList(ChatColor.WHITE
+							+ Messenger.getConfigMessage("gui.cost", MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
+					item.setItemMeta(meta);
+					gui.setItem(position, item);
+					position++;
+					if (position == 8) {
+						// Wrap to new page.
+						page++;
+						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points) + " (" + page + ")");
+						inventories.add(gui);
+						gui.setItem(0, leftArrow);
+						gui.setItem(8, rightArrow);
+						position = 1;
+					}
 				}
-			}
 
 		// Show page.
 		if (page > inventories.size())

@@ -63,7 +63,7 @@ public class EntitySpawn implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
 		World world = ((CraftWorld) e.getLocation().getWorld()).getHandle();
-		
+
 		// MultiWorld support, yay!
 		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName())) {
 			if (e.getEntity().getMetadata("MyZ.bypass") != null && !e.getEntity().getMetadata("MyZ.bypass").isEmpty()) { return; }
@@ -180,13 +180,7 @@ public class EntitySpawn implements Listener {
 			}
 		}
 
-		// Spawn NPCs
-		if (type == EntityType.SKELETON && !Configuration.isNPC()) {
-			e.setCancelled(true);
-			return;
-		}
-
-		if (type == EntityType.SKELETON && e.getSpawnReason() != SpawnReason.CUSTOM) {
+		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && e.getSpawnReason() != SpawnReason.CUSTOM && Configuration.isNPC()) {
 			e.setCancelled(true);
 			if (random.nextDouble() <= 0.9)
 				return;
@@ -232,9 +226,8 @@ public class EntitySpawn implements Listener {
 				((Skeleton) npc.getBukkitEntity()).getEquipment().setItemInHandDropChance(1);
 			}
 			return;
-		} else if (type == EntityType.SKELETON && e.getSpawnReason() == SpawnReason.CUSTOM)
-			return;
-
+		}
+		
 		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
 				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION)
 			return;
@@ -264,7 +257,7 @@ public class EntitySpawn implements Listener {
 			}
 		// Make sure we only spawn our desired mobs.
 		if (type != EntityType.ZOMBIE && type != EntityType.GIANT && type != EntityType.HORSE && type != EntityType.PLAYER
-				&& type != EntityType.PIG_ZOMBIE && type != EntityType.SKELETON && type != EntityType.VILLAGER) {
+				&& type != EntityType.PIG_ZOMBIE && type != EntityType.VILLAGER) {
 			e.setCancelled(true);
 			return;
 		}

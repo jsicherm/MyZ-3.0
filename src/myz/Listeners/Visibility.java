@@ -81,9 +81,9 @@ public class Visibility implements Listener {
 			PathingSupport.elevatePlayer(e.getPlayer(), 10);
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOWEST)
 	private void onExplodeBlocks(EntityExplodeEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName()))
 			return;
 		List<Block> explodedBlocks = new ArrayList<Block>();
 

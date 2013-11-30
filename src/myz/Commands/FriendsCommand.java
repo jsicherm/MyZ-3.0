@@ -48,6 +48,8 @@ public class FriendsCommand implements CommandExecutor {
 				output = output.substring(0, output.length() - 2);
 			if (!output.isEmpty())
 				sender.sendMessage(output);
+			else
+				Messenger.sendConfigMessage(sender, "command.friend.empty");
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
