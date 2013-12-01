@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.List;
 
 import myz.MyZ;
-import net.minecraft.server.v1_6_R3.DistanceComparator;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityHorse;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.IEntitySelector;
-import net.minecraft.server.v1_6_R3.PathfinderGoalTarget;
+import net.minecraft.server.v1_7_R1.DistanceComparator;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityHorse;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityLiving;
+import net.minecraft.server.v1_7_R1.IEntitySelector;
+import net.minecraft.server.v1_7_R1.PathfinderGoalTarget;
 
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
@@ -55,7 +55,7 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean a() {
-		if (b > 0 && c.aD().nextInt(b) != 0)
+		if (b > 0 && c.aI().nextInt(b) != 0)
 			return false;
 		else {
 			double d0 = f();

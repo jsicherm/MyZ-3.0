@@ -4,19 +4,19 @@
 package myz.mobs;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.server.v1_6_R3.BiomeBase;
-import net.minecraft.server.v1_6_R3.BiomeMeta;
-import net.minecraft.server.v1_6_R3.EntityGiantZombie;
-import net.minecraft.server.v1_6_R3.EntityHorse;
-import net.minecraft.server.v1_6_R3.EntityInsentient;
-import net.minecraft.server.v1_6_R3.EntityPigZombie;
-import net.minecraft.server.v1_6_R3.EntitySkeleton;
-import net.minecraft.server.v1_6_R3.EntityTypes;
-import net.minecraft.server.v1_6_R3.EntityZombie;
+import myz.Support.Messenger;
+import net.minecraft.server.v1_7_R1.BiomeBase;
+import net.minecraft.server.v1_7_R1.BiomeMeta;
+import net.minecraft.server.v1_7_R1.EntityGiantZombie;
+import net.minecraft.server.v1_7_R1.EntityHorse;
+import net.minecraft.server.v1_7_R1.EntityInsentient;
+import net.minecraft.server.v1_7_R1.EntityPigZombie;
+import net.minecraft.server.v1_7_R1.EntitySkeleton;
+import net.minecraft.server.v1_7_R1.EntityTypes;
+import net.minecraft.server.v1_7_R1.EntityZombie;
 
 import org.bukkit.entity.EntityType;
 
@@ -36,8 +36,6 @@ public enum CustomEntityType {
 	private EntityType entityType;
 	private Class<? extends EntityInsentient> nmsClass;
 	private Class<? extends EntityInsentient> customClass;
-
-	public static Method method;
 
 	private CustomEntityType(String name, int id, EntityType entityType, Class<? extends EntityInsentient> nmsClass,
 			Class<? extends EntityInsentient> customClass) {
@@ -70,21 +68,20 @@ public enum CustomEntityType {
 
 	public static void registerEntities() {
 		for (CustomEntityType entity : values())
-			try {
-				if (method == null) {
-					method = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
-					method.setAccessible(true);
-				}
-				method.invoke(null, entity.getCustomClass(), entity.getName(), entity.getID());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			a(entity.getCustomClass(), entity.getName(), entity.getID());
 
-		for (BiomeBase biomeBase : BiomeBase.biomes) {
+		BiomeBase[] biomes;
+		try {
+			biomes = (BiomeBase[]) getPrivateStatic(BiomeBase.class, "biomes");
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4BiomeBase issue!");
+			return;
+		}
+		for (BiomeBase biomeBase : biomes) {
 			if (biomeBase == null)
 				break;
 
-			for (String field : new String[] { "K", "J", "L", "M" })
+			for (String field : new String[] { "as", "at", "au", "av" })
 				try {
 					Field list = BiomeBase.class.getDeclaredField(field);
 					list.setAccessible(true);
@@ -101,51 +98,16 @@ public enum CustomEntityType {
 		}
 	}
 
-	public static void registerEntities(CustomEntityType entity) {
-		try {
-			if (method == null) {
-				method = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
-				method.setAccessible(true);
-			}
-			method.invoke(null, entity.getCustomClass(), entity.getName(), entity.getID());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		for (BiomeBase biomeBase : BiomeBase.biomes) {
-			if (biomeBase == null)
-				break;
-
-			for (String field : new String[] { "K", "J", "L", "M" })
-				try {
-					Field list = BiomeBase.class.getDeclaredField(field);
-					list.setAccessible(true);
-					@SuppressWarnings("unchecked")
-					List<BiomeMeta> mobList = (List<BiomeMeta>) list.get(biomeBase);
-
-					for (BiomeMeta meta : mobList)
-						if (entity.getNMSClass().equals(meta.b))
-							meta.b = entity.getCustomClass();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-		}
-	}
-
 	public static void unregisterEntities() {
 		for (CustomEntityType entity : values()) {
 			try {
-				Field c = EntityTypes.class.getDeclaredField("c");
-				c.setAccessible(true);
-				((Map) c.get(null)).remove(entity.getCustomClass());
+				((Map) getPrivateStatic(EntityTypes.class, "d")).remove(entity.getCustomClass());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 			try {
-				Field e = EntityTypes.class.getDeclaredField("e");
-				e.setAccessible(true);
-				((Map) e.get(null)).remove(entity.getCustomClass());
+				((Map) getPrivateStatic(EntityTypes.class, "f")).remove(entity.getCustomClass());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -153,20 +115,23 @@ public enum CustomEntityType {
 
 		for (CustomEntityType entity : values())
 			try {
-				if (method == null) {
-					method = EntityTypes.class.getDeclaredMethod("a", new Class<?>[] { Class.class, String.class, int.class });
-					method.setAccessible(true);
-				}
-				method.invoke(null, entity.getNMSClass(), entity.getName(), entity.getID());
+				a(entity.getNMSClass(), entity.getName(), entity.getID());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-		for (BiomeBase biomeBase : BiomeBase.biomes) {
+		BiomeBase[] biomes;
+		try {
+			biomes = (BiomeBase[]) getPrivateStatic(BiomeBase.class, "biomes");
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4BiomeBase issue!");
+			return;
+		}
+		for (BiomeBase biomeBase : biomes) {
 			if (biomeBase == null)
 				break;
 
-			for (String field : new String[] { "K", "J", "L", "M" })
+			for (String field : new String[] { "as", "at", "au", "av" })
 				try {
 					Field list = BiomeBase.class.getDeclaredField(field);
 					list.setAccessible(true);
@@ -180,6 +145,25 @@ public enum CustomEntityType {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+		}
+	}
+
+	private static Object getPrivateStatic(Class clazz, String f) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+			IllegalAccessException {
+		Field field = clazz.getDeclaredField(f);
+		field.setAccessible(true);
+		return field.get(null);
+	}
+
+	private static void a(Class paramClass, String paramString, int paramInt) {
+		try {
+			((Map) getPrivateStatic(EntityTypes.class, "c")).put(paramString, paramClass);
+			((Map) getPrivateStatic(EntityTypes.class, "d")).put(paramClass, paramString);
+			((Map) getPrivateStatic(EntityTypes.class, "e")).put(Integer.valueOf(paramInt), paramClass);
+			((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, Integer.valueOf(paramInt));
+			((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, Integer.valueOf(paramInt));
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4Registration issue!");
 		}
 	}
 }

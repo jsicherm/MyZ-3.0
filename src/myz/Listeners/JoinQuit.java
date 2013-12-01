@@ -10,7 +10,6 @@ import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
-import myz.Utilities.DisguiseUtilities;
 import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityPlayer;
 
@@ -145,9 +144,8 @@ public class JoinQuit implements Listener {
 				}
 
 			// Spawn our NPC unless we were flagged.
-			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getName())) {
+			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getName()))
 				Utilities.spawnNPC(e.getPlayer());
-			}
 			MyZ.instance.getFlagged().remove(e.getPlayer().getName());
 		}
 	}

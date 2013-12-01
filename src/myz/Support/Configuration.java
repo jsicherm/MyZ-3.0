@@ -1771,11 +1771,10 @@ public class Configuration {
 	 *            Their rank.
 	 */
 	public static void sendSpawnMessage(Player player, int rank) {
-		if (rank_spawnmessage.containsKey(rank)) {
+		if (rank_spawnmessage.containsKey(rank))
 			Messenger.sendMessage(player, rank_spawnmessage.get(rank));
-		} else {
+		else
 			Messenger.sendMessage(player, rank_spawnmessage.get(nearestInt(rank, rank_spawnmessage.keySet())));
-		}
 	}
 
 	public static void disable() {

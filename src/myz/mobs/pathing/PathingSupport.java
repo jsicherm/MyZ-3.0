@@ -8,18 +8,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import myz.MyZ;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityCreature;
-import net.minecraft.server.v1_6_R3.EntityHorse;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityInsentient;
-import net.minecraft.server.v1_6_R3.PathEntity;
-import net.minecraft.server.v1_6_R3.PathfinderGoalSelector;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityCreature;
+import net.minecraft.server.v1_7_R1.EntityHorse;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityInsentient;
+import net.minecraft.server.v1_7_R1.PathEntity;
+import net.minecraft.server.v1_7_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,14 +30,22 @@ import org.bukkit.inventory.ItemStack;
 public class PathingSupport {
 
 	private static Map<String, Double> visibility_override = new HashMap<String, Double>();
-	private static Field field;
+	private static Field field, field2;
 
 	public static Field getField() throws NoSuchFieldException, SecurityException {
 		if (field == null) {
-			field = PathfinderGoalSelector.class.getDeclaredField("a");
+			field = PathfinderGoalSelector.class.getDeclaredField("b");
 			field.setAccessible(true);
 		}
 		return field;
+	}
+
+	public static Field getSecondField() throws NoSuchFieldException, SecurityException {
+		if (field2 == null) {
+			field2 = PathfinderGoalSelector.class.getDeclaredField("c");
+			field2.setAccessible(true);
+		}
+		return field2;
 	}
 
 	/**
@@ -177,8 +185,12 @@ public class PathingSupport {
 
 		// Invisible players must be very close to be seen.
 		if (p.getHandle().isInvisible()) {
-			float f = p.getHandle().bx();
-
+			ItemStack[] items = p.getEquipment().getArmorContents();
+			int i = 0;
+			for (ItemStack item : items)
+				if (item != null)
+					i++;
+			float f = (float) i / (float) items.length;
 			if (f < 0.1F)
 				f = 0.1F;
 

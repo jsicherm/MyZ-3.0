@@ -9,22 +9,27 @@ import java.util.List;
 import myz.Utilities.Utilities;
 import myz.mobs.support.NullEntityNetworkManager;
 import myz.mobs.support.NullNetServerHandler;
-import net.minecraft.server.v1_6_R3.DamageSource;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityArrow;
-import net.minecraft.server.v1_6_R3.EntityDamageSource;
-import net.minecraft.server.v1_6_R3.EntityHorse;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.EntityPlayer;
-import net.minecraft.server.v1_6_R3.EntityWolf;
-import net.minecraft.server.v1_6_R3.EnumGamemode;
-import net.minecraft.server.v1_6_R3.MinecraftServer;
-import net.minecraft.server.v1_6_R3.MobEffectList;
-import net.minecraft.server.v1_6_R3.NetworkManager;
-import net.minecraft.server.v1_6_R3.PlayerInteractManager;
-import net.minecraft.server.v1_6_R3.StatisticList;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.DamageSource;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityArrow;
+import net.minecraft.server.v1_7_R1.EntityDamageSource;
+import net.minecraft.server.v1_7_R1.EntityHorse;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityLiving;
+import net.minecraft.server.v1_7_R1.EntityPlayer;
+import net.minecraft.server.v1_7_R1.EntityWolf;
+import net.minecraft.server.v1_7_R1.EnumDifficulty;
+import net.minecraft.server.v1_7_R1.EnumGamemode;
+import net.minecraft.server.v1_7_R1.MinecraftServer;
+import net.minecraft.server.v1_7_R1.MobEffectList;
+import net.minecraft.server.v1_7_R1.NetworkManager;
+import net.minecraft.server.v1_7_R1.PlayerInteractManager;
+import net.minecraft.server.v1_7_R1.StatisticList;
+import net.minecraft.server.v1_7_R1.WorldServer;
+import net.minecraft.util.com.mojang.authlib.GameProfile;
+
+import org.bukkit.craftbukkit.v1_7_R1.event.CraftEventFactory;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 /**
  * @author kumpelblase2
@@ -34,10 +39,11 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	protected List<org.bukkit.inventory.ItemStack> inventoryItems = new ArrayList<org.bukkit.inventory.ItemStack>();
 
-	public CustomEntityPlayer(MinecraftServer server, World world, String s, PlayerInteractManager iteminworldmanager) {
-		super(server, world, s, iteminworldmanager);
+	public CustomEntityPlayer(MinecraftServer server, WorldServer worldserver, GameProfile gameprofile,
+			PlayerInteractManager iteminworldmanager) {
+		super(server, worldserver, gameprofile, iteminworldmanager);
 		try {
-			NetworkManager manager = new NullEntityNetworkManager(server);
+			NetworkManager manager = new NullEntityNetworkManager(false);
 			playerConnection = new NullNetServerHandler(server, manager, this);
 			manager.a(playerConnection);
 		} catch (Exception e) {
@@ -63,10 +69,10 @@ public class CustomEntityPlayer extends EntityPlayer {
 		Utilities.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
 		inventoryItems = null;
 
-		EntityLiving entityliving = aS();
+		EntityLiving entityliving = aX();
 		if (entityliving != null)
 			entityliving.b(this, bb);
-		this.a(StatisticList.y, 1);
+		this.a(StatisticList.v, 1);
 		dead = true;
 		getBukkitEntity().remove();
 	}
@@ -77,28 +83,20 @@ public class CustomEntityPlayer extends EntityPlayer {
 		Utilities.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
 		inventoryItems = null;
 
-		EntityLiving entityliving = aS();
+		EntityLiving entityliving = aX();
 		if (entityliving != null)
 			entityliving.b(this, bb);
-		this.a(StatisticList.y, 1);
+		this.a(StatisticList.v, 1);
 		dead = true;
 		getBukkitEntity().remove();
 	}
 
 	@Override
-	public void g(double x, double y, double z) {
-		motX += x;
-		motY += y;
-		motZ += z;
-		an = true;
-	}
-
-	@Override
-	public void l_() {
+	public void h() {
 		// Taken from RemoteEntities#RemotePlayerEntity.java
 		yaw = az;
-		super.l_();
-		this.h();
+		super.h();
+		this.e();
 
 		if (noDamageTicks > 0)
 			noDamageTicks--;
@@ -141,21 +139,21 @@ public class CustomEntityPlayer extends EntityPlayer {
 			aV = 0;
 			if (getHealth() <= 0.0F)
 				return false;
-			else if (damagesource.m() && this.hasEffect(MobEffectList.FIRE_RESISTANCE))
+			else if (damagesource.o() && this.hasEffect(MobEffectList.FIRE_RESISTANCE))
 				return false;
 			else {
 				// EntityHuman default start.
 				if (isSleeping() && !world.isStatic)
 					this.a(true, true, false);
 
-				if (damagesource.p()) {
-					if (world.difficulty == 0)
-						f = 0.0F;
+				if (damagesource.r()) {
+					if (world.difficulty == EnumDifficulty.PEACEFUL)
+						return false;
 
-					if (world.difficulty == 1)
+					if (world.difficulty == EnumDifficulty.EASY)
 						f = f / 2.0F + 1.0F;
 
-					if (world.difficulty == 3)
+					if (world.difficulty == EnumDifficulty.HARD)
 						f = f * 3.0F / 2.0F;
 				}
 
@@ -178,6 +176,13 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 				aG = 1.5F;
 				flag = true;
+
+				EntityDamageEvent event = CraftEventFactory.handleEntityDamageEvent(this, damagesource, f);
+				if (event != null) {
+					if (event.isCancelled())
+						return false;
+					f = (float) event.getDamage();
+				}
 
 				if (noDamageTicks > maxNoDamageTicks / 2.0F) {
 					if (f <= lastDamage)
@@ -226,7 +231,7 @@ public class CustomEntityPlayer extends EntityPlayer {
 				if (flag) {
 					world.broadcastEntityEffect(this, (byte) 2);
 					if (damagesource != DamageSource.DROWN)
-						K();
+						Q();
 
 					if (entity != null /* MyZ start */&& onGround /* MyZ end */) {
 						double d0 = entity.locX - locX;
@@ -243,12 +248,12 @@ public class CustomEntityPlayer extends EntityPlayer {
 				}
 
 				if (getHealth() <= 0.0F) {
-					if (flag)
-						makeSound(aP(), ba(), bb());
+					if (flag && aU() != null)
+						makeSound(aU(), bf(), bg());
 
 					this.die(damagesource);
-				} else if (flag)
-					makeSound(aO(), ba(), bb());
+				} else if (flag && aT() != null)
+					makeSound(aT(), bf(), bg());
 
 				return true;
 			}

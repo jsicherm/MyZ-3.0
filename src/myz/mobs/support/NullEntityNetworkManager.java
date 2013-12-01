@@ -3,50 +3,55 @@
  */
 package myz.mobs.support;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.net.SocketAddress;
 
-import net.minecraft.server.v1_6_R3.Connection;
-import net.minecraft.server.v1_6_R3.MinecraftServer;
-import net.minecraft.server.v1_6_R3.NetworkManager;
-import net.minecraft.server.v1_6_R3.Packet;
+import javax.crypto.SecretKey;
+
+import net.minecraft.server.v1_7_R1.EnumProtocol;
+import net.minecraft.server.v1_7_R1.IChatBaseComponent;
+import net.minecraft.server.v1_7_R1.NetworkManager;
+import net.minecraft.server.v1_7_R1.Packet;
+import net.minecraft.server.v1_7_R1.PacketListener;
+import net.minecraft.util.io.netty.channel.Channel;
+import net.minecraft.util.io.netty.channel.ChannelHandlerContext;
+import net.minecraft.util.io.netty.util.concurrent.GenericFutureListener;
 
 /**
- * @author kumpelblase2
+ * @author Jordan
  * 
  */
 public class NullEntityNetworkManager extends NetworkManager {
 
-	public NullEntityNetworkManager(MinecraftServer server) throws IOException {
-		super(server.getLogger(), new NullSocket(), "myzentitymanager", new Connection() {
-			@Override
-			public boolean a() {
-				return false;
-			}
-		}, server.H().getPrivate());
-		try {
-			Field field = NetworkManager.class.getDeclaredField("n");
-			field.setAccessible(true);
-			field.set(this, false);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public NullEntityNetworkManager(boolean flag) {
+		super(flag);
 	}
 
 	@Override
-	public void a(final Connection nethandler) {
+	public void channelActive(ChannelHandlerContext channelhandlercontext) throws Exception {
 	}
 
 	@Override
-	public void queue(final Packet packet) {
+	public void a(EnumProtocol enumprotocol) {
 	}
 
 	@Override
-	public void a(final String s, final Object... aobject) {
+	public void channelInactive(ChannelHandlerContext channelhandlercontext) {
 	}
 
 	@Override
-	public void d() {
+	public void exceptionCaught(ChannelHandlerContext channelhandlercontext, Throwable throwable) {
+	}
+
+	@Override
+	protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) {
+	}
+
+	@Override
+	public void a(PacketListener packetlistener) {
+	}
+
+	@Override
+	public void handle(Packet packet, GenericFutureListener... agenericfuturelistener) {
 	}
 
 	@Override
@@ -54,7 +59,47 @@ public class NullEntityNetworkManager extends NetworkManager {
 	}
 
 	@Override
-	public int e() {
-		return 0;
+	public SocketAddress getSocketAddress() {
+		return null;
+	}
+
+	@Override
+	public void a(IChatBaseComponent ichatbasecomponent) {
+	}
+
+	@Override
+	public boolean c() {
+		return false;
+	}
+
+	@Override
+	public void a(SecretKey secretkey) {
+	}
+
+	@Override
+	public boolean d() {
+		return false;
+	}
+
+	@Override
+	public PacketListener getPacketListener() {
+		return null;
+	}
+
+	@Override
+	public IChatBaseComponent f() {
+		return null;
+	}
+
+	@Override
+	public void g() {
+	}
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext channelhandlercontext, Object object) {
+	}
+
+	static Channel a(NetworkManager networkmanager) {
+		return null;
 	}
 }

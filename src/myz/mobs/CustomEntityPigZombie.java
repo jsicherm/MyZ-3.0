@@ -8,27 +8,27 @@ import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
-import net.minecraft.server.v1_6_R3.DamageSource;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityPigZombie;
-import net.minecraft.server.v1_6_R3.EntitySkeleton;
-import net.minecraft.server.v1_6_R3.EntityVillager;
-import net.minecraft.server.v1_6_R3.Item;
-import net.minecraft.server.v1_6_R3.ItemStack;
-import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
-import net.minecraft.server.v1_6_R3.PathfinderGoalHurtByTarget;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveThroughVillage;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveTowardsRestriction;
-import net.minecraft.server.v1_6_R3.PathfinderGoalOpenDoor;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRandomLookaround;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRandomStroll;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRestrictOpenDoor;
-import net.minecraft.server.v1_6_R3.PathfinderGoalSelector;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityPigZombie;
+import net.minecraft.server.v1_7_R1.EntitySkeleton;
+import net.minecraft.server.v1_7_R1.EntityVillager;
+import net.minecraft.server.v1_7_R1.EnumDifficulty;
+import net.minecraft.server.v1_7_R1.ItemStack;
+import net.minecraft.server.v1_7_R1.Items;
+import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
+import net.minecraft.server.v1_7_R1.PathfinderGoalHurtByTarget;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveThroughVillage;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveTowardsRestriction;
+import net.minecraft.server.v1_7_R1.PathfinderGoalOpenDoor;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRandomLookaround;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRandomStroll;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRestrictOpenDoor;
+import net.minecraft.server.v1_7_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_6_R3.util.UnsafeList;
+import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
 
 /**
  * @author Jordan
@@ -42,6 +42,8 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
 			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -71,14 +73,14 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}
 
-	@Override
+	/*@Override
 	public boolean m(Entity entity) {
 		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getPigmanDamage() * (isBaby() ? 0.5f : 1f));
-	}
+	}*/
 
 	@Override
-	protected void bw() {
-		setEquipment(0, new ItemStack(Item.STONE_SWORD));
+	protected void bA() {
+		setEquipment(0, new ItemStack(Items.STONE_SWORD));
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		// int j = MathHelper.floor(boundingBox.b);
 		// int k = MathHelper.floor(locZ);
 
-		return world.difficulty > 0 && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
+		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
 				&& !world.containsLiquid(boundingBox);// && this.a(i, j, k) >=
 														// 0.0F;
 	}

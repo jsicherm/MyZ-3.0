@@ -7,38 +7,41 @@ import java.util.UUID;
 
 import myz.MyZ;
 import myz.Support.Configuration;
+import myz.Support.Messenger;
 import myz.Utilities.Utilities;
 import myz.mobs.pathing.PathfinderGoalFollow;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
-import net.minecraft.server.v1_6_R3.DamageSource;
-import net.minecraft.server.v1_6_R3.Enchantment;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntitySkeleton;
-import net.minecraft.server.v1_6_R3.Item;
-import net.minecraft.server.v1_6_R3.ItemStack;
-import net.minecraft.server.v1_6_R3.Packet;
-import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
-import net.minecraft.server.v1_6_R3.Packet29DestroyEntity;
-import net.minecraft.server.v1_6_R3.PathfinderGoalArrowAttack;
-import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
-import net.minecraft.server.v1_6_R3.PathfinderGoalHurtByTarget;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveIndoors;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveThroughVillage;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveTowardsRestriction;
-import net.minecraft.server.v1_6_R3.PathfinderGoalOpenDoor;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRandomLookaround;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRandomStroll;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRestrictOpenDoor;
-import net.minecraft.server.v1_6_R3.PathfinderGoalSelector;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.Block;
+import net.minecraft.server.v1_7_R1.DamageSource;
+import net.minecraft.server.v1_7_R1.Enchantment;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntitySkeleton;
+import net.minecraft.server.v1_7_R1.EnumDifficulty;
+import net.minecraft.server.v1_7_R1.Item;
+import net.minecraft.server.v1_7_R1.ItemStack;
+import net.minecraft.server.v1_7_R1.Items;
+import net.minecraft.server.v1_7_R1.Packet;
+import net.minecraft.server.v1_7_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_7_R1.PathfinderGoalArrowAttack;
+import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
+import net.minecraft.server.v1_7_R1.PathfinderGoalHurtByTarget;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveIndoors;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveThroughVillage;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveTowardsRestriction;
+import net.minecraft.server.v1_7_R1.PathfinderGoalOpenDoor;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRandomLookaround;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRandomStroll;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRestrictOpenDoor;
+import net.minecraft.server.v1_7_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_6_R3.util.UnsafeList;
+import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 
@@ -64,6 +67,8 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
 			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			PathingSupport.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -116,7 +121,7 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 			break;
 		}
 
-		bw();
+		bA();
 	}
 
 	public NPCType getType() {
@@ -124,27 +129,27 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 	}
 
 	@Override
-	protected String r() {
+	protected String t() {
 		return "mob.villager.idle";
 	}
 
 	@Override
-	protected String aO() {
+	protected String aT() {
 		return "mob.villager.hit"; // random.classic_hurt
 	}
 
 	@Override
-	protected String aP() {
+	protected String aU() {
 		return "random.classic_hurt";
 	}
 
 	@Override
-	protected void a(int i, int j, int k, int l) {
+	protected void a(int i, int j, int k, Block block) {
 		makeSound("step.grass", 0.15F, 1.0F);
 	}
 
 	@Override
-	protected ItemStack l(int i) {
+	protected ItemStack getRareDrop(int i) {
 		int r = random.nextInt(4);
 		ItemStack item;
 		Potion potion;
@@ -153,11 +158,11 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case FRIEND_ARCHER:
 			switch (r) {
 			case 0:
-				return new ItemStack(Item.ARROW, random.nextInt(5) + 1);
+				return new ItemStack(Items.ARROW, random.nextInt(5) + 1);
 			case 1:
-				return new ItemStack(Item.CAKE, 1);
+				return new ItemStack(Items.CAKE, 1);
 			case 2:
-				return new ItemStack(Item.POTATO, 1);
+				return new ItemStack(Items.POTATO, 1);
 			case 3:
 				potion = new Potion(PotionType.INSTANT_HEAL);
 				return CraftItemStack.asNMSCopy(potion.toItemStack(1));
@@ -167,14 +172,14 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case FRIEND_SWORDSMAN:
 			switch (r) {
 			case 0:
-				return new ItemStack(Item.COOKIE, random.nextInt(5) + 1);
+				return new ItemStack(Items.COOKIE, random.nextInt(5) + 1);
 			case 1:
-				item = new ItemStack(Item.STONE_SWORD, 1);
+				item = new ItemStack(Items.STONE_SWORD, 1);
 				if (random.nextBoolean())
 					item.addEnchantment(Enchantment.DAMAGE_UNDEAD, 0);
 				return item;
 			case 2:
-				item = new ItemStack(Item.WOOD_SWORD, 1);
+				item = new ItemStack(Items.WOOD_SWORD, 1);
 				if (random.nextBoolean())
 					item.addEnchantment(Enchantment.DAMAGE_UNDEAD, 0);
 				return item;
@@ -187,40 +192,40 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case FRIEND_WANDERER:
 			switch (r) {
 			case 0:
-				return new ItemStack(Item.POTION, random.nextInt(2) + 1);
+				return new ItemStack(Items.POTION, random.nextInt(2) + 1);
 			case 1:
-				return new ItemStack(Item.GLASS_BOTTLE, 1);
+				return new ItemStack(Items.GLASS_BOTTLE, 1);
 			case 2:
-				return new ItemStack(Item.APPLE, 1);
+				return new ItemStack(Items.APPLE, 1);
 			case 3:
-				return new ItemStack(Item.BOWL, 1);
+				return new ItemStack(Items.BOWL, 1);
 			}
 			break;
 		}
-		return new ItemStack(Item.POTION, 1);
+		return new ItemStack(Items.POTION, 1);
 	}
 
 	@Override
-	protected void bw() {
+	protected void bA() {
 		int i = random.nextInt(5);
 
 		switch (type) {
 		case ENEMY_ARCHER:
 		case FRIEND_ARCHER:
-			setEquipment(0, new ItemStack(Item.BOW, 1));
+			setEquipment(0, new ItemStack(Items.BOW, 1));
 			switch (i) {
 			case 0:
-				setEquipment(4, new ItemStack(Item.CHAINMAIL_HELMET, 1));
+				setEquipment(4, new ItemStack(Items.CHAINMAIL_HELMET, 1));
 				break;
 			case 1:
-				setEquipment(2, new ItemStack(Item.IRON_LEGGINGS, 1));
+				setEquipment(2, new ItemStack(Items.IRON_LEGGINGS, 1));
 				break;
 			case 2:
-				setEquipment(1, new ItemStack(Item.GOLD_BOOTS, 1));
+				setEquipment(1, new ItemStack(Items.GOLD_BOOTS, 1));
 				break;
 			case 3:
-				setEquipment(1, new ItemStack(Item.GOLD_BOOTS, 1));
-				setEquipment(3, new ItemStack(Item.LEATHER_CHESTPLATE, 1));
+				setEquipment(1, new ItemStack(Items.GOLD_BOOTS, 1));
+				setEquipment(3, new ItemStack(Items.LEATHER_CHESTPLATE, 1));
 				break;
 			}
 			break;
@@ -228,24 +233,24 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case FRIEND_SWORDSMAN:
 			switch (i) {
 			case 0:
-				setEquipment(0, new ItemStack(Item.STONE_SWORD, 1));
-				setEquipment(4, new ItemStack(Item.CHAINMAIL_HELMET, 1));
+				setEquipment(0, new ItemStack(Items.STONE_SWORD, 1));
+				setEquipment(4, new ItemStack(Items.CHAINMAIL_HELMET, 1));
 				break;
 			case 1:
-				setEquipment(0, new ItemStack(Item.IRON_SWORD, 1));
-				setEquipment(2, new ItemStack(Item.IRON_LEGGINGS, 1));
+				setEquipment(0, new ItemStack(Items.IRON_SWORD, 1));
+				setEquipment(2, new ItemStack(Items.IRON_LEGGINGS, 1));
 				break;
 			case 2:
-				setEquipment(0, new ItemStack(Item.STONE_SWORD, 1));
-				setEquipment(3, new ItemStack(Item.GOLD_CHESTPLATE, 1));
+				setEquipment(0, new ItemStack(Items.STONE_SWORD, 1));
+				setEquipment(3, new ItemStack(Items.GOLD_CHESTPLATE, 1));
 				break;
 			case 3:
-				setEquipment(0, new ItemStack(Item.WOOD_SWORD, 1));
-				setEquipment(3, new ItemStack(Item.CHAINMAIL_CHESTPLATE, 1));
-				setEquipment(2, new ItemStack(Item.CHAINMAIL_LEGGINGS, 1));
+				setEquipment(0, new ItemStack(Items.WOOD_SWORD, 1));
+				setEquipment(3, new ItemStack(Items.CHAINMAIL_CHESTPLATE, 1));
+				setEquipment(2, new ItemStack(Items.CHAINMAIL_LEGGINGS, 1));
 				break;
 			default:
-				setEquipment(0, new ItemStack(Item.STONE_SWORD, 1));
+				setEquipment(0, new ItemStack(Items.STONE_SWORD, 1));
 				break;
 			}
 			break;
@@ -253,30 +258,30 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case FRIEND_WANDERER:
 			switch (i) {
 			case 0:
-				setEquipment(0, new ItemStack(Item.POTION, 1));
+				setEquipment(0, new ItemStack(Items.POTION, 1));
 				break;
 			case 1:
-				setEquipment(0, new ItemStack(Item.GLASS_BOTTLE, 1));
+				setEquipment(0, new ItemStack(Items.GLASS_BOTTLE, 1));
 				break;
 			case 2:
-				setEquipment(0, new ItemStack(Item.WOOD_SWORD, 1));
-				setEquipment(4, new ItemStack(Item.LEATHER_HELMET, 1));
+				setEquipment(0, new ItemStack(Items.WOOD_SWORD, 1));
+				setEquipment(4, new ItemStack(Items.LEATHER_HELMET, 1));
 				break;
 			case 3:
-				setEquipment(0, new ItemStack(Item.ROTTEN_FLESH, 1));
+				setEquipment(0, new ItemStack(Items.ROTTEN_FLESH, 1));
 				break;
 			case 4:
-				setEquipment(0, new ItemStack(Item.STONE_SPADE, 1));
+				setEquipment(0, new ItemStack(Items.STONE_SPADE, 1));
 				break;
 			}
 			break;
 		}
 	}
 
-	@Override
+	/*@Override
 	public boolean m(Entity entity) {
 		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getNPCDamage() * (isBaby() ? 0.5f : 1f));
-	}
+	}*/
 
 	@Override
 	protected Entity findTarget() {
@@ -306,7 +311,11 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 			for (Packet packet : Utilities.packets.keySet())
 				if (Utilities.packets.get(packet).getUUID().equals(uid)) {
 					Utilities.packets.remove(packet);
-					a = ((Packet20NamedEntitySpawn) packet).a;
+					try {
+						a = (Integer) Utilities.getPrivateField(packet, "a");
+					} catch (Exception exc) {
+						Messenger.sendConsoleMessage("&4PacketPlayOutNamedEntitySpawn issue!");
+					}
 					break;
 				}
 
@@ -320,35 +329,24 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 				public void run() {
 					if (A == 0)
 						return;
-					Packet29DestroyEntity packet = new Packet29DestroyEntity(A);
+					PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(A);
 					Utilities.distributePacket(getBukkitEntity().getWorld(), packet);
 				}
 			}, 20 * 3);
 	}
 
 	@Override
-	public int getLootId() {
-		return l(3).id;
+	public Item getLoot() {
+		return null;
 	}
 
 	@Override
 	protected void dropDeathLoot(boolean flag, int i) {
-		int j = getLootId();
-
-		if (j > 0) {
-			int k = random.nextInt(3);
-
-			if (i > 0)
-				k += random.nextInt(i + 1);
-
-			for (int l = 0; l < k; ++l)
-				this.b(j, 1);
-		}
 	}
 
 	@Override
 	public boolean canSpawn() {
-		return world.difficulty > 0 && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
+		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
 				&& !world.containsLiquid(boundingBox);
 	}
 

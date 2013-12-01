@@ -19,20 +19,21 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityZombie;
-import net.minecraft.server.v1_6_R3.EntityInsentient;
-import net.minecraft.server.v1_6_R3.Packet;
-import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
-import net.minecraft.server.v1_6_R3.PlayerInteractManager;
-import net.minecraft.server.v1_6_R3.World;
-import net.minecraft.server.v1_6_R3.WorldServer;
+import net.minecraft.server.v1_7_R1.EntityInsentient;
+import net.minecraft.server.v1_7_R1.Item;
+import net.minecraft.server.v1_7_R1.Packet;
+import net.minecraft.server.v1_7_R1.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_7_R1.PlayerInteractManager;
+import net.minecraft.server.v1_7_R1.World;
+import net.minecraft.server.v1_7_R1.WorldServer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftSkeleton;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftSkeleton;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
@@ -42,6 +43,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+// Packet20NamedEntitySpawn
 
 /**
  * @author Jordan
@@ -291,8 +293,8 @@ public class Utilities {
 			return;
 
 		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
-		final CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, playerDuplicate.getName(),
-				new PlayerInteractManager(worldServer));
+		final CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer,
+				((CraftPlayer) playerDuplicate).getHandle().getProfile(), new PlayerInteractManager(worldServer));
 		Location loc = playerDuplicate.getLocation();
 		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 
@@ -447,12 +449,11 @@ public class Utilities {
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 			@Override
 			public void run() {
-				Packet20NamedEntitySpawn cp = new Packet20NamedEntitySpawn();
+				PacketPlayOutNamedEntitySpawn cp = new PacketPlayOutNamedEntitySpawn();
 				EntityInsentient npc = null;
 				UUID uid = null;
-				if (packets.containsKey(packet)) {
+				if (packets.containsKey(packet))
 					uid = packets.get(packet).uuid;
-				}
 				for (Entity entity : player.getWorld().getEntitiesByClass(Skeleton.class))
 					if (entity.getUniqueId() == uid) {
 						npc = ((CraftSkeleton) entity).getHandle();
@@ -461,14 +462,19 @@ public class Utilities {
 				if (npc == null)
 					return;
 
-				cp.a = npc.getBukkitEntity().getEntityId();
-				cp.b = ((Packet20NamedEntitySpawn) packet).b;
-				cp.c = (int) (npc.getBukkitEntity().getLocation().getX() * 32);
-				cp.d = (int) (npc.getBukkitEntity().getLocation().getY() * 32);
-				cp.e = (int) (npc.getBukkitEntity().getLocation().getZ() * 32);
-				cp.f = (byte) npc.getBukkitEntity().getLocation().getPitch();
-				cp.g = (byte) npc.getBukkitEntity().getLocation().getYaw();
-				cp.h = npc.getEquipment(0) != null ? npc.getEquipment(0).id : 0;
+				try {
+					setPrivateField(cp, "a", npc.getBukkitEntity().getEntityId());
+					setPrivateField(cp, "b", getPrivateField(packet, "b"));
+					setPrivateField(cp, "c", (int) (npc.getBukkitEntity().getLocation().getX() * 32));
+					setPrivateField(cp, "d", (int) (npc.getBukkitEntity().getLocation().getY() * 32));
+					setPrivateField(cp, "e", (int) (npc.getBukkitEntity().getLocation().getZ() * 32));
+					setPrivateField(cp, "f", (byte) npc.getBukkitEntity().getLocation().getPitch());
+					setPrivateField(cp, "g", (byte) npc.getBukkitEntity().getLocation().getYaw());
+					setPrivateField(cp, "h", npc.getEquipment(0) != null ? Item.b(npc.getEquipment(0).getItem()) : 0);
+				} catch (Exception exc) {
+					Messenger.sendConsoleMessage("&4PacketPlayerOutNamedEntitySpawn issue!");
+					return;
+				}
 
 				try {
 					Field f = cp.getClass().getDeclaredField("i");
@@ -480,6 +486,20 @@ public class Utilities {
 				}
 			}
 		}, 20L);
+	}
+
+	public static void setPrivateField(Object obj, String field, Object value) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException {
+		Field f = obj.getClass().getDeclaredField(field);
+		f.setAccessible(true);
+		f.set(obj, value);
+	}
+
+	public static Object getPrivateField(Object obj, String field) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException {
+		Field f = obj.getClass().getDeclaredField(field);
+		f.setAccessible(true);
+		return f.get(obj);
 	}
 
 	public static class WorldUUID {

@@ -7,10 +7,10 @@ import myz.MyZ;
 import myz.API.PlayerSummonGiantEvent;
 import myz.Support.Messenger;
 import myz.mobs.CustomEntityGiantZombie;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

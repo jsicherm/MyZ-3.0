@@ -3,11 +3,11 @@
  */
 package myz.mobs.pathing;
 
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityInsentient;
-import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.PathfinderGoal;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityInsentient;
+import net.minecraft.server.v1_7_R1.EntityLiving;
+import net.minecraft.server.v1_7_R1.PathfinderGoal;
 
 /**
  * @author Jordan
@@ -41,7 +41,7 @@ public class PathfinderGoalLookAtTarget extends PathfinderGoal {
 
 	@Override
 	public boolean a() {
-		if (b.aD().nextFloat() >= e)
+		if (b.aI().nextFloat() >= e)
 			return false;
 		else {
 			if (b.getGoalTarget() != null)
@@ -63,7 +63,7 @@ public class PathfinderGoalLookAtTarget extends PathfinderGoal {
 
 	@Override
 	public void c() {
-		d = 40 + b.aD().nextInt(40);
+		d = 40 + b.aI().nextInt(40);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class PathfinderGoalLookAtTarget extends PathfinderGoal {
 
 	@Override
 	public void e() {
-		b.getControllerLook().a(a.locX, a.locY + a.getHeadHeight(), a.locZ, 10.0F, b.bp());
+		b.getControllerLook().a(a.locX, a.locY + a.getHeadHeight(), a.locZ, 10.0F, 40);
 		--d;
 	}
 }

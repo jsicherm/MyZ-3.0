@@ -6,6 +6,7 @@ package myz.Commands;
 import java.util.Map;
 
 import myz.Support.Messenger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,9 +30,8 @@ public class ItemConfigurationCommand implements CommandExecutor {
 			if (hand != null) {
 				Map<String, Object> serialized = hand.serialize();
 				Messenger.sendMessage(sender, "==: org.bukkit.inventory.ItemStack");
-				for (String key : serialized.keySet()) {
+				for (String key : serialized.keySet())
 					Messenger.sendMessage(sender, key + ": " + serialized.get(key));
-				}
 			}
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");

@@ -317,7 +317,6 @@ public class MyZ extends JavaPlugin {
 		BlockCommand.blockChangers = null;
 		Sync.safeLogoutPlayers = null;
 		Configuration.disable();
-		CustomEntityType.method = null;
 		MedKit.clearKits();
 		myz.Utilities.DisguiseUtilities.disable();
 		Utilities.packets = null;
@@ -798,7 +797,8 @@ public class MyZ extends JavaPlugin {
 	 *            Whether or not the return to spawn was a result of a death.
 	 */
 	public void putPlayerAtSpawn(Player player, boolean wasDeath) {
-		if (!player.isOnline()) { return; }
+		if (!player.isOnline())
+			return;
 		Teleport.teleport(player, player.getWorld().getSpawnLocation(), false);
 		if (getServer().getPluginManager().isPluginEnabled("essentials"))
 			Bukkit.dispatchCommand(player, "spawn");

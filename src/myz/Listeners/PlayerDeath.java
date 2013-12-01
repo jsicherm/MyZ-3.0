@@ -5,9 +5,10 @@ package myz.Listeners;
 
 import myz.MyZ;
 import myz.Utilities.Utilities;
-import net.minecraft.server.v1_6_R3.Packet205ClientCommand;
+import net.minecraft.server.v1_7_R1.EnumClientCommand;
+import net.minecraft.server.v1_7_R1.PacketPlayInClientCommand;
 
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -56,6 +57,7 @@ public class PlayerDeath implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	private void onRespawn(final PlayerRespawnEvent e) {
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			@Override
 			public void run() {
 				if (e.getPlayer().isOnline())
 					MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true);
@@ -72,8 +74,7 @@ public class PlayerDeath implements Listener {
 	private void revive(Player p) {
 		if (!p.isDead())
 			return;
-		Packet205ClientCommand packet = new Packet205ClientCommand();
-		packet.a = 1;
+		PacketPlayInClientCommand packet = new PacketPlayInClientCommand(EnumClientCommand.PERFORM_RESPAWN);
 		((CraftPlayer) p).getHandle().playerConnection.a(packet);
 		MyZ.instance.putPlayerAtSpawn(p, true);
 	}

@@ -3,9 +3,9 @@
  */
 package myz.mobs.pathing;
 
-import net.minecraft.server.v1_6_R3.EntityCreature;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.PathfinderGoal;
+import net.minecraft.server.v1_7_R1.EntityCreature;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.PathfinderGoal;
 
 /**
  * @author Jordan
@@ -92,7 +92,7 @@ public class PathfinderGoalFollow extends PathfinderGoal {
 
 	@Override
 	public void e() {
-		a.getControllerLook().a(h, 30.0F, a.bp());
+		a.getControllerLook().a(h, 30.0F, 40);
 		if (a.e(h) < 6.25D)
 			a.getNavigation().h();
 		else

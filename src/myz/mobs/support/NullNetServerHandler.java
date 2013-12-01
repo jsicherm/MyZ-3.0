@@ -3,78 +3,143 @@
  */
 package myz.mobs.support;
 
-import net.minecraft.server.v1_6_R3.EntityPlayer;
-import net.minecraft.server.v1_6_R3.INetworkManager;
-import net.minecraft.server.v1_6_R3.MinecraftServer;
-import net.minecraft.server.v1_6_R3.Packet;
-import net.minecraft.server.v1_6_R3.Packet102WindowClick;
-import net.minecraft.server.v1_6_R3.Packet106Transaction;
-import net.minecraft.server.v1_6_R3.Packet10Flying;
-import net.minecraft.server.v1_6_R3.Packet130UpdateSign;
-import net.minecraft.server.v1_6_R3.Packet14BlockDig;
-import net.minecraft.server.v1_6_R3.Packet15Place;
-import net.minecraft.server.v1_6_R3.Packet16BlockItemSwitch;
-import net.minecraft.server.v1_6_R3.Packet255KickDisconnect;
-import net.minecraft.server.v1_6_R3.Packet28EntityVelocity;
-import net.minecraft.server.v1_6_R3.Packet3Chat;
-import net.minecraft.server.v1_6_R3.Packet51MapChunk;
-import net.minecraft.server.v1_6_R3.PlayerConnection;
+import net.minecraft.server.v1_7_R1.EntityPlayer;
+import net.minecraft.server.v1_7_R1.EnumProtocol;
+import net.minecraft.server.v1_7_R1.IChatBaseComponent;
+import net.minecraft.server.v1_7_R1.MinecraftServer;
+import net.minecraft.server.v1_7_R1.NetworkManager;
+import net.minecraft.server.v1_7_R1.Packet;
+import net.minecraft.server.v1_7_R1.PacketPlayInAbilities;
+import net.minecraft.server.v1_7_R1.PacketPlayInArmAnimation;
+import net.minecraft.server.v1_7_R1.PacketPlayInBlockDig;
+import net.minecraft.server.v1_7_R1.PacketPlayInBlockPlace;
+import net.minecraft.server.v1_7_R1.PacketPlayInChat;
+import net.minecraft.server.v1_7_R1.PacketPlayInClientCommand;
+import net.minecraft.server.v1_7_R1.PacketPlayInCloseWindow;
+import net.minecraft.server.v1_7_R1.PacketPlayInCustomPayload;
+import net.minecraft.server.v1_7_R1.PacketPlayInEnchantItem;
+import net.minecraft.server.v1_7_R1.PacketPlayInEntityAction;
+import net.minecraft.server.v1_7_R1.PacketPlayInFlying;
+import net.minecraft.server.v1_7_R1.PacketPlayInHeldItemSlot;
+import net.minecraft.server.v1_7_R1.PacketPlayInKeepAlive;
+import net.minecraft.server.v1_7_R1.PacketPlayInSetCreativeSlot;
+import net.minecraft.server.v1_7_R1.PacketPlayInSettings;
+import net.minecraft.server.v1_7_R1.PacketPlayInTabComplete;
+import net.minecraft.server.v1_7_R1.PacketPlayInTransaction;
+import net.minecraft.server.v1_7_R1.PacketPlayInUpdateSign;
+import net.minecraft.server.v1_7_R1.PacketPlayInUseEntity;
+import net.minecraft.server.v1_7_R1.PacketPlayInWindowClick;
+import net.minecraft.server.v1_7_R1.PlayerConnection;
 
 /**
  * @author kumpelblase2
  * 
  */
 public class NullNetServerHandler extends PlayerConnection {
-	public NullNetServerHandler(MinecraftServer minecraftserver, INetworkManager inetworkmanager, EntityPlayer entityplayer) {
-		super(minecraftserver, inetworkmanager, entityplayer);
+
+	public NullNetServerHandler(MinecraftServer minecraftserver, NetworkManager networkmanager, EntityPlayer entityplayer) {
+		super(minecraftserver, networkmanager, entityplayer);
 	}
 
 	@Override
-	public void a(Packet102WindowClick packet) {
+	public void a() {
 	}
 
 	@Override
-	public void a(Packet106Transaction packet) {
+	public void disconnect(String s) {
 	}
 
 	@Override
-	public void a(Packet10Flying packet) {
+	public void a(PacketPlayInWindowClick packet) {
 	}
 
 	@Override
-	public void a(Packet130UpdateSign packet) {
+	public void a(PacketPlayInTransaction packet) {
 	}
 
 	@Override
-	public void a(Packet14BlockDig packet) {
+	public void a(PacketPlayInFlying packet) {
 	}
 
 	@Override
-	public void a(Packet15Place packet) {
+	public void a(PacketPlayInAbilities packet) {
 	}
 
 	@Override
-	public void a(Packet16BlockItemSwitch packet) {
+	public void a(PacketPlayInSettings packet) {
 	}
 
 	@Override
-	public void a(Packet255KickDisconnect packet) {
+	public void a(PacketPlayInCustomPayload packet) {
 	}
 
 	@Override
-	public void a(Packet28EntityVelocity packet) {
+	public void a(EnumProtocol enumprotocol, EnumProtocol enumprotocol1) {
 	}
 
 	@Override
-	public void a(Packet3Chat packet) {
+	public void a(PacketPlayInTabComplete packet) {
 	}
 
 	@Override
-	public void a(Packet51MapChunk packet) {
+	public void a(PacketPlayInKeepAlive packet) {
 	}
 
 	@Override
-	public void a(String string, Object[] objects) {
+	public void a(PacketPlayInUpdateSign packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInBlockDig packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInBlockPlace packet) {
+	}
+
+	@Override
+	public void a(IChatBaseComponent ichatbasecomponent) {
+	}
+
+	@Override
+	public void a(PacketPlayInHeldItemSlot packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInChat packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInEnchantItem packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInSetCreativeSlot packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInArmAnimation packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInEntityAction packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInUseEntity packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInClientCommand packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInCloseWindow packet) {
+	}
+
+	@Override
+	public void a(double d0, double d1, double d2, float f, float f1) {
+
 	}
 
 	@Override

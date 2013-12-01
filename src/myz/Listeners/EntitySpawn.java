@@ -9,31 +9,34 @@ import java.util.Random;
 
 import myz.MyZ;
 import myz.Support.Configuration;
+import myz.Support.Messenger;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldGuardManager;
 import myz.mobs.CustomEntityGiantZombie;
 import myz.mobs.CustomEntityNPC;
 import myz.mobs.CustomEntityPigZombie;
 import myz.mobs.NPCType;
-import net.minecraft.server.v1_6_R3.DataWatcher;
-import net.minecraft.server.v1_6_R3.EntityHorse;
-import net.minecraft.server.v1_6_R3.EntityPigZombie;
-import net.minecraft.server.v1_6_R3.EntitySkeleton;
-import net.minecraft.server.v1_6_R3.EntityVillager;
-import net.minecraft.server.v1_6_R3.EntityZombie;
-import net.minecraft.server.v1_6_R3.GroupDataEntity;
-import net.minecraft.server.v1_6_R3.Item;
-import net.minecraft.server.v1_6_R3.ItemStack;
-import net.minecraft.server.v1_6_R3.MerchantRecipe;
-import net.minecraft.server.v1_6_R3.MerchantRecipeList;
-import net.minecraft.server.v1_6_R3.Packet20NamedEntitySpawn;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.DataWatcher;
+import net.minecraft.server.v1_7_R1.EntityHorse;
+import net.minecraft.server.v1_7_R1.EntityPigZombie;
+import net.minecraft.server.v1_7_R1.EntitySkeleton;
+import net.minecraft.server.v1_7_R1.EntityVillager;
+import net.minecraft.server.v1_7_R1.EntityZombie;
+import net.minecraft.server.v1_7_R1.GroupDataEntity;
+import net.minecraft.server.v1_7_R1.Item;
+import net.minecraft.server.v1_7_R1.ItemStack;
+import net.minecraft.server.v1_7_R1.Items;
+import net.minecraft.server.v1_7_R1.MerchantRecipe;
+import net.minecraft.server.v1_7_R1.MerchantRecipeList;
+import net.minecraft.server.v1_7_R1.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_7_R1.World;
+import net.minecraft.util.com.mojang.authlib.GameProfile;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_6_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_6_R3.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
@@ -48,7 +51,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 
@@ -66,7 +68,8 @@ public class EntitySpawn implements Listener {
 
 		// MultiWorld support, yay!
 		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName())) {
-			if (e.getEntity().getMetadata("MyZ.bypass") != null && !e.getEntity().getMetadata("MyZ.bypass").isEmpty()) { return; }
+			if (e.getEntity().getMetadata("MyZ.bypass") != null && !e.getEntity().getMetadata("MyZ.bypass").isEmpty())
+				return;
 			switch (e.getEntityType()) {
 			case HORSE:
 				EntityHorse horse = new EntityHorse(world);
@@ -143,30 +146,31 @@ public class EntitySpawn implements Listener {
 
 				switch (((Villager) e.getEntity()).getProfession()) {
 				case BLACKSMITH:
-					list.a(new MerchantRecipe(new ItemStack(Item.IRON_SWORD, 1), CraftItemStack.asNMSCopy(sword)));
-					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_NUGGET, 3), new ItemStack(Item.GOLD_INGOT, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_INGOT, 5), new ItemStack(Item.IRON_INGOT, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.IRON_INGOT, 10), new ItemStack(Item.DIAMOND, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.IRON_SWORD, 1), CraftItemStack.asNMSCopy(sword)));
+					list.a(new MerchantRecipe(new ItemStack(Items.GOLD_NUGGET, 3), new ItemStack(Items.GOLD_INGOT, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.GOLD_INGOT, 5), new ItemStack(Items.IRON_INGOT, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.IRON_INGOT, 10), new ItemStack(Items.DIAMOND, 1)));
 					break;
 				case BUTCHER:
-					list.a(new MerchantRecipe(new ItemStack(Item.ROTTEN_FLESH, 3), new ItemStack(Item.RAW_BEEF, 3)));
-					list.a(new MerchantRecipe(new ItemStack(Item.RAW_BEEF, 5), new ItemStack(Item.LEATHER, 2)));
-					list.a(new MerchantRecipe(new ItemStack(Item.SHEARS, 1), new ItemStack(Item.SADDLE, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.ROTTEN_FLESH, 3), new ItemStack(Items.RAW_BEEF, 3)));
+					list.a(new MerchantRecipe(new ItemStack(Items.RAW_BEEF, 5), new ItemStack(Items.LEATHER, 2)));
+					list.a(new MerchantRecipe(new ItemStack(Items.SHEARS, 1), new ItemStack(Items.SADDLE, 1)));
 					break;
 				case FARMER:
-					list.a(new MerchantRecipe(new ItemStack(Item.GOLD_NUGGET, 1), new ItemStack(Item.MILK_BUCKET, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.LEATHER, 3), new ItemStack(Item.LEASH, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.COOKED_BEEF, 3), new ItemStack(Item.EGG, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.MILK_BUCKET, 2), new ItemStack(Item.EGG, 1), new ItemStack(Item.CAKE, 2)));
+					list.a(new MerchantRecipe(new ItemStack(Items.GOLD_NUGGET, 1), new ItemStack(Items.MILK_BUCKET, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.LEATHER, 3), new ItemStack(Items.LEASH, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.COOKED_BEEF, 3), new ItemStack(Items.EGG, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.MILK_BUCKET, 2), new ItemStack(Items.EGG, 1),
+							new ItemStack(Items.CAKE, 2)));
 					break;
 				case LIBRARIAN:
-					list.a(new MerchantRecipe(new ItemStack(Item.PAPER, 1), new ItemStack(Item.BOOK_AND_QUILL, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.PAPER, 3), new ItemStack(Item.LEATHER_CHESTPLATE, 1)));
-					list.a(new MerchantRecipe(new ItemStack(Item.BOOK, 2), new ItemStack(Item.STICK, 3)));
+					list.a(new MerchantRecipe(new ItemStack(Items.PAPER, 1), new ItemStack(Items.BOOK_AND_QUILL, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.PAPER, 3), new ItemStack(Items.LEATHER_CHESTPLATE, 1)));
+					list.a(new MerchantRecipe(new ItemStack(Items.BOOK, 2), new ItemStack(Items.STICK, 3)));
 					break;
 				case PRIEST:
-					list.a(new MerchantRecipe(new ItemStack(Item.NETHER_STAR, 1), CraftItemStack.asNMSCopy(health.toItemStack(1))));
-					list.a(new MerchantRecipe(new ItemStack(Item.GOLDEN_APPLE, 2), CraftItemStack.asNMSCopy(strength.toItemStack(1))));
+					list.a(new MerchantRecipe(new ItemStack(Items.NETHER_STAR, 1), CraftItemStack.asNMSCopy(health.toItemStack(1))));
+					list.a(new MerchantRecipe(new ItemStack(Items.GOLDEN_APPLE, 2), CraftItemStack.asNMSCopy(strength.toItemStack(1))));
 					list.a(new MerchantRecipe(CraftItemStack.asNMSCopy(health.toItemStack(1)), CraftItemStack.asNMSCopy(strength
 							.toItemStack(1)), CraftItemStack.asNMSCopy(regen.toItemStack(1))));
 					break;
@@ -191,17 +195,26 @@ public class EntitySpawn implements Listener {
 			if (world.addEntity(npc, SpawnReason.CUSTOM)) {
 				if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") == null
 						|| !MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
-					Packet20NamedEntitySpawn packet = new Packet20NamedEntitySpawn();
-					packet.a = npc.getBukkitEntity().getEntityId();
-					packet.b = getRandomName(npctype);
-					packet.c = (int) e.getLocation().getX() * 32;
-					packet.d = (int) e.getLocation().getY() * 32;
-					packet.e = (int) e.getLocation().getZ() * 32;
-					packet.f = 0;
-					packet.g = 0;
-					packet.h = npc.getEquipment(0) != null ? npc.getEquipment(0).id : 0;
+					PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
+					try {
+						Utilities.setPrivateField(packet, "a", npc.getBukkitEntity().getEntityId());
+						// TODO ID, name
+						String name = getRandomName(npctype);
+						GameProfile profile = new GameProfile(name, name);
+						Utilities.setPrivateField(packet, "b", profile);
+						Utilities.setPrivateField(packet, "c", (int) e.getLocation().getX() * 32);
+						Utilities.setPrivateField(packet, "d", (int) e.getLocation().getY() * 32);
+						Utilities.setPrivateField(packet, "e", (int) e.getLocation().getZ() * 32);
+						Utilities.setPrivateField(packet, "f", (byte) 0);
+						Utilities.setPrivateField(packet, "g", (byte) 0);
+						Utilities.setPrivateField(packet, "h", npc.getEquipment(0) != null ? Item.b(npc.getEquipment(0).getItem()) : 0);
+					} catch (Exception exc) {
+						Messenger.sendConsoleMessage("&4PacketPlayOutEntitySpawn issue!");
+						exc.printStackTrace();
+						return;
+					}
 
-					DataWatcher datawatcher = new DataWatcher();
+					DataWatcher datawatcher = new DataWatcher(npc);
 					datawatcher.a(0, (Object) (byte) 0);
 					datawatcher.a(1, (Object) (short) 0);
 					datawatcher.a(8, (Object) (byte) 0);
@@ -227,7 +240,7 @@ public class EntitySpawn implements Listener {
 			}
 			return;
 		}
-		
+
 		if (e.getSpawnReason() != SpawnReason.DEFAULT && e.getSpawnReason() != SpawnReason.CHUNK_GEN
 				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION)
 			return;

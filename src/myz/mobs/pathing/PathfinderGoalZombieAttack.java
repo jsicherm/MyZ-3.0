@@ -4,12 +4,12 @@
 package myz.mobs.pathing;
 
 import myz.MyZ;
-import net.minecraft.server.v1_6_R3.EntityCreature;
-import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.MathHelper;
-import net.minecraft.server.v1_6_R3.PathEntity;
-import net.minecraft.server.v1_6_R3.PathfinderGoal;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.EntityCreature;
+import net.minecraft.server.v1_7_R1.EntityLiving;
+import net.minecraft.server.v1_7_R1.MathHelper;
+import net.minecraft.server.v1_7_R1.PathEntity;
+import net.minecraft.server.v1_7_R1.PathfinderGoal;
+import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.entity.Player;
 
@@ -89,7 +89,7 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 
 		b.getControllerLook().a(entityliving, 30.0F, 30.0F);
 		if ((e || b.getEntitySenses().canSee(entityliving)) && --h <= 0) {
-			h = 4 + b.aD().nextInt(7);
+			h = 4 + b.aI().nextInt(7);
 			b.getNavigation().a(entityliving, d);
 		} else if (entityliving != null && !entityliving.isAlive() || !b.getEntitySenses().canSee(entityliving))
 			b.setGoalTarget(null);
@@ -100,7 +100,7 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 		if (b.e(entityliving.locX, entityliving.boundingBox.b, entityliving.locZ) <= d0)
 			if (c <= 0) {
 				c = 20;
-				if (b.aZ() != null)
+				if (b.getEquipment(0) != null)
 					b.aV();
 
 				b.m(entityliving);

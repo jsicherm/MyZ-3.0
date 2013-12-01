@@ -6,13 +6,13 @@ package myz.mobs.pathing;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.server.v1_6_R3.DistanceComparator;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityCreature;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityLiving;
-import net.minecraft.server.v1_6_R3.IEntitySelector;
-import net.minecraft.server.v1_6_R3.PathfinderGoalTarget;
+import net.minecraft.server.v1_7_R1.DistanceComparator;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityCreature;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityLiving;
+import net.minecraft.server.v1_7_R1.IEntitySelector;
+import net.minecraft.server.v1_7_R1.PathfinderGoalTarget;
 
 /**
  * @author Jordan
@@ -51,7 +51,7 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean a() {
-		if (b > 0 && c.aD().nextInt(b) != 0)
+		if (b > 0 && c.aI().nextInt(b) != 0)
 			return false;
 		else {
 			double d0 = f();

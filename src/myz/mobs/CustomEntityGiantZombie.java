@@ -10,22 +10,23 @@ import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
 import myz.Support.Configuration;
-import net.minecraft.server.v1_6_R3.DamageSource;
-import net.minecraft.server.v1_6_R3.Entity;
-import net.minecraft.server.v1_6_R3.EntityGiantZombie;
-import net.minecraft.server.v1_6_R3.EntityHuman;
-import net.minecraft.server.v1_6_R3.EntityVillager;
-import net.minecraft.server.v1_6_R3.PathfinderGoalFloat;
-import net.minecraft.server.v1_6_R3.PathfinderGoalHurtByTarget;
-import net.minecraft.server.v1_6_R3.PathfinderGoalLeapAtTarget;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveThroughVillage;
-import net.minecraft.server.v1_6_R3.PathfinderGoalMoveTowardsRestriction;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRandomLookaround;
-import net.minecraft.server.v1_6_R3.PathfinderGoalRandomStroll;
-import net.minecraft.server.v1_6_R3.PathfinderGoalSelector;
-import net.minecraft.server.v1_6_R3.World;
+import net.minecraft.server.v1_7_R1.Block;
+import net.minecraft.server.v1_7_R1.DamageSource;
+import net.minecraft.server.v1_7_R1.Entity;
+import net.minecraft.server.v1_7_R1.EntityGiantZombie;
+import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityVillager;
+import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
+import net.minecraft.server.v1_7_R1.PathfinderGoalHurtByTarget;
+import net.minecraft.server.v1_7_R1.PathfinderGoalLeapAtTarget;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveThroughVillage;
+import net.minecraft.server.v1_7_R1.PathfinderGoalMoveTowardsRestriction;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRandomLookaround;
+import net.minecraft.server.v1_7_R1.PathfinderGoalRandomStroll;
+import net.minecraft.server.v1_7_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_7_R1.World;
 
-import org.bukkit.craftbukkit.v1_6_R3.util.UnsafeList;
+import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
 
 /**
  * @author Jordan
@@ -74,22 +75,22 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 	}*/
 
 	@Override
-	protected String r() {
+	protected String t() {
 		return "mob.zombie.say";
 	}
 
 	@Override
-	protected String aO() {
+	protected String aT() {
 		return "mob.zombie.hurt";
 	}
 
 	@Override
-	protected String aP() {
+	protected String aU() {
 		return "mob.zombie.death";
 	}
 
 	@Override
-	protected void a(int i, int j, int k, int l) {
+	protected void a(int i, int j, int k, Block block) {
 		this.makeSound("mob.zombie.step", 0.15F, 1.0F);
 	}
 
