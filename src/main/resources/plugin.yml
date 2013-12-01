@@ -1,6 +1,6 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.6.3
+version: 3.0.6.301
 softdepend: [WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises]
 description: MyZ 3.0 with chest support by SirAntony.
 authors: [TeeePeee, SirAntony]
@@ -30,6 +30,10 @@ commands:
   addspawn:
     description: Add a spawnpoint.
     permission: MyZ.world_admin
+    permission-message: You don't have permission.
+  configure:
+    description: Get the configuration for an item.
+    permission: MyZ.*
     permission-message: You don't have permission.
   removespawn:
     description: Remove a spawnpoint.

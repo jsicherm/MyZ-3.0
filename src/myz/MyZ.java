@@ -23,6 +23,7 @@ import myz.Commands.CreateMedKitCommand;
 import myz.Commands.FriendCommand;
 import myz.Commands.FriendsCommand;
 import myz.Commands.GetUIDCommand;
+import myz.Commands.ItemConfigurationCommand;
 import myz.Commands.JoinClanCommand;
 import myz.Commands.RemoveSpawnCommand;
 import myz.Commands.ResearchCommand;
@@ -159,6 +160,7 @@ public class MyZ extends JavaPlugin {
 		getCommand("setresearch").setExecutor(new AddResearchCommand());
 		getCommand("stats").setExecutor(new StatsCommand());
 		getCommand("myz").setExecutor(new BaseCommand());
+		getCommand("configure").setExecutor(new ItemConfigurationCommand());
 
 		/*
 		 * Register all listeners.
