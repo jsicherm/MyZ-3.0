@@ -35,7 +35,10 @@ import net.minecraft.server.v1_7_R1.PathfinderGoalSelector;
 import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 /**
  * @author Jordan
@@ -213,5 +216,14 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 			target = null;
 			PathingSupport.setTarget(this, location, Configuration.getZombieSpeed());
 		}
+	}
+
+	public static CustomEntityZombie newInstance(Player player) {
+		World world = ((CraftWorld) player.getWorld()).getHandle();
+		CustomEntityZombie zombie = new CustomEntityZombie(world);
+
+		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
+		world.addEntity(zombie, SpawnReason.CUSTOM);
+		return zombie;
 	}
 }

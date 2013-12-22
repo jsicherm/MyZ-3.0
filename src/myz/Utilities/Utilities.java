@@ -19,31 +19,19 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityZombie;
-import net.minecraft.server.v1_7_R1.EntityInsentient;
-import net.minecraft.server.v1_7_R1.Item;
-import net.minecraft.server.v1_7_R1.Packet;
-import net.minecraft.server.v1_7_R1.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_7_R1.PlayerInteractManager;
-import net.minecraft.server.v1_7_R1.World;
-import net.minecraft.server.v1_7_R1.WorldServer;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftSkeleton;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-// Packet20NamedEntitySpawn
 
 /**
  * @author Jordan
@@ -51,7 +39,7 @@ import org.bukkit.inventory.meta.SkullMeta;
  */
 public class Utilities {
 
-	public static Map<Packet, WorldUUID> packets;
+	public static Map<Object, WorldUUID> packets;
 
 	/**
 	 * Get a skull for a given player.
@@ -252,10 +240,7 @@ public class Utilities {
 	public static void spawnPlayerZombie(Player player, List<ItemStack> inventory) {
 		ItemStack head = playerSkull(player.getName());
 
-		World world = ((CraftWorld) player.getWorld()).getHandle();
-		CustomEntityZombie zombie = new CustomEntityZombie(world);
-		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
-		world.addEntity(zombie, SpawnReason.CUSTOM);
+		CustomEntityZombie zombie = CustomEntityZombie.newInstance(player);
 
 		zombie.setBaby(false);
 		zombie.setVillager(false);
@@ -292,23 +277,8 @@ public class Utilities {
 		if (Configuration.getSafeLogoutTime() <= 0)
 			return;
 
-		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
-		final CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer,
-				((CraftPlayer) playerDuplicate).getHandle().getProfile(), new PlayerInteractManager(worldServer));
-		Location loc = playerDuplicate.getLocation();
-		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-
-		((Player) player.getBukkitEntity()).setItemInHand(playerDuplicate.getItemInHand());
-		((Player) player.getBukkitEntity()).setCustomName(playerDuplicate.getName());
-		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
-		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
-
-		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
-		((Player) player.getBukkitEntity()).setMaxHealth(playerDuplicate.getMaxHealth());
-		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
-		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
-
-		worldServer.addEntity(player, SpawnReason.CUSTOM);
+		final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
+		
 		player.world.players.remove(player);
 		MyZ.instance.getNPCs().add(player);
 
@@ -413,12 +383,16 @@ public class Utilities {
 	 * @param world
 	 *            The World.
 	 */
-	public static void saveAndDistributePacket(Packet packet, Entity entity) {
+	public static void saveAndDistributePacket(Object packet, Entity entity) {
 		if (packets == null)
-			packets = new HashMap<Packet, WorldUUID>();
+			packets = new HashMap<Object, WorldUUID>();
 		packets.put(packet, new WorldUUID(entity.getWorld().getName(), entity.getUniqueId()));
 		for (Player player : entity.getWorld().getPlayers())
-			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+			try {
+				NMS.sendPacket(packet, player);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 
 	/**
@@ -429,9 +403,13 @@ public class Utilities {
 	 * @param packet
 	 *            The packet.
 	 */
-	public static void distributePacket(org.bukkit.World world, Packet packet) {
+	public static void distributePacket(org.bukkit.World world, Object packet) {
 		for (Player player : world.getPlayers())
-			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+			try {
+				NMS.sendPacket(packet, player);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 
 	/**
@@ -444,33 +422,40 @@ public class Utilities {
 	 */
 	public static void sendPacket(final Player player, final Object packet) {
 		if (packets == null)
-			packets = new HashMap<Packet, WorldUUID>();
+			packets = new HashMap<Object, WorldUUID>();
 
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 			@Override
 			public void run() {
-				PacketPlayOutNamedEntitySpawn cp = new PacketPlayOutNamedEntitySpawn();
-				EntityInsentient npc = null;
+				Object cp;
+				try {
+					cp = Class.forName("net.minecraft.server." + NMS.version + ".PacketPlayOutNamedEntitySpawn").newInstance();
+				} catch (Exception exc) {
+					exc.printStackTrace();
+					return;
+				}
+				LivingEntity npc = null;
 				UUID uid = null;
 				if (packets.containsKey(packet))
 					uid = packets.get(packet).uuid;
 				for (Entity entity : player.getWorld().getEntitiesByClass(Skeleton.class))
 					if (entity.getUniqueId() == uid) {
-						npc = ((CraftSkeleton) entity).getHandle();
+						npc = (LivingEntity) entity;
 						break;
 					}
 				if (npc == null)
 					return;
 
 				try {
-					setPrivateField(cp, "a", npc.getBukkitEntity().getEntityId());
+					setPrivateField(cp, "a", npc.getEntityId());
 					setPrivateField(cp, "b", getPrivateField(packet, "b"));
-					setPrivateField(cp, "c", (int) (npc.getBukkitEntity().getLocation().getX() * 32));
-					setPrivateField(cp, "d", (int) (npc.getBukkitEntity().getLocation().getY() * 32));
-					setPrivateField(cp, "e", (int) (npc.getBukkitEntity().getLocation().getZ() * 32));
-					setPrivateField(cp, "f", (byte) npc.getBukkitEntity().getLocation().getPitch());
-					setPrivateField(cp, "g", (byte) npc.getBukkitEntity().getLocation().getYaw());
-					setPrivateField(cp, "h", npc.getEquipment(0) != null ? Item.b(npc.getEquipment(0).getItem()) : 0);
+					setPrivateField(cp, "c", (int) (npc.getLocation().getX() * 32));
+					setPrivateField(cp, "d", (int) (npc.getLocation().getY() * 32));
+					setPrivateField(cp, "e", (int) (npc.getLocation().getZ() * 32));
+					setPrivateField(cp, "f", (byte) npc.getLocation().getPitch());
+					setPrivateField(cp, "g", (byte) npc.getLocation().getYaw());
+					setPrivateField(cp, "h", npc.getEquipment().getItemInHand() != null ? npc.getEquipment().getItemInHand().getType()
+							.getId() : 0);
 				} catch (Exception exc) {
 					Messenger.sendConsoleMessage("&4PacketPlayerOutNamedEntitySpawn issue!");
 					return;
@@ -480,7 +465,7 @@ public class Utilities {
 					Field f = cp.getClass().getDeclaredField("i");
 					f.setAccessible(true);
 					f.set(cp, f.get(packet));
-					((CraftPlayer) player).getHandle().playerConnection.sendPacket(cp);
+					NMS.sendPacket(cp, player);
 				} catch (Exception exc) {
 					exc.printStackTrace();
 				}

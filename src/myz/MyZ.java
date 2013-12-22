@@ -94,12 +94,15 @@ import org.mcstats.MetricsLite;
  *         The main plugin and the interface for most convenience methods.
  */
 public class MyZ extends JavaPlugin {
-
-	// TODO giants
+	
 	// TODO sound attraction to (trap)doors.
-	// TODO complete MultiWorld
 	// TODO air pollution random event
 	// TODO random objectives/events
+	// TODO rank inheritance
+	// TODO research point rank uppance.
+	// TODO grave-digging, speed-sugar.
+	// TODO configurable death loot (?)
+	// TODO rank-nodes for spawn numbered and research.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();

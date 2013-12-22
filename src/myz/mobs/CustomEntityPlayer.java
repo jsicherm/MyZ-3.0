@@ -4,6 +4,7 @@
 package myz.mobs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import myz.Utilities.Utilities;
@@ -28,8 +29,14 @@ import net.minecraft.server.v1_7_R1.StatisticList;
 import net.minecraft.server.v1_7_R1.WorldServer;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
 
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_7_R1.event.CraftEventFactory;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * @author kumpelblase2
@@ -258,5 +265,28 @@ public class CustomEntityPlayer extends EntityPlayer {
 				return true;
 			}
 		}
+	}
+
+	public static CustomEntityPlayer newInstance(org.bukkit.entity.Player playerDuplicate) {
+		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
+		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, ((CraftPlayer) playerDuplicate).getHandle()
+				.getProfile(), new PlayerInteractManager(worldServer));
+		
+		Location loc = playerDuplicate.getLocation();
+		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+
+		((Player) player.getBukkitEntity()).setItemInHand(playerDuplicate.getItemInHand());
+		((Player) player.getBukkitEntity()).setCustomName(playerDuplicate.getName());
+		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
+		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
+
+		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
+		((Player) player.getBukkitEntity()).setMaxHealth(playerDuplicate.getMaxHealth());
+		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
+		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
+
+		worldServer.addEntity(player, SpawnReason.CUSTOM);
+		
+		return player;
 	}
 }

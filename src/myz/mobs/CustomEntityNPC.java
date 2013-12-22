@@ -24,7 +24,6 @@ import net.minecraft.server.v1_7_R1.EnumDifficulty;
 import net.minecraft.server.v1_7_R1.Item;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
-import net.minecraft.server.v1_7_R1.Packet;
 import net.minecraft.server.v1_7_R1.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_7_R1.PathfinderGoalArrowAttack;
 import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
@@ -308,7 +307,7 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		int a = 0;
 
 		if (Utilities.packets != null)
-			for (Packet packet : Utilities.packets.keySet())
+			for (Object packet : Utilities.packets.keySet())
 				if (Utilities.packets.get(packet).getUUID().equals(uid)) {
 					Utilities.packets.remove(packet);
 					try {

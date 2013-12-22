@@ -13,6 +13,7 @@ import myz.API.PlayerTakeWaterDamageEvent;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.NMS;
 import myz.mobs.pathing.PathingSupport;
 
 import org.bukkit.Bukkit;
@@ -20,7 +21,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 /**
@@ -80,10 +80,20 @@ public class aSync implements Runnable {
 				player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
 
 				// Increase thirst level by swimming or by standing in the rain.
+				boolean isRaining = false;
+				Object nmsplayer = NMS.castToNMS(player);
+				if (nmsplayer != null) {
+					try {
+						isRaining = (Boolean) nmsplayer
+								.getClass()
+								.getMethod("isRainingAt", int.class, int.class, int.class)
+								.invoke(nmsplayer, player.getLocation().getBlockX(), player.getLocation().getBlockY(),
+										player.getLocation().getBlockZ());
+					} catch (Exception exc) {
+					}
+				}
 				if (player.getLevel() < Configuration.getMaxThirstLevel()
-						&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || ((CraftPlayer) player).getHandle().world
-								.isRainingAt(player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation()
-										.getBlockZ())
+						&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
 								&& noBlocksAbove(player.getLocation())))
 					if (ticks % (random.nextInt(2) + 1) == 0) {
 						PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
