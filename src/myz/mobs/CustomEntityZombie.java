@@ -92,7 +92,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 			if (entityliving == null && damagesource.getEntity() instanceof EntityLiving)
 				entityliving = (EntityLiving) damagesource.getEntity();
 
-			if (entityliving != null && world.difficulty == EnumDifficulty.HARD && random.nextFloat() < getAttributeInstance(bp).getValue()) {
+			if (entityliving != null && world.difficulty == EnumDifficulty.NORMAL && random.nextFloat() < getAttributeInstance(bp).getValue()) {
 				int i = MathHelper.floor(locX);
 				int j = MathHelper.floor(locY);
 				int k = MathHelper.floor(locZ);
@@ -143,7 +143,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 
 	@Override
 	protected void bA() {
-		if (random.nextFloat() < (world.difficulty == EnumDifficulty.HARD ? 0.05F : 0.01F)) {
+		if (random.nextFloat() < (world.difficulty == EnumDifficulty.NORMAL ? 0.05F : 0.01F)) {
 			int i = random.nextInt(3);
 
 			if (i == 0)
