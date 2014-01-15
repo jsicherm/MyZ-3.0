@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import myz.MyZ;
+import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Utilities.Utilities;
@@ -52,18 +53,32 @@ public class ResearchItem implements Listener {
 						Player player = Bukkit.getPlayerExact(entry);
 						e.setCancelled(true);
 						if (player != null) {
+							PlayerData data = PlayerData.getDataFor(player);
+							int rank = 0;
+							if (data != null)
+								rank = data.getRank();
+							if (MyZ.instance.getSQLManager().isConnected())
+								rank = MyZ.instance.getSQLManager().getInt(player.getName(), "rank");
+
+							if (rank < Configuration.getResearchRank())
+								Messenger.sendConfigMessage(player, "research.rank");
 							FileConfiguration config = MyZ.instance.getResearchConfig();
 							for (String key : config.getConfigurationSection("item").getKeys(false))
 								if (config.getItemStack("item." + key + ".item").equals(e.getItem().getItemStack())) {
 									e.getItem().remove();
 									int points = config.getInt("item." + key + ".value");
 									Messenger.sendMessage(player, Messenger.getConfigMessage("research.success", points));
-									PlayerData data = PlayerData.getDataFor(player);
+									int before = 0, after;
 									if (data != null)
-										data.setResearchPoints(data.getResearchPoints() + points);
+										data.setResearchPoints((before = data.getResearchPoints()) + points);
 									if (MyZ.instance.getSQLManager().isConnected())
-										MyZ.instance.getSQLManager().set(player.getName(), "research",
-												MyZ.instance.getSQLManager().getInt(player.getName(), "research"), true);
+										MyZ.instance.getSQLManager()
+												.set(player.getName(),
+														"research",
+														(before = MyZ.instance.getSQLManager().getInt(player.getName(), "research"))
+																+ points, true);
+									after = before + points;
+									checkRankIncrease(player, before, after, rank);
 									return;
 								}
 							Messenger.sendConfigMessage(player, "research.fail");
@@ -73,6 +88,23 @@ public class ResearchItem implements Listener {
 						} else
 							e.getItem().remove();
 					}
+	}
+
+	/**
+	 * Check to see if a player has to get an increased rank. If so, increase
+	 * their rank.
+	 * 
+	 * @param Player
+	 *            The player.
+	 * @param before
+	 *            The points before a research.
+	 * @param after
+	 *            The points after a research.
+	 * @param rank
+	 *            The players current rank.
+	 */
+	private void checkRankIncrease(Player player, int before, int after, int rank) {
+		// TODO
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

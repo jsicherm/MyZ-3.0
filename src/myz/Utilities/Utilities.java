@@ -19,6 +19,7 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityZombie;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -278,7 +279,7 @@ public class Utilities {
 			return;
 
 		final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
-		
+
 		player.world.players.remove(player);
 		MyZ.instance.getNPCs().add(player);
 

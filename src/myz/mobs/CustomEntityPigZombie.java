@@ -14,6 +14,7 @@ import net.minecraft.server.v1_7_R1.EntityPigZombie;
 import net.minecraft.server.v1_7_R1.EntitySkeleton;
 import net.minecraft.server.v1_7_R1.EntityVillager;
 import net.minecraft.server.v1_7_R1.EnumDifficulty;
+import net.minecraft.server.v1_7_R1.GenericAttributes;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
 import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
@@ -64,6 +65,12 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityHuman.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityVillager.class, 0, false));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntitySkeleton.class, 0, false));
+	}
+
+	@Override
+	protected void aD() {
+		super.aD();
+		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getPigmanDamage() * (isBaby() ? 0.5 : 1));
 	}
 
 	@Override

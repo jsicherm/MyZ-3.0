@@ -37,12 +37,13 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
  */
 public class Configuration {
 
-	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data,
-			numbered_spawn_requires_rank, grenade, local_chat, minez_chests, is_bleed, is_auto, npc, zombie_spawn;
+	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data, grenade, local_chat,
+			is_bleed, is_auto, npc, zombie_spawn;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
-	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency,
-			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time, heal_delay;
+	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency, spawn_radius,
+			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time, heal_delay,
+			numbered_spawn_requires_rank, research_rank;
 	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage, water_damage, bleed_damage,
 			zombie_speed, horse_speed, npc_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, npc_damage, giant_damage,
 			pigman_damage, bandage_heal;
@@ -60,9 +61,12 @@ public class Configuration {
 	private static Map<String, Integer> food_thirst = new HashMap<String, Integer>();
 	private static Map<String, List<PotionEffect>> food_potion = new HashMap<String, List<PotionEffect>>();
 	private static Map<String, Double> food_potion_chance = new HashMap<String, Double>();
+	private static Map<Integer, List<Integer>> ranked_kit_children = new HashMap<Integer, List<Integer>>();
+	private static Map<String, String> chests = new HashMap<String, String>();
 
 	private static Map<ItemStack, Integer> allow_place = new HashMap<ItemStack, Integer>();
 	private static Map<ItemStack, DestroyPair> allow_destroy = new HashMap<ItemStack, DestroyPair>();
+	private static Map<String, Map<ItemStack, Integer>> lootsets = new HashMap<String, Map<ItemStack, Integer>>();
 
 	// TODO ensure all new values are added in reload(), writeUnwrittenValues()
 	// and save()
@@ -74,6 +78,7 @@ public class Configuration {
 		FileConfiguration config = MyZ.instance.getConfig();
 		FileConfiguration localizableConfig = MyZ.instance.getLocalizableConfig();
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
+		FileConfiguration chestsConfig = MyZ.instance.getChestsConfig();
 		writeUnwrittenValues();
 
 		playerdata_is_temporary = false;
@@ -95,10 +100,11 @@ public class Configuration {
 			food_potion.put(entry, effectList);
 		}
 
+		research_rank = config.getInt("ranks.research_rank_required");
+		spawn_radius = spawnConfig.getInt("prerequisites.blocks_from_chest_or_player");
 		zombie_spawn = spawnConfig.getBoolean("zombie_spawn");
 		is_auto = config.getBoolean("autoupdate.enable");
 		worlds = new ArrayList<String>(config.getStringList("multiworld.worlds"));
-		minez_chests = config.getBoolean("download.minez_chests");
 		heal_delay = config.getInt("heal.delay_seconds");
 		bandage = config.getItemStack("heal.bandage");
 		bandage_heal = config.getDouble("heal.bandage_heal_amount");
@@ -150,7 +156,7 @@ public class Configuration {
 		safespawn_radius = config.getInt("spawn.safespawn_radius");
 		max_thirst = config.getInt("water.max_level");
 		spawn_potion_effects = new ArrayList<String>(config.getStringList("spawn.potion_effects"));
-		numbered_spawn_requires_rank = config.getBoolean("spawn.numbered_requires_rank");
+		numbered_spawn_requires_rank = config.getInt("spawn.numbered_requires_rank");
 
 		is_bleed = config.getBoolean("mobs.bleed");
 		grenade = config.getBoolean("projectile.enderpearl.become_grenade");
@@ -163,6 +169,8 @@ public class Configuration {
 		ranked_chestplate.put(0, spawnConfig.getItemStack("spawn.default_kit.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE)));
 		ranked_leggings.put(0, spawnConfig.getItemStack("spawn.default_kit.leggings", new ItemStack(Material.LEATHER_LEGGINGS)));
 		ranked_boots.put(0, spawnConfig.getItemStack("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS)));
+		ranked_kit_children.put(0, spawnConfig.getIntegerList("spawn.default_kit.children"));
+
 		try {
 			ranked_inventory.put(0, spawnConfig.getList("spawn.default_kit.inventory_contents").toArray(new ItemStack[0]));
 		} catch (Exception exc) {
@@ -211,6 +219,7 @@ public class Configuration {
 							spawnConfig.getItemStack("spawn.kit_" + position + ".boots", new ItemStack(Material.LEATHER_BOOTS)));
 					ranked_inventory.put(position,
 							spawnConfig.getList("spawn.kit_" + position + ".inventory_contents").toArray(new ItemStack[0]));
+					ranked_kit_children.put(position, spawnConfig.getIntegerList("spawn.kit_" + position + ".children"));
 				} catch (Exception exc) {
 					Messenger.sendConsoleMessage("&4spawn.kit_" + entry + " could not be resolved. Please re-configure or remove.");
 				}
@@ -226,6 +235,20 @@ public class Configuration {
 			DestroyPair pair = new DestroyPair(with, config.getInt("blocks.destroy." + entry + ".respawn"));
 			allow_destroy.put(block, pair);
 		}
+
+		for (String entry : chestsConfig.getConfigurationSection("chests").getKeys(false))
+			chests.put(entry, chestsConfig.getConfigurationSection("chests").getString(entry));
+
+		for (String entry : chestsConfig.getConfigurationSection("loot").getKeys(false)) {
+			Map<ItemStack, Integer> loot = new HashMap<ItemStack, Integer>();
+			for (int i = 0; i <= 27; i++)
+				if (chestsConfig.getConfigurationSection("loot." + entry).isSet(i + ""))
+					loot.put(
+							chestsConfig.getConfigurationSection("loot." + entry + "." + i).getItemStack("item",
+									new ItemStack(Material.AIR)),
+							chestsConfig.getConfigurationSection("loot." + entry + "." + i).getInt("chance"));
+			lootsets.put(entry, loot);
+		}
 	}
 
 	/**
@@ -238,6 +261,7 @@ public class Configuration {
 		FileConfiguration config = MyZ.instance.getConfig();
 		FileConfiguration localizableConfig = MyZ.instance.getLocalizableConfig();
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
+		FileConfiguration chestsConfig = MyZ.instance.getChestsConfig();
 
 		// MySQL begin.
 		if (!config.contains("mysql.host"))
@@ -264,6 +288,12 @@ public class Configuration {
 		if (!config.contains("statistics.healer_heals"))
 			config.set("statistics.healer_heals", 13);
 
+		// Chests begin.
+		if (!chestsConfig.contains("chests"))
+			chestsConfig.createSection("chests");
+		if (!chestsConfig.contains("loot"))
+			chestsConfig.createSection("loot");
+
 		// Chat begin.
 		if (!config.contains("chat.local_enabled"))
 			config.set("chat.local_enabled", true);
@@ -275,6 +305,8 @@ public class Configuration {
 			config.set("ranks.names.0", "[%s]");
 		if (!config.contains("ranks.spawnmessage.0"))
 			config.set("ranks.spawnmessage.0", "You have spawned in the world, find food and water.");
+		if (!config.contains("ranks.research_rank_required"))
+			config.set("ranks.research_rank_required", 0);
 
 		// AutoUpdate begin.
 		if (!config.contains("autoupdate.enable"))
@@ -297,10 +329,6 @@ public class Configuration {
 		// Performance begin.
 		if (!config.contains("performance.use_prelogin_kickban"))
 			config.set("performance.use_prelogin_kickban", true);
-
-		// Download begin.
-		if (!config.contains("download.minez_chests"))
-			config.set("download.minez_chests", true);
 
 		// Mobs begin.
 		if (!config.contains("mobs.zombie.damage"))
@@ -327,6 +355,10 @@ public class Configuration {
 			config.set("mobs.npc.speed", 1.2);
 		if (!config.contains("mobs.bleed"))
 			config.set("mobs.bleed", true);
+
+		// Spawn pre-requisites begin.
+		if (!spawnConfig.contains("prerequisites.blocks_from_chest_or_player"))
+			spawnConfig.set("prerequisites.blocks_from_chest_or_player", 32);
 
 		// Kickban begin.
 		if (!config.contains("kickban.kick_on_death"))
@@ -428,8 +460,10 @@ public class Configuration {
 		// Spawn-related begin.
 		if (!spawnConfig.contains("spawn.safespawn_radius"))
 			spawnConfig.set("spawn.safespawn_radius", 30);
+		if (spawnConfig.isBoolean("spawn.numbered_requires_rank"))
+			spawnConfig.set("spawn.numbered_requires_rank", null);
 		if (!spawnConfig.contains("spawn.numbered_requires_rank"))
-			spawnConfig.set("spawn.numbered_requires_rank", true);
+			spawnConfig.set("spawn.numbered_requires_rank", 2);
 		if (!spawnConfig.contains("spawn.default_kit.helmet"))
 			spawnConfig.set("spawn.default_kit.helmet", new ItemStack(Material.LEATHER_HELMET, 1));
 		if (!spawnConfig.contains("spawn.default_kit.chestplate"))
@@ -440,6 +474,8 @@ public class Configuration {
 			spawnConfig.set("spawn.default_kit.boots", new ItemStack(Material.LEATHER_BOOTS, 1));
 		if (!spawnConfig.contains("spawn.default_kit.inventory_contents"))
 			spawnConfig.set("spawn.default_kit.inventory_contents", new ArrayList<ItemStack>());
+		if (!spawnConfig.contains("spawn.default_kit.children"))
+			spawnConfig.set("spawn.default_kit.children", new ArrayList<String>());
 		if (!spawnConfig.contains("spawn.potion_effects")) {
 			List<String> potion_effects = new ArrayList<String>();
 			potion_effects.add("CONFUSION,3,4");
@@ -449,6 +485,33 @@ public class Configuration {
 		}
 
 		// Localizable begin.
+		if (!localizableConfig.contains("localizable.loot.set.arguments"))
+			localizableConfig.set("localizable.loot.set.arguments", "&4Please specify the name of the lootset.");
+		if (!localizableConfig.contains("localizable.chest.get.click"))
+			localizableConfig.set("localizable.chest.get.click", "&eRight-click the chest you want to get.");
+		if (!localizableConfig.contains("localizable.chest.set.click"))
+			localizableConfig.set("localizable.chest.set.click", "&eRight-click the chest you want to set.");
+		if (!localizableConfig.contains("localizable.loot.set.info"))
+			localizableConfig
+					.set("localizable.loot.set.info",
+							"&eThis will create a lootset with your current inventory. &aPlease add the items you want to set for this lootset to the inventory that opens. &eStacksizes are equivalent to spawn chance. Each item in the stack increases the spawn chance by 2 percent. &aType anything to continue making lootset.");
+		if (!localizableConfig.contains("localizable.chest.set.begin"))
+			localizableConfig.set("localizable.chest.set.begin", "&eStarting MyZ Chest Log. This will cause some lag and take awhile.");
+		if (!localizableConfig.contains("localizable.chest.set.nonchest"))
+			localizableConfig.set("localizable.chest.set.nonchest", "&4That isn't a chest.");
+		if (!localizableConfig.contains("localizable.chest.set.typeis"))
+			localizableConfig.set("localizable.chest.set.typeis", "&eThat chest now has the loot table: %s");
+		if (!localizableConfig.contains("localizable.chest.get.nonchest"))
+			localizableConfig.set("localizable.chest.get.nonchest", "&4That isn't a chest.");
+		if (!localizableConfig.contains("localizable.chest.get.typeis"))
+			localizableConfig.set("localizable.chest.get.typeis", "&eThat chest has the loot table: %s");
+		if (!localizableConfig.contains("localizable.chest.set.coordinate1"))
+			localizableConfig.set("localizable.chest.set.coordinate1", "&ePunch one corner of the area you want scanned.");
+		if (!localizableConfig.contains("localizable.chest.set.coordinate2"))
+			localizableConfig.set("localizable.chest.set.coordinate2", "&ePunch the other corner of the area you want scanned.");
+		if (!localizableConfig.contains("localizable.chest.set.initialize"))
+			localizableConfig.set("localizable.chest.set.initialize",
+					"&eInitializing a scan on the selected area. Run another scan concurrently at your own peril.");
 		if (!localizableConfig.contains("localizable.npc_names.archer.friendly"))
 			localizableConfig.set("localizable.npc_names.archer.friendly",
 					new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
@@ -484,9 +547,13 @@ public class Configuration {
 		if (!localizableConfig.contains("localizable.gui.cost"))
 			localizableConfig.set("localizable.gui.cost", "%s Research Points");
 		if (!localizableConfig.contains("localizable.research.fail"))
-			localizableConfig.set("localizable.research.fail", "The Science Gods refuse your offering.");
+			localizableConfig.set("localizable.research.fail", "&eThe Science Gods refuse your offering.");
 		if (!localizableConfig.contains("localizable.research.success"))
-			localizableConfig.set("localizable.research.success", "You gain a better understanding of the disease and %s research points.");
+			localizableConfig.set("localizable.research.success",
+					"&eYou gain a better understanding of the disease and %s research points.");
+		if (!localizableConfig.contains("localizable.research.rank"))
+			localizableConfig.set("localizable.research.rank",
+					"&eThe Science Gods will not hear you. You must be ranked on this server to do research.");
 		if (!localizableConfig.contains("localizable.radio_name"))
 			localizableConfig.set("localizable.radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
 		if (!localizableConfig.contains("localizable.radio_color_override"))
@@ -702,6 +769,7 @@ public class Configuration {
 			spawnConfig.set("spawnpoints", new ArrayList<String>());
 
 		MyZ.instance.saveConfig();
+		MyZ.instance.saveChestConfig();
 		MyZ.instance.saveLocalizableConfig();
 		MyZ.instance.saveSpawnConfig();
 	}
@@ -723,6 +791,7 @@ public class Configuration {
 		spawnConfig.set("spawn.default_kit.leggings", ranked_leggings.get(0));
 		spawnConfig.set("spawn.default_kit.boots", ranked_boots.get(0));
 		spawnConfig.set("spawn.default_kit.inventory_contents", ranked_inventory.get(0));
+		spawnConfig.set("spawn.default_kit.children", ranked_kit_children.get(0));
 
 		for (int entry : rank_prefix.keySet())
 			config.set("ranks.names." + entry, rank_prefix.get(entry));
@@ -740,9 +809,13 @@ public class Configuration {
 			spawnConfig.set("spawn.kit_" + position + ".boots", ranked_boots.get(position));
 		for (int position = 1; position < ranked_inventory.size(); position++)
 			spawnConfig.set("spawn.kit_" + position + ".inventory_contents", ranked_inventory.get(position));
+		for (int position = 1; position < ranked_kit_children.size(); position++)
+			spawnConfig.set("spawn.kit_" + position + ".children", ranked_kit_children.get(0));
 
 		MyZ.instance.saveConfig();
 		MyZ.instance.saveSpawnConfig();
+		MyZ.instance.saveChestConfig();
+		MyZ.instance.saveLocalizableConfig();
 	}
 
 	/**
@@ -1057,7 +1130,7 @@ public class Configuration {
 	/**
 	 * @return The numbered_spawn_requires_rank
 	 */
-	public static boolean numberedSpawnRequiresRank() {
+	public static int numberedSpawnRequiresRank() {
 		return numbered_spawn_requires_rank;
 	}
 
@@ -1099,8 +1172,8 @@ public class Configuration {
 	}
 
 	/**
-	 * Get a list of the inventory items. Will return every item for rank <= @param
-	 * rank
+	 * Get a list of the inventory items. Will return every item for each child
+	 * of the rank. rank
 	 * 
 	 * @param rank
 	 *            The rank to get for.
@@ -1117,7 +1190,8 @@ public class Configuration {
 			List<ItemStack> parsed_stack = new ArrayList<ItemStack>(Arrays.asList(current_stack));
 			for (int value : keys)
 				if (value < rank)
-					parsed_stack.addAll(Arrays.asList(ranked_inventory.get(value)));
+					if (ranked_kit_children.get(rank).contains(value))
+						parsed_stack.addAll(Arrays.asList(ranked_inventory.get(value)));
 			return parsed_stack.toArray(new ItemStack[0]);
 		}
 	}
@@ -1181,6 +1255,7 @@ public class Configuration {
 		ranked_leggings.put(rank, armor.get(1));
 		ranked_chestplate.put(rank, armor.get(2));
 		ranked_helmet.put(rank, armor.get(3));
+		ranked_kit_children.put(rank, new ArrayList<Integer>());
 		save();
 	}
 
@@ -1443,6 +1518,14 @@ public class Configuration {
 	}
 
 	/**
+	 * @return The location of all the chests in the world as well as their
+	 *         lootset.
+	 */
+	public static Map<String, String> getChests() {
+		return chests;
+	}
+
+	/**
 	 * @return the safe_logout_time
 	 */
 	public static int getSafeLogoutTime() {
@@ -1523,13 +1606,6 @@ public class Configuration {
 	}
 
 	/**
-	 * @return the minez_chests.
-	 */
-	public static boolean isDownloadMineZChests() {
-		return minez_chests;
-	}
-
-	/**
 	 * @return the worlds.
 	 */
 	public static List<String> getWorlds() {
@@ -1541,6 +1617,20 @@ public class Configuration {
 	 */
 	public static boolean isBleed() {
 		return is_bleed;
+	}
+
+	/**
+	 * @return the spawn_radius
+	 */
+	public static int spawnRadius() {
+		return spawn_radius;
+	}
+
+	/**
+	 * @return the research_rank
+	 */
+	public static int getResearchRank() {
+		return research_rank;
 	}
 
 	/**
@@ -1763,6 +1853,34 @@ public class Configuration {
 	}
 
 	/**
+	 * Create a lootset or set its items.
+	 * 
+	 * @param name
+	 *            The name of the lootset.
+	 * @param spawnPercents
+	 *            The map of items : spawnpercent
+	 */
+	public static void setLootset(String name, Map<ItemStack, Integer> spawnPercents) {
+		lootsets.put(name, spawnPercents);
+
+		FileConfiguration config = MyZ.instance.getChestsConfig();
+		int i = 0;
+		for (ItemStack item : spawnPercents.keySet()) {
+			config.set("loot." + name + "." + i + ".item", item);
+			config.set("loot." + name + "." + i + ".chance", spawnPercents.get(item));
+			i++;
+		}
+		save();
+	}
+
+	/**
+	 * @return the lootsets
+	 */
+	public static Set<String> getLootsets() {
+		return lootsets.keySet();
+	}
+
+	/**
 	 * Send a spawn message to a player, specific to their rank.
 	 * 
 	 * @param player
@@ -1795,6 +1913,8 @@ public class Configuration {
 		food_potion_chance = null;
 		allow_place = null;
 		allow_destroy = null;
+		ranked_kit_children = null;
+		chests = null;
 	}
 
 	private static class DestroyPair {
@@ -1806,5 +1926,20 @@ public class Configuration {
 			this.item = item;
 			this.time = time;
 		}
+	}
+
+	/**
+	 * Set a chest to a formatted location with a specific lootset.
+	 * 
+	 * @param location
+	 *            The formatted location.
+	 * @param loot
+	 *            The lootset.
+	 */
+	public static void setChest(String location, String loot) {
+		chests.put(location, loot);
+		for (String key : chests.keySet())
+			MyZ.instance.getChestsConfig().set("chests." + key, chests.get(key));
+		MyZ.instance.saveChestConfig();
 	}
 }

@@ -6,6 +6,7 @@ package myz.Listeners;
 import myz.MyZ;
 import myz.Commands.BlockCommand;
 import myz.Support.Configuration;
+import myz.chests.ChestManager;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -42,6 +43,10 @@ public class BlockEvent implements Listener {
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK && BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
 			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnHit(e.getItem(), e.getClickedBlock(), e.getPlayer());
 			e.setCancelled(true);
+		} else if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.CHEST
+				&& ChestManager.isMyZChest(e.getClickedBlock().getLocation())) {
+			e.setCancelled(true);
+			e.getClickedBlock().setType(Material.AIR);
 		}
 	}
 

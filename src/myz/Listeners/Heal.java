@@ -184,7 +184,7 @@ public class Heal implements Listener {
 			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
 						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
-			Messenger.sendMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
+			Messenger.sendItemMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(healer);

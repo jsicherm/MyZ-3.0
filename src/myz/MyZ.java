@@ -18,6 +18,9 @@ import myz.Commands.AddSpawnCommand;
 import myz.Commands.AllowedCommand;
 import myz.Commands.BaseCommand;
 import myz.Commands.BlockCommand;
+import myz.Commands.ChestGetCommand;
+import myz.Commands.ChestScanCommand;
+import myz.Commands.ChestSetCommand;
 import myz.Commands.ClanCommand;
 import myz.Commands.CreateMedKitCommand;
 import myz.Commands.FriendCommand;
@@ -25,6 +28,7 @@ import myz.Commands.FriendsCommand;
 import myz.Commands.GetUIDCommand;
 import myz.Commands.ItemConfigurationCommand;
 import myz.Commands.JoinClanCommand;
+import myz.Commands.LootSetCommand;
 import myz.Commands.RemoveSpawnCommand;
 import myz.Commands.ResearchCommand;
 import myz.Commands.SaveKitCommand;
@@ -63,11 +67,12 @@ import myz.Support.Messenger;
 import myz.Support.PlayerData;
 import myz.Support.Teleport;
 import myz.Utilities.DisguiseUtilities;
-import myz.Utilities.Downloader;
 import myz.Utilities.LibsDisguiseUtilities;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
+import myz.chests.ChestManager;
+import myz.chests.Scanner;
 import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityType;
 
@@ -94,19 +99,18 @@ import org.mcstats.MetricsLite;
  *         The main plugin and the interface for most convenience methods.
  */
 public class MyZ extends JavaPlugin {
-	
-	// TODO sound attraction to (trap)doors.
+
+	// TODO configurable death loot (?)
 	// TODO air pollution random event
-	// TODO random objectives/events
-	// TODO rank inheritance
+	// TODO sound attraction to (trap)doors.
+	// TODO localizable to user locale.
 	// TODO research point rank uppance.
 	// TODO grave-digging, speed-sugar.
-	// TODO configurable death loot (?)
-	// TODO rank-nodes for spawn numbered and research.
+	// TODO chest support lootsets
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
-	private FileConfiguration playerdata, blocks, localizable, spawn, research;
+	private FileConfiguration playerdata, blocks, localizable, spawn, chests, research;
 	private SQLManager sql;
 	private static final Random random = new Random();
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
@@ -114,13 +118,22 @@ public class MyZ extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		if (!Bukkit.getServer().getClass().getPackage().getName().contains("v1_7_R1")) {
+			getLogger()
+					.warning("This version of MyZ is not compatible with your version of Craftbukkit (" + getServer().getVersion() + ")");
+			getLogger().warning("Disabling MyZ 3");
+			setEnabled(false);
+			return;
+		}
 		instance = this;
 		saveDefaultConfig();
 		loadPlayerData();
 		loadBlocks();
 		loadLocalizable();
 		loadSpawn();
+		loadChests();
 		loadResearch();
+		ChestManager.respawnAll();
 
 		/*
 		 * Register the new enchantment so that MedKits can have their glow.
@@ -164,12 +177,17 @@ public class MyZ extends JavaPlugin {
 		getCommand("stats").setExecutor(new StatsCommand());
 		getCommand("myz").setExecutor(new BaseCommand());
 		getCommand("configure").setExecutor(new ItemConfigurationCommand());
+		getCommand("chestscan").setExecutor(new ChestScanCommand());
+		getCommand("chestset").setExecutor(new ChestSetCommand());
+		getCommand("chestget").setExecutor(new ChestGetCommand());
+		getCommand("lootset").setExecutor(new LootSetCommand());
 
 		/*
 		 * Register all listeners.
 		 */
 		PluginManager p = getServer().getPluginManager();
 		p.registerEvents(new JoinQuit(), this);
+		p.registerEvents(new Scanner(), this);
 		p.registerEvents(new BlockEvent(), this);
 		p.registerEvents(new AutoFriend(), this);
 		p.registerEvents(new Heal(), this);
@@ -258,18 +276,6 @@ public class MyZ extends JavaPlugin {
 		}
 
 		/*
-		 * Download MineZ chests.
-		 */
-		if (Configuration.isDownloadMineZChests())
-			getServer().getScheduler().runTaskLaterAsynchronously(instance, new Runnable() {
-				@Override
-				public void run() {
-					if (getServer().getPluginManager().getPlugin("MineZ-chests") == null)
-						new Downloader(getDataFolder());
-				}
-			}, 0L);
-
-		/*
 		 * Autoupdate.
 		 */
 		if (Configuration.isAutoUpdate())
@@ -279,6 +285,7 @@ public class MyZ extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getServer().getScheduler().cancelTasks(this);
+		ChestManager.respawnAll();
 		boolean disguise = getServer().getPluginManager().getPlugin("LibsDisguises") != null
 				&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled();
 
@@ -400,6 +407,20 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * Load the chests YAML file.
+	 */
+	private void loadChests() {
+		File chests_file = new File(getDataFolder() + File.separator + "chests.yml");
+
+		/*
+		 * Make sure the file exists.
+		 */
+		if (!chests_file.exists())
+			saveResource("chests.yml", true);
+		chests = YamlConfiguration.loadConfiguration(chests_file);
+	}
+
+	/**
 	 * Load the research YAML file.
 	 */
 	private void loadResearch() {
@@ -452,6 +473,15 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * Get the chest YAML.
+	 * 
+	 * @return The FileConfiguration for the chests.yml or null if not loaded.
+	 */
+	public FileConfiguration getChestsConfig() {
+		return chests;
+	}
+
+	/**
 	 * Get the research YAML.
 	 * 
 	 * @return The FileConfiguration for the research.yml or null if not loaded.
@@ -490,6 +520,17 @@ public class MyZ extends JavaPlugin {
 			spawn.save(new File(MyZ.instance.getDataFolder() + File.separator + "spawn.yml"));
 		} catch (IOException e) {
 			Messenger.sendConsoleMessage("&4Unable to save spawn.yml: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Save the chests.yml
+	 */
+	public void saveChestConfig() {
+		try {
+			chests.save(new File(MyZ.instance.getDataFolder() + File.separator + "chests.yml"));
+		} catch (IOException e) {
+			Messenger.sendConsoleMessage("&4Unable to save chests.yml: " + e.getMessage());
 		}
 	}
 
@@ -734,14 +775,14 @@ public class MyZ extends JavaPlugin {
 					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
 				myz.Utilities.LibsDisguiseUtilities.undisguise(player);
 
-			if (Configuration.isKickBan() && wasDeath && player.getName() != "MrTeePee") {
+			if (Configuration.isKickBan() && wasDeath && !player.getName().equals("MrTeePee")) {
 				if (data != null)
 					data.setTimeOfKickban(System.currentTimeMillis());
 				if (sql.isConnected())
 					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
 			}
 
-			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && player.getName() != "MrTeePee") {
+			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && !player.getName().equals("MrTeePee")) {
 				if (data != null) {
 					data.setAutosave(false, false);
 					for (String friend : data.getFriends())
@@ -839,7 +880,8 @@ public class MyZ extends JavaPlugin {
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
 			if (Configuration.isKickBan() && !wasNPCKilled)
-				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0) {
+				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0
+						&& !player.getName().equals("MrTeePee")) {
 					flags.add(player.getName());
 					player.kickPlayer(Messenger.getConfigMessage("kick.come_back", Configuration.getKickBanSeconds()));
 				}
@@ -905,14 +947,14 @@ public class MyZ extends JavaPlugin {
 	 */
 	public void spawnPlayer(Player player, int spawnpoint, boolean withInitiallySpecifiedSpawnpoint, int spawningAttempts) {
 		PlayerData data = PlayerData.getDataFor(player);
-		if (Configuration.numberedSpawnRequiresRank() && withInitiallySpecifiedSpawnpoint) {
+		if (Configuration.numberedSpawnRequiresRank() > 0 && withInitiallySpecifiedSpawnpoint) {
 			if (data != null)
-				if (data.getRank() == 0) {
+				if (data.getRank() < Configuration.numberedSpawnRequiresRank()) {
 					Messenger.sendConfigMessage(player, "command.spawn.requires_rank");
 					return;
 				}
 			if (sql.isConnected())
-				if (sql.getInt(player.getName(), "rank") == 0) {
+				if (sql.getInt(player.getName(), "rank") < Configuration.numberedSpawnRequiresRank()) {
 					Messenger.sendConfigMessage(player, "command.spawn.requires_rank");
 					return;
 				}

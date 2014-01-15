@@ -21,6 +21,7 @@ import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityHuman;
 import net.minecraft.server.v1_7_R1.EntitySkeleton;
 import net.minecraft.server.v1_7_R1.EnumDifficulty;
+import net.minecraft.server.v1_7_R1.GenericAttributes;
 import net.minecraft.server.v1_7_R1.Item;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
@@ -121,6 +122,12 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		}
 
 		bA();
+	}
+
+	@Override
+	protected void aD() {
+		super.aD();
+		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getNPCDamage());
 	}
 
 	public NPCType getType() {

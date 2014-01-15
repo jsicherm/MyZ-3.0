@@ -19,6 +19,7 @@ import net.minecraft.server.v1_7_R1.EntitySkeleton;
 import net.minecraft.server.v1_7_R1.EntityVillager;
 import net.minecraft.server.v1_7_R1.EntityZombie;
 import net.minecraft.server.v1_7_R1.EnumDifficulty;
+import net.minecraft.server.v1_7_R1.GenericAttributes;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
 import net.minecraft.server.v1_7_R1.MathHelper;
@@ -80,6 +81,12 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 	}
 
 	@Override
+	protected void aD() {
+		super.aD();
+		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getZombieDamage() * (isBaby() ? 0.5 : 1));
+	}
+
+	@Override
 	public boolean damageEntity(DamageSource damagesource, float f) {
 		if (!super.damageEntity(damagesource, f))
 			return false;
@@ -92,7 +99,8 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 			if (entityliving == null && damagesource.getEntity() instanceof EntityLiving)
 				entityliving = (EntityLiving) damagesource.getEntity();
 
-			if (entityliving != null && world.difficulty == EnumDifficulty.HARD && random.nextFloat() < getAttributeInstance(bp).getValue()) {
+			if (entityliving != null && world.difficulty == EnumDifficulty.NORMAL
+					&& random.nextFloat() < getAttributeInstance(bp).getValue()) {
 				int i = MathHelper.floor(locX);
 				int j = MathHelper.floor(locY);
 				int k = MathHelper.floor(locZ);
@@ -143,7 +151,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 
 	@Override
 	protected void bA() {
-		if (random.nextFloat() < (world.difficulty == EnumDifficulty.HARD ? 0.05F : 0.01F)) {
+		if (random.nextFloat() < (world.difficulty == EnumDifficulty.NORMAL ? 0.05F : 0.01F)) {
 			int i = random.nextInt(3);
 
 			if (i == 0)

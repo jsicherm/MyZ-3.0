@@ -86,6 +86,13 @@ public class CustomEntityHorse extends EntityHorse {
 	}
 
 	@Override
+	protected void aD() {
+		super.aD();
+		bc().b(GenericAttributes.e);
+		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getHorseDamage());
+	}
+
+	@Override
 	public boolean m(Entity entity) {
 		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
 				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)

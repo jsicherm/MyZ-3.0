@@ -1,9 +1,9 @@
 name: MyZ-3
 main: myz.MyZ
-version: 3.0.6.31
+version: 3.0.6.4
 softdepend: [WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises]
-description: MyZ 3.0 with chest support by SirAntony.
-authors: [TeeePeee, SirAntony]
+description: MyZ 3.0
+authors: [TeeePeee]
 
 commands:
   start:
@@ -76,6 +76,22 @@ commands:
     description: The name of your clan.
   getid:
     description: The ID for use on my-z.org.
+  chestscan:
+    description: Scan an area for chests.
+    permission: MyZ.world_admin
+    permission-message: You don't have permission.
+  chestget:
+    description: Get the lootset of a chest.
+    permission: MyZ.world_admin
+    permission-message: You don't have permission.
+  chestset:
+    description: Set the lootset of a chest.
+    permission: MyZ.world_admin
+    permission-message: You don't have permission.
+  lootset:
+    description: Set the contents of a lootset.
+    permission: MyZ.world_admin
+    permission-message: You don't have permission.
 
 permissions:
   MyZ.*:

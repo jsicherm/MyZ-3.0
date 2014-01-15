@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import myz.MyZ;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -68,7 +69,7 @@ public class ItemMessage {
 	 */
 	public void setEmptyHandReplacement(Material material) {
 		Validate.notNull(material, "There must be a replacement for an empty hand!");
-		this.emptyHandReplacement = material;
+		emptyHandReplacement = material;
 	}
 
 	/**
@@ -115,23 +116,22 @@ public class ItemMessage {
 	 *             if the player is unavailable (e.g. went offline)
 	 */
 	public void sendMessage(Player player, String message, int duration, int priority) {
-		if (player.getGameMode() == GameMode.CREATIVE) {
+		if (player.getGameMode() == GameMode.CREATIVE)
 			// TODO: this doesn't work properly in creative mode. Need to
 			// investigate further
 			// if it can be made to work, but for now, just send an
 			// old-fashioned chat message.
 			player.sendMessage(message);
-		} else {
+		else {
 			PriorityQueue<MessageRecord> msgQueue = getMessageQueue(player);
 			msgQueue.add(new MessageRecord(message, duration, priority, getNextId(player)));
-			if (msgQueue.size() == 1) {
+			if (msgQueue.size() == 1)
 				// there was nothing in the queue previously - kick off a
 				// NamerTask
 				// (if there was already something in the queue, a new NamerTask
 				// will be kicked off
 				// when the current task completes - see notifyDone())
 				new NamerTask(player, msgQueue.peek()).runTaskTimer(MyZ.instance, 1L, interval);
-			}
 		}
 	}
 
@@ -146,9 +146,8 @@ public class ItemMessage {
 	 */
 	public void setFormats(String... formats) {
 		Validate.isTrue(formats.length > 1, "Two formats are minimum!");
-		for (String format : formats) {
+		for (String format : formats)
 			Validate.isTrue(format.contains("%s"), "format string \"" + format + "\" must contain a %s");
-		}
 		this.formats = formats;
 	}
 
@@ -157,21 +156,19 @@ public class ItemMessage {
 		if (player.hasMetadata(METADATA_ID_KEY)) {
 			List<MetadataValue> l = player.getMetadata(METADATA_ID_KEY);
 			id = l.size() >= 1 ? l.get(0).asLong() : 1L;
-		} else {
+		} else
 			id = 1L;
-		}
 		player.setMetadata(METADATA_ID_KEY, new FixedMetadataValue(MyZ.instance, id + 1));
 		return id;
 	}
 
 	@SuppressWarnings("unchecked")
 	private PriorityQueue<MessageRecord> getMessageQueue(Player player) {
-		if (!player.hasMetadata(METADATA_Q_KEY)) {
+		if (!player.hasMetadata(METADATA_Q_KEY))
 			player.setMetadata(METADATA_Q_KEY, new FixedMetadataValue(MyZ.instance, new PriorityQueue<MessageRecord>()));
-		}
-		for (MetadataValue v : player.getMetadata(METADATA_Q_KEY)) {
-			if (v.value() instanceof PriorityQueue<?>) { return (PriorityQueue<MessageRecord>) v.value(); }
-		}
+		for (MetadataValue v : player.getMetadata(METADATA_Q_KEY))
+			if (v.value() instanceof PriorityQueue<?>)
+				return (PriorityQueue<MessageRecord>) v.value();
 		return null;
 	}
 
@@ -198,9 +195,9 @@ public class ItemMessage {
 	 *         problem
 	 */
 	private MessageRecord importOtherMessageRecord(Object other) {
-		if (other instanceof MessageRecord) {
+		if (other instanceof MessageRecord)
 			return (MessageRecord) other;
-		} else if (other.getClass().getName().endsWith(".ItemMessage$MessageRecord")) {
+		else if (other.getClass().getName().endsWith(".ItemMessage$MessageRecord"))
 			// looks like the same class as us - we make no assumptions about
 			// what package it's in, though
 			try {
@@ -217,9 +214,8 @@ public class ItemMessage {
 				e.printStackTrace();
 				return null;
 			}
-		} else {
+		else
 			return null;
-		}
 	}
 
 	private class NamerTask extends BukkitRunnable implements Listener {
@@ -229,10 +225,10 @@ public class ItemMessage {
 		private int iterations;
 
 		public NamerTask(Player player, MessageRecord rec) {
-			this.playerRef = new WeakReference<Player>(player);
-			this.iterations = Math.max(1, (rec.getDuration() * 20) / interval);
-			this.slot = player.getInventory().getHeldItemSlot();
-			this.message = rec.getMessage();
+			playerRef = new WeakReference<Player>(player);
+			iterations = Math.max(1, rec.getDuration() * 20 / interval);
+			slot = player.getInventory().getHeldItemSlot();
+			message = rec.getMessage();
 			Bukkit.getPluginManager().registerEvents(this, MyZ.instance);
 		}
 
@@ -259,17 +255,15 @@ public class ItemMessage {
 		public void run() {
 			Player player = playerRef.get();
 			if (player != null) {
-				if (iterations-- <= 0) {
+				if (iterations-- <= 0)
 					// finished - restore the previous item data and tidy up
 					finish(player);
-				} else {
+				else
 					// refresh the item data
 					refresh(player);
-				}
-			} else {
+			} else
 				// player probably disconnected - whatever, we're done here
 				cleanup();
-			}
 		}
 
 		private void refresh(Player player) {
@@ -290,13 +284,13 @@ public class ItemMessage {
 		private ItemStack makeStack(Player player) {
 			ItemStack stack0 = player.getInventory().getItem(slot);
 			ItemStack stack;
-			if (stack0 == null || stack0.getType() == Material.AIR) {
+			if (stack0 == null || stack0.getType() == Material.AIR)
 				// an empty slot can't display any custom item name, so we need
 				// to fake an item
 				// a snow layer is a good choice, since it's visually quite
 				// unobtrusive
 				stack = new ItemStack(emptyHandReplacement, 1);
-			} else {
+			else {
 				stack = new ItemStack(stack0.getType(), stack0.getAmount(), stack0.getDurability());
 				stack.setItemMeta(stack0.getItemMeta());
 			}
@@ -309,34 +303,30 @@ public class ItemMessage {
 		}
 
 		private void sendItemSlotChange(Player player, int slot, ItemStack stack) {
-			Object setSlot;
 			try {
-				setSlot = Class.forName("net.minecraft.server." + NMS.version + ".PacketPlayOutSetSlot").newInstance();
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				return;
-			}
-			try {
-				NMS.setDeclaredField(setSlot, "slot", slot + 36);
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				return;
-			}
-			Object nms;
-			try {
-				nms = Class.forName("net.minecraft.server." + NMS.version + ".inventory.CraftItemStack")
-						.getMethod("asNMSCopy", ItemStack.class).invoke(null, stack);
-			} catch (Exception exc) {
-				return;
-			}
-			try {
-				NMS.setDeclaredField(setSlot, "stack", nms);
-			} catch (Exception exc) {
-				exc.printStackTrace();
-				return;
-			}
-			try {
-				NMS.sendPacket(setSlot, player);
+				Class<?> craftstack = Class.forName("org.bukkit.craftbukkit." + NMS.version + ".inventory.CraftItemStack");
+				Class<?> nmsstack = Class.forName("net.minecraft.server." + NMS.version + ".ItemStack");
+				Object nms;
+
+				try {
+					nms = craftstack.getMethod("asNMSCopy", ItemStack.class).invoke(null, stack);
+				} catch (Exception exc) {
+					return;
+				}
+
+				Object setSlot;
+				try {
+					setSlot = Class.forName("net.minecraft.server." + NMS.version + ".PacketPlayOutSetSlot")
+							.getConstructor(int.class, int.class, nmsstack).newInstance(0, slot + 36, nmsstack.cast(nms));
+				} catch (Exception exc) {
+					exc.printStackTrace();
+					return;
+				}
+				try {
+					NMS.sendPacket(setSlot, player);
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				}
 			} catch (Exception exc) {
 				exc.printStackTrace();
 			}
@@ -376,14 +366,12 @@ public class ItemMessage {
 		public int compareTo(Object other) {
 			MessageRecord rec = importOtherMessageRecord(other);
 			if (rec != null) {
-				if (this.priority == rec.getPriority()) {
-					return (Long.valueOf(this.id)).compareTo(rec.getId());
-				} else {
-					return (Integer.valueOf(this.priority)).compareTo(rec.getPriority());
-				}
-			} else {
+				if (priority == rec.getPriority())
+					return Long.valueOf(id).compareTo(rec.getId());
+				else
+					return Integer.valueOf(priority).compareTo(rec.getPriority());
+			} else
 				return 0;
-			}
 		}
 	}
 }

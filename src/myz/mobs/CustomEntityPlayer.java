@@ -34,8 +34,8 @@ import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_7_R1.event.CraftEventFactory;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -269,9 +269,9 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	public static CustomEntityPlayer newInstance(org.bukkit.entity.Player playerDuplicate) {
 		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
-		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, ((CraftPlayer) playerDuplicate).getHandle()
-				.getProfile(), new PlayerInteractManager(worldServer));
-		
+		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, ((CraftPlayer) playerDuplicate)
+				.getHandle().getProfile(), new PlayerInteractManager(worldServer));
+
 		Location loc = playerDuplicate.getLocation();
 		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 
@@ -286,7 +286,7 @@ public class CustomEntityPlayer extends EntityPlayer {
 		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
 
 		worldServer.addEntity(player, SpawnReason.CUSTOM);
-		
+
 		return player;
 	}
 }

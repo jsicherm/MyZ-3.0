@@ -4,6 +4,7 @@
 package myz.Utilities;
 
 import java.lang.reflect.Field;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -64,7 +65,8 @@ public class NMS {
 		}
 
 		Object craft = castToCraft(player);
-		if (craft == null) { return null; }
+		if (craft == null)
+			return null;
 		try {
 			return craftPlayer.getMethod("getHandle").invoke(castToCraft(player));
 		} catch (Exception exc) {

@@ -45,10 +45,10 @@ public class PlayerSummonGiant implements Listener {
 			PlayerSummonGiantEvent event = new PlayerSummonGiantEvent(e.getPlayer(), e.getBlockPlaced().getLocation());
 			MyZ.instance.getServer().getPluginManager().callEvent(event);
 			if (!event.isCancelled()) {
-				Messenger.sendConfigMessage(e.getPlayer(), "special.giant_summoned");
+				Messenger.sendConfigItemMessage(e.getPlayer(), "special.giant_summoned");
 				for (Entity player : e.getPlayer().getNearbyEntities(40, 10, 40))
 					if (player instanceof Player)
-						Messenger.sendConfigMessage((Player) player, "special.giant_summoned");
+						Messenger.sendConfigItemMessage((Player) player, "special.giant_summoned");
 				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 					@Override
 					public void run() {

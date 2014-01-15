@@ -82,7 +82,7 @@ public class aSync implements Runnable {
 				// Increase thirst level by swimming or by standing in the rain.
 				boolean isRaining = false;
 				Object nmsplayer = NMS.castToNMS(player);
-				if (nmsplayer != null) {
+				if (nmsplayer != null)
 					try {
 						isRaining = (Boolean) nmsplayer
 								.getClass()
@@ -91,7 +91,6 @@ public class aSync implements Runnable {
 										player.getLocation().getBlockZ());
 					} catch (Exception exc) {
 					}
-				}
 				if (player.getLevel() < Configuration.getMaxThirstLevel()
 						&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
 								&& noBlocksAbove(player.getLocation())))
@@ -107,7 +106,7 @@ public class aSync implements Runnable {
 					PlayerTakeBleedingDamageEvent event = new PlayerTakeBleedingDamageEvent(player);
 					if (!event.isCancelled()) {
 						player.damage(Configuration.getBleedDamage());
-						Messenger.sendConfigMessage(player, "damage.bleed_begin");
+						Messenger.sendConfigItemMessage(player, "damage.bleed_begin");
 					}
 				}
 
@@ -117,7 +116,7 @@ public class aSync implements Runnable {
 					PlayerTakePoisonDamageEvent event = new PlayerTakePoisonDamageEvent(player);
 					if (!event.isCancelled()) {
 						player.damage(Configuration.getPoisonDamage());
-						Messenger.sendConfigMessage(player, "damage.poison_begin");
+						Messenger.sendConfigItemMessage(player, "damage.poison_begin");
 					}
 				}
 

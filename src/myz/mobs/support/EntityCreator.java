@@ -38,6 +38,7 @@ import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -104,6 +105,7 @@ public class EntityCreator {
 				pigman.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
 				pigman.setBaby(random.nextInt(20) < 3);
 				world.addEntity(pigman, SpawnReason.NATURAL);
+				((PigZombie) pigman.getBukkitEntity()).setAngry(true);
 			}
 			break;
 		case ZOMBIE:

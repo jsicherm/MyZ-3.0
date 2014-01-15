@@ -3,17 +3,22 @@
  */
 package myz.Listeners;
 
+import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Utilities.WorldGuardManager;
 import myz.mobs.support.EntityCreator;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -54,6 +59,11 @@ public class EntitySpawn implements Listener {
 			return;
 		}
 
+		if (isTooFarFromLandmark(e.getEntity())) {
+			e.setCancelled(true);
+			return;
+		}
+
 		EntityType type = e.getEntityType();
 
 		// Override mooshroom spawns with giant spawns.
@@ -64,9 +74,8 @@ public class EntitySpawn implements Listener {
 		}
 
 		// Override villager trades.
-		if (e.getEntityType() == EntityType.VILLAGER) {
+		if (e.getEntityType() == EntityType.VILLAGER)
 			EntityCreator.overrideVillager(e.getEntity());
-		}
 
 		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && e.getSpawnReason() != SpawnReason.CUSTOM && Configuration.isNPC()) {
 			e.setCancelled(true);
@@ -137,5 +146,29 @@ public class EntitySpawn implements Listener {
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Make sure we only spawn creatures close enough to a player or a chest.
+	 * 
+	 * @param entity
+	 *            The creature that is spawning.
+	 * @return True if we should cancel the underlying event (too far from a
+	 *         player or chest), false otherwise.
+	 */
+	private boolean isTooFarFromLandmark(Entity entity) {
+		List<Entity> nearby = entity.getNearbyEntities(Configuration.spawnRadius(), 10, Configuration.spawnRadius());
+		for (Entity near : nearby)
+			if (near instanceof Player)
+				return false;
+		Location location = entity.getLocation();
+		World world = location.getWorld();
+		int X = location.getBlockX(), Y = location.getBlockY(), Z = location.getBlockZ();
+		for (int x = -Configuration.spawnRadius(); x < Configuration.spawnRadius(); x++)
+			for (int y = -10; y < 10; y++)
+				for (int z = -Configuration.spawnRadius(); z < Configuration.spawnRadius(); z++)
+					if (world.getBlockAt(X + x, Y + y, Z + z).getType() == Material.CHEST)
+						return false;
+		return true;
 	}
 }
