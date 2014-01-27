@@ -57,7 +57,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life_record", amount, true);
 			}
-			Messenger.sendItemMessage(playerFor, Messenger.getConfigMessage("zombie.kill_amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("zombie.kill_amount", amount));
 			break;
 		case PIG_ZOMBIE:
 			if (data != null) {
@@ -74,7 +74,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life_record", amount, true);
 			}
-			Messenger.sendItemMessage(playerFor, Messenger.getConfigMessage("pigman.kill_amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("pigman.kill_amount", amount));
 			break;
 		case GIANT:
 			if (data != null) {
@@ -91,7 +91,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life_record", amount, true);
 			}
-			Messenger.sendItemMessage(playerFor, Messenger.getConfigMessage("giant.kill_amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("giant.kill_amount", amount));
 			break;
 		case PLAYER:
 			if (data != null) {
@@ -108,7 +108,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life_record", amount, true);
 			}
-			Messenger.sendItemMessage(playerFor, Messenger.getConfigMessage("bandit.amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage("bandit.amount", amount));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(playerFor);

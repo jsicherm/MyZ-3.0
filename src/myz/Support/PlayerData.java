@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 /**
@@ -26,7 +27,7 @@ public class PlayerData {
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
 			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record,
 			deaths, rank, heals_life, thirst, minutes_alive_life, minutes_alive_life_record, research;
-	private boolean isBleeding, isPoisoned, wasKilledNPC, isZombie, autosave = true;
+	private boolean isBleeding, isPoisoned, wasKilledNPC, isZombie;
 	private long timeOfKickban, minutes_alive;
 	private String clan;
 	private List<String> friends = new ArrayList<String>();
@@ -74,6 +75,37 @@ public class PlayerData {
 	}
 
 	/**
+	 * Update a primitive data type to a new version.
+	 * 
+	 * @param oldData
+	 *            The old FileConfiguration storing the data.
+	 */
+	public static void updateData(FileConfiguration oldData) {
+		for (String key : oldData.getKeys(false)) {
+			File newFile = new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + key + ".yml");
+			if (!newFile.exists()) {
+				try {
+					newFile.createNewFile();
+				} catch (Exception e) {
+					Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
+				}
+			} else {
+				continue;
+			}
+
+			FileConfiguration newData = YamlConfiguration.loadConfiguration(newFile);
+			for (String valueKey : oldData.getConfigurationSection(key).getValues(false).keySet()) {
+				newData.set(valueKey, oldData.getConfigurationSection(key).get(valueKey));
+			}
+			try {
+				newData.save(newFile);
+			} catch (Exception e) {
+				Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
+			}
+		}
+	}
+
+	/**
 	 * The PlayerData stored for the given player by name.
 	 * 
 	 * @param player
@@ -85,7 +117,7 @@ public class PlayerData {
 			return null;
 		if (!playerDataExists(player))
 			return null;
-		ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(player);
+		FileConfiguration section = MyZ.instance.getPlayerDataConfig(player);
 		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie.kills"), section.getInt("pigman.kills"),
 				section.getInt("giant.kills"), section.getInt("player.kills_life"), section.getInt("zombie.kills_life"),
 				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("deaths"), section.getInt("rank"),
@@ -165,7 +197,7 @@ public class PlayerData {
 		if (!Configuration.usePlayerData())
 			return null;
 		if (!playerDataExists(player)) {
-			ConfigurationSection section = MyZ.instance.getPlayerDataConfig().createSection(player.getName());
+			FileConfiguration section = MyZ.instance.getPlayerDataConfig(player.getName());
 			section.set("player.kills", player_kills);
 			section.set("zombie.kills", zombie_kills);
 			section.set("pigman.kills", pigman_kills);
@@ -192,9 +224,10 @@ public class PlayerData {
 			section.set("minutes.played_life", minutes_alive_life);
 			section.set("minutes.played_life_record", minutes_alive_life_record);
 			section.set("research", research);
-			section.set("zombie", isZombie);
+			section.set("isZombie", isZombie);
 			try {
-				MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
+				section.save(
+						new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + player.getName() + ".yml"));
 			} catch (IOException e) {
 				MyZ.instance.getLogger().warning("Unable to save a new PlayerData for " + player.getName() + ": " + e.getMessage());
 			}
@@ -219,63 +252,54 @@ public class PlayerData {
 	private static boolean playerDataExists(String player) {
 		if (!Configuration.usePlayerData())
 			return false;
-		FileConfiguration config = MyZ.instance.getPlayerDataConfig();
-		return config != null && config.contains(player);
-	}
-
-	/**
-	 * @see save(boolean bypass_autosave)
-	 */
-	private void save() {
-		save(false);
+		FileConfiguration config = MyZ.instance.getPlayerDataConfig(player);
+		return config != null;
 	}
 
 	/**
 	 * Save the PlayerData object into the YAML. Only continues if
 	 * playerDataExists() resolves to true.
-	 * 
-	 * @param bypass_autosave
-	 *            Whether or not to bypass the value of autosave.
 	 */
-	public void save(boolean bypass_autosave) {
+	public void save() {
 		if (!Configuration.usePlayerData())
 			return;
-		if (bypass_autosave || autosave)
-			if (playerDataExists(name)) {
-				ConfigurationSection section = MyZ.instance.getPlayerDataConfig().getConfigurationSection(name);
-				section.set("player.kills", player_kills);
-				section.set("zombie.kills", zombie_kills);
-				section.set("pigman.kills", pigman_kills);
-				section.set("giant.kills", giant_kills);
-				section.set("player.kills_life", player_kills_life);
-				section.set("zombie.kills_life", zombie_kills_life);
-				section.set("pigman.kills_life", pigman_kills_life);
-				section.set("giant.kills_life", giant_kills_life);
-				section.set("player.kills_life_record", player_kills_life_record);
-				section.set("zombie.kills_life_record", zombie_kills_life_record);
-				section.set("pigman.kills_life_record", pigman_kills_life_record);
-				section.set("giant.kills_life_record", giant_kills_life_record);
-				section.set("deaths", deaths);
-				section.set("rank", rank);
-				section.set("isBleeding", isBleeding);
-				section.set("isPoisoned", isPoisoned);
-				section.set("wasKilledNPC", wasKilledNPC);
-				section.set("timeOfKickban", timeOfKickban);
-				section.set("friends", friends);
-				section.set("heals_life", heals_life);
-				section.set("thirst", thirst);
-				section.set("clan", clan);
-				section.set("minutes.played", minutes_alive);
-				section.set("minutes.played_life", minutes_alive_life);
-				section.set("minutes.played_life_record", minutes_alive_life_record);
-				section.set("research", research);
-				section.set("zombie", isZombie);
-				try {
-					MyZ.instance.getPlayerDataConfig().save(new File(MyZ.instance.getDataFolder() + File.separator + "playerdata.yml"));
-				} catch (IOException e) {
-					MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + name + ": " + e.getMessage());
-				}
+
+		if (playerDataExists(name)) {
+			FileConfiguration section = MyZ.instance.getPlayerDataConfig(name);
+			section.set("player.kills", player_kills);
+			section.set("zombie.kills", zombie_kills);
+			section.set("pigman.kills", pigman_kills);
+			section.set("giant.kills", giant_kills);
+			section.set("player.kills_life", player_kills_life);
+			section.set("zombie.kills_life", zombie_kills_life);
+			section.set("pigman.kills_life", pigman_kills_life);
+			section.set("giant.kills_life", giant_kills_life);
+			section.set("player.kills_life_record", player_kills_life_record);
+			section.set("zombie.kills_life_record", zombie_kills_life_record);
+			section.set("pigman.kills_life_record", pigman_kills_life_record);
+			section.set("giant.kills_life_record", giant_kills_life_record);
+			section.set("deaths", deaths);
+			section.set("rank", rank);
+			section.set("isBleeding", isBleeding);
+			section.set("isPoisoned", isPoisoned);
+			section.set("wasKilledNPC", wasKilledNPC);
+			section.set("timeOfKickban", timeOfKickban);
+			section.set("friends", friends);
+			section.set("heals_life", heals_life);
+			section.set("thirst", thirst);
+			section.set("clan", clan);
+			section.set("minutes.played", minutes_alive);
+			section.set("minutes.played_life", minutes_alive_life);
+			section.set("minutes.played_life_record", minutes_alive_life_record);
+			section.set("research", research);
+			section.set("isZombie", isZombie);
+			try {
+				section.save(
+						new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + name + ".yml"));
+			} catch (IOException e) {
+				MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + name + ": " + e.getMessage());
 			}
+		}
 	}
 
 	/**
@@ -704,21 +728,6 @@ public class PlayerData {
 	}
 
 	/**
-	 * Toggle the autosaving of the playerdata file when this PlayerData is
-	 * changed.
-	 * 
-	 * @param state
-	 *            The state to set autosave to.
-	 * @param save_immediately
-	 *            Whether or not to save when this command is called.
-	 */
-	public void setAutosave(boolean state, boolean save_immediately) {
-		autosave = state;
-		if (save_immediately)
-			save(true);
-	}
-
-	/**
 	 * @return the heals_life
 	 */
 	public int getHealsLife() {
@@ -829,6 +838,7 @@ public class PlayerData {
 	 */
 	public void setZombie(boolean isZombie) {
 		this.isZombie = isZombie;
+		save();
 	}
 
 	/**

@@ -26,8 +26,9 @@ public class SaveRankCommand implements CommandExecutor {
 		if (args.length >= 2) {
 			try {
 				rank = Integer.parseInt(args[0]);
-			} catch (NumberFormatException exc) {
+			} catch (Exception exc) {
 				Messenger.sendConfigMessage(sender, "command.saverank.requires_number");
+				return true;
 			}
 			for (int position = 1; position < args.length; position++)
 				prefix += args[position] + " ";

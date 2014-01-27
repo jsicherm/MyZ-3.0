@@ -421,6 +421,8 @@ public class Configuration {
 			config.set("heal.bandage_heal_amount", 1);
 		if (!config.contains("heal.wait"))
 			config.set("heal.wait", "Please wait %s seconds before healing another player again.");
+		if (!localizableConfig.contains("localizable.heal.waste"))
+			localizableConfig.set("localizable.heal.waste", "&eWell that was a waste.");
 		if (!config.contains("heal.delay_seconds"))
 			config.set("heal.delay_seconds", 30);
 		if (!config.contains("heal.bandage"))
@@ -907,8 +909,8 @@ public class Configuration {
 	 *         hasInitializedConfigs() resolves to false.
 	 */
 	public static boolean isInLobby(Location the_location) {
-		if (MyZ.instance.getPlayerDataConfig() == null)
-			return false;
+		//if (MyZ.instance.getPlayerDataConfig() == null)
+		//	return false;
 
 		double minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
 
@@ -1012,16 +1014,19 @@ public class Configuration {
 
 		for (String spawn : spawnpoints) {
 			double x = 0, y = 0, z = 0;
+			float pitch = 0, yaw = 0;
 			String[] location = spawn.split(",");
 			try {
 				x = Integer.parseInt(location[0]);
 				y = Integer.parseInt(location[1]);
 				z = Integer.parseInt(location[2]);
+				pitch = Float.parseFloat(location[3]);
+				yaw = Float.parseFloat(location[4]);
 			} catch (Exception exc) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Misconfigured spawnpoint min/max entry for spawnpoint: " + spawn
-						+ ". Please re-configure.");
+						+ ". Please re-configure (perhaps you're missing ,pitch,yaw?).");
 			}
-			returnList.add(new WorldlessLocation(x, y, z));
+			returnList.add(new WorldlessLocation(x, y, z, pitch, yaw));
 		}
 		return returnList;
 	}
@@ -1037,22 +1042,25 @@ public class Configuration {
 	 */
 	public static WorldlessLocation getSpawnpoint(int position) {
 		double x = 0, y = 0, z = 0;
+		float pitch = 0, yaw = 0;
 
 		try {
 			String[] location = spawnpoints.get(position).split(",");
 			x = Integer.parseInt(location[0]);
 			y = Integer.parseInt(location[1]);
 			z = Integer.parseInt(location[2]);
+			pitch = Float.parseFloat(location[3]);
+			yaw = Float.parseFloat(location[4]);
 		} catch (NumberFormatException exc) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Misconfigured spawnpoint min/max entry for spawnpoint: "
-					+ spawnpoints.get(position) + ". Please re-configure.");
+					+ spawnpoints.get(position) + ". Please re-configure (perhaps you're missing ,pitch,yaw?).");
 		} catch (IndexOutOfBoundsException exc) {
 			if (position == spawnpoints.size() - 1)
-				return new WorldlessLocation(x, y, z);
+				return new WorldlessLocation(x, y, z, pitch, yaw);
 
 			return getSpawnpoint(spawnpoints.size() - 1);
 		}
-		return new WorldlessLocation(x, y, z);
+		return new WorldlessLocation(x, y, z, pitch, yaw);
 	}
 
 	/**
@@ -1143,7 +1151,8 @@ public class Configuration {
 	 *         existed.
 	 */
 	public static boolean addSpawnpoint(Location location) {
-		String format = location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+		String format = location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ() + "," + location.getPitch() + ","
+				+ location.getYaw();
 		if (!spawnpoints.contains(format)) {
 			spawnpoints.add(format);
 			save();

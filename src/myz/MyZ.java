@@ -6,7 +6,9 @@ package myz;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import myz.API.PlayerBeginBleedingEvent;
@@ -102,18 +104,19 @@ public class MyZ extends JavaPlugin {
 
 	// TODO configurable death loot (?)
 	// TODO air pollution random event
-	// TODO sound attraction to (trap)doors.
 	// TODO localizable to user locale.
+	// TODO sound attraction to (trap)doors.
 	// TODO research point rank uppance.
 	// TODO grave-digging, speed-sugar.
 	// TODO chest support lootsets
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
-	private FileConfiguration playerdata, blocks, localizable, spawn, chests, research;
+	private FileConfiguration blocks, localizable, spawn, chests, research;
 	private SQLManager sql;
 	private static final Random random = new Random();
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
+	private Map<String, FileConfiguration> playerdata = new HashMap<String, FileConfiguration>();
 	private List<String> flags = new ArrayList<String>();
 
 	@Override
@@ -360,8 +363,10 @@ public class MyZ extends JavaPlugin {
 		 * Make sure the file exists.
 		 */
 		if (!playerdata_file.exists())
-			saveResource("playerdata.yml", true);
-		playerdata = YamlConfiguration.loadConfiguration(playerdata_file);
+			return;
+		FileConfiguration data = YamlConfiguration.loadConfiguration(playerdata_file);
+		PlayerData.updateData(data);
+		playerdata_file.delete();
 	}
 
 	/**
@@ -437,11 +442,26 @@ public class MyZ extends JavaPlugin {
 	/**
 	 * Get the playerdata YAML.
 	 * 
-	 * @return The FileConfiguration for the playerdata.yml or null if not
-	 *         loaded.
+	 * @param player
+	 *            The player name of the data to get for.
+	 * @return The FileConfiguration for the specified player's PlayerData or null if not
+	 *         loaded or can't load.
 	 */
-	public FileConfiguration getPlayerDataConfig() {
-		return playerdata;
+	public FileConfiguration getPlayerDataConfig(String player) {
+		if (!playerdata.containsKey(player)) {
+			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + player + ".yml");
+			if (!datafile.exists())
+				try {
+					datafile.createNewFile();
+				} catch (Exception e) {
+					Messenger.sendConsoleMessage("&4Unable to save a new PlayerData file for " + player + ": " + e.getMessage());
+					return null;
+				}
+			FileConfiguration config = YamlConfiguration.loadConfiguration(datafile);
+			playerdata.put(player, config);
+			return config;
+		}
+		return playerdata.get(player);
 	}
 
 	/**
@@ -754,11 +774,9 @@ public class MyZ extends JavaPlugin {
 		if (isPlayer(player)) {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null && wasDeath) {
-				data.setAutosave(false, true);
 				data.setBleeding(false);
 				data.setPoisoned(false);
 				data.setThirst(Configuration.getMaxThirstLevel());
-				data.setAutosave(true, true);
 				data.setZombie(false);
 			}
 			if (sql.isConnected() && wasDeath) {
@@ -784,7 +802,6 @@ public class MyZ extends JavaPlugin {
 
 			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && !player.getName().equals("MrTeePee")) {
 				if (data != null) {
-					data.setAutosave(false, false);
 					for (String friend : data.getFriends())
 						data.removeFriend(friend);
 					data.setDeaths(0);
@@ -803,7 +820,6 @@ public class MyZ extends JavaPlugin {
 					data.setMinutesAlive(0);
 					data.setMinutesAliveLife(0);
 					data.setMinutesAliveLifeRecord(0);
-					data.setAutosave(true, true);
 				}
 				if (sql.isConnected()) {
 					sql.set(player.getName(), "friends", "''", true);
@@ -856,7 +872,6 @@ public class MyZ extends JavaPlugin {
 			boolean wasNPCKilled = false;
 			if (data != null) {
 				wasNPCKilled = data.wasKilledNPC();
-				data.setAutosave(false, true);
 				data.setWasKilledNPC(false);
 				data.setDeaths(data.getDeaths() + 1);
 				data.setMinutesAliveLife(0);
@@ -864,7 +879,6 @@ public class MyZ extends JavaPlugin {
 				data.setZombieKillsLife(0);
 				data.setPigmanKillsLife(0);
 				data.setGiantKillsLife(0);
-				data.setAutosave(true, true);
 			}
 			if (sql.isConnected()) {
 				wasNPCKilled = sql.getBoolean(player.getName(), "wasNPCKilled");

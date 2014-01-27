@@ -22,6 +22,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  * @author Jordan
@@ -56,12 +58,10 @@ public class aSync implements Runnable {
 					PlayerData data = PlayerData.getDataFor(player);
 					int amount;
 					if (data != null) {
-						data.setAutosave(false, true);
 						data.setMinutesAlive(data.getMinutesAlive() + 1);
 						data.setMinutesAliveLife(amount = data.getMinutesAliveLife() + 1);
 						if (amount > data.getMinutesAliveLifeRecord())
 							data.setMinutesAliveLifeRecord(amount);
-						data.setAutosave(true, true);
 					}
 					if (MyZ.instance.getSQLManager().isConnected()) {
 						MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive",
@@ -106,7 +106,8 @@ public class aSync implements Runnable {
 					PlayerTakeBleedingDamageEvent event = new PlayerTakeBleedingDamageEvent(player);
 					if (!event.isCancelled()) {
 						player.damage(Configuration.getBleedDamage());
-						Messenger.sendConfigItemMessage(player, "damage.bleed_begin");
+						player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1, 20));
+						Messenger.sendConfigMessage(player, "damage.bleed_begin");
 					}
 				}
 
@@ -116,7 +117,9 @@ public class aSync implements Runnable {
 					PlayerTakePoisonDamageEvent event = new PlayerTakePoisonDamageEvent(player);
 					if (!event.isCancelled()) {
 						player.damage(Configuration.getPoisonDamage());
-						Messenger.sendConfigItemMessage(player, "damage.poison_begin");
+						player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1, 20));
+						player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 2, 80));
+						Messenger.sendConfigMessage(player, "damage.poison_begin");
 					}
 				}
 

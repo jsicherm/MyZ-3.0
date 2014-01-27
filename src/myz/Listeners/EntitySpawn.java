@@ -89,7 +89,11 @@ public class EntitySpawn implements Listener {
 				&& e.getSpawnReason() != SpawnReason.NATURAL && e.getSpawnReason() != SpawnReason.VILLAGE_INVASION)
 			return;
 
-		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard"))
+		if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+			if (!WorldGuardManager.isMobSpawning(e.getLocation())) {
+				e.setCancelled(true);
+				return;
+			}
 			if (WorldGuardManager.isAmplifiedRegion(e.getLocation())) {
 				// Increase natural spawns inside towns.
 				if (random.nextDouble() >= 0.5) {
@@ -112,6 +116,7 @@ public class EntitySpawn implements Listener {
 				e.setCancelled(true);
 				return;
 			}
+		}
 		// Make sure we only spawn our desired mobs.
 		if (type != EntityType.ZOMBIE && type != EntityType.GIANT && type != EntityType.HORSE && type != EntityType.PLAYER
 				&& type != EntityType.PIG_ZOMBIE && type != EntityType.VILLAGER) {

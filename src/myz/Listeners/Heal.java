@@ -52,6 +52,8 @@ public class Heal implements Listener {
 				if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
 					if (player.getHealth() + 1 <= player.getMaxHealth())
 						player.setHealth(player.getHealth() + 1);
+					else
+						Messenger.sendConfigMessage(player, "heal.waste");
 				} else {
 					int antiLevel = kit.getAntisepticRequired(), regenLevel = kit.getOintmentRequired();
 					if (regenLevel != 0)
@@ -84,7 +86,8 @@ public class Heal implements Listener {
 				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
 				if (!regainEvent.isCancelled())
 					player.setHealth(player.getHealth() + Configuration.getBandageHealAmount());
-			}
+			} else
+				Messenger.sendConfigMessage(player, "heal.waste");
 
 			if (item.getAmount() != 1)
 				item.setAmount(item.getAmount() - 1);
@@ -123,6 +126,8 @@ public class Heal implements Listener {
 					if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
 						if (player.getHealth() + 1 <= player.getMaxHealth())
 							player.setHealth(player.getHealth() + 1);
+						else
+							Messenger.sendConfigMessage(player, "heal.waste");
 					} else {
 						int antiLevel = kit.getAntisepticRequired(), regenLevel = kit.getOintmentRequired();
 						if (regenLevel != 0)
@@ -159,7 +164,8 @@ public class Heal implements Listener {
 					MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
 					if (!regainEvent.isCancelled())
 						player.setHealth(player.getHealth() + Configuration.getBandageHealAmount());
-				}
+				} else
+					Messenger.sendConfigMessage(player, "heal.waste");
 
 				if (item.getAmount() != 1)
 					item.setAmount(item.getAmount() - 1);
@@ -184,7 +190,7 @@ public class Heal implements Listener {
 			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
 						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
-			Messenger.sendItemMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
+			Messenger.sendMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(healer);

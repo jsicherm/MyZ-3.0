@@ -4,7 +4,6 @@
 package myz.Support;
 
 import myz.MyZ;
-import myz.Utilities.ItemMessage;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,21 +29,6 @@ public class Messenger {
 		if (player instanceof Player)
 			uncolored_message = processForArguments((Player) player, uncolored_message);
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_message));
-	}
-
-	/**
-	 * Color a message and send it to a player via the item message.
-	 * 
-	 * @param player
-	 *            The player.
-	 * @param uncolored_message
-	 *            The uncolored message.
-	 */
-	public static void sendItemMessage(Player player, String uncolored_message) {
-		if (player instanceof Player)
-			uncolored_message = processForArguments(player, uncolored_message);
-		new ItemMessage().sendMessage(player, ChatColor.translateAlternateColorCodes('&', uncolored_message));
-
 	}
 
 	/**
@@ -101,21 +85,6 @@ public class Messenger {
 			uncolored_config_message = processForArguments((Player) player,
 					MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message));
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_config_message));
-	}
-
-	/**
-	 * Color a config message and send it to a player via the item message.
-	 * 
-	 * @param player
-	 *            The player.
-	 * @param uncolored_config_message
-	 *            The uncolored config message.
-	 */
-	public static void sendConfigItemMessage(Player player, String uncolored_config_message) {
-		if (player instanceof Player)
-			uncolored_config_message = processForArguments(player,
-					MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message));
-		new ItemMessage().sendMessage(player, ChatColor.translateAlternateColorCodes('&', uncolored_config_message));
 	}
 
 	/**
