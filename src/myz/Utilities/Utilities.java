@@ -181,22 +181,21 @@ public class Utilities {
 	}
 
 	/**
-	 * List the players within a given radius of a given player. Includes the
-	 * player denoted by @param player.
+	 * List the players within a given radius of a given location.
 	 * 
-	 * @param player
-	 *            The player.
+	 * @param location
+	 *            The location.
 	 * @param radius
 	 *            The radius.
 	 * @return The list of players within the radius of the player or an empty
 	 *         list if none were found.
 	 */
-	public static List<Player> getPlayersInRange(Player player, int radius) {
+	public static List<Player> getPlayersInRange(Location location, int radius) {
 		List<Player> players = new ArrayList<Player>();
 		int d2 = radius * radius;
 		for (Player p : Bukkit.getOnlinePlayers())
-			if (p.getWorld() == player.getWorld())
-				if (p.getLocation().distanceSquared(player.getLocation()) <= d2)
+			if (p.getWorld() == location.getWorld())
+				if (p.getLocation().distanceSquared(location) <= d2)
 					players.add(p);
 		return players;
 	}

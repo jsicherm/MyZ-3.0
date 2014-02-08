@@ -30,10 +30,12 @@ public class WorldGuardManager {
 		ApplicableRegionSet region = WGBukkit.getRegionManager(inLocation.getWorld()).getApplicableRegions(inLocation);
 		return region.allows(DefaultFlag.CHEST_ACCESS);
 	}
-	
+
 	/**
 	 * Whether or not a region alows mob spawning.
-	 * @param inLocation The location.
+	 * 
+	 * @param inLocation
+	 *            The location.
 	 * @return True if mob spawning is allowed.
 	 */
 	public static boolean isMobSpawning(Location inLocation) {

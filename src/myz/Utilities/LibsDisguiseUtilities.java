@@ -21,8 +21,8 @@ public class LibsDisguiseUtilities {
 	 * Make sure players can see disguises, including their own.
 	 */
 	public static void setup() {
-		//DisguiseAPI.setViewDisguises(true);
-		//DisguiseAPI.setHearSelfDisguise(true);
+		// DisguiseAPI.setViewDisguises(true);
+		// DisguiseAPI.setHearSelfDisguise(true);
 	}
 
 	/**

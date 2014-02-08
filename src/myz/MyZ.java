@@ -108,7 +108,8 @@ public class MyZ extends JavaPlugin {
 	// TODO sound attraction to (trap)doors.
 	// TODO research point rank uppance.
 	// TODO grave-digging, speed-sugar.
-	// TODO chest support lootsets
+	// TODO use construction parts to create clans. Builder is clan owner.
+	// TODO add construction parts for build-in-a-box style system
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -128,6 +129,7 @@ public class MyZ extends JavaPlugin {
 			setEnabled(false);
 			return;
 		}
+
 		instance = this;
 		saveDefaultConfig();
 		loadPlayerData();
@@ -136,7 +138,7 @@ public class MyZ extends JavaPlugin {
 		loadSpawn();
 		loadChests();
 		loadResearch();
-		ChestManager.respawnAll();
+		ChestManager.respawnAll(true);
 
 		/*
 		 * Register the new enchantment so that MedKits can have their glow.
@@ -245,17 +247,17 @@ public class MyZ extends JavaPlugin {
 						continue;
 					}
 					for (Player player : Bukkit.getWorld(world).getPlayers()) {
-						addPlayer(player);
+						addPlayer(player, true);
 						PlayerData data = null;
 						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
 							if (data == null && Configuration.usePlayerData()) {
 								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
 										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0, 0, false);
-								putPlayerAtSpawn(player, false);
+								putPlayerAtSpawn(player, false, true);
 							}
 							if (sql.isConnected() && !sql.isIn(player.getName())) {
 								sql.add(player);
-								putPlayerAtSpawn(player, false);
+								putPlayerAtSpawn(player, false, true);
 							}
 						}
 					}
@@ -288,7 +290,7 @@ public class MyZ extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		getServer().getScheduler().cancelTasks(this);
-		ChestManager.respawnAll();
+		ChestManager.respawnAll(true);
 		boolean disguise = getServer().getPluginManager().getPlugin("LibsDisguises") != null
 				&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled();
 
@@ -444,8 +446,8 @@ public class MyZ extends JavaPlugin {
 	 * 
 	 * @param player
 	 *            The player name of the data to get for.
-	 * @return The FileConfiguration for the specified player's PlayerData or null if not
-	 *         loaded or can't load.
+	 * @return The FileConfiguration for the specified player's PlayerData or
+	 *         null if not loaded or can't load.
 	 */
 	public FileConfiguration getPlayerDataConfig(String player) {
 		if (!playerdata.containsKey(player)) {
@@ -683,7 +685,7 @@ public class MyZ extends JavaPlugin {
 	 * @param player
 	 *            The player.
 	 */
-	public void addPlayer(Player player) {
+	public void addPlayer(Player player, boolean clearInventory) {
 		PlayerData playerdata = PlayerData.getDataFor(player.getName());
 
 		if (!Configuration.usePreLogin()) {
@@ -709,11 +711,11 @@ public class MyZ extends JavaPlugin {
 		if (playerdata == null && Configuration.usePlayerData()) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
 					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false);
-			putPlayerAtSpawn(player, false);
+			putPlayerAtSpawn(player, false, clearInventory);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {
 			sql.add(player);
-			putPlayerAtSpawn(player, false);
+			putPlayerAtSpawn(player, false, clearInventory);
 		}
 
 		setThirst(player);
@@ -734,7 +736,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getName(), "wasNPCKilled")) {
 			Messenger.sendConfigMessage(player, "player_was_killed_npc");
-			putPlayerAtSpawn(player, true);
+			putPlayerAtSpawn(player, true, clearInventory);
 		}
 
 		if (MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
@@ -856,13 +858,13 @@ public class MyZ extends JavaPlugin {
 	 * @param wasDeath
 	 *            Whether or not the return to spawn was a result of a death.
 	 */
-	public void putPlayerAtSpawn(Player player, boolean wasDeath) {
+	public void putPlayerAtSpawn(Player player, boolean wasDeath, boolean clearInventory) {
 		if (!player.isOnline())
 			return;
 		Teleport.teleport(player, player.getWorld().getSpawnLocation(), false);
 		if (getServer().getPluginManager().isPluginEnabled("essentials"))
 			Bukkit.dispatchCommand(player, "spawn");
-		wipeBuffs(player);
+		wipeBuffs(player, clearInventory);
 
 		if (wasDeath) {
 			PlayerData data = PlayerData.getDataFor(player);
@@ -927,13 +929,15 @@ public class MyZ extends JavaPlugin {
 	 * @param player
 	 *            The player.
 	 */
-	private void wipeBuffs(Player player) {
+	private void wipeBuffs(Player player, boolean clearInventory) {
 		stopBleeding(player);
 		stopPoison(player);
 		player.setHealth(player.getMaxHealth());
 		player.setFireTicks(0);
-		player.getInventory().clear();
-		player.getInventory().setArmorContents(null);
+		if (clearInventory) {
+			player.getInventory().clear();
+			player.getInventory().setArmorContents(null);
+		}
 		for (PotionEffect effect : player.getActivePotionEffects())
 			player.removePotionEffect(effect.getType());
 		player.setSaturation(20);
@@ -1000,7 +1004,7 @@ public class MyZ extends JavaPlugin {
 		PlayerSpawnInWorldEvent event = new PlayerSpawnInWorldEvent(player);
 		getServer().getPluginManager().callEvent(event);
 		if (!event.isCancelled()) {
-			wipeBuffs(player);
+			wipeBuffs(player, true);
 			setThirst(player, Configuration.getMaxThirstLevel());
 
 			Teleport.teleport(player, spawn, false);

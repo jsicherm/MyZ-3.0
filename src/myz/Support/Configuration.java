@@ -38,12 +38,12 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 public class Configuration {
 
 	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data, grenade, local_chat,
-			is_bleed, is_auto, npc, zombie_spawn;
+			is_bleed, is_auto, npc, zombie_spawn, zombie_pickup, pigman_pickup;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
 	private static int water_decrease, kickban_seconds, port, safespawn_radius, max_thirst, poison_damage_frequency, spawn_radius,
 			bleed_damage_frequency, healer_heals, bandit_kills, local_chat_distance, safe_logout_time, heal_delay,
-			numbered_spawn_requires_rank, research_rank;
+			numbered_spawn_requires_rank, research_rank, chest_respawn;
 	private static double bleed_chance, poison_chance_flesh, poison_chance_zombie, food_heal, poison_damage, water_damage, bleed_damage,
 			zombie_speed, horse_speed, npc_speed, giant_speed, pigman_speed, zombie_damage, horse_damage, npc_damage, giant_damage,
 			pigman_damage, bandage_heal;
@@ -100,6 +100,9 @@ public class Configuration {
 			food_potion.put(entry, effectList);
 		}
 
+		zombie_pickup = config.getBoolean("mobs.zombie.canPickup");
+		pigman_pickup = config.getBoolean("mobs.pigman.canPickup");
+		chest_respawn = config.getInt("chest.respawn_time");
 		research_rank = config.getInt("ranks.research_rank_required");
 		spawn_radius = spawnConfig.getInt("prerequisites.blocks_from_chest_or_player");
 		zombie_spawn = spawnConfig.getBoolean("zombie_spawn");
@@ -294,6 +297,9 @@ public class Configuration {
 		if (!chestsConfig.contains("loot"))
 			chestsConfig.createSection("loot");
 
+		if (!config.contains("chest.respawn_time"))
+			config.set("chest.respawn_time", 300);
+
 		// Chat begin.
 		if (!config.contains("chat.local_enabled"))
 			config.set("chat.local_enabled", true);
@@ -353,6 +359,10 @@ public class Configuration {
 			config.set("mobs.giant.speed", 1.3);
 		if (!config.contains("mobs.npc.speed"))
 			config.set("mobs.npc.speed", 1.2);
+		if (!config.contains("mobs.zombie.canPickup"))
+			config.set("mobs.zombie.canPickup", true);
+		if (!config.contains("mobs.pigman.canPickup"))
+			config.set("mobs.pigman.canPickup", true);
 		if (!config.contains("mobs.bleed"))
 			config.set("mobs.bleed", true);
 
@@ -493,10 +503,12 @@ public class Configuration {
 			localizableConfig.set("localizable.chest.get.click", "&eRight-click the chest you want to get.");
 		if (!localizableConfig.contains("localizable.chest.set.click"))
 			localizableConfig.set("localizable.chest.set.click", "&eRight-click the chest you want to set.");
+		if (!localizableConfig.contains("localizable.loot.set.percent"))
+			localizableConfig.set("localizable.loot.set.percent", "Enter the spawn chance percent (0-100)");
 		if (!localizableConfig.contains("localizable.loot.set.info"))
 			localizableConfig
 					.set("localizable.loot.set.info",
-							"&eThis will create a lootset with your current inventory. &aPlease add the items you want to set for this lootset to the inventory that opens. &eStacksizes are equivalent to spawn chance. Each item in the stack increases the spawn chance by 2 percent. &aType anything to continue making lootset.");
+							"&ePlace ONE item (with proper stack size) into the inventory that opens above. Once you close the inventory, enter the percent chance of spawning the item. Type anything to continue.");
 		if (!localizableConfig.contains("localizable.chest.set.begin"))
 			localizableConfig.set("localizable.chest.set.begin", "&eStarting MyZ Chest Log. This will cause some lag and take awhile.");
 		if (!localizableConfig.contains("localizable.chest.set.nonchest"))
@@ -909,8 +921,8 @@ public class Configuration {
 	 *         hasInitializedConfigs() resolves to false.
 	 */
 	public static boolean isInLobby(Location the_location) {
-		//if (MyZ.instance.getPlayerDataConfig() == null)
-		//	return false;
+		// if (MyZ.instance.getPlayerDataConfig() == null)
+		// return false;
 
 		double minx = 0, miny = 0, minz = 0, maxx = 0, maxy = 0, maxz = 0;
 
@@ -1678,10 +1690,10 @@ public class Configuration {
 		if (canBreak(block, with)) {
 			ItemStack compare = new ItemStack(block.getType());
 			compare.setDurability(block.getData());
-			int time = -1;
+			int time = Integer.MAX_VALUE;
 			for (ItemStack key : allow_destroy.keySet())
 				if (key.isSimilar(compare)) {
-					if (isVaguelySimilar(allow_destroy.get(key).item, with))
+					if (isVaguelySimilar(allow_destroy.get(key).item, with) || key.getType() == Material.AIR)
 						time = allow_destroy.get(key).time;
 					break;
 				}
@@ -1721,7 +1733,7 @@ public class Configuration {
 		compare.setDurability(block.getData());
 		for (ItemStack key : allow_destroy.keySet())
 			if (key.isSimilar(compare))
-				if (isVaguelySimilar(allow_destroy.get(key).item, with))
+				if (isVaguelySimilar(allow_destroy.get(key).item, with) || key.getType() == Material.AIR)
 					return true;
 		return false;
 	}
@@ -1883,6 +1895,26 @@ public class Configuration {
 	}
 
 	/**
+	 * Get the contents of a lootset.
+	 * 
+	 * @param lootset
+	 *            The name of the lootset.
+	 * @return The contents of the lootset with the value being the spawn chance
+	 *         percent.
+	 */
+	public static Map<ItemStack, Double> getLootsetContents(String lootset) {
+		Map<ItemStack, Double> filler = new HashMap<ItemStack, Double>();
+		FileConfiguration config = MyZ.instance.getChestsConfig();
+		if (config.isConfigurationSection("loot." + lootset))
+			for (String key : config.getConfigurationSection("loot." + lootset).getKeys(false))
+				filler.put(config.getItemStack("loot." + lootset + "." + key + ".item", new ItemStack(Material.AIR)),
+						config.getInt("loot." + lootset + "." + key + ".chance") / 100.00);
+		else
+			Messenger.sendConsoleMessage("&4The lootset &e'" + lootset + "'&4 does not exist. Perhaps it was deleted?");
+		return filler;
+	}
+
+	/**
 	 * @return the lootsets
 	 */
 	public static Set<String> getLootsets() {
@@ -1950,5 +1982,26 @@ public class Configuration {
 		for (String key : chests.keySet())
 			MyZ.instance.getChestsConfig().set("chests." + key, chests.get(key));
 		MyZ.instance.saveChestConfig();
+	}
+
+	/**
+	 * @return the chest_respawn
+	 */
+	public static int getChestRespawnTime() {
+		return chest_respawn;
+	}
+
+	/**
+	 * @return the zombie_pickup
+	 */
+	public static boolean zombieLoots() {
+		return zombie_pickup;
+	}
+
+	/**
+	 * @return the pigman_pickup
+	 */
+	public static boolean pigmanLoots() {
+		return pigman_pickup;
 	}
 }

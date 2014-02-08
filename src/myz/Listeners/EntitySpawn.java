@@ -3,7 +3,6 @@
  */
 package myz.Listeners;
 
-import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
@@ -13,12 +12,10 @@ import myz.mobs.support.EntityCreator;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -96,7 +93,7 @@ public class EntitySpawn implements Listener {
 			}
 			if (WorldGuardManager.isAmplifiedRegion(e.getLocation())) {
 				// Increase natural spawns inside towns.
-				if (random.nextDouble() >= 0.5) {
+				if (random.nextDouble() >= 0.6) {
 					Location newLocation = e.getLocation().clone();
 					newLocation.add(random.nextInt(8) * random.nextInt(2) == 0 ? -1 : 1, 0, random.nextInt(8) * random.nextInt(2) == 0 ? -1
 							: 1);
@@ -111,8 +108,8 @@ public class EntitySpawn implements Listener {
 					if (doSpawn)
 						e.getLocation().getWorld().spawnEntity(newLocation, e.getEntityType());
 				}
-			} else // Decrease natural spawns outside of towns.
-			if (random.nextDouble() <= 0.45) {
+			} else if (random.nextDouble() <= 0.6) {// Decrease natural spawns
+													// outside of towns.
 				e.setCancelled(true);
 				return;
 			}
@@ -162,7 +159,9 @@ public class EntitySpawn implements Listener {
 	 *         player or chest), false otherwise.
 	 */
 	private boolean isTooFarFromLandmark(Entity entity) {
-		List<Entity> nearby = entity.getNearbyEntities(Configuration.spawnRadius(), 10, Configuration.spawnRadius());
+		// TODO Caused too much lag to use.
+
+		/*List<Entity> nearby = entity.getNearbyEntities(Configuration.spawnRadius(), 10, Configuration.spawnRadius());
 		for (Entity near : nearby)
 			if (near instanceof Player)
 				return false;
@@ -173,7 +172,7 @@ public class EntitySpawn implements Listener {
 			for (int y = -10; y < 10; y++)
 				for (int z = -Configuration.spawnRadius(); z < Configuration.spawnRadius(); z++)
 					if (world.getBlockAt(X + x, Y + y, Z + z).getType() == Material.CHEST)
-						return false;
-		return true;
+						return false;*/
+		return false;// true;
 	}
 }

@@ -76,7 +76,7 @@ public class JoinQuit implements Listener {
 	 *            The player.
 	 */
 	private void playerJoin(Player player) {
-		MyZ.instance.addPlayer(player);
+		MyZ.instance.addPlayer(player, false);
 
 		// Ensure our NPC doesn't remain on when we log in.
 		CustomEntityPlayer ourNPC = null;

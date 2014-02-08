@@ -60,7 +60,7 @@ public class PlayerDeath implements Listener {
 			@Override
 			public void run() {
 				if (e.getPlayer().isOnline())
-					MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true);
+					MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true, true);
 			}
 		}, 10L);
 	}
@@ -76,6 +76,6 @@ public class PlayerDeath implements Listener {
 			return;
 		PacketPlayInClientCommand packet = new PacketPlayInClientCommand(EnumClientCommand.PERFORM_RESPAWN);
 		((CraftPlayer) p).getHandle().playerConnection.a(packet);
-		MyZ.instance.putPlayerAtSpawn(p, true);
+		MyZ.instance.putPlayerAtSpawn(p, true, true);
 	}
 }

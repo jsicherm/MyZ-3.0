@@ -53,7 +53,7 @@ public class Chat implements Listener {
 			if (!Configuration.isLocalChat())
 				e.getRecipients().addAll(original_recipients);
 			else
-				for (Player player_in_range : Utilities.getPlayersInRange(player, Configuration.getLocalChatDistance()))
+				for (Player player_in_range : Utilities.getPlayersInRange(player.getLocation(), Configuration.getLocalChatDistance()))
 					e.getRecipients().add(player_in_range);
 		} else
 			// Add all players with the same radio equipped.

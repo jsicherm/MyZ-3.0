@@ -9,6 +9,7 @@ import java.util.Map;
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.chests.ChestManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,6 +53,11 @@ public class Sync implements Runnable {
 			if (MyZ.instance.getBlocksConfig().contains(location + ".time"))
 				if (ticks >= MyZ.instance.getBlocksConfig().getLong(location + ".time"))
 					actOnBlock(location, true);
+
+		if (ticks % Configuration.getChestRespawnTime() == 0) {
+			Messenger.sendConsoleMessage("&eMyZ respawned chests as scheduled.");
+			ChestManager.respawnAll(false);
+		}
 
 		if (ticks == Long.MAX_VALUE || ticks == 0) {
 			ticks = 0;

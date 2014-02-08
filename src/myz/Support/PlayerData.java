@@ -12,7 +12,6 @@ import myz.MyZ;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -83,20 +82,18 @@ public class PlayerData {
 	public static void updateData(FileConfiguration oldData) {
 		for (String key : oldData.getKeys(false)) {
 			File newFile = new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + key + ".yml");
-			if (!newFile.exists()) {
+			if (!newFile.exists())
 				try {
 					newFile.createNewFile();
 				} catch (Exception e) {
 					Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
 				}
-			} else {
+			else
 				continue;
-			}
 
 			FileConfiguration newData = YamlConfiguration.loadConfiguration(newFile);
-			for (String valueKey : oldData.getConfigurationSection(key).getValues(false).keySet()) {
+			for (String valueKey : oldData.getConfigurationSection(key).getValues(false).keySet())
 				newData.set(valueKey, oldData.getConfigurationSection(key).get(valueKey));
-			}
 			try {
 				newData.save(newFile);
 			} catch (Exception e) {
@@ -226,8 +223,7 @@ public class PlayerData {
 			section.set("research", research);
 			section.set("isZombie", isZombie);
 			try {
-				section.save(
-						new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + player.getName() + ".yml"));
+				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + player.getName() + ".yml"));
 			} catch (IOException e) {
 				MyZ.instance.getLogger().warning("Unable to save a new PlayerData for " + player.getName() + ": " + e.getMessage());
 			}
@@ -294,8 +290,7 @@ public class PlayerData {
 			section.set("research", research);
 			section.set("isZombie", isZombie);
 			try {
-				section.save(
-						new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + name + ".yml"));
+				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + name + ".yml"));
 			} catch (IOException e) {
 				MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + name + ": " + e.getMessage());
 			}

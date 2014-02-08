@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
+import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityGiantZombie;
@@ -104,6 +105,7 @@ public class EntityCreator {
 				CustomEntityPigZombie pigman = new CustomEntityPigZombie(world);
 				pigman.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
 				pigman.setBaby(random.nextInt(20) < 3);
+				pigman.canPickUpLoot = Configuration.pigmanLoots();
 				world.addEntity(pigman, SpawnReason.NATURAL);
 				((PigZombie) pigman.getBukkitEntity()).setAngry(true);
 			}
@@ -113,6 +115,7 @@ public class EntityCreator {
 			zombie.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
 			if (zombie.canSpawn()) {
 				zombie.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
+				zombie.canPickUpLoot = Configuration.zombieLoots();
 				world.addEntity(zombie, reason);
 			}
 			break;

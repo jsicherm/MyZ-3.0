@@ -46,7 +46,7 @@ public class BlockEvent implements Listener {
 		} else if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.CHEST
 				&& ChestManager.isMyZChest(e.getClickedBlock().getLocation())) {
 			e.setCancelled(true);
-			e.getClickedBlock().setType(Material.AIR);
+			ChestManager.breakChest(e.getClickedBlock());
 		}
 	}
 

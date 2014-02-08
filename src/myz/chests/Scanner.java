@@ -31,6 +31,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Chest;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
@@ -42,8 +43,18 @@ public class Scanner implements Listener {
 	private static Map<String, MaxMin> scanners = new HashMap<String, MaxMin>();
 	public static List<String> getters = new ArrayList<String>();
 	public static Map<String, String> setters = new HashMap<String, String>();
-	private static Map<String, String> lootCreators = new HashMap<String, String>();
+	private static Map<String, LootsetCreate> lootCreators = new HashMap<String, LootsetCreate>();
 	private static Map<String, String> looters = new HashMap<String, String>();
+
+	private class LootsetCreate {
+		private final String name;
+		private ItemStack newest;
+		private Map<ItemStack, Integer> spawnable = new HashMap<ItemStack, Integer>();
+
+		public LootsetCreate(String name) {
+			this.name = name;
+		}
+	}
 
 	/**
 	 * Start the chest scanning process for a player.
@@ -73,26 +84,43 @@ public class Scanner implements Listener {
 	@EventHandler
 	private void onChat(AsyncPlayerChatEvent e) {
 		if (looters.containsKey(e.getPlayer().getName())) {
-			e.getPlayer().openInventory(Bukkit.createInventory(null, 27, "Lootset Creator"));
-			lootCreators.put(e.getPlayer().getName(), looters.get(e.getPlayer().getName()));
+			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
+			lootCreators.put(e.getPlayer().getName(), new LootsetCreate(looters.get(e.getPlayer().getName())));
 			looters.remove(e.getPlayer().getName());
 			e.setCancelled(true);
+		} else if (lootCreators.containsKey(e.getPlayer().getName())) {
+			e.setCancelled(true);
+			int percent = 0;
+			try {
+				percent = Integer.parseInt(e.getMessage().replaceAll("%", ""));
+				if (percent > 100) {
+					percent = 100;
+				}
+			} catch (Exception exc) {
+			}
+			Messenger.sendMessage(e.getPlayer(), "&e" + Utilities.getNameOf(lootCreators.get(e.getPlayer().getName()).newest) + ": &a"
+					+ percent + "%");
+			lootCreators.get(e.getPlayer().getName()).spawnable.put(lootCreators.get(e.getPlayer().getName()).newest, percent);
+			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
 		}
 	}
 
 	@EventHandler
 	private void onInventoryClose(InventoryCloseEvent e) {
-		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 27
+		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9
 				&& lootCreators.containsKey(e.getPlayer().getName())) {
-			String lootset = lootCreators.get(e.getPlayer().getName());
-			Map<ItemStack, Integer> spawnPercents = new HashMap<ItemStack, Integer>();
+			LootsetCreate lootset = lootCreators.get(e.getPlayer().getName());
 			for (ItemStack item : e.getInventory().getContents())
 				if (item != null) {
-					int percent = item.getAmount() * 2 > 100 ? 100 : (int) (item.getAmount() * 2);
-					Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utilities.getNameOf(item) + ": &a" + percent + "%");
-					spawnPercents.put(item, percent);
+					lootset.newest = item;
+					Messenger.sendConfigMessage((Player) e.getPlayer(), "loot.set.percent");
+					return;
 				}
-			Configuration.setLootset(lootset, spawnPercents);
+
+			Configuration.setLootset(lootset.name, lootset.spawnable);
+			for (ItemStack item : lootset.spawnable.keySet())
+				Messenger
+						.sendMessage((Player) e.getPlayer(), "&e" + Utilities.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
 			lootCreators.remove(e.getPlayer().getName());
 		}
 	}
@@ -116,12 +144,15 @@ public class Scanner implements Listener {
 		} else if (setters.containsKey(e.getPlayer().getName())) {
 			e.setCancelled(true);
 			Location inLoc = e.getClickedBlock().getLocation();
-			String location = inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
+			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
 			if (e.getClickedBlock().getType() != Material.CHEST) {
 				Messenger.sendConfigMessage(e.getPlayer(), "chest.set.nonchest");
 				setters.remove(e.getPlayer().getName());
 				return;
 			}
+			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
+			location += "," + chestObject.getFacing().toString();
+
 			Configuration.setChest(location, setters.get(e.getPlayer().getName()));
 			String slug = "&4N/A";
 			if (setters.get(e.getPlayer().getName()) != null) {
