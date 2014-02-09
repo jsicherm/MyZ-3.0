@@ -107,9 +107,8 @@ public class MyZ extends JavaPlugin {
 	// TODO localizable to user locale.
 	// TODO sound attraction to (trap)doors.
 	// TODO research point rank uppance.
-	// TODO grave-digging, speed-sugar.
+	// TODO grave-digging (and human grave digging using bed-sleep mechanics), speed-sugar.
 	// TODO use construction parts to create clans. Builder is clan owner.
-	// TODO add construction parts for build-in-a-box style system
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();

@@ -263,7 +263,7 @@ public class SQLManager {
 	 *            Whether or not to use an aSync thread to execute the command.
 	 */
 	public void set(String name, String field, Object value, boolean aSync) {
-		set(name, field, value, aSync, false);
+		set(name, field, value, aSync, !aSync);
 	}
 
 	/**
@@ -271,7 +271,7 @@ public class SQLManager {
 	 * 
 	 * @param forcingaSync
 	 *            A distinguisher to ensure we update the cache because it
-	 *            wasn't update aSynchronously.
+	 *            wasn't updated aSynchronously.
 	 */
 	public void set(final String name, final String field, final Object value, boolean aSync, boolean forcingaSync) {
 		if (aSync) {
@@ -332,7 +332,9 @@ public class SQLManager {
 				received.put(field, (Long) value);
 				cachedLongValues.put(name, received);
 			}
-		else if (value instanceof String)
+		else if (value instanceof String) {
+			if (((String) value).startsWith("'") && ((String) value).endsWith("'"))
+				value = ((String) value).substring(1, ((String) value).length() - 1);
 			// Make sure our player is in the data cache.
 			if (!cachedStringValues.containsKey(name)) {
 				Map<String, String> insert = new HashMap<String, String>();
@@ -343,7 +345,7 @@ public class SQLManager {
 				received.put(field, (String) value);
 				cachedStringValues.put(name, received);
 			}
-		else if (value instanceof Boolean)
+		} else if (value instanceof Boolean)
 			// Make sure our player is in the data cache.
 			if (!cachedBooleanValues.containsKey(name)) {
 				Map<String, Boolean> insert = new HashMap<String, Boolean>();
@@ -686,13 +688,14 @@ public class SQLManager {
 				// Force the caches to be created.
 				getNumberInClan(name);
 				// Force a sync message to be delivered.
-				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
-					@Override
-					public void run() {
-						if (player.isOnline())
-							Messenger.sendMessage(player, Messenger.getConfigMessage("clan.joined", clan));
-					}
-				}, 0L);
+				if (!clan.isEmpty() && clan != "" && clan != null)
+					MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+						@Override
+						public void run() {
+							if (player.isOnline())
+								Messenger.sendMessage(player, Messenger.getConfigMessage("clan.joined", clan));
+						}
+					}, 0L);
 			}
 		}, 0L);
 	}

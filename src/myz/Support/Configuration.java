@@ -37,7 +37,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
  */
 public class Configuration {
 
-	private static boolean use_playerdata, use_kickban, playerdata_is_temporary, use_prelogin, autofriend, save_data, grenade, local_chat,
+	private static boolean use_playerdata, use_kickban, use_prelogin, autofriend, save_data, grenade, local_chat,
 			is_bleed, is_auto, npc, zombie_spawn, zombie_pickup, pigman_pickup;
 	private static String host = "", user = "", password = "", database = "", lobby_min = "0,0,0", lobby_max = "0,0,0", radio_name = "",
 			radio_color_override = "", to_prefix = "", from_prefix = "", ointment_color = "", antiseptic_color = "";
@@ -80,8 +80,6 @@ public class Configuration {
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
 		FileConfiguration chestsConfig = MyZ.instance.getChestsConfig();
 		writeUnwrittenValues();
-
-		playerdata_is_temporary = false;
 
 		for (String entry : config.getConfigurationSection("food").getKeys(false)) {
 			food_thirst.put(entry, config.getInt("food." + entry + ".thirst"));
@@ -795,9 +793,6 @@ public class Configuration {
 		FileConfiguration config = MyZ.instance.getConfig();
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
 
-		if (!playerdata_is_temporary)
-			config.set("datastorage.use_server_specific", use_playerdata);
-
 		spawnConfig.set("spawnpoints", spawnpoints);
 
 		spawnConfig.set("spawn.default_kit.helmet", ranked_helmet.get(0));
@@ -828,8 +823,6 @@ public class Configuration {
 
 		MyZ.instance.saveConfig();
 		MyZ.instance.saveSpawnConfig();
-		MyZ.instance.saveChestConfig();
-		MyZ.instance.saveLocalizableConfig();
 	}
 
 	/**
@@ -1013,7 +1006,6 @@ public class Configuration {
 	 */
 	public static void togglePlayerDataTemporarily(boolean state) {
 		use_playerdata = state;
-		playerdata_is_temporary = true;
 	}
 
 	/**
