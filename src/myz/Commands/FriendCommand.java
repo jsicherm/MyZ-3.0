@@ -5,6 +5,7 @@ package myz.Commands;
 
 import myz.MyZ;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -41,7 +42,7 @@ public class FriendCommand implements CommandExecutor {
 					else
 						MyZ.instance.addFriend((Player) sender, name);
 				} else
-					sender.sendMessage(Messenger.getConfigMessage("command.friend.non_exist", name));
+					sender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.friend.non_exist", name));
 			} else
 				Messenger.sendConfigMessage(sender, "command.friend.requires_name");
 		} else

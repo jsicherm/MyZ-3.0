@@ -693,7 +693,7 @@ public class SQLManager {
 						@Override
 						public void run() {
 							if (player.isOnline())
-								Messenger.sendMessage(player, Messenger.getConfigMessage("clan.joined", clan));
+								Messenger.sendMessage(player, Messenger.getConfigMessage(Localizer.getLocale(player), "clan.joined", clan));
 						}
 					}, 0L);
 			}

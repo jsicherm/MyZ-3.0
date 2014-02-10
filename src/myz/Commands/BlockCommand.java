@@ -8,6 +8,7 @@ import java.util.Map;
 
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -128,7 +129,8 @@ public class BlockCommand implements CommandExecutor {
 			String item = hand.getType().toString().toLowerCase().replaceAll("_", " ");
 			Messenger.sendMessage(
 					player,
-					Messenger.getConfigMessage("command.block.destroy." + slug, hit.getType().toString().toLowerCase().replaceAll("_", " ")
+					Messenger.getConfigMessage(Localizer.getLocale(player), "command.block.destroy." + slug, hit.getType().toString()
+							.toLowerCase().replaceAll("_", " ")
 							+ (hit.getData() != (byte) 0 ? ":" + hit.getData() : ""), item == "air" ? "anything" : item));
 		}
 
@@ -166,8 +168,8 @@ public class BlockCommand implements CommandExecutor {
 			}
 			Messenger.sendMessage(
 					player,
-					Messenger.getConfigMessage("command.block.place." + slug, placed.getType().toString().toLowerCase()
-							.replaceAll("_", " ")
+					Messenger.getConfigMessage(Localizer.getLocale(player), "command.block.place." + slug, placed.getType().toString()
+							.toLowerCase().replaceAll("_", " ")
 							+ (placed.getData() != (byte) 0 ? ":" + placed.getData() : "")));
 		}
 	}

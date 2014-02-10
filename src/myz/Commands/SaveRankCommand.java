@@ -5,10 +5,12 @@ package myz.Commands;
 
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * @author Jordan
@@ -40,7 +42,8 @@ public class SaveRankCommand implements CommandExecutor {
 			return true;
 		}
 		Configuration.setRankPrefix(rank, prefix);
-		sender.sendMessage(Messenger.getConfigMessage("command.saverank.saved", rank, prefix.replace("%s", "<player name>")));
+		sender.sendMessage(Messenger.getConfigMessage(sender instanceof Player ? Localizer.getLocale((Player) sender) : Localizer.ENGLISH,
+				"command.saverank.saved", rank, prefix.replace("%s", "<player name>")));
 		return true;
 	}
 }

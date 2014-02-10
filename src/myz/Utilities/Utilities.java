@@ -305,7 +305,7 @@ public class Utilities {
 			data.setWasKilledNPC(true);
 		if (MyZ.instance.getSQLManager().isConnected())
 			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
-		Messenger.sendMessage(player.getBukkitEntity().getWorld(), Messenger.getConfigMessage("player_npc_killed", player.getName()));
+		Messenger.sendMessage(player.getBukkitEntity().getWorld(), "player_npc_killed", player.getName());
 	}
 
 	/**
@@ -328,15 +328,15 @@ public class Utilities {
 		// Create inventories and initial arrows.
 		ItemStack leftArrow = new ItemStack(Material.PISTON_EXTENSION);
 		ItemMeta meta = leftArrow.getItemMeta();
-		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage("gui.previous_page"));
+		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage(Localizer.getLocale(player), "gui.previous_page"));
 		leftArrow.setItemMeta(meta);
 		ItemStack rightArrow = new ItemStack(Material.PISTON_EXTENSION);
 		meta = rightArrow.getItemMeta();
-		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage("gui.next_page"));
+		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage(Localizer.getLocale(player), "gui.next_page"));
 		rightArrow.setItemMeta(meta);
 
 		List<Inventory> inventories = new ArrayList<Inventory>();
-		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points) + " (1)");
+		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points) + " (1)");
 		inventories.add(gui);
 		gui.setItem(0, leftArrow);
 		gui.setItem(8, rightArrow);
@@ -350,14 +350,14 @@ public class Utilities {
 					ItemStack item = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item").clone();
 					meta = item.getItemMeta();
 					meta.setLore(Arrays.asList(ChatColor.WHITE
-							+ Messenger.getConfigMessage("gui.cost", MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
+							+ Messenger.getConfigMessage(Localizer.getLocale(player), "gui.cost", MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
 					item.setItemMeta(meta);
 					gui.setItem(position, item);
 					position++;
 					if (position == 8) {
 						// Wrap to new page.
 						page++;
-						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage("science_gui", points) + " (" + page + ")");
+						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points) + " (" + page + ")");
 						inventories.add(gui);
 						gui.setItem(0, leftArrow);
 						gui.setItem(8, rightArrow);

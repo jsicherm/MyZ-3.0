@@ -70,6 +70,7 @@ import myz.Support.PlayerData;
 import myz.Support.Teleport;
 import myz.Utilities.DisguiseUtilities;
 import myz.Utilities.LibsDisguiseUtilities;
+import myz.Utilities.Localizer;
 import myz.Utilities.SQLManager;
 import myz.Utilities.Utilities;
 import myz.Utilities.WorldlessLocation;
@@ -106,13 +107,14 @@ public class MyZ extends JavaPlugin {
 	// TODO air pollution random event
 	// TODO localizable to user locale.
 	// TODO sound attraction to (trap)doors.
-	// TODO research point rank uppance.
-	// TODO grave-digging (and human grave digging using bed-sleep mechanics), speed-sugar.
+	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
+	// TODO grave-digging, speed-sugar.
 	// TODO use construction parts to create clans. Builder is clan owner.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
-	private FileConfiguration blocks, localizable, spawn, chests, research;
+	private FileConfiguration blocks, spawn, chests, research;
+	private Map<String, FileConfiguration> localizable = new HashMap<String, FileConfiguration>();
 	private SQLManager sql;
 	private static final Random random = new Random();
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
@@ -388,14 +390,27 @@ public class MyZ extends JavaPlugin {
 	 * Load the localizable YAML file.
 	 */
 	private void loadLocalizable() {
-		File localizable_file = new File(getDataFolder() + File.separator + "localizable.yml");
+		File folder = new File(getDataFolder() + File.separator + "locales");
+		if (!folder.exists()) {
+			folder.mkdir();
+		}
+		for (Localizer locale : Localizer.values()) {
+			File localeable = new File(getDataFolder() + File.separator + "locales" + File.separator + locale.getCode() + ".yml");
+			if (!localeable.exists()) {
+				try {
+					localeable.createNewFile();
+				} catch (IOException e) {
+					getLogger().warning("Unable to create locale " + locale.getCode());
+					e.printStackTrace();
+				}
+			}
+			localizable.put(locale.getCode(), YamlConfiguration.loadConfiguration(localeable));
+		}
 
-		/*
-		 * Make sure the file exists.
-		 */
+		/*File localizable_file = new File(getDataFolder() + File.separator + "localizable.yml");
 		if (!localizable_file.exists())
 			saveResource("localizable.yml", true);
-		localizable = YamlConfiguration.loadConfiguration(localizable_file);
+		localizable = YamlConfiguration.loadConfiguration(localizable_file);*/
 	}
 
 	/**
@@ -479,9 +494,11 @@ public class MyZ extends JavaPlugin {
 	 * 
 	 * @return The FileConfiguration for the localizable.yml or null if not
 	 *         loaded.
+	 * @param locale
+	 *            The locale to get.
 	 */
-	public FileConfiguration getLocalizableConfig() {
-		return localizable;
+	public FileConfiguration getLocalizableConfig(Localizer locale) {
+		return localizable.get(locale.getCode());
 	}
 
 	/**
@@ -524,10 +541,14 @@ public class MyZ extends JavaPlugin {
 
 	/**
 	 * Save the localizable.yml
+	 * 
+	 * @param locale
+	 *            The locale to save.
 	 */
-	public void saveLocalizableConfig() {
+	public void saveLocalizableConfig(Localizer locale) {
 		try {
-			localizable.save(new File(MyZ.instance.getDataFolder() + File.separator + "localizable.yml"));
+			localizable.get(locale.getCode()).save(
+					new File(MyZ.instance.getDataFolder() + File.separator + "locales" + File.separator + locale.getCode() + ".yml"));
 		} catch (IOException e) {
 			Messenger.sendConsoleMessage("&4Unable to save localizable.yml: " + e.getMessage());
 		}
@@ -698,7 +719,7 @@ public class MyZ extends JavaPlugin {
 					|| MyZ.instance.getSQLManager().isConnected()
 					&& (timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(player.getName(), "timeOfKickban")
 							+ Configuration.getKickBanSeconds() * 1000) >= now) {
-				player.kickPlayer(Messenger.getConfigMessage("kick.recur", (timeOfKickExpiry - now) / 1000));
+				player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.recur", (timeOfKickExpiry - now) / 1000));
 				return;
 			}
 		}
@@ -898,7 +919,8 @@ public class MyZ extends JavaPlugin {
 				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0
 						&& !player.getName().equals("MrTeePee")) {
 					flags.add(player.getName());
-					player.kickPlayer(Messenger.getConfigMessage("kick.come_back", Configuration.getKickBanSeconds()));
+					player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.come_back",
+							Configuration.getKickBanSeconds()));
 				}
 		}
 	}
@@ -1115,12 +1137,12 @@ public class MyZ extends JavaPlugin {
 		PlayerData data = PlayerData.getDataFor(friender);
 		if (data != null && !data.getFriends().contains(friended)) {
 			data.addFriend(friended);
-			friender.sendMessage(Messenger.getConfigMessage("friend.added", friended));
+			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", friended));
 		}
 		if (sql.isConnected() && !sql.getStringList(friender.getName(), "friends").contains(friended)) {
 			String current = sql.getString(friender.getName(), "friends");
 			sql.set(friender.getName(), "friends", current + (current.isEmpty() ? "" : ",") + friended, true);
-			friender.sendMessage(Messenger.getConfigMessage("friend.added", friended));
+			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", friended));
 		}
 	}
 
@@ -1136,12 +1158,12 @@ public class MyZ extends JavaPlugin {
 		PlayerData data = PlayerData.getDataFor(unfriender);
 		if (data != null && data.getFriends().contains(unfriended)) {
 			data.removeFriend(unfriended);
-			unfriender.sendMessage(Messenger.getConfigMessage("friend.removed", unfriended));
+			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", unfriended));
 		}
 		if (sql.isConnected() && sql.getStringList(unfriender.getName(), "friends").contains(unfriended)) {
 			sql.set(unfriender.getName(), "friends", sql.getString(unfriender.getName(), "friends").replaceAll("," + unfriended, "")
 					.replaceAll(unfriended + ",", ""), true);
-			unfriender.sendMessage(Messenger.getConfigMessage("friend.removed", unfriended));
+			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", unfriended));
 		}
 	}
 

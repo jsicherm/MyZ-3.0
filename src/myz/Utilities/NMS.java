@@ -4,6 +4,7 @@
 package myz.Utilities;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,6 +17,9 @@ public class NMS {
 
 	private static final String packageName = Bukkit.getServer().getClass().getPackage().getName();
 	public static final String version = packageName.substring(packageName.lastIndexOf(".") + 1);
+	private static Class<?> craftPlayer, packet;
+	private static Method getHandle, sendPacket;
+	private static Field connection;
 
 	public static void setDeclaredField(Object obj, String fieldName, Object value) {
 		try {
@@ -37,14 +41,14 @@ public class NMS {
 	 *         not be found.
 	 */
 	public static Object castToCraft(Player player) {
-		Class<?> craftPlayer;
-		try {
-			craftPlayer = Class.forName("org.bukkit.craftbukkit." + NMS.version + ".entity.CraftPlayer");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
-
+		if (craftPlayer == null)
+			try {
+				craftPlayer = Class.forName("org.bukkit.craftbukkit." + NMS.version + ".entity.CraftPlayer");
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+				return null;
+			}
+		if (craftPlayer == null) { return null; }
 		return craftPlayer.cast(player);
 	}
 
@@ -56,19 +60,17 @@ public class NMS {
 	 * @return The NMS alternative or null if problems with reflection.
 	 */
 	public static Object castToNMS(Player player) {
-		Class<?> craftPlayer;
-		try {
-			craftPlayer = Class.forName("org.bukkit.craftbukkit." + NMS.version + ".entity.CraftPlayer");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
-
 		Object craft = castToCraft(player);
 		if (craft == null)
 			return null;
+		if (getHandle == null)
+			try {
+				getHandle = craftPlayer.getMethod("getHandle");
+			} catch (Exception exc) {
+				return null;
+			}
 		try {
-			return craftPlayer.getMethod("getHandle").invoke(castToCraft(player));
+			return getHandle.invoke(castToCraft(player));
 		} catch (Exception exc) {
 			return null;
 		}
@@ -82,13 +84,21 @@ public class NMS {
 	 * @param inPlayer
 	 *            The player.
 	 * @throws Exception
-	 *             if an exception occured.
+	 *             if an exception occurred.
 	 */
 	public static void sendPacket(Object inPacket, Player inPlayer) throws Exception {
-		Class<?> packet = Class.forName("net.minecraft.server." + NMS.version + ".Packet");
+		if (packet == null)
+			packet = Class.forName("net.minecraft.server." + NMS.version + ".Packet");
 
 		Object handle = castToNMS(inPlayer);
-		Object con = handle.getClass().getField("playerConnection").get(handle);
-		con.getClass().getMethod("sendPacket", packet).invoke(con, inPacket);
+		if (handle == null) { return; }
+		if (connection == null)
+			connection = handle.getClass().getField("playerConnection");
+		Object con = connection.get(handle);
+		if (con == null) { return; }
+		if (sendPacket == null)
+			sendPacket = con.getClass().getMethod("sendPacket", packet);
+		if (sendPacket != null)
+			sendPacket.invoke(con, inPacket);
 	}
 }

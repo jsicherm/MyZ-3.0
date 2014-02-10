@@ -10,6 +10,7 @@ import java.util.Random;
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityGiantZombie;
 import myz.mobs.CustomEntityNPC;
@@ -207,22 +208,22 @@ public class EntityCreator {
 		List<String> possibilities = null;
 		switch (type) {
 		case ENEMY_ARCHER:
-			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.archer.enemy");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.archer.enemy");
 			break;
 		case ENEMY_SWORDSMAN:
-			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.swordsman.enemy");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.swordsman.enemy");
 			break;
 		case ENEMY_WANDERER:
-			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.wanderer.enemy");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.wanderer.enemy");
 			break;
 		case FRIEND_ARCHER:
-			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.archer.friendly");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.archer.friendly");
 			break;
 		case FRIEND_SWORDSMAN:
-			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.swordsman.friendly");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.swordsman.friendly");
 			break;
 		default:
-			possibilities = MyZ.instance.getLocalizableConfig().getStringList("localizable.npc_names.wanderer.friendly");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.wanderer.friendly");
 			break;
 		}
 		return possibilities == null ? "Notch" : possibilities.get(random.nextInt(possibilities.size() == 0 ? 1 : possibilities.size()));

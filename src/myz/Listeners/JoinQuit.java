@@ -10,6 +10,7 @@ import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.Localizer;
 import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityPlayer;
 
@@ -47,7 +48,8 @@ public class JoinQuit implements Listener {
 				timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(name, "timeOfKickban") + Configuration.getKickBanSeconds() * 1000;
 
 			if (timeOfKickExpiry >= now)
-				e.disallow(Result.KICK_OTHER, Messenger.getConfigMessage("kick.recur", (timeOfKickExpiry - now) / 1000));
+				e.disallow(Result.KICK_OTHER,
+						Messenger.getConfigMessage(Localizer.ENGLISH, "kick.recur", (timeOfKickExpiry - now) / 1000));
 		}
 	}
 

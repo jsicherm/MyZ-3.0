@@ -3,6 +3,7 @@ package myz.Support;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 /**
  * @author Jordan
@@ -42,13 +43,13 @@ public class Teleport {
 			Entity vehicle = player.getVehicle();
 			vehicle.eject();
 			// Teleport the player...
-			player.teleport(to);
+			player.teleport(to, TeleportCause.PLUGIN);
 			// Remove the vehicle if it's not persisting.
 			if (!keepVehicle)
 				vehicle.remove();
 			else {
 				// Otherwise teleport the vehicle and remount.
-				vehicle.teleport(to);
+				vehicle.teleport(to, TeleportCause.PLUGIN);
 				vehicle.setPassenger(player);
 			}
 			return;

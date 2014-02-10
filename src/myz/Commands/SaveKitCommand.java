@@ -8,6 +8,7 @@ import java.util.List;
 
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -39,7 +40,7 @@ public class SaveKitCommand implements CommandExecutor {
 			List<ItemStack> inventory = Arrays.asList(((Player) sender).getInventory().getContents());
 			Configuration.setArmorContents(armor, rank);
 			Configuration.setInventoryContents(inventory, rank);
-			sender.sendMessage(Messenger.getConfigMessage("command.savekit.saved", rank));
+			sender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale((Player)sender), "command.savekit.saved", rank));
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;

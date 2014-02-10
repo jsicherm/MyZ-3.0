@@ -9,6 +9,7 @@ import java.util.List;
 
 import myz.MyZ;
 import myz.Utilities.GlowEnchant;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -55,19 +56,11 @@ public class MedKit {
 		this.output = output;
 
 		if (antiseptic > 0)
-			lore.add(ChatColor.GRAY
-					+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
-							MyZ.instance.getConfig().getString("heal.medkit.localizable.antiseptic"))) + " "
-					+ getRomanNumeralsFor(antiseptic));
+			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.antiseptic") + " " + getRomanNumeralsFor(antiseptic));
 		if (ointment > 0)
-			lore.add(ChatColor.GRAY
-					+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
-							MyZ.instance.getConfig().getString("heal.medkit.localizable.regeneration"))) + " "
-					+ getRomanNumeralsFor(ointment));
+			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.regeneration") + " " + getRomanNumeralsFor(ointment));
 		if (lore.isEmpty())
-			lore.add(ChatColor.GRAY
-					+ ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',
-							MyZ.instance.getConfig().getString("heal.medkit.localizable.heal"))) + " I");
+			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.heal") + " I");
 
 		medkits.add(this);
 		save();

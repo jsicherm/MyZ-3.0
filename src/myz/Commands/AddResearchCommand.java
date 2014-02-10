@@ -7,6 +7,7 @@ import java.util.Set;
 
 import myz.MyZ;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -55,7 +56,8 @@ public class AddResearchCommand implements CommandExecutor {
 						if (config.getItemStack("item." + key + ".item").equals(hand)) {
 							config.set("item." + key, null);
 							MyZ.instance.saveResearchConfig();
-							Messenger.sendMessage(sender, Messenger.getConfigMessage("command.research.removed", value));
+							Messenger.sendMessage(sender,
+									Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.research.removed", value));
 							return true;
 						}
 
@@ -85,8 +87,10 @@ public class AddResearchCommand implements CommandExecutor {
 						int points = Integer.parseInt(args[1]);
 						config.set("item." + key + ".item", hand);
 						config.set("item." + key + (reward ? ".cost" : ".value"), points);
-						Messenger.sendMessage(sender,
-								Messenger.getConfigMessage("command.research." + (reward ? "reward." : "") + "added", value, points));
+						Messenger.sendMessage(
+								sender,
+								Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.research."
+										+ (reward ? "reward." : "") + "added", value, points));
 						MyZ.instance.saveResearchConfig();
 					} catch (NumberFormatException exc) {
 						Messenger.sendConfigMessage(sender, "command.research.arguments");

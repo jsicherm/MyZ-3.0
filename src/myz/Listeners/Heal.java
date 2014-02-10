@@ -11,6 +11,7 @@ import myz.Support.Configuration;
 import myz.Support.MedKit;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.Localizer;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -119,8 +120,8 @@ public class Heal implements Listener {
 						&& (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay())
 					Messenger.sendMessage(
 							healer,
-							Messenger.getConfigMessage("heal.wait", Configuration.getHealDelay() - (now - lastHeals.get(healer.getName()))
-									/ 1000));
+							Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait", Configuration.getHealDelay()
+									- (now - lastHeals.get(healer.getName())) / 1000));
 				else {
 					MyZ.instance.stopBleeding(player);
 					if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
@@ -154,8 +155,8 @@ public class Heal implements Listener {
 			if (lastHeals.containsKey(healer.getName()) && (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay())
 				Messenger.sendMessage(
 						healer,
-						Messenger.getConfigMessage("heal.wait", Configuration.getHealDelay() - (now - lastHeals.get(healer.getName()))
-								/ 1000));
+						Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait", Configuration.getHealDelay()
+								- (now - lastHeals.get(healer.getName())) / 1000));
 			else {
 				MyZ.instance.stopBleeding(player);
 				if (player.getHealth() + Configuration.getBandageHealAmount() <= player.getMaxHealth()) {
@@ -190,7 +191,7 @@ public class Heal implements Listener {
 			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
 						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
-			Messenger.sendMessage(healer, Messenger.getConfigMessage("heal.amount", amount));
+			Messenger.sendMessage(healer, Messenger.getConfigMessage(Localizer.getLocale(player), "heal.amount", amount));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(healer);

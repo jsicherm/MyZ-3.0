@@ -11,6 +11,7 @@ import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.Localizer;
 import myz.Utilities.Utilities;
 
 import org.bukkit.Bukkit;
@@ -67,7 +68,8 @@ public class ResearchItem implements Listener {
 								if (config.getItemStack("item." + key + ".item").equals(e.getItem().getItemStack())) {
 									e.getItem().remove();
 									int points = config.getInt("item." + key + ".value");
-									Messenger.sendMessage(player, Messenger.getConfigMessage("research.success", points));
+									Messenger.sendMessage(player,
+											Messenger.getConfigMessage(Localizer.getLocale(player), "research.success", points));
 									int before = 0, after;
 									if (data != null)
 										data.setResearchPoints((before = data.getResearchPoints()) + points);
@@ -110,7 +112,7 @@ public class ResearchItem implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	private void onClickResearchItem(InventoryClickEvent e) {
 		if (e.getInventory().getHolder() == null
-				&& e.getInventory().getTitle().contains(Messenger.getConfigMessage("science_gui", 69).split("69")[0])
+				&& e.getInventory().getTitle().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", 69).split("69")[0])
 				&& e.getInventory().getSize() == 9) {
 			e.setCancelled(true);
 			if (e.getRawSlot() >= 0 && e.getRawSlot() <= 8) {
@@ -152,8 +154,8 @@ public class ResearchItem implements Listener {
 								Utilities.showResearchDialog((Player) e.getWhoClicked(), page);
 								Messenger.sendMessage(
 										(Player) e.getWhoClicked(),
-										Messenger.getConfigMessage("gui.purchased",
-												points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")));
+										Messenger.getConfigMessage(Localizer.getLocale((Player) e.getWhoClicked()), "gui.purchased", points
+												- MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")));
 							} else
 								Messenger.sendConfigMessage((Player) e.getWhoClicked(), "gui.afford");
 							return;
@@ -184,8 +186,10 @@ public class ResearchItem implements Listener {
 						&& (one.getDisplayName() != null ? one.getDisplayName().equals(two.getDisplayName()) : two.getDisplayName() == null);
 			else {
 				if (one != null)
-					return one.getLore() != null && one.getLore().contains(Messenger.getConfigMessage("research_gui", 69).split("69")[0]);
-				return two.getLore() != null && two.getLore().contains(Messenger.getConfigMessage("research_gui", 69).split("69")[0]);
+					return one.getLore() != null
+							&& one.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", 69).split("69")[0]);
+				return two.getLore() != null
+						&& two.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", 69).split("69")[0]);
 			}
 		} else
 			return false;

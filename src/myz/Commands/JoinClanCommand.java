@@ -6,6 +6,7 @@ package myz.Commands;
 import myz.MyZ;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -37,7 +38,7 @@ public class JoinClanCommand implements CommandExecutor {
 				PlayerData data = PlayerData.getDataFor((Player) sender);
 				if (data != null) {
 					data.setClan(clan);
-					Messenger.sendMessage(sender, Messenger.getConfigMessage("clan.joined", clan));
+					Messenger.sendMessage(sender, Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "clan.joined", clan));
 				}
 				if (MyZ.instance.getSQLManager().isConnected()) {
 					Messenger.sendConfigMessage(sender, "clan.joining");

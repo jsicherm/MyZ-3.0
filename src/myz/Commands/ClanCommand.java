@@ -6,6 +6,7 @@ package myz.Commands;
 import myz.MyZ;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -41,7 +42,8 @@ public class ClanCommand implements CommandExecutor {
 			if (clan == null || clan.isEmpty())
 				Messenger.sendConfigMessage(sender, "command.clan.not_in");
 			else
-				Messenger.sendMessage(sender, Messenger.getConfigMessage("command.clan.in", clan, online, total));
+				Messenger.sendMessage(sender,
+						Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.clan.in", clan, online, total));
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;

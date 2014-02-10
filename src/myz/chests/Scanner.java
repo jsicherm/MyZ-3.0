@@ -14,6 +14,7 @@ import java.util.Map;
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 import myz.Utilities.NMS;
 import myz.Utilities.Utilities;
 
@@ -172,7 +173,7 @@ public class Scanner implements Listener {
 					exc.printStackTrace();
 				}
 			}
-			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage("chest.set.typeis", slug));
+			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.set.typeis", slug));
 			setters.remove(e.getPlayer().getName());
 		} else if (getters.contains(e.getPlayer().getName())) {
 			e.setCancelled(true);
@@ -189,7 +190,7 @@ public class Scanner implements Listener {
 				if (slug == null)
 					slug = "&4N/A";
 			}
-			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage("chest.get.typeis", slug));
+			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.get.typeis", slug));
 		}
 	}
 

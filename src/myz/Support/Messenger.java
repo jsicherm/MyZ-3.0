@@ -4,6 +4,7 @@
 package myz.Support;
 
 import myz.MyZ;
+import myz.Utilities.Localizer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -73,6 +74,22 @@ public class Messenger {
 	}
 
 	/**
+	 * Color a message and send it to all the players in a world. Provides
+	 * ability to specify a string variable and still allow for locale.
+	 * 
+	 * @param inWorld
+	 *            The world.
+	 * @param uncolored_message
+	 *            The uncolored message.
+	 * @param variable
+	 *            A string variable.
+	 */
+	public static void sendMessage(World inWorld, String uncolored_config_message, String variable) {
+		for (Player player : inWorld.getPlayers())
+			sendConfigMessage(player, getConfigMessage(Localizer.getLocale(player), uncolored_config_message, variable));
+	}
+
+	/**
 	 * Color a config message and send it to a player.
 	 * 
 	 * @param player
@@ -83,7 +100,7 @@ public class Messenger {
 	public static void sendConfigMessage(CommandSender player, String uncolored_config_message) {
 		if (player instanceof Player)
 			uncolored_config_message = processForArguments((Player) player,
-					MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message));
+					MyZ.instance.getLocalizableConfig(Localizer.getLocale((Player) player)).getString(uncolored_config_message));
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_config_message));
 	}
 
@@ -118,20 +135,22 @@ public class Messenger {
 	 */
 	public static void sendConfigConsoleMessage(String uncolored_config_message) {
 		sendConsoleMessage(ChatColor.translateAlternateColorCodes('&',
-				MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message)));
+				MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getString(uncolored_config_message)));
 	}
 
 	/**
 	 * Get a message out of the config and color it.
 	 * 
+	 * @param locale
+	 *            The locale.
 	 * @param uncolored_config_message
 	 *            The uncolored config message.
 	 * @param variables
 	 *            Any applicable variables denoted by a %s.
 	 * @return The colored message with replaced variables.
 	 */
-	public static String getConfigMessage(String uncolored_config_message, Object... variables) {
-		String message = MyZ.instance.getLocalizableConfig().getString("localizable." + uncolored_config_message);
+	public static String getConfigMessage(Localizer locale, String uncolored_config_message, Object... variables) {
+		String message = MyZ.instance.getLocalizableConfig(locale).getString(uncolored_config_message);
 		if (variables != null)
 			try {
 				message = String.format(message, variables);

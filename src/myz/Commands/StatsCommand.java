@@ -6,6 +6,7 @@ package myz.Commands;
 import myz.MyZ;
 import myz.Support.Messenger;
 import myz.Support.PlayerData;
+import myz.Utilities.Localizer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -52,15 +53,17 @@ public class StatsCommand implements CommandExecutor {
 				total = MyZ.instance.getSQLManager().getLong(sender.getName(), "minutes_alive");
 				life = MyZ.instance.getSQLManager().getInt(sender.getName(), "minutes_alive_life");
 			}
-			Messenger.sendMessage(sender, Messenger.getConfigMessage("command.stats.header", name));
+			Messenger.sendMessage(sender, Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.stats.header", name));
 			sender.sendMessage("");
 			Messenger.sendConfigMessage(sender, "command.stats.kills_header");
-			Messenger.sendMessage(sender, Messenger.getConfigMessage("command.stats.kills", zombie, pigman, giant, player));
+			Messenger.sendMessage(sender,
+					Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.stats.kills", zombie, pigman, giant, player));
 			sender.sendMessage("");
 			Messenger.sendConfigMessage(sender, "command.stats.time_header");
-			Messenger.sendMessage(sender, Messenger.getConfigMessage("command.stats.time", total, life));
+			Messenger.sendMessage(sender,
+					Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.stats.time", total, life));
 			sender.sendMessage("");
-			Messenger.sendMessage(sender, Messenger.getConfigMessage("command.stats.footer", name));
+			Messenger.sendMessage(sender, Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.stats.footer", name));
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;

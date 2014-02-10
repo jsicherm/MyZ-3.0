@@ -9,6 +9,7 @@ import java.util.Map;
 import myz.MyZ;
 import myz.Support.Configuration;
 import myz.Support.Messenger;
+import myz.Utilities.Localizer;
 import myz.chests.ChestManager;
 
 import org.bukkit.Bukkit;
@@ -40,7 +41,7 @@ public class Sync implements Runnable {
 			}
 			int timeRemaining = safeLogoutPlayers.get(player);
 			if (timeRemaining <= 0) {
-				the_player.kickPlayer(Messenger.getConfigMessage("kick.safe_logout"));
+				the_player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(the_player), "kick.safe_logout"));
 				safeLogoutPlayers.remove(player);
 				continue;
 			}

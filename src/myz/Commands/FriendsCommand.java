@@ -46,7 +46,7 @@ public class FriendsCommand implements CommandExecutor {
 				}
 			if (output.length() >= 2)
 				output = output.substring(0, output.length() - 2);
-			if (!output.isEmpty())
+			if (!output.trim().isEmpty() && output != "" && output.trim() != "")
 				sender.sendMessage(output);
 			else
 				Messenger.sendConfigMessage(sender, "command.friend.empty");
