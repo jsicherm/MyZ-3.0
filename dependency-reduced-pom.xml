@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>MyZ_3</groupId>
-  <artifactId>MyZ_3</artifactId>
-  <version>3.0</version>
+  <groupId>myz.MyZ</groupId>
+  <artifactId>MyZ</artifactId>
+  <version>3.0.6.52</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -15,6 +15,13 @@
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
+      </resource>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>plugin.yml</include>
+        </includes>
       </resource>
     </resources>
     <plugins>
@@ -46,6 +53,7 @@
               <artifactSet>
                 <includes>
                   <include>org.mcstats.bukkit:*</include>
+                  <include>org.json:*</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -84,13 +92,13 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>LATEST</version>
+      <version>1.7.2-R0.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>craftbukkit</artifactId>
-      <version>LATEST</version>
+      <version>1.7.2-R0.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -124,5 +132,14 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
+  <properties>
+    <project.name>MyZ-3</project.name>
+    <project.version>3.0.6.52</project.version>
+    <project.authors>TeeePeee</project.authors>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.main>myz.MyZ</project.main>
+    <project.description>The best post-apocalyptic plugin in existance.</project.description>
+    <project.softdepends>[WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises]</project.softdepends>
+  </properties>
 </project>
 

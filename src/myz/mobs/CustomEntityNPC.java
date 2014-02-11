@@ -6,14 +6,14 @@ package myz.mobs;
 import java.util.UUID;
 
 import myz.MyZ;
-import myz.Support.Configuration;
-import myz.Support.Messenger;
-import myz.Utilities.Utilities;
 import myz.mobs.pathing.PathfinderGoalFollow;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
+import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Messenger;
+import myz.utilities.Utils;
 import net.minecraft.server.v1_7_R1.Block;
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.Enchantment;
@@ -313,12 +313,12 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		final UUID uid = getBukkitEntity().getUniqueId();
 		int a = 0;
 
-		if (Utilities.packets != null)
-			for (Object packet : Utilities.packets.keySet())
-				if (Utilities.packets.get(packet).getUUID().equals(uid)) {
-					Utilities.packets.remove(packet);
+		if (Utils.packets != null)
+			for (Object packet : Utils.packets.keySet())
+				if (Utils.packets.get(packet).getUUID().equals(uid)) {
+					Utils.packets.remove(packet);
 					try {
-						a = (Integer) Utilities.getPrivateField(packet, "a");
+						a = (Integer) Utils.getPrivateField(packet, "a");
 					} catch (Exception exc) {
 						Messenger.sendConsoleMessage("&4PacketPlayOutNamedEntitySpawn issue!");
 					}
@@ -336,7 +336,7 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 					if (A == 0)
 						return;
 					PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(A);
-					Utilities.distributePacket(getBukkitEntity().getWorld(), packet);
+					Utils.distributePacket(getBukkitEntity().getWorld(), packet);
 				}
 			}, 20 * 3);
 	}

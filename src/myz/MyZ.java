@@ -11,73 +11,73 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import myz.API.PlayerBeginBleedingEvent;
-import myz.API.PlayerBeginPoisonEvent;
-import myz.API.PlayerSpawnInWorldEvent;
-import myz.API.PlayerWaterDecayEvent;
-import myz.Commands.AddResearchCommand;
-import myz.Commands.AddSpawnCommand;
-import myz.Commands.AllowedCommand;
-import myz.Commands.BaseCommand;
-import myz.Commands.BlockCommand;
-import myz.Commands.ChestGetCommand;
-import myz.Commands.ChestScanCommand;
-import myz.Commands.ChestSetCommand;
-import myz.Commands.ClanCommand;
-import myz.Commands.CreateMedKitCommand;
-import myz.Commands.FriendCommand;
-import myz.Commands.FriendsCommand;
-import myz.Commands.GetUIDCommand;
-import myz.Commands.ItemConfigurationCommand;
-import myz.Commands.JoinClanCommand;
-import myz.Commands.LootSetCommand;
-import myz.Commands.RemoveSpawnCommand;
-import myz.Commands.ResearchCommand;
-import myz.Commands.SaveKitCommand;
-import myz.Commands.SaveRankCommand;
-import myz.Commands.SetLobbyCommand;
-import myz.Commands.SetRankCommand;
-import myz.Commands.SpawnCommand;
-import myz.Commands.SpawnsCommand;
-import myz.Commands.StatsCommand;
-import myz.Listeners.AutoFriend;
-import myz.Listeners.BlockEvent;
-import myz.Listeners.CancelPlayerEvents;
-import myz.Listeners.CancelZombieDamage;
-import myz.Listeners.Chat;
-import myz.Listeners.ConsumeFood;
-import myz.Listeners.EntityHurtPlayer;
-import myz.Listeners.EntitySpawn;
-import myz.Listeners.Heal;
-import myz.Listeners.JoinQuit;
-import myz.Listeners.KittehTag;
-import myz.Listeners.LibsUndisguiseListener;
-import myz.Listeners.Movement;
-import myz.Listeners.PlayerDeath;
-import myz.Listeners.PlayerHurtEntity;
-import myz.Listeners.PlayerKillEntity;
-import myz.Listeners.PlayerSummonGiant;
-import myz.Listeners.PlayerTakeDamage;
-import myz.Listeners.ResearchItem;
-import myz.Listeners.UndisguiseListener;
-import myz.Listeners.Visibility;
-import myz.Scheduling.Sync;
-import myz.Scheduling.aSync;
-import myz.Support.Configuration;
-import myz.Support.MedKit;
-import myz.Support.Messenger;
-import myz.Support.PlayerData;
-import myz.Support.Teleport;
-import myz.Utilities.DisguiseUtilities;
-import myz.Utilities.LibsDisguiseUtilities;
-import myz.Utilities.Localizer;
-import myz.Utilities.SQLManager;
-import myz.Utilities.Utilities;
-import myz.Utilities.WorldlessLocation;
+import myz.api.PlayerBeginBleedingEvent;
+import myz.api.PlayerBeginPoisonEvent;
+import myz.api.PlayerSpawnInWorldEvent;
+import myz.api.PlayerWaterDecayEvent;
 import myz.chests.ChestManager;
-import myz.chests.Scanner;
+import myz.chests.ChestScanner;
+import myz.commands.AddResearchCommand;
+import myz.commands.AddSpawnCommand;
+import myz.commands.AllowedCommand;
+import myz.commands.BaseCommand;
+import myz.commands.BlockCommand;
+import myz.commands.ChestGetCommand;
+import myz.commands.ChestScanCommand;
+import myz.commands.ChestSetCommand;
+import myz.commands.ClanCommand;
+import myz.commands.CreateMedKitCommand;
+import myz.commands.FriendCommand;
+import myz.commands.FriendsCommand;
+import myz.commands.GetUIDCommand;
+import myz.commands.ItemConfigurationCommand;
+import myz.commands.JoinClanCommand;
+import myz.commands.LootSetCommand;
+import myz.commands.RemoveSpawnCommand;
+import myz.commands.ResearchCommand;
+import myz.commands.SaveKitCommand;
+import myz.commands.SaveRankCommand;
+import myz.commands.SetLobbyCommand;
+import myz.commands.SetRankCommand;
+import myz.commands.SpawnCommand;
+import myz.commands.SpawnsCommand;
+import myz.commands.StatsCommand;
+import myz.listeners.CancelZombieDamage;
+import myz.listeners.EntityHurtPlayer;
+import myz.listeners.EntitySpawn;
+import myz.listeners.player.AutoFriend;
+import myz.listeners.player.BlockEvent;
+import myz.listeners.player.CancelPlayerEvents;
+import myz.listeners.player.Chat;
+import myz.listeners.player.ConsumeFood;
+import myz.listeners.player.Heal;
+import myz.listeners.player.JoinQuit;
+import myz.listeners.player.KittehTag;
+import myz.listeners.player.LibsUndisguiseListener;
+import myz.listeners.player.Movement;
+import myz.listeners.player.PlayerDeath;
+import myz.listeners.player.PlayerHurtEntity;
+import myz.listeners.player.PlayerKillEntity;
+import myz.listeners.player.PlayerSummonGiant;
+import myz.listeners.player.PlayerTakeDamage;
+import myz.listeners.player.ResearchItem;
+import myz.listeners.player.UndisguiseListener;
+import myz.listeners.player.Visibility;
 import myz.mobs.CustomEntityPlayer;
 import myz.mobs.CustomEntityType;
+import myz.scheduling.Sync;
+import myz.scheduling.aSync;
+import myz.support.MedKit;
+import myz.support.PlayerData;
+import myz.support.SQLManager;
+import myz.support.Teleport;
+import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Localizer;
+import myz.support.interfacing.Messenger;
+import myz.utilities.DisguiseUtils;
+import myz.utilities.LibsDisguiseUtils;
+import myz.utilities.Utils;
+import myz.utilities.WorldlessLocation;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -132,7 +132,15 @@ public class MyZ extends JavaPlugin {
 		}
 
 		instance = this;
-		saveDefaultConfig();
+		getDataFolder().mkdir();
+		File defaultConfig = new File(getDataFolder() + File.separator + "config.yml");
+		if (!defaultConfig.exists()) {
+			try {
+				defaultConfig.createNewFile();
+			} catch (Exception exc) {
+				getLogger().warning("Unable to save default config: " + exc.getMessage());
+			}
+		}
 		loadPlayerData();
 		loadBlocks();
 		loadLocalizable();
@@ -193,7 +201,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		PluginManager p = getServer().getPluginManager();
 		p.registerEvents(new JoinQuit(), this);
-		p.registerEvents(new Scanner(), this);
+		p.registerEvents(new ChestScanner(), this);
 		p.registerEvents(new BlockEvent(), this);
 		p.registerEvents(new AutoFriend(), this);
 		p.registerEvents(new Heal(), this);
@@ -218,7 +226,7 @@ public class MyZ extends JavaPlugin {
 			p.registerEvents(new UndisguiseListener(), this);
 		if (getServer().getPluginManager().getPlugin("LibsDisguises") != null
 				&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
-			myz.Utilities.LibsDisguiseUtilities.setup();
+			myz.utilities.LibsDisguiseUtils.setup();
 			p.registerEvents(new LibsUndisguiseListener(), this);
 		}
 
@@ -302,7 +310,7 @@ public class MyZ extends JavaPlugin {
 			player.getBukkitEntity().remove();
 		if (disguise)
 			for (Player player : getServer().getOnlinePlayers())
-				myz.Utilities.LibsDisguiseUtilities.undisguise(player);
+				myz.utilities.LibsDisguiseUtils.undisguise(player);
 		NPCs.clear();
 		for (String name : Configuration.getWorlds()) {
 			World world = Bukkit.getWorld(name);
@@ -314,14 +322,14 @@ public class MyZ extends JavaPlugin {
 				if (entity.getType() == EntityType.ZOMBIE || entity.getType() == EntityType.GIANT || entity.getType() == EntityType.HORSE
 						|| entity.getType() == EntityType.PIG_ZOMBIE || entity.getType() == EntityType.SKELETON) {
 					if (disguise)
-						myz.Utilities.LibsDisguiseUtilities.undisguise((LivingEntity) entity);
+						myz.utilities.LibsDisguiseUtils.undisguise((LivingEntity) entity);
 					entity.remove();
 				}
 		}
 		// Attempt to clean up the custom classes.
 		CustomEntityType.unregisterEntities();
-		if (Utilities.packets != null)
-			Utilities.packets.clear();
+		if (Utils.packets != null)
+			Utils.packets.clear();
 		nullifyStatics();
 	}
 
@@ -334,8 +342,8 @@ public class MyZ extends JavaPlugin {
 		Sync.safeLogoutPlayers = null;
 		Configuration.disable();
 		MedKit.clearKits();
-		myz.Utilities.DisguiseUtilities.disable();
-		Utilities.packets = null;
+		myz.utilities.DisguiseUtils.disable();
+		Utils.packets = null;
 	}
 
 	/**
@@ -382,7 +390,11 @@ public class MyZ extends JavaPlugin {
 		 * Make sure the file exists.
 		 */
 		if (!blocks_file.exists())
-			saveResource("blocks.yml", true);
+			try {
+				blocks_file.createNewFile();
+			} catch (IOException e) {
+				getLogger().warning("Unable to save blocks.yml: " + e.getMessage());
+			}
 		blocks = YamlConfiguration.loadConfiguration(blocks_file);
 	}
 
@@ -406,11 +418,6 @@ public class MyZ extends JavaPlugin {
 			}
 			localizable.put(locale.getCode(), YamlConfiguration.loadConfiguration(localeable));
 		}
-
-		/*File localizable_file = new File(getDataFolder() + File.separator + "localizable.yml");
-		if (!localizable_file.exists())
-			saveResource("localizable.yml", true);
-		localizable = YamlConfiguration.loadConfiguration(localizable_file);*/
 	}
 
 	/**
@@ -423,7 +430,11 @@ public class MyZ extends JavaPlugin {
 		 * Make sure the file exists.
 		 */
 		if (!spawn_file.exists())
-			saveResource("spawn.yml", true);
+			try {
+				spawn_file.createNewFile();
+			} catch (IOException e) {
+				getLogger().warning("Unable to save spawn.yml: " + e.getMessage());
+			}
 		spawn = YamlConfiguration.loadConfiguration(spawn_file);
 	}
 
@@ -437,7 +448,11 @@ public class MyZ extends JavaPlugin {
 		 * Make sure the file exists.
 		 */
 		if (!chests_file.exists())
-			saveResource("chests.yml", true);
+			try {
+				chests_file.createNewFile();
+			} catch (IOException e) {
+				getLogger().warning("Unable to save chests.yml: " + e.getMessage());
+			}
 		chests = YamlConfiguration.loadConfiguration(chests_file);
 	}
 
@@ -451,7 +466,11 @@ public class MyZ extends JavaPlugin {
 		 * Make sure the file exists.
 		 */
 		if (!research_file.exists())
-			saveResource("research.yml", true);
+			try {
+				research_file.createNewFile();
+			} catch (IOException e) {
+				getLogger().warning("Unable to save research.yml: " + e.getMessage());
+			}
 		research = YamlConfiguration.loadConfiguration(research_file);
 	}
 
@@ -465,6 +484,10 @@ public class MyZ extends JavaPlugin {
 	 */
 	public FileConfiguration getPlayerDataConfig(String player) {
 		if (!playerdata.containsKey(player)) {
+			File datafolder = new File(getDataFolder() + File.separator + "data");
+			if (!datafolder.exists()) {
+				datafolder.mkdir();
+			}
 			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + player + ".yml");
 			if (!datafile.exists())
 				try {
@@ -763,12 +786,12 @@ public class MyZ extends JavaPlugin {
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
 			if (playerdata != null && playerdata.isZombie() || MyZ.instance.getSQLManager().isConnected()
 					&& MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))
-				DisguiseUtilities.becomeZombie(player);
+				DisguiseUtils.becomeZombie(player);
 		if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
 			if (playerdata != null && playerdata.isZombie() || MyZ.instance.getSQLManager().isConnected()
 					&& MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))
-				LibsDisguiseUtilities.becomeZombie(player);
+				LibsDisguiseUtils.becomeZombie(player);
 	}
 
 	/**
@@ -810,10 +833,10 @@ public class MyZ extends JavaPlugin {
 
 			if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 					&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
-				myz.Utilities.DisguiseUtilities.undisguise(player);
+				myz.utilities.DisguiseUtils.undisguise(player);
 			if (getServer().getPluginManager().getPlugin("LibsDisguises") != null
 					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
-				myz.Utilities.LibsDisguiseUtilities.undisguise(player);
+				myz.utilities.LibsDisguiseUtils.undisguise(player);
 
 			if (Configuration.isKickBan() && wasDeath && !player.getName().equals("MrTeePee")) {
 				if (data != null)
@@ -1014,7 +1037,7 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * An enemy was nearby, stop the spawning.
 		 */
-		if (Utilities.isPlayerNearby(player, spawn, Configuration.getSafeSpawnRadius())) {
+		if (Utils.isPlayerNearby(player, spawn, Configuration.getSafeSpawnRadius())) {
 			if (withInitiallySpecifiedSpawnpoint || spawningAttempts >= 25)
 				Messenger.sendConfigMessage(player, "command.spawn.unable_to_spawn");
 			else
@@ -1036,7 +1059,7 @@ public class MyZ extends JavaPlugin {
 			if (Configuration.zombieSpawn())
 				if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 						&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
-					myz.Utilities.DisguiseUtilities.becomeZombie(player);
+					myz.utilities.DisguiseUtils.becomeZombie(player);
 					player.getInventory().setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2));
 					Messenger.sendConfigMessage(player, "spawn.zombie");
 					if (data != null)
@@ -1046,7 +1069,7 @@ public class MyZ extends JavaPlugin {
 					return;
 				} else if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("LibsDisguises") != null
 						&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
-					myz.Utilities.LibsDisguiseUtilities.becomeZombie(player);
+					myz.utilities.LibsDisguiseUtils.becomeZombie(player);
 					Messenger.sendConfigMessage(player, "spawn.zombie");
 					if (data != null)
 						data.setZombie(true);

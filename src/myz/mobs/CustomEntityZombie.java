@@ -6,11 +6,11 @@ package myz.mobs;
 import java.util.ArrayList;
 import java.util.List;
 
-import myz.Support.Configuration;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
+import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityHuman;

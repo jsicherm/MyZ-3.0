@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.Support.Configuration;
-import myz.Support.Messenger;
-import myz.Utilities.Localizer;
-import myz.Utilities.Utilities;
 import myz.mobs.CustomEntityGiantZombie;
 import myz.mobs.CustomEntityNPC;
 import myz.mobs.CustomEntityPigZombie;
 import myz.mobs.NPCType;
+import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Localizer;
+import myz.support.interfacing.Messenger;
+import myz.utilities.Utils;
 import net.minecraft.server.v1_7_R1.DataWatcher;
 import net.minecraft.server.v1_7_R1.EntityHorse;
 import net.minecraft.server.v1_7_R1.EntityPigZombie;
@@ -157,16 +157,16 @@ public class EntityCreator {
 					|| !MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
 				PacketPlayOutNamedEntitySpawn packet = new PacketPlayOutNamedEntitySpawn();
 				try {
-					Utilities.setPrivateField(packet, "a", npc.getBukkitEntity().getEntityId());
+					Utils.setPrivateField(packet, "a", npc.getBukkitEntity().getEntityId());
 					String name = getRandomName(npctype);
 					GameProfile profile = new GameProfile(name, name);
-					Utilities.setPrivateField(packet, "b", profile);
-					Utilities.setPrivateField(packet, "c", (int) location.getX() * 32);
-					Utilities.setPrivateField(packet, "d", (int) location.getY() * 32);
-					Utilities.setPrivateField(packet, "e", (int) location.getZ() * 32);
-					Utilities.setPrivateField(packet, "f", (byte) 0);
-					Utilities.setPrivateField(packet, "g", (byte) 0);
-					Utilities.setPrivateField(packet, "h", npc.getEquipment(0) != null ? Item.b(npc.getEquipment(0).getItem()) : 0);
+					Utils.setPrivateField(packet, "b", profile);
+					Utils.setPrivateField(packet, "c", (int) location.getX() * 32);
+					Utils.setPrivateField(packet, "d", (int) location.getY() * 32);
+					Utils.setPrivateField(packet, "e", (int) location.getZ() * 32);
+					Utils.setPrivateField(packet, "f", (byte) 0);
+					Utils.setPrivateField(packet, "g", (byte) 0);
+					Utils.setPrivateField(packet, "h", npc.getEquipment(0) != null ? Item.b(npc.getEquipment(0).getItem()) : 0);
 				} catch (Exception exc) {
 					Messenger.sendConsoleMessage("&4PacketPlayOutEntitySpawn issue!");
 					exc.printStackTrace();
@@ -182,13 +182,13 @@ public class EntityCreator {
 					Field f = packet.getClass().getDeclaredField("i");
 					f.setAccessible(true);
 					f.set(packet, datawatcher);
-					Utilities.saveAndDistributePacket(packet, npc.getBukkitEntity());
+					Utils.saveAndDistributePacket(packet, npc.getBukkitEntity());
 				} catch (Exception exc) {
 					exc.printStackTrace();
 				}
 			} else if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
-				myz.Utilities.LibsDisguiseUtilities.becomeNPC((LivingEntity) npc.getBukkitEntity(), getRandomName(npctype));
+				myz.utilities.LibsDisguiseUtils.becomeNPC((LivingEntity) npc.getBukkitEntity(), getRandomName(npctype));
 
 			((Skeleton) npc.getBukkitEntity()).setRemoveWhenFarAway(true);
 			((Skeleton) npc.getBukkitEntity()).getEquipment().setBootsDropChance(1);

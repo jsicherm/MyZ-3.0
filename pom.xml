@@ -1,8 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>MyZ_3</groupId>
-  <artifactId>MyZ_3</artifactId>
-  <version>3.0</version>
+  <groupId>myz.MyZ</groupId>
+  <artifactId>MyZ</artifactId>
+  <version>3.0.6.52</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.authors>TeeePeee</project.authors>
+    <project.main>myz.MyZ</project.main>
+    <project.name>MyZ-3</project.name>
+    <project.version>3.0.6.52</project.version>
+    <project.softdepends>[WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises]</project.softdepends>
+    <project.description>The best post-apocalyptic plugin in existance.</project.description>
+  </properties>
   
   <repositories>
   	<repository>
@@ -35,12 +44,12 @@
 	<dependency>
 	  <groupId>org.bukkit</groupId>
 	  <artifactId>bukkit</artifactId>
-	  <version>LATEST</version>
+	  <version>1.7.2-R0.2</version>
 	</dependency>
 	<dependency>
 	  <groupId>org.bukkit</groupId>
 	  <artifactId>craftbukkit</artifactId>
-	  <version>LATEST</version>
+	  <version>1.7.2-R0.2</version>
 	</dependency>
 	<dependency>
 	  <groupId>com.sk89q</groupId>
@@ -73,6 +82,11 @@
       <artifactId>LibsDisguises</artifactId>
       <version>LATEST</version>
     </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20090211</version>
+    </dependency>
   </dependencies>
   	
   <build>
@@ -87,6 +101,13 @@
 		    <include>**/*.yml</include>
 		  </includes>
 	    </resource>
+	    <resource>
+          <directory>src/main/resources</directory>
+          <filtering>true</filtering>
+          <includes>
+            <include>plugin.yml</include>
+          </includes>
+        </resource>
 	  </resources>
     <plugins>
       <plugin>
@@ -119,6 +140,7 @@
               <artifactSet>
                 <includes>
                   <include>org.mcstats.bukkit:*</include>
+                  <include>org.json:*</include>
                 </includes>
               </artifactSet>
             </configuration>

@@ -80,7 +80,7 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 		boolean disguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
 		if (b.getGoalTarget().getBukkitEntity() instanceof Player && disguise
-				&& myz.Utilities.DisguiseUtilities.isZombie((Player) b.getGoalTarget().getBukkitEntity())) {
+				&& myz.utilities.DisguiseUtils.isZombie((Player) b.getGoalTarget().getBukkitEntity())) {
 			b.setGoalTarget(null);
 			return;
 		}

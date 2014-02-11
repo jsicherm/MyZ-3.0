@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import myz.Support.Messenger;
+import myz.support.interfacing.Messenger;
 
 import org.bukkit.Server;
 import org.bukkit.command.Command;

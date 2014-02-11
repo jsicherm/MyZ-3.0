@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import myz.Utilities.Utilities;
 import myz.mobs.support.NullEntityNetworkManager;
 import myz.mobs.support.NullNetServerHandler;
+import myz.utilities.Utils;
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityArrow;
@@ -72,8 +72,8 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	@Override
 	public void die(DamageSource source) {
-		Utilities.playerNPCDied(this);
-		Utilities.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
+		Utils.playerNPCDied(this);
+		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
 		inventoryItems = null;
 
 		EntityLiving entityliving = aX();
@@ -86,8 +86,8 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	@Override
 	public void die() {
-		Utilities.playerNPCDied(this);
-		Utilities.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
+		Utils.playerNPCDied(this);
+		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
 		inventoryItems = null;
 
 		EntityLiving entityliving = aX();

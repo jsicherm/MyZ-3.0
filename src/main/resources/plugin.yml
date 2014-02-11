@@ -1,9 +1,9 @@
-name: MyZ-3
-main: myz.MyZ
-version: 3.0.6.5
-softdepend: [WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises]
-description: MyZ 3.0
-authors: [TeeePeee]
+author: ${project.authors}
+main: ${project.main}
+version: ${project.version}
+name: ${project.name}
+description: ${project.description}
+softdepend: ${project.softdepends}
 
 commands:
   start:

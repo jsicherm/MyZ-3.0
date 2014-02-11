@@ -82,7 +82,7 @@ public class PathingSupport {
 		for (int i = 0; i < world.players.size(); ++i) {
 			EntityHuman player = (EntityHuman) world.players.get(i);
 
-			if (disguise && myz.Utilities.DisguiseUtilities.isZombie((Player) player.getBukkitEntity()))
+			if (disguise && myz.utilities.DisguiseUtils.isZombie((Player) player.getBukkitEntity()))
 				continue;
 
 			if (!player.abilities.isInvulnerable && player.isAlive()) {

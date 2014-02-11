@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.Support.Configuration;
-import myz.Support.Messenger;
-import myz.Utilities.Utilities;
+import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Messenger;
+import myz.utilities.Utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -72,7 +72,7 @@ public class ChestManager {
 	 */
 	public static void respawn(Location location, boolean bypass) {
 		if (isMyZChest(location))
-			if (Utilities.getPlayersInRange(location, 5).isEmpty() || bypass) {
+			if (Utils.getPlayersInRange(location, 5).isEmpty() || bypass) {
 				boolean wasChest = location.getBlock().getType() == Material.CHEST;
 				location.getBlock().setType(Material.CHEST);
 				Chest chest = (Chest) location.getBlock().getState().getData();

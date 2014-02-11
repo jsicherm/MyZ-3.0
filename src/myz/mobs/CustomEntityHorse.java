@@ -4,11 +4,11 @@
 package myz.mobs;
 
 import myz.MyZ;
-import myz.Support.Configuration;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableHorseTarget;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
+import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.Block;
 import net.minecraft.server.v1_7_R1.Blocks;
 import net.minecraft.server.v1_7_R1.DamageSource;
