@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import myz.MyZ;
+
+import org.bukkit.configuration.file.FileConfiguration;
 
 /**
  * @author Jordan
@@ -27,31 +27,26 @@ public class Locales {
 	 * non-english, non-mapped ones to english.
 	 */
 	public static void save() {
-		if (defaultSet.isEmpty()) {
+		if (defaultSet.isEmpty())
 			loadDefault();
-		}
 		List<String> codesCovered = new ArrayList<String>();
 
 		// Makes everything that doesn't have a default value english.
 		for (Localizer locale : Localizer.values()) {
-			if (codesCovered.contains(locale.getCode())) {
+			if (codesCovered.contains(locale.getCode()))
 				continue;
-			}
 			FileConfiguration file = MyZ.instance.getLocalizableConfig(locale);
 			if (file != null) {
 				switch (locale) {
 				case PIRATE_SPEAK:
-					for (String key : pirateSet.keySet()) {
+					for (String key : pirateSet.keySet())
 						if (!file.isSet(key))
 							file.set(key, pirateSet.get(key));
-					}
 					break;
 				default:
-					for (String key : defaultSet.keySet()) {
-						if (!file.isSet(key)) {
+					for (String key : defaultSet.keySet())
+						if (!file.isSet(key))
 							file.set(key, defaultSet.get(key));
-						}
-					}
 					break;
 				}
 				codesCovered.add(locale.getCode());

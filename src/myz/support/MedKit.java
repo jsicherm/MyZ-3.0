@@ -57,9 +57,11 @@ public class MedKit {
 		this.output = output;
 
 		if (antiseptic > 0)
-			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.antiseptic") + " " + getRomanNumeralsFor(antiseptic));
+			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.antiseptic") + " "
+					+ getRomanNumeralsFor(antiseptic));
 		if (ointment > 0)
-			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.regeneration") + " " + getRomanNumeralsFor(ointment));
+			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.regeneration") + " "
+					+ getRomanNumeralsFor(ointment));
 		if (lore.isEmpty())
 			lore.add(ChatColor.GRAY + Messenger.getConfigMessage(Localizer.ENGLISH, "heal.medkit.heal") + " I");
 

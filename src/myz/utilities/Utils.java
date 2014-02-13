@@ -351,14 +351,16 @@ public class Utils {
 					ItemStack item = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item").clone();
 					meta = item.getItemMeta();
 					meta.setLore(Arrays.asList(ChatColor.WHITE
-							+ Messenger.getConfigMessage(Localizer.getLocale(player), "gui.cost", MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
+							+ Messenger.getConfigMessage(Localizer.getLocale(player), "gui.cost",
+									MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
 					item.setItemMeta(meta);
 					gui.setItem(position, item);
 					position++;
 					if (position == 8) {
 						// Wrap to new page.
 						page++;
-						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points) + " (" + page + ")");
+						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points) + " ("
+								+ page + ")");
 						inventories.add(gui);
 						gui.setItem(0, leftArrow);
 						gui.setItem(8, rightArrow);

@@ -3,7 +3,10 @@
  */
 package myz.commands;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import myz.support.interfacing.Configuration;
@@ -15,6 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,7 +26,7 @@ import org.bukkit.inventory.ItemStack;
  * @author Jordan
  * 
  */
-public class BlockCommand implements CommandExecutor {
+public class BlockCommand implements CommandExecutor, TabCompleter {
 
 	public static Map<String, BlockFunction> blockChangers = new HashMap<String, BlockFunction>();
 
@@ -54,7 +58,7 @@ public class BlockCommand implements CommandExecutor {
 					Messenger.sendConfigMessage(sender, "command.block.place.remove.help");
 				} else
 					Messenger.sendConfigMessage(sender, "command.block.place.arguments");
-			} else if (args[0].equalsIgnoreCase("destroy"))
+			} else if (args[0].equalsIgnoreCase("destroy")) {
 				if (args.length == 1)
 					Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
 				else if (args[1].equalsIgnoreCase("add")) {
@@ -74,6 +78,9 @@ public class BlockCommand implements CommandExecutor {
 					Messenger.sendConfigMessage(sender, "command.block.destroy.remove.help");
 				} else
 					Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
+			} else {
+				Messenger.sendConfigMessage(sender, "command.block.arguments");
+			}
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
@@ -172,5 +179,13 @@ public class BlockCommand implements CommandExecutor {
 							.toLowerCase().replaceAll("_", " ")
 							+ (placed.getData() != (byte) 0 ? ":" + placed.getData() : "")));
 		}
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+		if (args.length == 1) {
+			return Arrays.asList("place", "destroy");
+		} else if (args.length == 2) { return Arrays.asList("add", "remove"); }
+		return new ArrayList<String>();
 	}
 }

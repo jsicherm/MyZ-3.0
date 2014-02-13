@@ -94,9 +94,8 @@ public class ChestScanner implements Listener {
 			int percent = 0;
 			try {
 				percent = Integer.parseInt(e.getMessage().replaceAll("%", ""));
-				if (percent > 100) {
+				if (percent > 100)
 					percent = 100;
-				}
 			} catch (Exception exc) {
 			}
 			Messenger.sendMessage(e.getPlayer(), "&e" + Utils.getNameOf(lootCreators.get(e.getPlayer().getName()).newest) + ": &a"
@@ -120,8 +119,7 @@ public class ChestScanner implements Listener {
 
 			Configuration.setLootset(lootset.name, lootset.spawnable);
 			for (ItemStack item : lootset.spawnable.keySet())
-				Messenger
-						.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
+				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
 			lootCreators.remove(e.getPlayer().getName());
 		}
 	}

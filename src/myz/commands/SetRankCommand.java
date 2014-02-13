@@ -3,8 +3,12 @@
  */
 package myz.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import myz.MyZ;
 import myz.support.PlayerData;
+import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 
 import org.bukkit.Bukkit;
@@ -12,13 +16,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 /**
  * @author Jordan
  * 
  */
-public class SetRankCommand implements CommandExecutor {
+public class SetRankCommand implements CommandExecutor, TabCompleter {
 
 	/* (non-Javadoc)
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
@@ -73,5 +78,22 @@ public class SetRankCommand implements CommandExecutor {
 		else
 			Messenger.sendConfigConsoleMessage("command.setrank.failure");
 		return true;
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+		List<String> returnList = new ArrayList<String>();
+		if (args.length == 1) {
+			if (sender instanceof Player)
+				for (Player player : ((Player) sender).getWorld().getPlayers())
+					returnList.add(player.getName());
+			else
+				for (Player player : Bukkit.getOnlinePlayers())
+					returnList.add(player.getName());
+		} else if (args.length == 2) {
+			for (int i : Configuration.getRanks())
+				returnList.add(i + "");
+		}
+		return returnList;
 	}
 }

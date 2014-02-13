@@ -9,7 +9,7 @@ import org.json.JSONWriter;
 
 /**
  * @author mkremins
- *
+ * 
  */
 final class MessagePart {
 
@@ -24,20 +24,15 @@ final class MessagePart {
 
 	JSONWriter writeJson(final JSONWriter json) throws JSONException {
 		json.object().key("text").value(text);
-		if (color != null) {
+		if (color != null)
 			json.key("color").value(color.name().toLowerCase());
-		}
-		if (styles != null) {
-			for (final ChatColor style : styles) {
+		if (styles != null)
+			for (final ChatColor style : styles)
 				json.key(style.name().toLowerCase()).value(true);
-			}
-		}
-		if (clickActionName != null && clickActionData != null) {
+		if (clickActionName != null && clickActionData != null)
 			json.key("clickEvent").object().key("action").value(clickActionName).key("value").value(clickActionData).endObject();
-		}
-		if (hoverActionName != null && hoverActionData != null) {
+		if (hoverActionName != null && hoverActionData != null)
 			json.key("hoverEvent").object().key("action").value(hoverActionName).key("value").value(hoverActionData).endObject();
-		}
 		return json.endObject();
 	}
 

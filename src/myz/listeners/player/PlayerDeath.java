@@ -30,10 +30,9 @@ public class PlayerDeath implements Listener {
 			return;
 
 		// No deathmessages for pvp.
-		if (e.getEntity().getKiller() != null) {
+		if (e.getEntity().getKiller() != null)
 			e.setDeathMessage(null);
-		}
-		
+
 		// Get rid of our horse.
 		for (Horse horse : e.getEntity().getWorld().getEntitiesByClass(Horse.class))
 			if (horse.getOwner() != null && horse.getOwner().getName() != null

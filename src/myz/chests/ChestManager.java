@@ -96,7 +96,8 @@ public class ChestManager {
 		Random random = new Random();
 		Map<ItemStack, Double> spawning = Configuration.getLootsetContents(lootset);
 		// Lootset doesn't exist.
-		if (spawning.isEmpty()) { return; }
+		if (spawning.isEmpty())
+			return;
 		// Make sure we add at least one item. Also ensure that there's a 10%
 		// chance we do this again. The more the merrier.
 		while (fill < 1 || random.nextDouble() <= 0.1)

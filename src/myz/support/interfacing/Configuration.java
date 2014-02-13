@@ -656,6 +656,13 @@ public class Configuration {
 		return the_location.getX() >= minx && the_location.getX() <= maxx && the_location.getY() >= miny && the_location.getY() <= maxy
 				&& the_location.getZ() >= minz && the_location.getZ() <= maxz;
 	}
+	
+	/**
+	 * @return the keys of rank_prefix
+	 */
+	public static Set<Integer> getRanks() {
+		return rank_prefix.keySet();
+	}
 
 	/**
 	 * @return the host
@@ -1217,7 +1224,8 @@ public class Configuration {
 	 * @return the from_prefix
 	 */
 	public static String getFromPrefix(Player fromPlayer) {
-		return getStringWithArguments(Messenger.getConfigMessage(Localizer.getLocale(fromPlayer),"private.from_prefix"), fromPlayer.getDisplayName());
+		return getStringWithArguments(Messenger.getConfigMessage(Localizer.getLocale(fromPlayer), "private.from_prefix"),
+				fromPlayer.getDisplayName());
 	}
 
 	/**
@@ -1226,7 +1234,8 @@ public class Configuration {
 	 * @return the to_prefix
 	 */
 	public static String getToPrefix(Player toPlayer) {
-		return getStringWithArguments(Messenger.getConfigMessage(Localizer.getLocale(toPlayer), "private.to_prefix"), toPlayer.getDisplayName());
+		return getStringWithArguments(Messenger.getConfigMessage(Localizer.getLocale(toPlayer), "private.to_prefix"),
+				toPlayer.getDisplayName());
 	}
 
 	/**

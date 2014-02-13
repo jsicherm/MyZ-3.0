@@ -20,7 +20,7 @@ import org.json.JSONStringer;
 
 /**
  * @author mkremins
- *
+ * 
  */
 public class FancyMessage {
 
@@ -32,15 +32,16 @@ public class FancyMessage {
 	}
 
 	public FancyMessage color(final ChatColor color) {
-		if (!color.isColor()) { throw new IllegalArgumentException(color.name() + " is not a color"); }
+		if (!color.isColor())
+			throw new IllegalArgumentException(color.name() + " is not a color");
 		latest().color = color;
 		return this;
 	}
 
 	public FancyMessage style(final ChatColor... styles) {
-		for (final ChatColor style : styles) {
-			if (!style.isFormat()) { throw new IllegalArgumentException(style.name() + " is not a style"); }
-		}
+		for (final ChatColor style : styles)
+			if (!style.isFormat())
+				throw new IllegalArgumentException(style.name() + " is not a style");
 		latest().styles = styles;
 		return this;
 	}
@@ -92,13 +93,12 @@ public class FancyMessage {
 	public String toJSONString() {
 		final JSONStringer json = new JSONStringer();
 		try {
-			if (messageParts.size() == 1) {
+			if (messageParts.size() == 1)
 				latest().writeJson(json);
-			} else {
+			else {
 				json.object().key("text").value("").key("extra").array();
-				for (final MessagePart part : messageParts) {
+				for (final MessagePart part : messageParts)
 					part.writeJson(json);
-				}
 				json.endArray().endObject();
 			}
 		} catch (final JSONException e) {

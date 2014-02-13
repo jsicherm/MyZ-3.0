@@ -3,6 +3,9 @@
  */
 package myz.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import myz.MyZ;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
@@ -13,13 +16,14 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 /**
  * @author Jordan
  * 
  */
-public class FriendCommand implements CommandExecutor {
+public class FriendCommand implements CommandExecutor, TabCompleter {
 
 	/* (non-Javadoc)
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
@@ -48,5 +52,16 @@ public class FriendCommand implements CommandExecutor {
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+		List<String> returnList = new ArrayList<String>();
+		if (sender instanceof Player && args.length == 1) {
+			for (Player player : ((Player) sender).getWorld().getPlayers()) {
+				returnList.add(player.getName());
+			}
+		}
+		return returnList;
 	}
 }

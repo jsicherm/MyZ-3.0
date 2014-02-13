@@ -104,12 +104,10 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO configurable death loot (?)
-	// TODO air pollution random event
-	// TODO localizable to user locale.
 	// TODO sound attraction to (trap)doors.
 	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
-	// TODO grave-digging, speed-sugar.
-	// TODO use construction parts to create clans. Builder is clan owner.
+	// TODO grave-digging
+	// TODO use construction parts to create clans. Builder is clan owner. Requires Build-in-a-box.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -134,13 +132,12 @@ public class MyZ extends JavaPlugin {
 		instance = this;
 		getDataFolder().mkdir();
 		File defaultConfig = new File(getDataFolder() + File.separator + "config.yml");
-		if (!defaultConfig.exists()) {
+		if (!defaultConfig.exists())
 			try {
 				defaultConfig.createNewFile();
 			} catch (Exception exc) {
 				getLogger().warning("Unable to save default config: " + exc.getMessage());
 			}
-		}
 		loadPlayerData();
 		loadBlocks();
 		loadLocalizable();
@@ -403,19 +400,17 @@ public class MyZ extends JavaPlugin {
 	 */
 	private void loadLocalizable() {
 		File folder = new File(getDataFolder() + File.separator + "locales");
-		if (!folder.exists()) {
+		if (!folder.exists())
 			folder.mkdir();
-		}
 		for (Localizer locale : Localizer.values()) {
 			File localeable = new File(getDataFolder() + File.separator + "locales" + File.separator + locale.getCode() + ".yml");
-			if (!localeable.exists()) {
+			if (!localeable.exists())
 				try {
 					localeable.createNewFile();
 				} catch (IOException e) {
 					getLogger().warning("Unable to create locale " + locale.getCode());
 					e.printStackTrace();
 				}
-			}
 			localizable.put(locale.getCode(), YamlConfiguration.loadConfiguration(localeable));
 		}
 	}
@@ -485,9 +480,8 @@ public class MyZ extends JavaPlugin {
 	public FileConfiguration getPlayerDataConfig(String player) {
 		if (!playerdata.containsKey(player)) {
 			File datafolder = new File(getDataFolder() + File.separator + "data");
-			if (!datafolder.exists()) {
+			if (!datafolder.exists())
 				datafolder.mkdir();
-			}
 			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + player + ".yml");
 			if (!datafile.exists())
 				try {

@@ -8,11 +8,9 @@ import myz.support.PlayerData;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * @author Jordan
@@ -87,7 +85,7 @@ public class Messenger {
 		for (Player player : playerFor.getWorld().getPlayers())
 			new FancyMessage(Configuration.getPrefixForPlayerRank(playerFor)).itemTooltip(playerFor.getItemInHand())
 					.then(" " + Messenger.getConfigMessage(Localizer.getLocale(player), "murdered") + " ")
-					.then(Configuration.getPrefixForPlayerRank((Player) typeFor)).itemTooltip(typeFor.getItemInHand());
+					.then(Configuration.getPrefixForPlayerRank(typeFor)).itemTooltip(typeFor.getItemInHand());
 	}
 
 	/**

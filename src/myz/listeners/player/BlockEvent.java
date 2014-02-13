@@ -81,15 +81,15 @@ public class BlockEvent implements Listener {
 	 */
 	private Location didClickOutGrave(Block clicked) {
 		Material g = Material.COBBLE_WALL;
-		if (clicked.getType() != Material.SOUL_SAND) { return null; }
+		if (clicked.getType() != Material.SOUL_SAND)
+			return null;
 		Location click = clicked.getLocation();
 		// There is a grave above where we clicked.
 		if (click.clone().add(0, 1, 0).getBlock().getType() == g && click.clone().add(0, 2, 0).getBlock().getType() == g
-				&& click.clone().add(0, 3, 0).getBlock().getType() == g && click.clone().add(0, 4, 0).getBlock().getType() == g) {
-			if ((click.clone().add(1, 3, 0).getBlock().getType() == g && click.clone().add(-1, 3, 0).getBlock().getType() == g)
-					|| (click.clone().add(0, 3, 1).getBlock().getType() == g && click.clone().add(0, 3, 1).getBlock().getType() == g)) { return click
-					.clone().add(0, 1, 0); }
-		}
+				&& click.clone().add(0, 3, 0).getBlock().getType() == g && click.clone().add(0, 4, 0).getBlock().getType() == g)
+			if (click.clone().add(1, 3, 0).getBlock().getType() == g && click.clone().add(-1, 3, 0).getBlock().getType() == g
+					|| click.clone().add(0, 3, 1).getBlock().getType() == g && click.clone().add(0, 3, 1).getBlock().getType() == g)
+				return click.clone().add(0, 1, 0);
 		return null;
 	}
 
@@ -107,7 +107,8 @@ public class BlockEvent implements Listener {
 	 */
 	private Location didClickGrave(Block clicked) {
 		Material g = Material.COBBLE_WALL;
-		if (clicked.getType() != g) { return null; }
+		if (clicked.getType() != g)
+			return null;
 		Location click = clicked.getLocation();
 		// Click the base block.
 		if (click.clone().subtract(0, 1, 0).getBlock().getType() == Material.SOUL_SAND
@@ -115,53 +116,46 @@ public class BlockEvent implements Listener {
 				&& click.clone().subtract(0, 3, 0).getBlock().getType() == Material.AIR) {
 			// There is a pillar of three more above.
 			if (click.clone().add(0, 1, 0).getBlock().getType() == g && click.clone().add(0, 2, 0).getBlock().getType() == g
-					&& click.clone().add(0, 3, 0).getBlock().getType() == g) {
+					&& click.clone().add(0, 3, 0).getBlock().getType() == g)
 				// There are two branches in either direction so we have a
 				// grave.
-				if ((click.clone().add(1, 2, 0).getBlock().getType() == g && click.clone().add(-1, 2, 0).getBlock().getType() == g)
-						|| (click.clone().add(0, 2, 1).getBlock().getType() == g && click.clone().add(0, 2, -1).getBlock().getType() == g)) { return click
-						.clone().subtract(0, 2, 0); }
-			}
-			// Click the second-up block.
+				if (click.clone().add(1, 2, 0).getBlock().getType() == g && click.clone().add(-1, 2, 0).getBlock().getType() == g
+						|| click.clone().add(0, 2, 1).getBlock().getType() == g && click.clone().add(0, 2, -1).getBlock().getType() == g)
+					return click.clone().subtract(0, 2, 0);
 		} else if (click.clone().subtract(0, 2, 0).getBlock().getType() == Material.SOUL_SAND
 				&& click.clone().subtract(0, 3, 0).getBlock().getType() == Material.AIR
 				&& click.clone().subtract(0, 4, 0).getBlock().getType() == Material.AIR) {
 			// There is a pillar of three more above.
 			if (click.clone().subtract(0, 1, 0).getBlock().getType() == g && click.clone().add(0, 1, 0).getBlock().getType() == g
-					&& click.clone().add(0, 2, 0).getBlock().getType() == g) {
+					&& click.clone().add(0, 2, 0).getBlock().getType() == g)
 				// There are two branches in either direction so we have a
 				// grave.
-				if ((click.clone().add(1, 1, 0).getBlock().getType() == g && click.clone().add(-1, 1, 0).getBlock().getType() == g)
-						|| (click.clone().add(0, 1, 1).getBlock().getType() == g && click.clone().add(0, 1, -1).getBlock().getType() == g)) { return click
-						.clone().subtract(0, 3, 0); }
-			}
-			// Click the third-up block.
+				if (click.clone().add(1, 1, 0).getBlock().getType() == g && click.clone().add(-1, 1, 0).getBlock().getType() == g
+						|| click.clone().add(0, 1, 1).getBlock().getType() == g && click.clone().add(0, 1, -1).getBlock().getType() == g)
+					return click.clone().subtract(0, 3, 0);
 		} else if (click.clone().subtract(0, 3, 0).getBlock().getType() == Material.SOUL_SAND
 				&& click.clone().subtract(0, 4, 0).getBlock().getType() == Material.AIR
 				&& click.clone().subtract(0, 5, 0).getBlock().getType() == Material.AIR) {
 			// There is a pillar of three more above.
 			if (click.clone().subtract(0, 2, 0).getBlock().getType() == g && click.clone().subtract(0, 1, 0).getBlock().getType() == g
-					&& click.clone().add(0, 1, 0).getBlock().getType() == g) {
+					&& click.clone().add(0, 1, 0).getBlock().getType() == g)
 				// There are two branches in either direction so we have a
 				// grave.
-				if ((click.clone().add(1, 0, 0).getBlock().getType() == g && click.clone().add(-1, 0, 0).getBlock().getType() == g)
-						|| (click.clone().add(0, 0, 1).getBlock().getType() == g && click.clone().add(0, 0, -1).getBlock().getType() == g)) { return click
-						.clone().subtract(0, 4, 0); }
-			}
-			// Click the top block.
+				if (click.clone().add(1, 0, 0).getBlock().getType() == g && click.clone().add(-1, 0, 0).getBlock().getType() == g
+						|| click.clone().add(0, 0, 1).getBlock().getType() == g && click.clone().add(0, 0, -1).getBlock().getType() == g)
+					return click.clone().subtract(0, 4, 0);
 		} else if (click.clone().subtract(0, 4, 0).getBlock().getType() == Material.SOUL_SAND
 				&& click.clone().subtract(0, 5, 0).getBlock().getType() == Material.AIR
-				&& click.clone().subtract(0, 6, 0).getBlock().getType() == Material.AIR) {
+				&& click.clone().subtract(0, 6, 0).getBlock().getType() == Material.AIR)
 			// There is a pillar of three more above.
 			if (click.clone().subtract(0, 3, 0).getBlock().getType() == g && click.clone().subtract(0, 2, 0).getBlock().getType() == g
-					&& click.clone().subtract(0, 1, 0).getBlock().getType() == g) {
+					&& click.clone().subtract(0, 1, 0).getBlock().getType() == g)
 				// There are two branches in either direction so we have a
 				// grave.
-				if ((click.clone().subtract(-1, 1, 0).getBlock().getType() == g && click.clone().subtract(1, 1, 0).getBlock().getType() == g)
-						|| (click.clone().subtract(0, 1, -1).getBlock().getType() == g && click.clone().subtract(0, 1, 1).getBlock()
-								.getType() == g)) { return click.clone().subtract(0, 5, 0); }
-			}
-		}
+				if (click.clone().subtract(-1, 1, 0).getBlock().getType() == g && click.clone().subtract(1, 1, 0).getBlock().getType() == g
+						|| click.clone().subtract(0, 1, -1).getBlock().getType() == g
+						&& click.clone().subtract(0, 1, 1).getBlock().getType() == g)
+					return click.clone().subtract(0, 5, 0);
 		return null;
 	}
 

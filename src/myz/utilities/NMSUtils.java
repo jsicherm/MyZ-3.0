@@ -48,7 +48,8 @@ public class NMSUtils {
 				e.printStackTrace();
 				return null;
 			}
-		if (craftPlayer == null) { return null; }
+		if (craftPlayer == null)
+			return null;
 		return craftPlayer.cast(player);
 	}
 
@@ -91,11 +92,13 @@ public class NMSUtils {
 			packet = Class.forName("net.minecraft.server." + NMSUtils.version + ".Packet");
 
 		Object handle = castToNMS(inPlayer);
-		if (handle == null) { return; }
+		if (handle == null)
+			return;
 		if (connection == null)
 			connection = handle.getClass().getField("playerConnection");
 		Object con = connection.get(handle);
-		if (con == null) { return; }
+		if (con == null)
+			return;
 		if (sendPacket == null)
 			sendPacket = con.getClass().getMethod("sendPacket", packet);
 		if (sendPacket != null)
