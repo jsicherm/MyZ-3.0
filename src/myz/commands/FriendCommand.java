@@ -57,11 +57,9 @@ public class FriendCommand implements CommandExecutor, TabCompleter {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		List<String> returnList = new ArrayList<String>();
-		if (sender instanceof Player && args.length == 1) {
-			for (Player player : ((Player) sender).getWorld().getPlayers()) {
+		if (sender instanceof Player && args.length == 1)
+			for (Player player : ((Player) sender).getWorld().getPlayers())
 				returnList.add(player.getName());
-			}
-		}
 		return returnList;
 	}
 }

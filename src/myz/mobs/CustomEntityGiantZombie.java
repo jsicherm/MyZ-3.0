@@ -46,8 +46,10 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 
 		getNavigation().b(true);
 		goalSelector.a(0, new PathfinderGoalFloat(this));
-		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getGiantSpeed(), false));
-		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getGiantSpeed(), true));
+		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.giant.speed"),
+				false));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, (Double) Configuration.getConfig("mobs.giant.speed"),
+				true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(6, new PathfinderGoalRandomStroll(this, 1.0D));
@@ -75,7 +77,7 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 	@Override
 	protected void aD() {
 		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getGiantDamage());
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.giant.damage"));
 	}
 
 	@Override

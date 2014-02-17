@@ -33,18 +33,18 @@ public class ConsumeFood implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onConsume(PlayerItemConsumeEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		final Player player = e.getPlayer();
 		ItemStack item = e.getItem();
 
 		if (isFood(item)) {
-			if (player.getHealth() + Configuration.getFoodHealthValue() <= player.getMaxHealth()) {
-				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getFoodHealthValue(),
+			if (player.getHealth() + Configuration.getHealAmount(item) <= player.getMaxHealth()) {
+				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getHealAmount(item),
 						RegainReason.EATING);
 				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
 				if (!regainEvent.isCancelled())
-					player.setHealth(player.getHealth() + Configuration.getFoodHealthValue());
+					player.setHealth(player.getHealth() + Configuration.getHealAmount(item));
 			}
 			addEffects(player, item);
 		} else if (item.getType() == Material.POTION && item.getDurability() == (short) 0) {
@@ -65,7 +65,7 @@ public class ConsumeFood implements Listener {
 				default:
 					break;
 				}
-				MyZ.instance.setThirst(player, (int) (Configuration.getMaxThirstLevel() * factor));
+				MyZ.instance.setThirst(player, (int) ((Integer) Configuration.getConfig(Configuration.THIRST_MAX) * factor));
 			}
 		} else if (item.getType() == Material.POTION && item.getDurability() != (short) 0 || item.getType() == Material.MILK_BUCKET) {
 			if (item.getType() == Material.MILK_BUCKET) {
@@ -73,7 +73,7 @@ public class ConsumeFood implements Listener {
 				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
 				MyZ.instance.getServer().getPluginManager().callEvent(event);
 				if (!event.isCancelled())
-					MyZ.instance.setThirst(player, Configuration.getMaxThirstLevel());
+					MyZ.instance.setThirst(player, (Integer) Configuration.getConfig(Configuration.THIRST_MAX));
 			}
 			MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 				@Override
@@ -82,7 +82,8 @@ public class ConsumeFood implements Listener {
 				}
 			}, 0L);
 		} else if (item.getType() == Material.ROTTEN_FLESH) {
-			if (random.nextDouble() <= Configuration.getPoisonChanceFlesh() && Configuration.getPoisonChanceFlesh() != 0.0)
+			if (random.nextDouble() <= (Integer) Configuration.getConfig("damage.chance_of_poison_from_flesh")
+					&& (Integer) Configuration.getConfig("damage.chance_of_poison_from_flesh") != 0.0)
 				MyZ.instance.startPoison(player);
 			addEffects(player, item);
 		}

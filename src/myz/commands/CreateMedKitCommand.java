@@ -93,7 +93,7 @@ public class CreateMedKitCommand implements CommandExecutor {
 		return true;
 	}
 
-	private class UnfinishedMedKit {
+	public static class UnfinishedMedKit {
 
 		private String configID, name;
 		private int ointment = -1, antiseptic = -1;
@@ -101,6 +101,30 @@ public class CreateMedKitCommand implements CommandExecutor {
 
 		public UnfinishedMedKit(String configID) {
 			this.configID = configID;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getConfigID() {
+			return configID;
+		}
+
+		public int getOintment() {
+			return ointment;
+		}
+
+		public int getAntiseptic() {
+			return antiseptic;
+		}
+
+		public ItemStack getInput() {
+			return input;
+		}
+
+		public ItemStack getOutput() {
+			return output;
 		}
 
 		public MedKit toMedKit() {

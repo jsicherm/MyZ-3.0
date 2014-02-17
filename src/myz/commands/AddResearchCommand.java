@@ -94,7 +94,7 @@ public class AddResearchCommand implements CommandExecutor, TabCompleter {
 						Messenger.sendMessage(
 								sender,
 								Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.research."
-										+ (reward ? "reward." : "") + "added", value, points));
+										+ (reward ? "reward." : "") + "added", value + "", points + ""));
 						MyZ.instance.saveResearchConfig();
 					} catch (NumberFormatException exc) {
 						Messenger.sendConfigMessage(sender, "command.research.arguments");

@@ -3,14 +3,17 @@
  */
 package myz.listeners.player;
 
+import java.util.List;
+
 import myz.MyZ;
+import myz.support.interfacing.Configuration;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.kitteh.tag.PlayerReceiveNameTagEvent;
+import org.kitteh.tag.AsyncPlayerReceiveNameTagEvent;
 import org.kitteh.tag.TagAPI;
 
 /**
@@ -20,8 +23,8 @@ import org.kitteh.tag.TagAPI;
 public class KittehTag implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
-	private void onNameTagsReceived(PlayerReceiveNameTagEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getNamedPlayer().getWorld().getName()))
+	private void onNameTagsReceived(AsyncPlayerReceiveNameTagEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getNamedPlayer().getWorld().getName()))
 			return;
 
 		Player player = e.getNamedPlayer();

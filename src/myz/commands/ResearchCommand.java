@@ -3,7 +3,9 @@
  */
 package myz.commands;
 
-import myz.MyZ;
+import java.util.List;
+
+import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Utils;
 
@@ -25,7 +27,7 @@ public class ResearchCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!MyZ.instance.getWorlds().contains(((Player) sender).getWorld().getName()))
+			if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(((Player) sender).getWorld().getName()))
 				return true;
 			Utils.showResearchDialog((Player) sender, 1);
 		} else

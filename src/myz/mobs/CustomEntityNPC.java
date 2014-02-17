@@ -90,11 +90,22 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case ENEMY_SWORDSMAN:
 		case ENEMY_WANDERER:
 			if (type != NPCType.ENEMY_ARCHER) {
-				goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getNPCSpeed(), false));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityGiantZombie.class, Configuration.getNPCSpeed(), true));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityPigZombie.class, Configuration.getNPCSpeed(), true));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityHorse.class, Configuration.getNPCSpeed(), true));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityZombie.class, Configuration.getNPCSpeed(), true));
+				goalSelector.a(2,
+						new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.npc.speed"), false));
+				goalSelector.a(
+						3,
+						new PathfinderGoalZombieAttack(this, CustomEntityGiantZombie.class, (Double) Configuration
+								.getConfig("mobs.npc.speed"), true));
+				goalSelector.a(
+						3,
+						new PathfinderGoalZombieAttack(this, CustomEntityPigZombie.class, (Double) Configuration
+								.getConfig("mobs.npc.speed"), true));
+				goalSelector.a(3,
+						new PathfinderGoalZombieAttack(this, CustomEntityHorse.class, (Double) Configuration.getConfig("mobs.npc.speed"),
+								true));
+				goalSelector.a(3,
+						new PathfinderGoalZombieAttack(this, CustomEntityZombie.class, (Double) Configuration.getConfig("mobs.npc.speed"),
+								true));
 			} else
 				goalSelector.a(4, new PathfinderGoalArrowAttack(this, 1.0, 20, 60, 15f));
 			targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityHuman.class, 0, true));
@@ -107,10 +118,20 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		case FRIEND_SWORDSMAN:
 		case FRIEND_WANDERER:
 			if (type != NPCType.FRIEND_ARCHER) {
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityGiantZombie.class, Configuration.getNPCSpeed(), true));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityPigZombie.class, Configuration.getNPCSpeed(), true));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityHorse.class, Configuration.getNPCSpeed(), true));
-				goalSelector.a(3, new PathfinderGoalZombieAttack(this, CustomEntityZombie.class, Configuration.getNPCSpeed(), true));
+				goalSelector.a(
+						3,
+						new PathfinderGoalZombieAttack(this, CustomEntityGiantZombie.class, (Double) Configuration
+								.getConfig("mobs.npc.speed"), true));
+				goalSelector.a(
+						3,
+						new PathfinderGoalZombieAttack(this, CustomEntityPigZombie.class, (Double) Configuration
+								.getConfig("mobs.npc.speed"), true));
+				goalSelector.a(3,
+						new PathfinderGoalZombieAttack(this, CustomEntityHorse.class, (Double) Configuration.getConfig("mobs.npc.speed"),
+								true));
+				goalSelector.a(3,
+						new PathfinderGoalZombieAttack(this, CustomEntityZombie.class, (Double) Configuration.getConfig("mobs.npc.speed"),
+								true));
 			} else
 				goalSelector.a(4, new PathfinderGoalArrowAttack(this, 1.0, 20, 60, 15f));
 			targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, CustomEntityGiantZombie.class, 0, false));
@@ -127,7 +148,7 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 	@Override
 	protected void aD() {
 		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getNPCDamage());
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.npc.damage"));
 	}
 
 	public NPCType getType() {
@@ -364,7 +385,7 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		if (random.nextInt(priority + 1) >= 1) {
 			setGoalTarget(null);
 			target = null;
-			PathingSupport.setTarget(this, location, Configuration.getNPCSpeed());
+			PathingSupport.setTarget(this, location, (Double) Configuration.getConfig("mobs.npc.speed"));
 		}
 	}
 }

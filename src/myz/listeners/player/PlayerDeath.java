@@ -3,7 +3,10 @@
  */
 package myz.listeners.player;
 
+import java.util.List;
+
 import myz.MyZ;
+import myz.support.interfacing.Configuration;
 import myz.utilities.Utils;
 import net.minecraft.server.v1_7_R1.EnumClientCommand;
 import net.minecraft.server.v1_7_R1.PacketPlayInClientCommand;
@@ -26,7 +29,7 @@ public class PlayerDeath implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDeath(PlayerDeathEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 
 		// No deathmessages for pvp.

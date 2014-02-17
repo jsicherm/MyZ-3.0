@@ -112,7 +112,7 @@ public class PlayerData {
 	 * @return The PlayerData stored or null if no data is stored.
 	 */
 	public static PlayerData getDataFor(String player) {
-		if (!Configuration.usePlayerData())
+		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return null;
 		if (!playerDataExists(player))
 			return null;
@@ -193,7 +193,7 @@ public class PlayerData {
 			int thirst, String clan, long minutes_alive, int minutes_alive_life, int minutes_alive_life_record,
 			int player_kills_life_record, int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record,
 			int research, boolean isZombie) {
-		if (!Configuration.usePlayerData())
+		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return null;
 		if (!playerDataExists(player)) {
 			FileConfiguration section = MyZ.instance.getPlayerDataConfig(player.getName());
@@ -248,7 +248,7 @@ public class PlayerData {
 	 * @return True if the entry exists, false otherwise.
 	 */
 	private static boolean playerDataExists(String player) {
-		if (!Configuration.usePlayerData())
+		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return false;
 		FileConfiguration config = MyZ.instance.getPlayerDataConfig(player);
 		return config != null;
@@ -259,7 +259,7 @@ public class PlayerData {
 	 * playerDataExists() resolves to true.
 	 */
 	public void save() {
-		if (!Configuration.usePlayerData())
+		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return;
 
 		if (playerDataExists(name)) {
@@ -803,7 +803,7 @@ public class PlayerData {
 	 * @return True if the player is a bandit, false otherwise.
 	 */
 	public boolean isBandit() {
-		return player_kills_life >= Configuration.getBanditKills();
+		return player_kills_life >= (Integer) Configuration.getConfig(Configuration.BANDIT);
 	}
 
 	/**
@@ -812,7 +812,7 @@ public class PlayerData {
 	 * @return True if the player is a healer, false otherwise.
 	 */
 	public boolean isHealer() {
-		return player_kills_life >= Configuration.getHealerHeals();
+		return player_kills_life >= (Integer) Configuration.getConfig(Configuration.HEALER);
 	}
 
 	/**

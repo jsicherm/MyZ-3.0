@@ -42,7 +42,7 @@ public class SaveKitCommand implements CommandExecutor, TabCompleter {
 			List<ItemStack> inventory = Arrays.asList(((Player) sender).getInventory().getContents());
 			Configuration.setArmorContents(armor, rank);
 			Configuration.setInventoryContents(inventory, rank);
-			sender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.savekit.saved", rank));
+			sender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.savekit.saved", rank + ""));
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
@@ -51,8 +51,9 @@ public class SaveKitCommand implements CommandExecutor, TabCompleter {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		List<String> returnList = new ArrayList<String>();
-		if (args.length != 1) { return returnList; }
-		returnList.add(Configuration.getRanks().size() + "");
+		if (args.length != 1)
+			return returnList;
+		returnList.add(Configuration.getRankPrefixes().size() + "");
 		return returnList;
 	}
 }

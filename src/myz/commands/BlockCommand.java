@@ -52,7 +52,8 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 						}
 						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_ADD, seconds));
 						Messenger.sendConfigMessage(sender, "command.block.place.add.help");
-					}
+					} else
+						Messenger.sendConfigMessage(sender, "command.block.place.arguments");
 				} else if (args[1].equalsIgnoreCase("remove")) {
 					blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_REMOVE, -1));
 					Messenger.sendConfigMessage(sender, "command.block.place.remove.help");
@@ -72,15 +73,15 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 						}
 						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_ADD, seconds));
 						Messenger.sendConfigMessage(sender, "command.block.destroy.add.help");
-					}
+					} else
+						Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
 				} else if (args[1].equalsIgnoreCase("remove")) {
 					blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_REMOVE, -1));
 					Messenger.sendConfigMessage(sender, "command.block.destroy.remove.help");
 				} else
 					Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
-			} else {
+			} else
 				Messenger.sendConfigMessage(sender, "command.block.arguments");
-			}
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
@@ -183,9 +184,10 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-		if (args.length == 1) {
+		if (args.length == 1)
 			return Arrays.asList("place", "destroy");
-		} else if (args.length == 2) { return Arrays.asList("add", "remove"); }
+		else if (args.length == 2)
+			return Arrays.asList("add", "remove");
 		return new ArrayList<String>();
 	}
 }

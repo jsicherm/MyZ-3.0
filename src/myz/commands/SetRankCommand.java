@@ -90,10 +90,9 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 			else
 				for (Player player : Bukkit.getOnlinePlayers())
 					returnList.add(player.getName());
-		} else if (args.length == 2) {
-			for (int i : Configuration.getRanks())
+		} else if (args.length == 2)
+			for (int i : Configuration.getRankPrefixes().keySet())
 				returnList.add(i + "");
-		}
 		return returnList;
 	}
 }

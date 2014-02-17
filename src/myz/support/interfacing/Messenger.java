@@ -164,13 +164,14 @@ public class Messenger {
 	 *            Any applicable variables denoted by a %s.
 	 * @return The colored message with replaced variables.
 	 */
-	public static String getConfigMessage(Localizer locale, String uncolored_config_message, Object... variables) {
+	public static String getConfigMessage(Localizer locale, String uncolored_config_message, String... variables) {
 		String message = MyZ.instance.getLocalizableConfig(locale).getString(uncolored_config_message);
 		if (variables != null)
 			try {
 				message = String.format(message, variables);
 			} catch (Exception exc) {
-				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat.");
+				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat: "
+						+ exc.getMessage());
 				message = message.replaceAll("%s", "");
 			}
 		return ChatColor.translateAlternateColorCodes('&', message);

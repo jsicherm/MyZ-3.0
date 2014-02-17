@@ -3,6 +3,8 @@
  */
 package myz.commands;
 
+import java.util.List;
+
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
@@ -38,12 +40,13 @@ public class SetLobbyCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!MyZ.instance.getWorlds().contains(((Player) sender).getWorld().getName()))
+			if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(((Player) sender).getWorld().getName()))
 				return true;
 			if (plugin != null && plugin.isEnabled()) {
 				Selection selection = plugin.getSelection((Player) sender);
 				if (selection != null && selection instanceof CuboidSelection) {
-					Configuration.setLobbyRegion((CuboidSelection) selection);
+					CuboidSelection cuboid = (CuboidSelection) selection;
+					Configuration.setLobbyRegion(cuboid.getMinimumPoint(), cuboid.getMaximumPoint());
 					Messenger.sendConfigMessage(sender, "command.setlobby.updated");
 				} else
 					Messenger.sendConfigMessage(sender, "command.setlobby.requires_cuboid");

@@ -4,6 +4,7 @@
 package myz.listeners.player;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import myz.MyZ;
@@ -38,7 +39,7 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onRightClick(PlayerInteractEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK)
 			return;
@@ -77,16 +78,18 @@ public class Heal implements Listener {
 		}
 
 		// Handle bandage healing.
-		if (player.getGameMode() != GameMode.CREATIVE && item != null
-				&& item.isSimilar(Configuration.getBandageItem() != null ? Configuration.getBandageItem() : new ItemStack(Material.PAPER))) {
+		if (player.getGameMode() != GameMode.CREATIVE
+				&& item != null
+				&& item.isSimilar((ItemStack) Configuration.getConfig("heal.bandage") != null ? (ItemStack) Configuration
+						.getConfig("heal.bandage") : new ItemStack(Material.PAPER))) {
 
 			MyZ.instance.stopBleeding(player);
-			if (player.getHealth() + Configuration.getBandageHealAmount() <= player.getMaxHealth()) {
-				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getBandageHealAmount(),
-						RegainReason.CUSTOM);
+			if (player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount") <= player.getMaxHealth()) {
+				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player,
+						(Integer) Configuration.getConfig("heal.bandage_heal_amount"), RegainReason.CUSTOM);
 				MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
 				if (!regainEvent.isCancelled())
-					player.setHealth(player.getHealth() + Configuration.getBandageHealAmount());
+					player.setHealth(player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount"));
 			} else
 				Messenger.sendConfigMessage(player, "heal.waste");
 
@@ -104,6 +107,8 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onRightClickOther(PlayerInteractEntityEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
 		if (!(e.getRightClicked() instanceof Player))
 			return;
 		final Player player = (Player) e.getRightClicked();
@@ -117,11 +122,12 @@ public class Heal implements Listener {
 			MedKit kit;
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
 				if (lastHeals.containsKey(healer.getName())
-						&& (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay())
+						&& (now - lastHeals.get(healer.getName())) / 1000 < (Integer) Configuration.getConfig("heal.delay_seconds"))
 					Messenger.sendMessage(
 							healer,
-							Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait", Configuration.getHealDelay()
-									- (now - lastHeals.get(healer.getName())) / 1000));
+							Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait",
+									(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getName()))
+											/ 1000 + ""));
 				else {
 					MyZ.instance.stopBleeding(player);
 					if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
@@ -150,21 +156,25 @@ public class Heal implements Listener {
 				}
 				flag = true;
 			}
-		} else if (player.getGameMode() != GameMode.CREATIVE && item != null
-				&& item.isSimilar(Configuration.getBandageItem() != null ? Configuration.getBandageItem() : new ItemStack(Material.PAPER))) {
-			if (lastHeals.containsKey(healer.getName()) && (now - lastHeals.get(healer.getName())) / 1000 < Configuration.getHealDelay())
+		} else if (player.getGameMode() != GameMode.CREATIVE
+				&& item != null
+				&& item.isSimilar((ItemStack) Configuration.getConfig("heal.bandage") != null ? (ItemStack) Configuration
+						.getConfig("heal.bandage") : new ItemStack(Material.PAPER))) {
+			if (lastHeals.containsKey(healer.getName())
+					&& (now - lastHeals.get(healer.getName())) / 1000 < (Integer) Configuration.getConfig("heal.delay_seconds"))
 				Messenger.sendMessage(
 						healer,
-						Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait", Configuration.getHealDelay()
-								- (now - lastHeals.get(healer.getName())) / 1000));
+						Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait",
+								(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getName())) / 1000
+										+ ""));
 			else {
 				MyZ.instance.stopBleeding(player);
-				if (player.getHealth() + Configuration.getBandageHealAmount() <= player.getMaxHealth()) {
-					EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player, Configuration.getBandageHealAmount(),
-							RegainReason.CUSTOM);
+				if (player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount") <= player.getMaxHealth()) {
+					EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player,
+							(Integer) Configuration.getConfig("heal.bandage_heal_amount"), RegainReason.CUSTOM);
 					MyZ.instance.getServer().getPluginManager().callEvent(regainEvent);
 					if (!regainEvent.isCancelled())
-						player.setHealth(player.getHealth() + Configuration.getBandageHealAmount());
+						player.setHealth(player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount"));
 				} else
 					Messenger.sendConfigMessage(player, "heal.waste");
 
@@ -191,7 +201,7 @@ public class Heal implements Listener {
 			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
 						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
-			Messenger.sendMessage(healer, Messenger.getConfigMessage(Localizer.getLocale(player), "heal.amount", amount));
+			Messenger.sendMessage(healer, Messenger.getConfigMessage(Localizer.getLocale(player), "heal.amount", amount + ""));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(healer);

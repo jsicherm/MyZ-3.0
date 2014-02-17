@@ -74,11 +74,17 @@ public class ChestManager {
 		if (isMyZChest(location))
 			if (Utils.getPlayersInRange(location, 5).isEmpty() || bypass) {
 				boolean wasChest = location.getBlock().getType() == Material.CHEST;
-				location.getBlock().setType(Material.CHEST);
+				if (wasChest) {
+					org.bukkit.block.Chest test = (org.bukkit.block.Chest) location.getBlock().getState();
+					wasChest = test.getBlockInventory().getContents().length > 0;
+				} else
+					location.getBlock().setType(Material.CHEST);
 				Chest chest = (Chest) location.getBlock().getState().getData();
 				chest.setFacingDirection(getFacingDirection(location));
+				String lootset = getLootset(location);
+				ChestScanner.nameChest(location.getBlock(), lootset);
 				if (!wasChest)
-					fillChest(((org.bukkit.block.Chest) location.getBlock().getState()).getBlockInventory(), getLootset(location));
+					fillChest(((org.bukkit.block.Chest) location.getBlock().getState()).getBlockInventory(), lootset);
 			}
 	}
 
@@ -150,14 +156,6 @@ public class ChestManager {
 	 *         listing doesn't exist in the config.
 	 */
 	private static BlockFace doesExist(Location location) {
-		// Contains without a direction set.
-		if (MyZ.instance.getChestsConfig().contains(
-				"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ())
-				|| MyZ.instance.getChestsConfig().contains(
-						"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
-								+ location.getBlockZ()))
-			return null;
-
 		// Look for set directions.
 		BlockFace[] values = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 		for (BlockFace slug : values)
@@ -167,6 +165,14 @@ public class ChestManager {
 							"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
 									+ location.getBlockZ() + "," + slug))
 				return slug;
+
+		// Contains without a direction set.
+		if (MyZ.instance.getChestsConfig().contains(
+				"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ())
+				|| MyZ.instance.getChestsConfig().contains(
+						"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
+								+ location.getBlockZ()))
+			return null;
 
 		// Not even a chest.
 		return null;
@@ -185,16 +191,6 @@ public class ChestManager {
 	private static String getLootset(Location location) {
 		if (isMyZChest(location)) {
 			String locationAt = null;
-			// Contains without a direction set.
-			if (MyZ.instance.getChestsConfig().contains(
-					"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ()))
-				locationAt = "chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
-			else if (MyZ.instance.getChestsConfig().contains(
-					"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
-							+ location.getBlockZ()))
-				locationAt = "chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
-						+ location.getBlockZ();
-
 			// Look for set directions.
 			BlockFace[] values = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 			for (BlockFace slug : values)
@@ -206,6 +202,17 @@ public class ChestManager {
 								+ location.getBlockZ() + "," + slug))
 					locationAt = "chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
 							+ location.getBlockZ() + "," + slug;
+
+			if (locationAt == null)
+				// Contains without a direction set.
+				if (MyZ.instance.getChestsConfig().contains(
+						"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ()))
+					locationAt = "chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+				else if (MyZ.instance.getChestsConfig().contains(
+						"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
+								+ location.getBlockZ()))
+					locationAt = "chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
+							+ location.getBlockZ();
 
 			if (locationAt != null)
 				return MyZ.instance.getChestsConfig().getString(locationAt);

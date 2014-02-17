@@ -26,12 +26,13 @@ public class SpawnsCommand implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		List<WorldlessLocation> spawnpoints = Configuration.getSpawnpoints();
+		List<String> spawnpoints = (List<String>) Configuration.getConfig("spawnpoints");
 		int spawnnumber = 1;
 		ChatColor current = ChatColor.YELLOW;
 		boolean player = sender instanceof Player;
 
-		for (WorldlessLocation location : spawnpoints) {
+		for (String loc : spawnpoints) {
+			WorldlessLocation location = WorldlessLocation.fromString(loc);
 			if (player)
 				sender.sendMessage(current + "" + spawnnumber + ". " + location.toString());
 			else

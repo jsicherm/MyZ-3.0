@@ -1,6 +1,6 @@
 author: ${project.authors}
 main: ${project.main}
-version: ${project.version}
+version: ${version}
 name: ${project.name}
 description: ${project.description}
 softdepend: ${project.softdepends}

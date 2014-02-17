@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import myz.MyZ;
+import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityCreature;
 import net.minecraft.server.v1_7_R1.EntityHorse;
@@ -94,7 +95,8 @@ public class PathingSupport {
 					continue;
 				// Get the players distance from the x, y, z.
 				double distance_to_player_squared = player.e(x, y, z);
-				double refined_radius = experienceBarVisibility((Player) player.getBukkitEntity());
+				double refined_radius = experienceBarVisibility((Player) player.getBukkitEntity())
+						* (Double) Configuration.getConfig("mobs.aggroMultiplier");
 
 				if (distance_to_player_squared < refined_radius * refined_radius
 						&& (shortest_distance == -1.0D || distance_to_player_squared < shortest_distance)) {

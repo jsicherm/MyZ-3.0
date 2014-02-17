@@ -275,7 +275,7 @@ public class Utils {
 	public static void spawnNPC(Player playerDuplicate) {
 		// The NPC won't even be on the screen for a second, may as well not add
 		// it.
-		if (Configuration.getSafeLogoutTime() <= 0)
+		if ((Integer) Configuration.getConfig(Configuration.LOGOUT_TIME) <= 0)
 			return;
 
 		final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
@@ -289,7 +289,7 @@ public class Utils {
 				MyZ.instance.getNPCs().remove(player);
 				player.getBukkitEntity().remove();
 			}
-		}, Configuration.getSafeLogoutTime() * 20L);
+		}, (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME) * 20L);
 	}
 
 	/**
@@ -337,7 +337,7 @@ public class Utils {
 		rightArrow.setItemMeta(meta);
 
 		List<Inventory> inventories = new ArrayList<Inventory>();
-		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points) + " (1)");
+		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points + "") + " (1)");
 		inventories.add(gui);
 		gui.setItem(0, leftArrow);
 		gui.setItem(8, rightArrow);
@@ -352,15 +352,15 @@ public class Utils {
 					meta = item.getItemMeta();
 					meta.setLore(Arrays.asList(ChatColor.WHITE
 							+ Messenger.getConfigMessage(Localizer.getLocale(player), "gui.cost",
-									MyZ.instance.getResearchConfig().get("item." + key + ".cost"))));
+									MyZ.instance.getResearchConfig().get("item." + key + ".cost") + "")));
 					item.setItemMeta(meta);
 					gui.setItem(position, item);
 					position++;
 					if (position == 8) {
 						// Wrap to new page.
 						page++;
-						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points) + " ("
-								+ page + ")");
+						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points + "")
+								+ " (" + page + ")");
 						inventories.add(gui);
 						gui.setItem(0, leftArrow);
 						gui.setItem(8, rightArrow);

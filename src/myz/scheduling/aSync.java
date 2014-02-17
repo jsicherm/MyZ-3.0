@@ -3,6 +3,7 @@
  */
 package myz.scheduling;
 
+import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
@@ -44,7 +45,7 @@ public class aSync implements Runnable {
 	public void run() {
 		ticks++;
 
-		for (String world : MyZ.instance.getWorlds()) {
+		for (String world : (List<String>) Configuration.getConfig(Configuration.WORLDS)) {
 			if (Bukkit.getWorld(world) == null) {
 				Messenger.sendConsoleMessage("&4Specified world (" + world + ") does not exist! Please update your config.yml");
 				continue;
@@ -91,7 +92,7 @@ public class aSync implements Runnable {
 										player.getLocation().getBlockZ());
 					} catch (Exception exc) {
 					}
-				if (player.getLevel() < Configuration.getMaxThirstLevel()
+				if (player.getLevel() < (Integer) Configuration.getConfig(Configuration.THIRST_MAX)
 						&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
 								&& noBlocksAbove(player.getLocation())))
 					if (ticks % (random.nextInt(2) + 1) == 0) {
@@ -101,22 +102,23 @@ public class aSync implements Runnable {
 					}
 
 				// Take bleeding damage.
-				if (ticks % Configuration.getBleedDamageFrequency() == 0 && MyZ.instance.isBleeding(player)
-						&& player.getHealth() > Configuration.getBleedDamage()) {
+				if (ticks % (Integer) Configuration.getConfig("damage.bleed_damage_frequency") == 0 && MyZ.instance.isBleeding(player)
+						&& player.getHealth() > (Integer) Configuration.getConfig("damage.bleed_damage")) {
 					PlayerTakeBleedingDamageEvent event = new PlayerTakeBleedingDamageEvent(player);
 					if (!event.isCancelled()) {
-						player.damage(Configuration.getBleedDamage());
+						player.damage((Integer) Configuration.getConfig("damage.bleed_damage"));
 						player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1, 20));
 						Messenger.sendConfigMessage(player, "damage.bleed_begin");
 					}
 				}
 
 				// Take poison damage.
-				if ((ticks + 11) % Configuration.getPoisonDamageFrequency() == 0 && MyZ.instance.isPoisoned(player)
-						&& player.getHealth() > Configuration.getPoisonDamage()) {
+				if ((ticks + 11) % (Integer) Configuration.getConfig("damage.poison_damage_frequency") == 0
+						&& MyZ.instance.isPoisoned(player)
+						&& player.getHealth() > (Integer) Configuration.getConfig("damage.poison_damage")) {
 					PlayerTakePoisonDamageEvent event = new PlayerTakePoisonDamageEvent(player);
 					if (!event.isCancelled()) {
-						player.damage(Configuration.getPoisonDamage());
+						player.damage((Integer) Configuration.getConfig("damage.poison_damage"));
 						player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 1, 20));
 						player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 2, 80));
 						Messenger.sendConfigMessage(player, "damage.poison_begin");
@@ -124,13 +126,13 @@ public class aSync implements Runnable {
 				}
 
 				// Take thirst decay and damage.
-				if ((ticks + 22) % Configuration.getWaterDecreaseTime() == 0)
+				if ((ticks + 22) % (Integer) Configuration.getConfig(Configuration.THIRST_DECAY) == 0)
 					if (player.getLevel() > 0)
 						MyZ.instance.setThirst(player, player.getLevel() - 1);
-					else if (player.getHealth() > Configuration.getWaterDamage()) {
+					else if (player.getHealth() > (Integer) Configuration.getConfig("damage.water_damage")) {
 						PlayerTakeWaterDamageEvent event = new PlayerTakeWaterDamageEvent(player);
 						if (!event.isCancelled())
-							player.damage(Configuration.getWaterDamage());
+							player.damage((Integer) Configuration.getConfig("damage.water_damage"));
 					}
 			}
 

@@ -3,6 +3,7 @@
  */
 package myz.listeners.player;
 
+import java.util.List;
 import java.util.Set;
 
 import myz.MyZ;
@@ -18,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * @author Jordan
@@ -27,7 +29,7 @@ public class Chat implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onChat(AsyncPlayerChatEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		Player player = e.getPlayer();
 		String prefix = Configuration.getPrefixForPlayerRank(player);
@@ -35,10 +37,10 @@ public class Chat implements Listener {
 
 		// Apply the appropriate format to the message depending on radio state
 		// and rank prefix.
-		if (player.getItemInHand() != null && player.getItemInHand().isSimilar(Configuration.getRadioItem())) {
+		if (player.getItemInHand() != null && player.getItemInHand().isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO))) {
 			radio_frequency = player.getInventory().getHeldItemSlot() + 1;
-			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix().replace("%s", "" + radio_frequency)) + " "
-					+ prefix + ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
+			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix(radio_frequency)) + " " + prefix
+					+ ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
 		}
 		e.setFormat(prefix + ": " + e.getMessage());
 
@@ -50,16 +52,18 @@ public class Chat implements Listener {
 		if (radio_frequency == -1) {
 			if (didHandlePrivateChat(e))
 				return;
-			if (!Configuration.isLocalChat())
+			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
 				e.getRecipients().addAll(original_recipients);
 			else
-				for (Player player_in_range : Utils.getPlayersInRange(player.getLocation(), Configuration.getLocalChatDistance()))
+				for (Player player_in_range : Utils.getPlayersInRange(player.getLocation(),
+						(Integer) Configuration.getConfig(Configuration.CHAT_DISTANCE)))
 					e.getRecipients().add(player_in_range);
 		} else
 			// Add all players with the same radio equipped.
 			for (Player player_on_server : player.getServer().getOnlinePlayers())
 				if (player_on_server.getInventory().getItem(radio_frequency - 1) != null
-						&& player_on_server.getInventory().getItem(radio_frequency - 1).isSimilar(Configuration.getRadioItem()))
+						&& player_on_server.getInventory().getItem(radio_frequency - 1)
+								.isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO)))
 					e.getRecipients().add(player_on_server);
 		PathingSupport.elevatePlayer(player, 10);
 	}

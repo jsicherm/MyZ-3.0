@@ -3,6 +3,7 @@
  */
 package myz.listeners;
 
+import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
@@ -34,7 +35,7 @@ public class EntitySpawn implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
 		// MultiWorld support, yay!
-		if (!MyZ.instance.getWorlds().contains(e.getLocation().getWorld().getName())) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getLocation().getWorld().getName())) {
 			if (e.getEntity().getMetadata("MyZ.bypass") != null && !e.getEntity().getMetadata("MyZ.bypass").isEmpty())
 				return;
 			switch (e.getEntityType()) {
@@ -74,7 +75,8 @@ public class EntitySpawn implements Listener {
 		if (e.getEntityType() == EntityType.VILLAGER)
 			EntityCreator.overrideVillager(e.getEntity());
 
-		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && e.getSpawnReason() != SpawnReason.CUSTOM && Configuration.isNPC()) {
+		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && e.getSpawnReason() != SpawnReason.CUSTOM
+				&& (Boolean) Configuration.getConfig("mobs.npc.enabled")) {
 			e.setCancelled(true);
 			if (random.nextDouble() <= 0.9)
 				return;

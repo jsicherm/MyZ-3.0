@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -157,19 +158,7 @@ public class ChestScanner implements Listener {
 			if (setters.get(e.getPlayer().getName()) != null) {
 				slug = setters.get(e.getPlayer().getName());
 
-				try {
-					Class<?> craftchest = Class.forName("org.bukkit.craftbukkit." + NMSUtils.version + ".block.CraftChest");
-					Object chest = craftchest.cast(e.getClickedBlock().getState());
-
-					Field inventoryField = craftchest.getDeclaredField("chest");
-					inventoryField.setAccessible(true);
-					Class<?> tileentitychest = Class.forName("net.minecraft.server." + NMSUtils.version + ".TileEntityChest");
-					Method a = tileentitychest.getMethod("a", String.class);
-					Object teChest = tileentitychest.cast(inventoryField.get(chest));
-					a.invoke(teChest, slug);
-				} catch (Exception exc) {
-					exc.printStackTrace();
-				}
+				nameChest(e.getClickedBlock(), slug);
 			}
 			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.set.typeis", slug));
 			setters.remove(e.getPlayer().getName());
@@ -262,6 +251,22 @@ public class ChestScanner implements Listener {
 				}
 				task.cancel();
 			}
+		}
+	}
+
+	public static void nameChest(Block block, String slug) {
+		try {
+			Class<?> craftchest = Class.forName("org.bukkit.craftbukkit." + NMSUtils.version + ".block.CraftChest");
+			Object chest = craftchest.cast(block.getState());
+
+			Field inventoryField = craftchest.getDeclaredField("chest");
+			inventoryField.setAccessible(true);
+			Class<?> tileentitychest = Class.forName("net.minecraft.server." + NMSUtils.version + ".TileEntityChest");
+			Method a = tileentitychest.getMethod("a", String.class);
+			Object teChest = tileentitychest.cast(inventoryField.get(chest));
+			a.invoke(teChest, slug);
+		} catch (Exception exc) {
+			exc.printStackTrace();
 		}
 	}
 

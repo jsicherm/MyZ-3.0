@@ -107,7 +107,8 @@ public class MyZ extends JavaPlugin {
 	// TODO sound attraction to (trap)doors.
 	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
 	// TODO grave-digging
-	// TODO use construction parts to create clans. Builder is clan owner. Requires Build-in-a-box.
+	// TODO use construction parts to create clans. Builder is clan owner.
+	// Requires Build-in-a-box.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -153,8 +154,9 @@ public class MyZ extends JavaPlugin {
 
 		Configuration.reload();
 
-		sql = new SQLManager(Configuration.getHost(), Configuration.getPort(), Configuration.getDatabase(), Configuration.getUser(),
-				Configuration.getPassword());
+		sql = new SQLManager((String) Configuration.getConfig(Configuration.HOST), (Integer) Configuration.getConfig(Configuration.PORT),
+				(String) Configuration.getConfig(Configuration.DATABASE), (String) Configuration.getConfig(Configuration.USER),
+				(String) Configuration.getConfig(Configuration.PASSWORD));
 
 		/*
 		 * Register threads.
@@ -234,20 +236,20 @@ public class MyZ extends JavaPlugin {
 			@Override
 			public void run() {
 				sql.connect();
-				if (!sql.isConnected() && !Configuration.usePlayerData()) {
+				if (!sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
 					Messenger.sendConsoleMessage(ChatColor.RED
 							+ "MySQL is not connected and PlayerData is disabled. Enabling PlayerData for this session.");
-					Configuration.togglePlayerDataTemporarily(true);
-				} else if (sql.isConnected() && Configuration.usePlayerData()) {
+					Configuration.saveConfig(Configuration.DATASTORAGE, true, false);
+				} else if (sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
 					Messenger
 							.sendConsoleMessage(ChatColor.RED + "MySQL and PlayerData are enabled. Disabling PlayerData for this session.");
-					Configuration.togglePlayerDataTemporarily(false);
+					Configuration.saveConfig(Configuration.DATASTORAGE, false, false);
 				}
 
 				/*
 				 * Add all players that weren't already in the playerdata to it (in case of a reload).
 				 */
-				for (String world : Configuration.getWorlds()) {
+				for (String world : (List<String>) Configuration.getConfig(Configuration.WORLDS)) {
 					if (Bukkit.getWorld(world) == null) {
 						Messenger.sendConsoleMessage("&4Specified world (" + world + ") does not exist! Please update your config.yml");
 						continue;
@@ -256,9 +258,10 @@ public class MyZ extends JavaPlugin {
 						addPlayer(player, true);
 						PlayerData data = null;
 						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
-							if (data == null && Configuration.usePlayerData()) {
+							if (data == null && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
 								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-										new ArrayList<String>(), 0, Configuration.getMaxThirstLevel(), "", 0, 0, 0, 0, 0, 0, 0, 0, false);
+										new ArrayList<String>(), 0, (Integer) Configuration.getConfig(Configuration.THIRST_MAX), "", 0, 0,
+										0, 0, 0, 0, 0, 0, false);
 								putPlayerAtSpawn(player, false, true);
 							}
 							if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -289,7 +292,7 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * Autoupdate.
 		 */
-		if (Configuration.isAutoUpdate())
+		if ((Boolean) Configuration.getConfig(Configuration.AUTOUPDATE))
 			new Updater(this, 55557, getFile(), false);
 	}
 
@@ -309,7 +312,7 @@ public class MyZ extends JavaPlugin {
 			for (Player player : getServer().getOnlinePlayers())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
 		NPCs.clear();
-		for (String name : Configuration.getWorlds()) {
+		for (String name : (List<String>) Configuration.getConfig(Configuration.WORLDS)) {
 			World world = Bukkit.getWorld(name);
 			if (world == null) {
 				Messenger.sendConsoleMessage("&4Specified world (" + name + ") does not exist! Please update your config.yml");
@@ -337,19 +340,9 @@ public class MyZ extends JavaPlugin {
 	private void nullifyStatics() {
 		BlockCommand.blockChangers = null;
 		Sync.safeLogoutPlayers = null;
-		Configuration.disable();
 		MedKit.clearKits();
 		myz.utilities.DisguiseUtils.disable();
 		Utils.packets = null;
-	}
-
-	/**
-	 * The list of enabled worlds (for MultiWorld).
-	 * 
-	 * @return The list of all enabled worlds (by name).
-	 */
-	public List<String> getWorlds() {
-		return Configuration.getWorlds();
 	}
 
 	/**
@@ -725,18 +718,20 @@ public class MyZ extends JavaPlugin {
 	public void addPlayer(Player player, boolean clearInventory) {
 		PlayerData playerdata = PlayerData.getDataFor(player.getName());
 
-		if (!Configuration.usePreLogin()) {
+		if (!(Boolean) Configuration.getConfig(Configuration.PRELOGIN)) {
 			/*
 			 * Check if the player is still banned against the playerdata and sql.
 			 */
 			long now = System.currentTimeMillis();
 			long timeOfKickExpiry;
 			if (playerdata != null
-					&& (timeOfKickExpiry = playerdata.getTimeOfKickban() + Configuration.getKickBanSeconds() * 1000) >= now
+					&& (timeOfKickExpiry = playerdata.getTimeOfKickban() + (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME)
+							* 1000) >= now
 					|| MyZ.instance.getSQLManager().isConnected()
 					&& (timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(player.getName(), "timeOfKickban")
-							+ Configuration.getKickBanSeconds() * 1000) >= now) {
-				player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.recur", (timeOfKickExpiry - now) / 1000));
+							+ (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000) >= now) {
+				player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.recur", (timeOfKickExpiry - now) / 1000
+						+ ""));
 				return;
 			}
 		}
@@ -745,7 +740,7 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * Add the player to the dataset if they're not in it yet. If they weren't in it, put them at the spawn.
 		 */
-		if (playerdata == null && Configuration.usePlayerData()) {
+		if (playerdata == null && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
 					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false);
 			putPlayerAtSpawn(player, false, clearInventory);
@@ -815,13 +810,13 @@ public class MyZ extends JavaPlugin {
 			if (data != null && wasDeath) {
 				data.setBleeding(false);
 				data.setPoisoned(false);
-				data.setThirst(Configuration.getMaxThirstLevel());
+				data.setThirst((Integer) Configuration.getConfig(Configuration.THIRST_MAX));
 				data.setZombie(false);
 			}
 			if (sql.isConnected() && wasDeath) {
 				sql.set(player.getName(), "isBleeding", false, true);
 				sql.set(player.getName(), "isPoisoned", false, true);
-				sql.set(player.getName(), "thirst", Configuration.getMaxThirstLevel(), true);
+				sql.set(player.getName(), "thirst", Configuration.getConfig(Configuration.THIRST_MAX), true);
 				sql.set(player.getName(), "isZombie", false, true);
 			}
 
@@ -832,14 +827,15 @@ public class MyZ extends JavaPlugin {
 					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
 
-			if (Configuration.isKickBan() && wasDeath && !player.getName().equals("MrTeePee")) {
+			if ((Boolean) Configuration.getConfig(Configuration.KICKBAN) && wasDeath && !player.getName().equals("MrTeePee")) {
 				if (data != null)
 					data.setTimeOfKickban(System.currentTimeMillis());
 				if (sql.isConnected())
 					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
 			}
 
-			if (!Configuration.saveDataOfUnrankedPlayers() && getRankFor(player) <= 0 && !player.getName().equals("MrTeePee")) {
+			if (!(Boolean) Configuration.getConfig(Configuration.SAVE_UNRANKED) && getRankFor(player) <= 0
+					&& !player.getName().equals("MrTeePee")) {
 				if (data != null) {
 					for (String friend : data.getFriends())
 						data.removeFriend(friend);
@@ -906,7 +902,7 @@ public class MyZ extends JavaPlugin {
 		if (wasDeath) {
 			PlayerData data = PlayerData.getDataFor(player);
 
-			setThirst(player, Configuration.getMaxThirstLevel());
+			setThirst(player, (Integer) Configuration.getConfig(Configuration.THIRST_MAX));
 
 			boolean wasNPCKilled = false;
 			if (data != null) {
@@ -932,12 +928,12 @@ public class MyZ extends JavaPlugin {
 			/*
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
-			if (Configuration.isKickBan() && !wasNPCKilled)
+			if ((Boolean) Configuration.getConfig(Configuration.KICKBAN) && !wasNPCKilled)
 				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0
 						&& !player.getName().equals("MrTeePee")) {
 					flags.add(player.getName());
 					player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.come_back",
-							Configuration.getKickBanSeconds()));
+							Configuration.getConfig(Configuration.KICKBAN_TIME) + ""));
 				}
 		}
 	}
@@ -1003,14 +999,14 @@ public class MyZ extends JavaPlugin {
 	 */
 	public void spawnPlayer(Player player, int spawnpoint, boolean withInitiallySpecifiedSpawnpoint, int spawningAttempts) {
 		PlayerData data = PlayerData.getDataFor(player);
-		if (Configuration.numberedSpawnRequiresRank() > 0 && withInitiallySpecifiedSpawnpoint) {
+		if ((Integer) Configuration.getSpawn("spawn.numbered_requires_rank") > 0 && withInitiallySpecifiedSpawnpoint) {
 			if (data != null)
-				if (data.getRank() < Configuration.numberedSpawnRequiresRank()) {
+				if (data.getRank() < (Integer) Configuration.getSpawn("spawn.numbered_requires_rank")) {
 					Messenger.sendConfigMessage(player, "command.spawn.requires_rank");
 					return;
 				}
 			if (sql.isConnected())
-				if (sql.getInt(player.getName(), "rank") < Configuration.numberedSpawnRequiresRank()) {
+				if (sql.getInt(player.getName(), "rank") < (Integer) Configuration.getSpawn("spawn.numbered_requires_rank")) {
 					Messenger.sendConfigMessage(player, "command.spawn.requires_rank");
 					return;
 				}
@@ -1031,7 +1027,7 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * An enemy was nearby, stop the spawning.
 		 */
-		if (Utils.isPlayerNearby(player, spawn, Configuration.getSafeSpawnRadius())) {
+		if (Utils.isPlayerNearby(player, spawn, (Integer) Configuration.getSpawn("spawn.safespawn_radius"))) {
 			if (withInitiallySpecifiedSpawnpoint || spawningAttempts >= 25)
 				Messenger.sendConfigMessage(player, "command.spawn.unable_to_spawn");
 			else
@@ -1043,14 +1039,14 @@ public class MyZ extends JavaPlugin {
 		getServer().getPluginManager().callEvent(event);
 		if (!event.isCancelled()) {
 			wipeBuffs(player, true);
-			setThirst(player, Configuration.getMaxThirstLevel());
+			setThirst(player, (Integer) Configuration.getConfig(Configuration.THIRST_MAX));
 
 			Teleport.teleport(player, spawn, false);
 
 			for (PotionEffect potioneffect : Configuration.getSpawnPotionEffects())
 				player.addPotionEffect(potioneffect);
 
-			if (Configuration.zombieSpawn())
+			if ((Boolean) Configuration.getSpawn("zombie_spawn"))
 				if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 						&& getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled()) {
 					myz.utilities.DisguiseUtils.becomeZombie(player);
@@ -1104,9 +1100,9 @@ public class MyZ extends JavaPlugin {
 	public void setThirst(Player player, int level) {
 		if (level == player.getLevel())
 			return;
-		if (level != Configuration.getMaxThirstLevel()) {
-			if (level > Configuration.getMaxThirstLevel())
-				level = Configuration.getMaxThirstLevel();
+		if (level != (Integer) Configuration.getConfig(Configuration.THIRST_MAX)) {
+			if (level > (Integer) Configuration.getConfig(Configuration.THIRST_MAX))
+				level = (Integer) Configuration.getConfig(Configuration.THIRST_MAX);
 			PlayerWaterDecayEvent event = level < player.getLevel() ? new PlayerWaterDecayEvent(player) : null;
 			if (event != null)
 				getServer().getPluginManager().callEvent(event);
@@ -1243,7 +1239,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isHealer();
 		if (sql.isConnected())
-			return sql.getInt(player, "heals_life") >= Configuration.getHealerHeals();
+			return sql.getInt(player, "heals_life") >= (Integer) Configuration.getConfig(Configuration.HEALER);
 		// Theoretically impossible to get to this case.
 		return false;
 	}
@@ -1267,7 +1263,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isBandit();
 		if (sql.isConnected())
-			return sql.getInt(player, "player_kills_life") >= Configuration.getBanditKills();
+			return sql.getInt(player, "player_kills_life") >= (Integer) Configuration.getConfig(Configuration.BANDIT);
 		// Theoretically impossible to get to this case.
 		return false;
 	}

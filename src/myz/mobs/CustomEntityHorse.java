@@ -67,9 +67,12 @@ public class CustomEntityHorse extends EntityHorse {
 
 		goalSelector.a(0, new PathfinderGoalFloat(this));
 		goalSelector.a(1, new PathfinderGoalPanic(this, 1.2D));
-		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getHorseSpeed(), false));
-		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntityVillager.class, Configuration.getHorseSpeed(), false));
-		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, Configuration.getHorseSpeed(), false));
+		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.horse.speed"),
+				false));
+		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntityVillager.class, (Double) Configuration.getConfig("mobs.horse.speed"),
+				false));
+		goalSelector.a(1, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, (Double) Configuration.getConfig("mobs.horse.speed"),
+				false));
 		goalSelector.a(1, new PathfinderGoalTame(this, 1.2D));
 		goalSelector.a(2, new PathfinderGoalBreed(this, 1.0D));
 		goalSelector.a(3,
@@ -89,14 +92,15 @@ public class CustomEntityHorse extends EntityHorse {
 	protected void aD() {
 		super.aD();
 		bc().b(GenericAttributes.e);
-		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getHorseDamage());
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.horse.damage"));
 	}
 
 	@Override
 	public boolean m(Entity entity) {
 		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
 				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
-			return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getHorseDamage() * (isBaby() ? 0.5f : 1f));
+			return entity.damageEntity(DamageSource.mobAttack(this), (Float) Configuration.getConfig("mobs.horse.damage")
+					* (isBaby() ? 0.5f : 1f));
 		if (getOwnerName() == null || getOwnerName().isEmpty())
 			return false;
 		if (!MyZ.instance.isBandit(getOwnerName()))
@@ -105,7 +109,8 @@ public class CustomEntityHorse extends EntityHorse {
 				&& (getOwnerName().equals(((EntityHuman) entity).getName()) || MyZ.instance.isFriend(getOwnerName(),
 						((EntityHuman) entity).getName())))
 			return false;
-		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getHorseDamage() * (isBaby() ? 0.5f : 1f));
+		return entity.damageEntity(DamageSource.mobAttack(this), (Float) Configuration.getConfig("mobs.horse.damage")
+				* (isBaby() ? 0.5f : 1f));
 	}
 
 	@Override

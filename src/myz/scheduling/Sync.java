@@ -55,7 +55,7 @@ public class Sync implements Runnable {
 				if (ticks >= MyZ.instance.getBlocksConfig().getLong(location + ".time"))
 					actOnBlock(location, true);
 
-		if (ticks % Configuration.getChestRespawnTime() == 0) {
+		if (ticks % (Integer) Configuration.getConfig(Configuration.CHEST_RESPAWN) == 0) {
 			Messenger.sendConsoleMessage("&eMyZ respawned chests as scheduled.");
 			ChestManager.respawnAll(false);
 		}
@@ -131,7 +131,7 @@ public class Sync implements Runnable {
 	 *            The player.
 	 */
 	public static void addSafeLogoutPlayer(Player player) {
-		safeLogoutPlayers.put(player.getName(), Configuration.getSafeLogoutTime());
+		safeLogoutPlayers.put(player.getName(), (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME));
 	}
 
 	/**

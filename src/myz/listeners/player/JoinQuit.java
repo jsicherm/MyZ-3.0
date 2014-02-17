@@ -34,7 +34,7 @@ public class JoinQuit implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPreJoin(AsyncPlayerPreLoginEvent e) {
-		if (Configuration.usePreLogin()) {
+		if ((Boolean) Configuration.getConfig(Configuration.PRELOGIN)) {
 			String name = e.getName();
 			PlayerData data = PlayerData.getDataFor(name);
 			/*
@@ -43,18 +43,20 @@ public class JoinQuit implements Listener {
 			long now = System.currentTimeMillis();
 			long timeOfKickExpiry = 0L;
 			if (data != null)
-				timeOfKickExpiry = data.getTimeOfKickban() + Configuration.getKickBanSeconds() * 1000;
+				timeOfKickExpiry = data.getTimeOfKickban() + (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000;
 			if (MyZ.instance.getSQLManager().isConnected())
-				timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(name, "timeOfKickban") + Configuration.getKickBanSeconds() * 1000;
+				timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(name, "timeOfKickban")
+						+ (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000;
 
 			if (timeOfKickExpiry >= now)
-				e.disallow(Result.KICK_OTHER, Messenger.getConfigMessage(Localizer.ENGLISH, "kick.recur", (timeOfKickExpiry - now) / 1000));
+				e.disallow(Result.KICK_OTHER,
+						Messenger.getConfigMessage(Localizer.ENGLISH, "kick.recur", (timeOfKickExpiry - now) / 1000 + ""));
 		}
 	}
 
 	@EventHandler
 	private void onJoin(PlayerJoinEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		doJoin(e);
 	}
@@ -121,9 +123,9 @@ public class JoinQuit implements Listener {
 	@EventHandler
 	private void onWorldChange(PlayerChangedWorldEvent e) {
 		if (!MyZ.instance.isPlayer(e.getPlayer())) {
-			if (MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+			if (((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 				playerJoin(e.getPlayer());
-		} else if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		} else if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			MyZ.instance.removePlayer(e.getPlayer(), false);
 	}
 

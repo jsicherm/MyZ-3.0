@@ -47,15 +47,16 @@ public class SaveRankCommand implements CommandExecutor, TabCompleter {
 		}
 		Configuration.setRankPrefix(rank, prefix);
 		sender.sendMessage(Messenger.getConfigMessage(sender instanceof Player ? Localizer.getLocale((Player) sender) : Localizer.ENGLISH,
-				"command.saverank.saved", rank, prefix.replace("%s", "<player name>")));
+				"command.saverank.saved", rank + "", prefix.replace("%s", "<player name>")));
 		return true;
 	}
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		List<String> returnList = new ArrayList<String>();
-		if (args.length != 1) { return returnList; }
-		returnList.add(Configuration.getRanks().size() + "");
+		if (args.length != 1)
+			return returnList;
+		returnList.add(Configuration.getRankPrefixes().size() + "");
 		return returnList;
 	}
 }

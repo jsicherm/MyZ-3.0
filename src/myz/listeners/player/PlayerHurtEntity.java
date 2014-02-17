@@ -3,9 +3,9 @@
  */
 package myz.listeners.player;
 
+import java.util.List;
 import java.util.Random;
 
-import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 
@@ -37,7 +37,7 @@ public class PlayerHurtEntity implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageByEntityEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 		// Cancel damage inside spawn room.
 		if (Configuration.isInLobby(e.getDamager().getLocation()) && e.getEntityType() == EntityType.PLAYER)
@@ -68,7 +68,7 @@ public class PlayerHurtEntity implements Listener {
 		}
 
 		// Bleeding effect (not PDE but for general EDE)
-		if (Configuration.isBleed() && e.getDamage() > 0) {
+		if ((Boolean) Configuration.getConfig("mobs.bleed") && e.getDamage() > 0) {
 			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 		}

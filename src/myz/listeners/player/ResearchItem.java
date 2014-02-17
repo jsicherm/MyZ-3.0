@@ -4,6 +4,7 @@
 package myz.listeners.player;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,14 +38,14 @@ public class ResearchItem implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDrop(PlayerDropItemEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		lastDropped.put(e.getPlayer().getName(), e.getItemDrop().getUniqueId());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onEnterHopper(InventoryPickupItemEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getItem().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getItem().getWorld().getName()))
 			return;
 		if (e.getInventory().getType() == InventoryType.HOPPER)
 			if (lastDropped.containsValue(e.getItem().getUniqueId()))
@@ -61,7 +62,7 @@ public class ResearchItem implements Listener {
 							if (MyZ.instance.getSQLManager().isConnected())
 								rank = MyZ.instance.getSQLManager().getInt(player.getName(), "rank");
 
-							if (rank < Configuration.getResearchRank())
+							if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH))
 								Messenger.sendConfigMessage(player, "research.rank");
 							FileConfiguration config = MyZ.instance.getResearchConfig();
 							for (String key : config.getConfigurationSection("item").getKeys(false))
@@ -69,7 +70,7 @@ public class ResearchItem implements Listener {
 									e.getItem().remove();
 									int points = config.getInt("item." + key + ".value");
 									Messenger.sendMessage(player,
-											Messenger.getConfigMessage(Localizer.getLocale(player), "research.success", points));
+											Messenger.getConfigMessage(Localizer.getLocale(player), "research.success", points + ""));
 									int before = 0, after;
 									if (data != null)
 										data.setResearchPoints((before = data.getResearchPoints()) + points);
@@ -112,7 +113,7 @@ public class ResearchItem implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	private void onClickResearchItem(InventoryClickEvent e) {
 		if (e.getInventory().getHolder() == null
-				&& e.getInventory().getTitle().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", 69).split("69")[0])
+				&& e.getInventory().getTitle().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", "69").split("69")[0])
 				&& e.getInventory().getSize() == 9) {
 			e.setCancelled(true);
 			if (e.getRawSlot() >= 0 && e.getRawSlot() <= 8) {
@@ -155,7 +156,7 @@ public class ResearchItem implements Listener {
 								Messenger.sendMessage(
 										(Player) e.getWhoClicked(),
 										Messenger.getConfigMessage(Localizer.getLocale((Player) e.getWhoClicked()), "gui.purchased", points
-												- MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")));
+												- MyZ.instance.getResearchConfig().getInt("item." + key + ".cost") + ""));
 							} else
 								Messenger.sendConfigMessage((Player) e.getWhoClicked(), "gui.afford");
 							return;
@@ -187,9 +188,9 @@ public class ResearchItem implements Listener {
 			else {
 				if (one != null)
 					return one.getLore() != null
-							&& one.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", 69).split("69")[0]);
+							&& one.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", "69").split("69")[0]);
 				return two.getLore() != null
-						&& two.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", 69).split("69")[0]);
+						&& two.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", "69").split("69")[0]);
 			}
 		} else
 			return false;

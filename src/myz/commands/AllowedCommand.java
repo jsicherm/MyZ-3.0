@@ -6,6 +6,7 @@ package myz.commands;
 import java.util.Map;
 
 import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Configuration.TimePair;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Utils;
 
@@ -27,14 +28,14 @@ public class AllowedCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		Messenger.sendConfigMessage(sender, "command.allowed.breakable");
 
-		Map<ItemStack, ItemStack> broken = Configuration.getAllowedBroken();
+		Map<ItemStack, TimePair> broken = Configuration.getAllowedBroken();
 
 		for (ItemStack key : broken.keySet())
-			Messenger.sendMessage(sender, Utils.getNameOf(key) + " -> " + Utils.getNameOf(broken.get(key)));
+			Messenger.sendMessage(sender, Utils.getNameOf(key) + " -> " + Utils.getNameOf(broken.get(key).getItem()));
 		sender.sendMessage("");
 		Messenger.sendConfigMessage(sender, "command.allowed.placeable");
-		for (ItemStack item : Configuration.getAllowedPlaced())
-			Messenger.sendMessage(sender, Utils.getNameOf(item));
+		for (TimePair item : Configuration.getAllowedPlaced())
+			Messenger.sendMessage(sender, Utils.getNameOf(item.getItem()));
 
 		return true;
 	}

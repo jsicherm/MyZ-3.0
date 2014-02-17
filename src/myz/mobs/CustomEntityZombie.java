@@ -63,12 +63,12 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 
 		getNavigation().b(true);
 		goalSelector.a(0, new PathfinderGoalFloat(this));
-		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, Configuration.getZombieSpeed() * (isBaby() ? 0.75 : 1),
-				false));
-		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class,
-				Configuration.getZombieSpeed() * (isBaby() ? 0.75 : 1), true));
-		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class,
-				Configuration.getZombieSpeed() * (isBaby() ? 0.75 : 1), true));
+		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.zombie.speed")
+				* (isBaby() ? 0.75 : 1), false));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, (Double) Configuration.getConfig("mobs.zombie.speed")
+				* (isBaby() ? 0.75 : 1), true));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, (Double) Configuration.getConfig("mobs.zombie.speed")
+				* (isBaby() ? 0.75 : 1), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(6, new PathfinderGoalRandomStroll(this, 1.0D));
@@ -86,7 +86,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 	@Override
 	protected void aD() {
 		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue(Configuration.getZombieDamage() * (isBaby() ? 0.5 : 1));
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.zombie.damage") * (isBaby() ? 0.5 : 1));
 	}
 
 	@Override
@@ -225,7 +225,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 		if (random.nextInt(priority + 1) >= 1) {
 			setGoalTarget(null);
 			target = null;
-			PathingSupport.setTarget(this, location, Configuration.getZombieSpeed() * (isBaby() ? 0.75 : 1));
+			PathingSupport.setTarget(this, location, (Double) Configuration.getConfig("mobs.zombie.speed") * (isBaby() ? 0.75 : 1));
 		}
 	}
 

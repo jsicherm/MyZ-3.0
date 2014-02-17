@@ -13,11 +13,13 @@ import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Dye;
 
 /**
  * @author Jordan
@@ -118,6 +120,7 @@ public class MedKit {
 		config.set("heal.medkit.kit." + configID + ".input", input);
 		config.set("heal.medkit.kit." + configID + ".output", output);
 		MyZ.instance.saveConfig();
+		Configuration.reload();
 	}
 
 	/**
@@ -147,12 +150,16 @@ public class MedKit {
 		out.setItemMeta(meta);
 		out.setDurability((short) uid);
 		out.addEnchantment(glow, 1);
+		Dye oint = new Dye();
+		oint.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.ointment_color")));
+		Dye anti = new Dye();
+		anti.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.antiseptic_color")));
 
 		ShapelessRecipe recipe = new ShapelessRecipe(out);
 		if (ointment > 0)
-			recipe.addIngredient(ointment, Configuration.getOintment().getData());
+			recipe.addIngredient(ointment, oint.toItemStack().getData());
 		if (antiseptic > 0)
-			recipe.addIngredient(antiseptic, Configuration.getAntiseptic().getData());
+			recipe.addIngredient(antiseptic, anti.toItemStack().getData());
 		recipe.addIngredient(input.getData());
 
 		MyZ.instance.getServer().addRecipe(recipe);
@@ -163,8 +170,8 @@ public class MedKit {
 		String out = output.getType().toString().toLowerCase().replaceAll("_", " ");
 		String in = input.getType().toString().toLowerCase().replaceAll("_", " ");
 		return ChatColor.translateAlternateColorCodes('&', name) + ChatColor.RESET + " requires " + ointment + " ointment, " + antiseptic
-				+ " antiseptic and a" + (startsWithVowel(in) ? "n" : "") + in + " and yields a" + (startsWithVowel(out) ? "n" : "") + " "
-				+ out;
+				+ " antiseptic and a" + (startsWithVowel(in) ? "n" : "") + " " + in + " and yields a" + (startsWithVowel(out) ? "n" : "")
+				+ " " + out + ".";
 	}
 
 	/**

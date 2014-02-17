@@ -3,7 +3,8 @@
  */
 package myz.listeners.player;
 
-import myz.MyZ;
+import java.util.List;
+
 import myz.chests.ChestManager;
 import myz.commands.BlockCommand;
 import myz.support.Teleport;
@@ -31,7 +32,7 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onPlace(BlockPlaceEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
 			return;
@@ -44,7 +45,7 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onClick(PlayerInteractEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		Location grave;
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK && BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
@@ -166,7 +167,7 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPlacement(BlockPlaceEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
 			return;
@@ -179,7 +180,7 @@ public class BlockEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onDestroy(BlockBreakEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		boolean state = !Configuration.canBreak(e.getBlock(), e.getPlayer().getItemInHand());
 		if (state && e.getPlayer().hasPermission("MyZ.world_admin"))

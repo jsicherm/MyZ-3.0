@@ -43,7 +43,7 @@ public class ClanCommand implements CommandExecutor {
 				Messenger.sendConfigMessage(sender, "command.clan.not_in");
 			else
 				Messenger.sendMessage(sender,
-						Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.clan.in", clan, online, total));
+						Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.clan.in", clan, online + "", total + ""));
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;

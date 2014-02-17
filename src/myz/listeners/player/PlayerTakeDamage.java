@@ -3,6 +3,7 @@
  */
 package myz.listeners.player;
 
+import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
@@ -25,10 +26,11 @@ public class PlayerTakeDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 		if (e.getEntity() instanceof Player)
-			if (random.nextDouble() <= Configuration.getBleedChance() && Configuration.getBleedChance() != 0.0)
+			if (random.nextDouble() <= (Integer) Configuration.getConfig("damage.chance_of_bleeding")
+					&& (Integer) Configuration.getConfig("damage.chance_of_bleeding") != 0.0)
 				switch (e.getCause()) {
 				case FALL:
 					PathingSupport.elevatePlayer((Player) e.getEntity(), 10);

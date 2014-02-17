@@ -84,6 +84,25 @@ public class EntityCreator {
 	 *            Whether or not to spawn a custom entity (ONLY FOR PIGMEN)
 	 */
 	public static void create(Location inLocation, EntityType type, SpawnReason reason, boolean toggle) {
+		create(inLocation, type, reason, toggle, false);
+	}
+
+	/**
+	 * Create an entity using NMS in order to either bypass custom entity
+	 * creation or promote it.
+	 * 
+	 * @param inLocation
+	 *            The location to spawn at.
+	 * @param type
+	 *            The EntityType.
+	 * @param reason
+	 *            The spawning reason.
+	 * @param toggle
+	 *            Whether or not to spawn a custom entity (ONLY FOR PIGMEN)
+	 * @param baby
+	 *            Whether or not to force baby.
+	 */
+	public static void create(Location inLocation, EntityType type, SpawnReason reason, boolean toggle, boolean baby) {
 		World world = ((CraftWorld) inLocation.getWorld()).getHandle();
 		switch (type) {
 		case HORSE:
@@ -98,6 +117,7 @@ public class EntityCreator {
 			if (!toggle) {
 				EntityPigZombie pigman = new EntityPigZombie(world);
 				pigman.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
+				pigman.setBaby(baby);
 				if (pigman.canSpawn()) {
 					pigman.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
 					world.addEntity(pigman, reason);
@@ -106,17 +126,19 @@ public class EntityCreator {
 				CustomEntityPigZombie pigman = new CustomEntityPigZombie(world);
 				pigman.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
 				pigman.setBaby(random.nextInt(20) < 3);
-				pigman.canPickUpLoot = Configuration.pigmanLoots();
+				pigman.setBaby(baby);
+				pigman.canPickUpLoot = (Boolean) Configuration.getConfig("mobs.pigman.canPickup");
 				world.addEntity(pigman, SpawnReason.NATURAL);
 				((PigZombie) pigman.getBukkitEntity()).setAngry(true);
 			}
 			break;
 		case ZOMBIE:
 			EntityZombie zombie = new EntityZombie(world);
+			zombie.setBaby(baby);
 			zombie.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
 			if (zombie.canSpawn()) {
 				zombie.getBukkitEntity().setMetadata("MyZ.bypass", new FixedMetadataValue(MyZ.instance, true));
-				zombie.canPickUpLoot = Configuration.zombieLoots();
+				zombie.canPickUpLoot = (Boolean) Configuration.getConfig("mobs.zombie.canPickup");
 				world.addEntity(zombie, reason);
 			}
 			break;

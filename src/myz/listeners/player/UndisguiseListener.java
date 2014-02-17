@@ -3,7 +3,8 @@
  */
 package myz.listeners.player;
 
-import myz.MyZ;
+import java.util.List;
+
 import myz.support.interfacing.Configuration;
 
 import org.bukkit.event.EventHandler;
@@ -19,7 +20,7 @@ public class UndisguiseListener implements Listener {
 
 	@EventHandler
 	private void onUndisguise(PlayerUndisguiseEvent e) {
-		if (MyZ.instance.getWorlds().contains(e.getPlayer().getWorld().getName()))
+		if (((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 
 		e.setCancelled(!Configuration.isInLobby(e.getPlayer()));

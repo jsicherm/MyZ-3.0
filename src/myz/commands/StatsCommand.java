@@ -64,11 +64,11 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
 			sender.sendMessage("");
 			Messenger.sendConfigMessage(sender, "command.stats.kills_header");
 			Messenger.sendMessage(sender, Messenger.getConfigMessage(sender instanceof Player ? Localizer.getLocale((Player) sender)
-					: Localizer.ENGLISH, "command.stats.kills", zombie, pigman, giant, player));
+					: Localizer.ENGLISH, "command.stats.kills", zombie + "", pigman + "", giant + "", player + ""));
 			sender.sendMessage("");
 			Messenger.sendConfigMessage(sender, "command.stats.time_header");
 			Messenger.sendMessage(sender, Messenger.getConfigMessage(sender instanceof Player ? Localizer.getLocale((Player) sender)
-					: Localizer.ENGLISH, "command.stats.time", total, life));
+					: Localizer.ENGLISH, "command.stats.time", total + "", life + ""));
 			sender.sendMessage("");
 			Messenger.sendMessage(sender, Messenger.getConfigMessage(sender instanceof Player ? Localizer.getLocale((Player) sender)
 					: Localizer.ENGLISH, "command.stats.footer", name));
@@ -81,13 +81,12 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		List<String> returnList = new ArrayList<String>();
 		if (args.length == 1)
-			if (sender instanceof Player) {
+			if (sender instanceof Player)
 				for (Player player : ((Player) sender).getWorld().getPlayers())
 					returnList.add(player.getName());
-			} else {
+			else
 				for (Player player : Bukkit.getOnlinePlayers())
 					returnList.add(player.getName());
-			}
 		return returnList;
 	}
 }

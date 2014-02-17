@@ -3,16 +3,25 @@
  */
 package myz.listeners.player;
 
+import java.util.List;
+import java.util.Random;
+
 import myz.MyZ;
+import myz.mobs.support.EntityCreator;
 import myz.support.PlayerData;
+import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 
+import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 /**
@@ -21,13 +30,33 @@ import org.bukkit.event.entity.EntityDeathEvent;
  */
 public class PlayerKillEntity implements Listener {
 
+	private static final Random random = new Random();
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onEntityDeath(EntityDeathEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 		e.setDroppedExp(0);
 		if (e.getEntity().getKiller() != null)
 			incrementKills(e.getEntity(), e.getEntity().getKiller());
+		if (e.getEntity().getType() == EntityType.PIG_ZOMBIE && (Boolean) Configuration.getConfig("mobs.pigman.pigsplosion.enabled")) {
+			double chance = (Double) Configuration.getConfig("mobs.pigman.pigsplosion.chance");
+			if (random.nextDouble() <= chance && chance != 0.0) {
+				int min = (Integer) Configuration.getConfig("mobs.pigman.pigsplosion.min");
+				int max = (Integer) Configuration.getConfig("mobs.pigman.pigsplosion.max");
+				int amount = min + (int) (random.nextDouble() * ((max - min) + 1));
+				Location location = e.getEntity().getLocation();
+				while (amount > 0) {
+					Location spawn = location.clone().add(random.nextInt(6) * random.nextInt(2) == 0 ? -1 : 1, 0,
+							random.nextInt(6) * random.nextInt(2) == 0 ? -1 : 1);
+					spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn) + 1);
+					EntityCreator.create(spawn, EntityType.PIG_ZOMBIE, SpawnReason.REINFORCEMENTS, true, true);
+					spawn.getWorld().playEffect(spawn, Effect.STEP_SOUND, 11);
+					spawn.getWorld().playEffect(spawn, Effect.STEP_SOUND, 11);
+					amount--;
+				}
+			}
+		}
 	}
 
 	/**
@@ -60,7 +89,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "zombie.kill_amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "zombie.kill_amount", amount + ""));
 			break;
 		case PIG_ZOMBIE:
 			if (data != null) {
@@ -77,7 +106,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "pigman.kill_amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "pigman.kill_amount", amount + ""));
 			break;
 		case GIANT:
 			if (data != null) {
@@ -94,7 +123,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "giant.kill_amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "giant.kill_amount", amount + ""));
 			break;
 		case PLAYER:
 			Messenger.sendFancyDeathMessage(playerFor, (Player) typeFor);
@@ -113,7 +142,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", amount));
+			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", amount + ""));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(playerFor);

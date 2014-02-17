@@ -47,11 +47,11 @@ public class RemoveSpawnCommand implements CommandExecutor, TabCompleter {
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
 		List<String> returnList = new ArrayList<String>();
-		if (args.length != 1) { return returnList; }
-		int size = Configuration.getSpawnpoints().size();
-		for (int i = 1; i <= size; i++) {
+		if (args.length != 1)
+			return returnList;
+		int size = ((List<String>) Configuration.getConfig("spawnpoints")).size();
+		for (int i = 1; i <= size; i++)
 			returnList.add(i + "");
-		}
 		return returnList;
 	}
 }

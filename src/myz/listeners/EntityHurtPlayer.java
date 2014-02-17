@@ -3,6 +3,7 @@
  */
 package myz.listeners;
 
+import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
@@ -27,12 +28,13 @@ public class EntityHurtPlayer implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onZombification(EntityDamageByEntityEvent e) {
-		if (!MyZ.instance.getWorlds().contains(e.getEntity().getWorld().getName()))
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 		if ((e.getDamager() instanceof Horse || e.getDamager() instanceof Zombie) && e.getEntity() instanceof Player) {
 			if (e.getDamager() instanceof Horse && ((Horse) e.getDamager()).getVariant() != Variant.UNDEAD_HORSE)
 				return;
-			if (random.nextDouble() <= Configuration.getPoisonChanceZombie() && Configuration.getPoisonChanceZombie() != 0.0)
+			if (random.nextDouble() <= (Integer) Configuration.getConfig("damage.chance_poison_from_zombie")
+					&& (Integer) Configuration.getConfig("damage.chance_poison_from_zombie") != 0.0)
 				MyZ.instance.startPoison((Player) e.getEntity());
 		}
 
