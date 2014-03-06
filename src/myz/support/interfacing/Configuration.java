@@ -16,6 +16,7 @@ import myz.MyZ;
 import myz.listeners.player.ConsumeFood;
 import myz.scheduling.Sync;
 import myz.support.MedKit;
+import myz.utilities.SoulboundUtils;
 import myz.utilities.WorldlessLocation;
 
 import org.bukkit.Bukkit;
@@ -168,7 +169,7 @@ public class Configuration {
 		spawnEntries.put("spawnpoints", new ArrayList<String>());
 	}
 
-	public static void reload() {
+	public static void reload(boolean medkit) {
 		writeUnwrittenValues();
 
 		FileConfiguration config = MyZ.instance.getConfig();
@@ -200,7 +201,8 @@ public class Configuration {
 				int ointment = config.getInt("heal.medkit.kit." + entry + ".ointment_required");
 				ItemStack input = config.getItemStack("heal.medkit.kit." + entry + ".input");
 				ItemStack output = config.getItemStack("heal.medkit.kit." + entry + ".output");
-				new MedKit(entry, name, antiseptic, ointment, input, output);
+				if (medkit)
+					new MedKit(entry, name, antiseptic, ointment, input, output);
 			} catch (Exception exc) {
 				exc.printStackTrace();
 				Messenger.sendConsoleMessage("&4heal.medkit.kit." + entry + " could not be resolved. Please re-configure or remove.");
@@ -370,8 +372,8 @@ public class Configuration {
 				MyZ.instance.getLocalizableConfig(Localizer.getLocale(player)).getString("ranks.spawnmessage." + nearestInt(rank, values)));
 	}
 
-	public static ItemStack[] getInventory(int rank) {
-		List<ItemStack> current_stack = getSpawnkit(rank, false, false);
+	public static ItemStack[] getInventory(int rank, Player player) {
+		List<ItemStack> current_stack = getSpawnkit(rank, false, false, player);
 
 		if (current_stack == null) {
 			// Got a rank that doesn't exist.
@@ -384,13 +386,13 @@ public class Configuration {
 				}
 
 			int nearestRank = nearestInt(rank, keys);
-			return getInventory(nearestRank);
+			return getInventory(nearestRank, player);
 		} else
 			return current_stack.toArray(new ItemStack[0]);
 	}
 
-	public static ItemStack[] getArmorContents(int rank) {
-		List<ItemStack> stack = getSpawnkit(rank, true, true);
+	public static ItemStack[] getArmorContents(int rank, Player player) {
+		List<ItemStack> stack = getSpawnkit(rank, true, true, player);
 		if (stack != null && !stack.isEmpty())
 			return stack.toArray(new ItemStack[0]);
 
@@ -402,7 +404,7 @@ public class Configuration {
 			} catch (Exception exc) {
 			}
 
-		return getArmorContents(nearestInt(rank, keys));
+		return getArmorContents(nearestInt(rank, keys), player);
 	}
 
 	public static void setArmorContents(List<ItemStack> armor, int rank) {
@@ -424,21 +426,29 @@ public class Configuration {
 		save();
 	}
 
-	private static List<ItemStack> getSpawnkit(int rank, boolean withArmor, boolean onlyArmor) {
+	private static List<ItemStack> getSpawnkit(int rank, boolean withArmor, boolean onlyArmor, Player player) {
 		ArrayList<ItemStack> list = new ArrayList<ItemStack>();
 		if (withArmor) {
-			ItemStack helmet = (ItemStack) spawnEntries.get("spawn.kit" + rank + ".helmet");
-			ItemStack chestplate = (ItemStack) spawnEntries.get("spawn.kit" + rank + ".chestplate");
-			ItemStack leggings = (ItemStack) spawnEntries.get("spawn.kit" + rank + ".leggings");
-			ItemStack boots = (ItemStack) spawnEntries.get("spawn.kit" + rank + ".boots");
-			list.add(helmet);
-			list.add(chestplate);
-			list.add(leggings);
+			ItemStack helmet = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".helmet")).clone();
+			SoulboundUtils.soulbindItem(helmet, player);
+			ItemStack chestplate = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".chestplate")).clone();
+			SoulboundUtils.soulbindItem(chestplate, player);
+			ItemStack leggings = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".leggings")).clone();
+			SoulboundUtils.soulbindItem(leggings, player);
+			ItemStack boots = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".boots")).clone();
+			SoulboundUtils.soulbindItem(boots, player);
 			list.add(boots);
+			list.add(leggings);
+			list.add(chestplate);
+			list.add(helmet);
+
 			if (onlyArmor)
 				return list;
 		}
-		list.addAll((List<ItemStack>) spawnEntries.get("spawn.kit" + rank + ".inventory_contents"));
+		List<ItemStack> tentative = (List<ItemStack>) spawnEntries.get("spawn.kit" + rank + ".inventory_contents");
+		for (ItemStack item : tentative) {
+			list.add(item.clone());
+		}
 
 		Set<String> allKeys = MyZ.instance.getSpawnConfig().getConfigurationSection("spawn").getKeys(false);
 		Set<Integer> keys = new HashSet<Integer>();
@@ -450,7 +460,7 @@ public class Configuration {
 		for (int value : keys)
 			if (value < rank)
 				if (((List<Integer>) spawnEntries.get("spawn.kit" + rank + ".children")).contains(value))
-					list.addAll(getSpawnkit(value, false, false));
+					list.addAll(getSpawnkit(value, false, false, player));
 		return list;
 	}
 
@@ -484,8 +494,12 @@ public class Configuration {
 		FileConfiguration config = MyZ.instance.getChestsConfig();
 		if (config.isConfigurationSection("loot." + lootset))
 			for (String key : config.getConfigurationSection("loot." + lootset).getKeys(false))
-				filler.put((ItemStack) chestEntries.get("loot." + lootset + "." + key + ".item"),
-						(Integer) chestEntries.get("loot." + lootset + "." + key + ".chance") / 100.00);
+				try {
+					filler.put((ItemStack) chestEntries.get("loot." + lootset + "." + key + ".item"),
+							(Integer) chestEntries.get("loot." + lootset + "." + key + ".chance") / 100.00);
+				} catch (Exception exc) {
+
+				}
 		else
 			Messenger.sendConsoleMessage("&4The lootset &e'" + lootset + "'&4 does not exist. Perhaps it was deleted?");
 		return filler;

@@ -3,6 +3,7 @@
  */
 package myz.listeners.player;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class Chat implements Listener {
 		e.setFormat(prefix + ": " + e.getMessage());
 
 		// Cache and clear the recipients.
-		Set<Player> original_recipients = e.getRecipients();
+		Set<Player> original_recipients = new HashSet<Player>(e.getRecipients());
 		e.getRecipients().clear();
 
 		// If we're talking in local, not radio, only include those near us.

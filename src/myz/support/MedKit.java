@@ -120,7 +120,7 @@ public class MedKit {
 		config.set("heal.medkit.kit." + configID + ".input", input);
 		config.set("heal.medkit.kit." + configID + ".output", output);
 		MyZ.instance.saveConfig();
-		Configuration.reload();
+		Configuration.reload(false);
 	}
 
 	/**
@@ -140,16 +140,27 @@ public class MedKit {
 	}
 
 	/**
+	 * Get the MedKit associated with a given ItemStack. Compares stack materials as well as name.
+	 * 
+	 * @param stack
+	 *            The ItemStack in question.
+	 * @return The MedKit for the given ItemStack or null if none associated.
+	 */
+	public static MedKit getRawMedKitFor(ItemStack stack) {
+		for (MedKit kit : medkits)
+			if (stack.getType() == kit.output.getType()) {
+				if (stack.hasItemMeta()
+						&& kit.getName().equals(stack.getItemMeta().getDisplayName()))
+					return kit;
+			}
+		return null;
+	}
+
+	/**
 	 * Load and create the recipe for this medkit.
 	 */
 	public void createRecipe() {
-		ItemStack out = output.clone();
-		ItemMeta meta = out.getItemMeta();
-		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-		meta.setLore(lore);
-		out.setItemMeta(meta);
-		out.setDurability((short) uid);
-		out.addEnchantment(glow, 1);
+		ItemStack out = getTrueOutput();
 		Dye oint = new Dye();
 		oint.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.ointment_color")));
 		Dye anti = new Dye();
@@ -163,6 +174,22 @@ public class MedKit {
 		recipe.addIngredient(input.getData());
 
 		MyZ.instance.getServer().addRecipe(recipe);
+	}
+
+	/**
+	 * Get a true output item with the meta associated.
+	 * 
+	 * @return The ItemStack.
+	 */
+	public ItemStack getTrueOutput() {
+		ItemStack out = output.clone();
+		ItemMeta meta = out.getItemMeta();
+		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+		meta.setLore(lore);
+		out.setItemMeta(meta);
+		out.setDurability((short) uid);
+		out.addEnchantment(glow, 1);
+		return out;
 	}
 
 	@Override

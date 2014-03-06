@@ -26,7 +26,7 @@ public class SpawnsCommand implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		List<String> spawnpoints = (List<String>) Configuration.getConfig("spawnpoints");
+		List<String> spawnpoints = (List<String>) Configuration.getSpawn("spawnpoints");
 		int spawnnumber = 1;
 		ChatColor current = ChatColor.YELLOW;
 		boolean player = sender instanceof Player;

@@ -48,24 +48,26 @@ public class ConsumeFood implements Listener {
 			}
 			addEffects(player, item);
 		} else if (item.getType() == Material.POTION && item.getDurability() == (short) 0) {
-			PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
-			MyZ.instance.getServer().getPluginManager().callEvent(event);
-			if (!event.isCancelled()) {
-				double factor = 1;
-				switch (random.nextInt(10)) {
-				case 0:
-					factor = 0.25;
-					break;
-				case 1:
-					factor = 0.5;
-					break;
-				case 2:
-					factor = 0.75;
-					break;
-				default:
-					break;
+			if (player.getLevel() < (Integer) Configuration.getConfig(Configuration.THIRST_MAX)) {
+				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
+				MyZ.instance.getServer().getPluginManager().callEvent(event);
+				if (!event.isCancelled()) {
+					double factor = 1;
+					switch (random.nextInt(10)) {
+					case 0:
+						factor = 0.25;
+						break;
+					case 1:
+						factor = 0.5;
+						break;
+					case 2:
+						factor = 0.75;
+						break;
+					default:
+						break;
+					}
+					MyZ.instance.setThirst(player, (int) ((Integer) Configuration.getConfig(Configuration.THIRST_MAX) * factor));
 				}
-				MyZ.instance.setThirst(player, (int) ((Integer) Configuration.getConfig(Configuration.THIRST_MAX) * factor));
 			}
 		} else if (item.getType() == Material.POTION && item.getDurability() != (short) 0 || item.getType() == Material.MILK_BUCKET) {
 			if (item.getType() == Material.MILK_BUCKET) {

@@ -109,6 +109,8 @@ public class MyZ extends JavaPlugin {
 	// TODO grave-digging
 	// TODO use construction parts to create clans. Builder is clan owner.
 	// Requires Build-in-a-box.
+	// TODO 6. Save medkit and npc i there own yml files. Hard to rename npc the
+	// way it is now.
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -152,7 +154,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		MedKit.registerNewEnchantment();
 
-		Configuration.reload();
+		Configuration.reload(true);
 
 		sql = new SQLManager((String) Configuration.getConfig(Configuration.HOST), (Integer) Configuration.getConfig(Configuration.PORT),
 				(String) Configuration.getConfig(Configuration.DATABASE), (String) Configuration.getConfig(Configuration.USER),
@@ -308,6 +310,9 @@ public class MyZ extends JavaPlugin {
 		// do with overriding the pathfinding and entity.
 		for (CustomEntityPlayer player : NPCs)
 			player.getBukkitEntity().remove();
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			removePlayer(player, false);
+		}
 		if (disguise)
 			for (Player player : getServer().getOnlinePlayers())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
@@ -341,7 +346,8 @@ public class MyZ extends JavaPlugin {
 		BlockCommand.blockChangers = null;
 		Sync.safeLogoutPlayers = null;
 		MedKit.clearKits();
-		myz.utilities.DisguiseUtils.disable();
+		if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null)
+			myz.utilities.DisguiseUtils.disable();
 		Utils.packets = null;
 	}
 
@@ -1075,12 +1081,12 @@ public class MyZ extends JavaPlugin {
 				rank = sql.getInt(player.getName(), "rank");
 
 			try {
-				player.getInventory().setArmorContents(Configuration.getArmorContents(rank));
+				player.getInventory().setArmorContents(Configuration.getArmorContents(rank, player));
 			} catch (NullPointerException exc) {
 
 			}
 			try {
-				player.getInventory().setContents(Configuration.getInventory(rank));
+				player.getInventory().setContents(Configuration.getInventory(rank, player));
 			} catch (NullPointerException exc) {
 
 			}

@@ -8,8 +8,7 @@
     <project.authors>TeeePeee</project.authors>
     <project.main>myz.MyZ</project.main>
     <project.name>MyZ-3</project.name>
-    <project.version>3.0.6.52</project.version>
-    <project.softdepends>[WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises]</project.softdepends>
+    <project.softdepends>[WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises, Soulbound]</project.softdepends>
     <project.description>The best post-apocalyptic plugin in existance.</project.description>
   </properties>
   
@@ -116,6 +115,7 @@
         <version>2.3.1</version>
         <configuration>
           <finalName>MyZ-3</finalName>
+          <outputDirectory>D:\Users\Jordan\Minecraft\Server\plugins</outputDirectory>
         </configuration>
       </plugin>
       <plugin>

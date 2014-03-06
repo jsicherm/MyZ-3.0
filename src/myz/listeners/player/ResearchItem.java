@@ -122,7 +122,7 @@ public class ResearchItem implements Listener {
 				if (e.getRawSlot() == 0) {
 					Utils.showResearchDialog((Player) e.getWhoClicked(), page - 1);
 					return;
-				} else if (e.getRawSlot() == 0) {
+				} else if (e.getRawSlot() == 8) {
 					Utils.showResearchDialog((Player) e.getWhoClicked(), page + 1);
 					return;
 				}

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import myz.MyZ;
+import myz.support.MedKit;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
@@ -30,6 +31,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -108,6 +110,18 @@ public class ChestScanner implements Listener {
 
 	@EventHandler
 	private void onInventoryClose(InventoryCloseEvent e) {
+		if (e.getInventory().getHolder() instanceof Player) {
+			ItemStack[] contents = ((Player) e.getInventory().getHolder()).getInventory().getContents();
+			int spot = 0;
+			for (ItemStack i : contents) {
+				MedKit kit;
+				if (i != null && (kit = MedKit.getRawMedKitFor(i)) != null) {
+					((Player) e.getInventory().getHolder()).getInventory().setItem(spot, kit.getTrueOutput());
+				}
+				spot++;
+			}
+		}
+
 		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9
 				&& lootCreators.containsKey(e.getPlayer().getName())) {
 			LootsetCreate lootset = lootCreators.get(e.getPlayer().getName());
@@ -122,6 +136,8 @@ public class ChestScanner implements Listener {
 			for (ItemStack item : lootset.spawnable.keySet())
 				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
 			lootCreators.remove(e.getPlayer().getName());
+		} else if (e.getInventory().getType() == InventoryType.CHEST) {
+			ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
 		}
 	}
 
