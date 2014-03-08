@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>myz.MyZ</groupId>
   <artifactId>MyZ</artifactId>
-  <version>3.0.6.52</version>
+  <version>3.0.7</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.authors>TeeePeee</project.authors>
