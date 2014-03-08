@@ -50,7 +50,7 @@ public class JoinQuit implements Listener {
 
 			if (timeOfKickExpiry >= now)
 				e.disallow(Result.KICK_OTHER,
-						Messenger.getConfigMessage(Localizer.ENGLISH, "kick.recur", (timeOfKickExpiry - now) / 1000 + ""));
+						Messenger.getConfigMessage(Localizer.DEFAULT, "kick.recur", (timeOfKickExpiry - now) / 1000 + ""));
 		}
 	}
 

@@ -46,11 +46,27 @@ public class Heal implements Listener {
 		final Player player = e.getPlayer();
 		final ItemStack item = e.getItem();
 
+		// Handle bones for broken legs.
+		if (player.getGameMode() != GameMode.CREATIVE && item != null) {
+			if (item.getType() == Material.BONE && MyZ.instance.isLegBroken(player)) {
+				MyZ.instance.fixLeg(player, true);
+				if (item.getAmount() != 1)
+					item.setAmount(item.getAmount() - 1);
+				else
+					MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+						@Override
+						public void run() {
+							player.setItemInHand(null);
+						}
+					}, 0L);
+			}
+		}
+
 		// Handle MedKits.
 		if (player.getGameMode() != GameMode.CREATIVE && item != null) {
 			MedKit kit;
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
-				MyZ.instance.stopBleeding(player);
+				MyZ.instance.stopBleeding(player, true);
 				if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
 					if (player.getHealth() + 1 <= player.getMaxHealth())
 						player.setHealth(player.getHealth() + 1);
@@ -61,7 +77,7 @@ public class Heal implements Listener {
 					if (regenLevel != 0)
 						player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenLevel * 40, regenLevel));
 					if (antiLevel != 0) {
-						MyZ.instance.stopPoison(player);
+						MyZ.instance.stopPoison(player, true);
 						player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, antiLevel * 100, antiLevel));
 					}
 				}
@@ -83,7 +99,7 @@ public class Heal implements Listener {
 				&& item.isSimilar((ItemStack) Configuration.getConfig("heal.bandage") != null ? (ItemStack) Configuration
 						.getConfig("heal.bandage") : new ItemStack(Material.PAPER))) {
 
-			MyZ.instance.stopBleeding(player);
+			MyZ.instance.stopBleeding(player, true);
 			if (player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount") <= player.getMaxHealth()) {
 				EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player,
 						(Integer) Configuration.getConfig("heal.bandage_heal_amount"), RegainReason.CUSTOM);
@@ -129,7 +145,7 @@ public class Heal implements Listener {
 									(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getName()))
 											/ 1000 + ""));
 				else {
-					MyZ.instance.stopBleeding(player);
+					MyZ.instance.stopBleeding(player, true);
 					if (kit.getAntisepticRequired() == 0 && kit.getOintmentRequired() == 0) {
 						if (player.getHealth() + 1 <= player.getMaxHealth())
 							player.setHealth(player.getHealth() + 1);
@@ -140,7 +156,7 @@ public class Heal implements Listener {
 						if (regenLevel != 0)
 							player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, regenLevel * 40, regenLevel));
 						if (antiLevel != 0) {
-							MyZ.instance.stopPoison(player);
+							MyZ.instance.stopPoison(player, true);
 							player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, antiLevel * 100, antiLevel));
 						}
 					}
@@ -168,7 +184,7 @@ public class Heal implements Listener {
 								(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getName())) / 1000
 										+ ""));
 			else {
-				MyZ.instance.stopBleeding(player);
+				MyZ.instance.stopBleeding(player, true);
 				if (player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount") <= player.getMaxHealth()) {
 					EntityRegainHealthEvent regainEvent = new EntityRegainHealthEvent(player,
 							(Integer) Configuration.getConfig("heal.bandage_heal_amount"), RegainReason.CUSTOM);

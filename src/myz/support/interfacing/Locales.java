@@ -21,6 +21,7 @@ public class Locales {
 
 	private static final Map<String, Object> defaultSet = new HashMap<String, Object>();
 	private static final Map<String, Object> pirateSet = new HashMap<String, Object>();
+	private static final Map<String, Object> unSet = new HashMap<String, Object>();
 
 	/**
 	 * Make sure all locales have the appropriate mappings. Defaults
@@ -37,18 +38,21 @@ public class Locales {
 				continue;
 			FileConfiguration file = MyZ.instance.getLocalizableConfig(locale);
 			if (file != null) {
+				Map<String, Object> map;
 				switch (locale) {
+				case DEFAULT:
+					map = unSet;
+					break;
 				case PIRATE_SPEAK:
-					for (String key : pirateSet.keySet())
-						if (!file.isSet(key))
-							file.set(key, pirateSet.get(key));
+					map = pirateSet;
 					break;
 				default:
-					for (String key : defaultSet.keySet())
-						if (!file.isSet(key))
-							file.set(key, defaultSet.get(key));
+					map = defaultSet;
 					break;
 				}
+				for (String key : map.keySet())
+					if (!file.isSet(key))
+						file.set(key, map.get(key));
 				codesCovered.add(locale.getCode());
 				MyZ.instance.saveLocalizableConfig(locale);
 			}
@@ -80,15 +84,15 @@ public class Locales {
 				"&eInitializing a scan on the selected area. Run another scan concurrently at your own peril.");
 
 		// NPC names
-		defaultSet.put("npc_names.archer.friendly", new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
-		defaultSet.put("npc_names.archer.enemy", new ArrayList<String>(Arrays.asList("Evil Bob", "Stephen", "Monte")));
-		defaultSet.put("npc_names.swordsman.friendly", new ArrayList<String>(Arrays.asList("Knight Phil", "MrTeePee", "Isocrates")));
-		defaultSet.put("npc_names.swordsman.enemy", new ArrayList<String>(Arrays.asList("Amadeus", "Jason", "Clayton")));
-		defaultSet.put("npc_names.wanderer.friendly", new ArrayList<String>(Arrays.asList("Frederico", "Arthur", "Virgil")));
-		defaultSet.put("npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
+		unSet.put("npc_names.archer.friendly", new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
+		unSet.put("npc_names.archer.enemy", new ArrayList<String>(Arrays.asList("Evil Bob", "Stephen", "Monte")));
+		unSet.put("npc_names.swordsman.friendly", new ArrayList<String>(Arrays.asList("Knight Phil", "MrTeePee", "Isocrates")));
+		unSet.put("npc_names.swordsman.enemy", new ArrayList<String>(Arrays.asList("Amadeus", "Jason", "Clayton")));
+		unSet.put("npc_names.wanderer.friendly", new ArrayList<String>(Arrays.asList("Frederico", "Arthur", "Virgil")));
+		unSet.put("npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
 
 		// Science
-		defaultSet.put("science_gui", "Science Centre - %s pts.");
+		unSet.put("science_gui", "Science Centre - %s pts.");
 		defaultSet.put("gui.purchased", "You now have &e%s&r points.");
 		defaultSet.put("gui.afford", "You don't know enough to use that.");
 		defaultSet.put("gui.next_page", "Next Page");
@@ -99,8 +103,8 @@ public class Locales {
 		defaultSet.put("research.rank", "&eThe Science Gods will not hear you. You must be ranked on this server to do research.");
 
 		// Chat
-		defaultSet.put("radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
-		defaultSet.put("radio_color_override", "&2");
+		unSet.put("radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
+		unSet.put("radio_color_override", "&2");
 		defaultSet.put("private.to_prefix", "&7To %s:");
 		defaultSet.put("private.from_prefix", "&7From %s:");
 		defaultSet.put("private.clan_prefix", "&8Clan chat:");
@@ -110,6 +114,8 @@ public class Locales {
 		// Special Events
 		defaultSet.put("damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
 		defaultSet.put("damage.bleed_end", "That ought to stop the bleeding.");
+		defaultSet.put("damage.leg_break", "&4Oof! That was a far fall!");
+		defaultSet.put("damage.leg_fix", "That's more like it.");
 		defaultSet.put("damage.poison_begin", "&5Wh&ko&r&da, &5&kI &1d&kon&r&3't &kF&r&afeel &4so &kg&r&6oo&cd...");
 		defaultSet.put("damage.poison_end", "Ah, much better!");
 		defaultSet.put("damage.headshot", "&eHeadshot! 2x damage.");
@@ -126,9 +132,9 @@ public class Locales {
 		defaultSet.put("heal.amount", "&ePlayer &2healed&e. You now have %s heals this life.");
 		defaultSet.put("heal.wait", "Please wait %s seconds before healing another player again.");
 		defaultSet.put("heal.waste", "&eWell that was a waste.");
-		defaultSet.put("heal.medkit.regeneration", "Regeneration");
-		defaultSet.put("heal.medkit.heal", "Heal");
-		defaultSet.put("heal.medkit.antiseptic", "Antiseptic");
+		unSet.put("heal.medkit.regeneration", "Regeneration");
+		unSet.put("heal.medkit.heal", "Heal");
+		unSet.put("heal.medkit.antiseptic", "Antiseptic");
 
 		// Kill
 		defaultSet.put("bandit.amount", "&ePlayer &4killed&e. You now have %s kills this life.");
@@ -142,7 +148,7 @@ public class Locales {
 		// Kick
 		defaultSet.put("kick.come_back", "&4Grab a drink. Come back in %s seconds.");
 		defaultSet.put("kick.safe_logout", "&eYou have been safely logged out.");
-		defaultSet.put("kick.recur", "&4Stop stressing. %s seconds to go.");
+		unSet.put("kick.recur", "&4Stop stressing. %s seconds to go.");
 
 		// Commands
 		defaultSet.put("command.base.help", "=== MyZ Help ===");
@@ -258,16 +264,7 @@ public class Locales {
 		pirateSet.put("chest.set.coordinate2", "&eHit t' other corner of da land ye want scanned.");
 		pirateSet.put("chest.set.initialize", "&eLand ho! Search again at ye own peril.");
 
-		// NPC names
-		pirateSet.put("npc_names.archer.friendly", new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
-		pirateSet.put("npc_names.archer.enemy", new ArrayList<String>(Arrays.asList("Evil Bob", "Stephen", "Monte")));
-		pirateSet.put("npc_names.swordsman.friendly", new ArrayList<String>(Arrays.asList("Knight Phil", "MrTeePee", "Isocrates")));
-		pirateSet.put("npc_names.swordsman.enemy", new ArrayList<String>(Arrays.asList("Amadeus", "Jason", "Clayton")));
-		pirateSet.put("npc_names.wanderer.friendly", new ArrayList<String>(Arrays.asList("Frederico", "Arthur", "Virgil")));
-		pirateSet.put("npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
-
 		// Science
-		pirateSet.put("science_gui", "Science Centre - %s pts.");
 		pirateSet.put("gui.purchased", "Ye now have &e%s&r dubloons.");
 		pirateSet.put("gui.afford", "Yer not smart enough t' do that.");
 		pirateSet.put("gui.next_page", "More Treasure");
@@ -278,8 +275,6 @@ public class Locales {
 		pirateSet.put("research.rank", "&eYe must be important on da server t' find gold dubloons.");
 
 		// Chat
-		pirateSet.put("radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
-		pirateSet.put("radio_color_override", "&2");
 		pirateSet.put("private.to_prefix", "&7Ahoy, %s:");
 		pirateSet.put("private.from_prefix", "&7From %s:");
 		pirateSet.put("private.clan_prefix", "&8Crew chat:");
@@ -289,6 +284,8 @@ public class Locales {
 		// Special Events
 		pirateSet.put("damage.bleed_begin", "&4Cor blimey!");
 		pirateSet.put("damage.bleed_end", "That thar is better.");
+		pirateSet.put("damage.leg_break", "&4Arghh, me peg-leg!");
+		pirateSet.put("damage.leg_fix", "Bettarrrrrr.");
 		pirateSet.put("damage.poison_begin", "&5To&o&r &mu&5&kc&1h&k ru&r&3mmm&k.&r&a..");
 		pirateSet.put("damage.poison_end", "Me spies!");
 		pirateSet.put("damage.headshot", "&eShot across the bow! He'll be swimmin' with t' fishes.");
@@ -304,9 +301,6 @@ public class Locales {
 		pirateSet.put("heal.amount", "&eThe lubber was &2healed&e. You now have %s heals.");
 		pirateSet.put("heal.wait", "Wait %s seconds before healing yer deckmate.");
 		pirateSet.put("heal.waste", "&eShiver me timbers!");
-		pirateSet.put("heal.medkit.regeneration", "Shipshape");
-		pirateSet.put("heal.medkit.heal", "Rum");
-		pirateSet.put("heal.medkit.antiseptic", "Booty");
 
 		// Kill
 		pirateSet.put("bandit.amount", "&eFeed the fishes! You now have %s heads.");
@@ -319,8 +313,7 @@ public class Locales {
 
 		// Kick
 		pirateSet.put("kick.come_back", "&4Grab some more rum. Come back in %s seconds.");
-		pirateSet.put("kick.safe_logout", "&eYe have escaped with your life.");
-		pirateSet.put("kick.recur", "&4Ahoy! %s seconds to go.");
+		pirateSet.put("kick.safe_logout", "&eYe have escaped with yer life.");
 
 		// Commands
 		pirateSet.put("command.base.help", "=== MyZ Help ===");
@@ -352,7 +345,7 @@ public class Locales {
 		pirateSet.put("command.spawn.requires_rank", "&4That costs dubloons. Donate for the ability to spawn near yer crew!");
 		pirateSet
 				.put("spawn.zombie",
-						"Yer &2infected&r! As a zombie, ye aren't targetted by other zombies. Ye don't need rum or bleed but don't start with any treasure and are hunted by yer crew!");
+						"Yer &2infected&r! As a zombie, ye aren't targetted by other zombies. Ye don't need rum nor bleed but don't start with any treasure and are hunted by yer crew!");
 		pirateSet.put("ranks.spawnmessage.0", "Go find some rum!");
 
 		// Stats Command

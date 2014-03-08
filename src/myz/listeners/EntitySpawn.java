@@ -13,7 +13,6 @@ import myz.utilities.WGUtils;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
@@ -53,11 +52,6 @@ public class EntitySpawn implements Listener {
 
 		// Cancel spawning inside spawn room.
 		if (Configuration.isInLobby(e.getEntity().getLocation())) {
-			e.setCancelled(true);
-			return;
-		}
-
-		if (isTooFarFromLandmark(e.getEntity())) {
 			e.setCancelled(true);
 			return;
 		}
@@ -110,7 +104,7 @@ public class EntitySpawn implements Listener {
 					if (doSpawn)
 						e.getLocation().getWorld().spawnEntity(newLocation, e.getEntityType());
 				}
-			} else if (random.nextDouble() <= 0.6) {// Decrease natural spawns
+			} else if (random.nextDouble() <= 0.8) {// Decrease natural spawns
 													// outside of towns.
 				e.setCancelled(true);
 				return;
@@ -150,31 +144,5 @@ public class EntitySpawn implements Listener {
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Make sure we only spawn creatures close enough to a player or a chest.
-	 * 
-	 * @param entity
-	 *            The creature that is spawning.
-	 * @return True if we should cancel the underlying event (too far from a
-	 *         player or chest), false otherwise.
-	 */
-	private boolean isTooFarFromLandmark(Entity entity) {
-		// TODO Caused too much lag to use.
-
-		/*List<Entity> nearby = entity.getNearbyEntities(Configuration.spawnRadius(), 10, Configuration.spawnRadius());
-		for (Entity near : nearby)
-			if (near instanceof Player)
-				return false;
-		Location location = entity.getLocation();
-		World world = location.getWorld();
-		int X = location.getBlockX(), Y = location.getBlockY(), Z = location.getBlockZ();
-		for (int x = -Configuration.spawnRadius(); x < Configuration.spawnRadius(); x++)
-			for (int y = -10; y < 10; y++)
-				for (int z = -Configuration.spawnRadius(); z < Configuration.spawnRadius(); z++)
-					if (world.getBlockAt(X + x, Y + y, Z + z).getType() == Material.CHEST)
-						return false;*/
-		return false;// true;
 	}
 }

@@ -8,12 +8,14 @@ import java.util.List;
 
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
+import myz.mobs.pathing.PathfinderGoalWalkTo;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
 import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityHuman;
+import net.minecraft.server.v1_7_R1.EntityInsentient;
 import net.minecraft.server.v1_7_R1.EntityLiving;
 import net.minecraft.server.v1_7_R1.EntitySkeleton;
 import net.minecraft.server.v1_7_R1.EntityVillager;
@@ -23,6 +25,7 @@ import net.minecraft.server.v1_7_R1.GenericAttributes;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
 import net.minecraft.server.v1_7_R1.MathHelper;
+import net.minecraft.server.v1_7_R1.PathfinderGoal;
 import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
 import net.minecraft.server.v1_7_R1.PathfinderGoalHurtByTarget;
 import net.minecraft.server.v1_7_R1.PathfinderGoalMoveIndoors;
@@ -45,13 +48,17 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
  * @author Jordan
  * 
  */
-public class CustomEntityZombie extends EntityZombie implements SmartEntity {
+public class CustomEntityZombie extends EntityZombie {
 
 	protected List<org.bukkit.inventory.ItemStack> inventory = new ArrayList<org.bukkit.inventory.ItemStack>();
 
 	public CustomEntityZombie(World world) {
 		super(world);
 
+		populateGoals();
+	}
+
+	private void populateGoals() {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
 			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
@@ -64,11 +71,11 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 		getNavigation().b(true);
 		goalSelector.a(0, new PathfinderGoalFloat(this));
 		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.zombie.speed")
-				* (isBaby() ? 0.75 : 1), false));
+				* (isBaby() ? 0.4 : 1), false));
 		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, (Double) Configuration.getConfig("mobs.zombie.speed")
-				* (isBaby() ? 0.75 : 1), true));
+				* (isBaby() ? 0.4 : 1), true));
 		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, (Double) Configuration.getConfig("mobs.zombie.speed")
-				* (isBaby() ? 0.75 : 1), true));
+				* (isBaby() ? 0.4 : 1), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(6, new PathfinderGoalRandomStroll(this, 1.0D));
@@ -86,7 +93,7 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 	@Override
 	protected void aD() {
 		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.zombie.damage") * (isBaby() ? 0.5 : 1));
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.zombie.damage") * (isBaby() ? 0.75 : 1));
 	}
 
 	@Override
@@ -121,13 +128,6 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 							world.addEntity(entityzombie);
 							// Prevent crazy zombie mobs.
 							entityzombie.setGoalTarget(entityliving);
-							// entityzombie.a((GroupDataEntity) null);
-							// this.getAttributeInstance(bp).a(new
-							// AttributeModifier("Zombie reinforcement caller charge",
-							// -0.05000000074505806D, 0));
-							// entityzombie.getAttributeInstance(bp).a(new
-							// AttributeModifier("Zombie reinforcement callee charge",
-							// -0.05000000074505806D, 0));
 							break;
 						}
 					}
@@ -209,24 +209,25 @@ public class CustomEntityZombie extends EntityZombie implements SmartEntity {
 
 	@Override
 	public boolean canSpawn() {
-		// int i = MathHelper.floor(locX);
-		// int j = MathHelper.floor(boundingBox.b);
-		// int k = MathHelper.floor(locZ);
 		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
-				&& !world.containsLiquid(boundingBox);// && this.a(i, j, k) >=
-														// 0.0F;
+				&& !world.containsLiquid(boundingBox);
 	}
 
-	/* (non-Javadoc)
-	 * @see myz.mobs.SmartEntity#see(org.bukkit.Location, int)
-	 */
-	@Override
 	public void see(Location location, int priority) {
-		if (random.nextInt(priority + 1) >= 1) {
+		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;
-			PathingSupport.setTarget(this, location, (Double) Configuration.getConfig("mobs.zombie.speed") * (isBaby() ? 0.75 : 1));
+			double dub = (Double) Configuration.getConfig("mobs.zombie.speed");
+			addPather(location, (float) dub * (isBaby() ? 0.4f : 1f));
 		}
+	}
+
+	public void addPather(Location to, float speed) {
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	}
+
+	public void cleanPather(PathfinderGoal goal) {
+		populateGoals();
 	}
 
 	public static CustomEntityZombie newInstance(Player player) {

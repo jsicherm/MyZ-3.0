@@ -28,7 +28,7 @@ public class PlayerData {
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
 			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record,
 			deaths, rank, heals_life, thirst, minutes_alive_life, minutes_alive_life_record, research;
-	private boolean isBleeding, isPoisoned, wasKilledNPC, isZombie;
+	private boolean isBleeding, isPoisoned, wasKilledNPC, isZombie, isBrokenLeg;
 	private long timeOfKickban, minutes_alive;
 	private String clan;
 	private List<String> friends = new ArrayList<String>();
@@ -37,7 +37,8 @@ public class PlayerData {
 			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int deaths, int rank, boolean isBleeding,
 			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan,
 			long minutes_alive, int minutes_alive_life, int minutes_alive_life_record, int player_kills_life_record,
-			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record, int research, boolean isZombie) {
+			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record, int research, boolean isZombie,
+			boolean isBrokenLeg) {
 		this.name = name;
 		this.player_kills = player_kills;
 		this.zombie_kills = zombie_kills;
@@ -57,6 +58,7 @@ public class PlayerData {
 		this.isBleeding = isBleeding;
 		this.isPoisoned = isPoisoned;
 		this.wasKilledNPC = wasKilledNPC;
+		this.isBrokenLeg = isBrokenLeg;
 		this.timeOfKickban = timeOfKickban;
 		this.heals_life = heals_life;
 		this.thirst = thirst;
@@ -125,7 +127,8 @@ public class PlayerData {
 				section.getString("clan"), section.getInt("minutes.played"), section.getInt("minutes.played_life"),
 				section.getInt("minutes.played_life_record"), section.getInt("player.kills_life_record"),
 				section.getInt("zombie.kills_life_record"), section.getInt("pigman.kills_life_record"),
-				section.getInt("giant.kills_life_record"), section.getInt("research"), section.getBoolean("zombie"));
+				section.getInt("giant.kills_life_record"), section.getInt("research"), section.getBoolean("zombie"),
+				section.getBoolean("legBroken"));
 	}
 
 	/**
@@ -185,6 +188,8 @@ public class PlayerData {
 	 *            The number of research points owned.
 	 * @param isZombie
 	 *            Whether or not the player is a zombie.
+	 * @param isBrokenLeg
+	 *            Whether or not the players' leg is broken.
 	 * @return The PlayerData object created.
 	 */
 	public static PlayerData createDataFor(Player player, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
@@ -192,7 +197,7 @@ public class PlayerData {
 			boolean isBleeding, boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life,
 			int thirst, String clan, long minutes_alive, int minutes_alive_life, int minutes_alive_life_record,
 			int player_kills_life_record, int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record,
-			int research, boolean isZombie) {
+			int research, boolean isZombie, boolean isBrokenLeg) {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return null;
 		if (!playerDataExists(player)) {
@@ -224,6 +229,7 @@ public class PlayerData {
 			section.set("minutes.played_life_record", minutes_alive_life_record);
 			section.set("research", research);
 			section.set("isZombie", isZombie);
+			section.set("legBroken", isBrokenLeg);
 			try {
 				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + player.getName() + ".yml"));
 			} catch (IOException e) {
@@ -291,6 +297,7 @@ public class PlayerData {
 			section.set("minutes.played_life_record", minutes_alive_life_record);
 			section.set("research", research);
 			section.set("isZombie", isZombie);
+			section.set("legBroken", isBrokenLeg);
 			try {
 				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + name + ".yml"));
 			} catch (IOException e) {
@@ -835,6 +842,22 @@ public class PlayerData {
 	 */
 	public void setZombie(boolean isZombie) {
 		this.isZombie = isZombie;
+		save();
+	}
+	
+	/**
+	 * @return the isBrokenLeg
+	 */
+	public boolean isLegBroken() {
+		return isBrokenLeg;
+	}
+
+	/**
+	 * @param isLegBroken
+	 *            the isBrokenLeg to set
+	 */
+	public void setLegBroken(boolean isLegBroken) {
+		this.isBrokenLeg = isLegBroken;
 		save();
 	}
 

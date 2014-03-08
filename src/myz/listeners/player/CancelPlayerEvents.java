@@ -8,6 +8,10 @@ import java.util.List;
 import myz.support.interfacing.Configuration;
 import myz.utilities.Utils;
 
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,6 +19,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerFishEvent.State;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -40,6 +46,33 @@ public class CancelPlayerEvents implements Listener {
 				&& e.getItem().isSimilar((ItemStack) Configuration.getConfig(Configuration.LOGOUT_ITEM))) {
 			e.setCancelled(true);
 			Utils.startSafeLogout(e.getPlayer());
+		}
+	}
+
+	private void grapple(Player puller, Entity pulled, Location to) {
+		if (puller.equals(pulled)) {
+			Utils.pullTo(puller, to);
+		} else {
+			Utils.pullTo(pulled, to);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	private void onFish(PlayerFishEvent e) {
+		Player p = e.getPlayer();
+		if (p.getItemInHand().getType() != Material.FISHING_ROD) { return; }
+		if (e.getState() == State.IN_GROUND) {
+			for (Entity entity : e.getHook().getNearbyEntities(1.5, 1, 1.5)) {
+				if (entity instanceof Item) {
+					p.getItemInHand().setDurability((short) -12);
+					grapple(p, entity, p.getLocation());
+					return;
+				}
+			}
+			grapple(p, p, e.getHook().getLocation());
+		} else if(e.getState() == State.CAUGHT_ENTITY) {
+			e.setCancelled(true);
+			grapple(p, e.getCaught(), p.getLocation());
 		}
 	}
 }

@@ -5,6 +5,7 @@ package myz.mobs;
 
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
+import myz.mobs.pathing.PathfinderGoalWalkTo;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
 import myz.support.interfacing.Configuration;
@@ -17,6 +18,7 @@ import net.minecraft.server.v1_7_R1.EnumDifficulty;
 import net.minecraft.server.v1_7_R1.GenericAttributes;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
+import net.minecraft.server.v1_7_R1.PathfinderGoal;
 import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
 import net.minecraft.server.v1_7_R1.PathfinderGoalHurtByTarget;
 import net.minecraft.server.v1_7_R1.PathfinderGoalMoveThroughVillage;
@@ -35,11 +37,15 @@ import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
  * @author Jordan
  * 
  */
-public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntity {
+public class CustomEntityPigZombie extends EntityPigZombie {
 
 	public CustomEntityPigZombie(World world) {
 		super(world);
 
+		populateGoals();
+	}
+
+	public void populateGoals() {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
 			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
@@ -51,12 +57,12 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 
 		getNavigation().b(true);
 		goalSelector.a(0, new PathfinderGoalFloat(this));
-		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.pigman.speed"),
-				false));
-		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, (Double) Configuration.getConfig("mobs.pigman.speed"),
-				true));
-		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, (Double) Configuration.getConfig("mobs.pigman.speed"),
-				true));
+		goalSelector.a(2, new PathfinderGoalZombieAttack(this, EntityHuman.class, (Double) Configuration.getConfig("mobs.pigman.speed")
+				* (isBaby() ? 0.4 : 1), false));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntityVillager.class, (Double) Configuration.getConfig("mobs.pigman.speed")
+				* (isBaby() ? 0.4 : 1), true));
+		goalSelector.a(3, new PathfinderGoalZombieAttack(this, EntitySkeleton.class, (Double) Configuration.getConfig("mobs.pigman.speed")
+				* (isBaby() ? 0.4 : 1), true));
 		goalSelector.a(4, new PathfinderGoalMoveTowardsRestriction(this, 1.0D));
 		goalSelector.a(5, new PathfinderGoalMoveThroughVillage(this, 1.0D, false));
 		goalSelector.a(3, new PathfinderGoalRestrictOpenDoor(this));
@@ -73,7 +79,7 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 	@Override
 	protected void aD() {
 		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.pigman.damage") * (isBaby() ? 0.5 : 1));
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.pigman.damage") * (isBaby() ? 0.75 : 1));
 	}
 
 	@Override
@@ -83,11 +89,6 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}
 
-	/*@Override
-	public boolean m(Entity entity) {
-		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getPigmanDamage() * (isBaby() ? 0.5f : 1f));
-	}*/
-
 	@Override
 	protected void bA() {
 		setEquipment(0, new ItemStack(Items.STONE_SWORD));
@@ -95,24 +96,24 @@ public class CustomEntityPigZombie extends EntityPigZombie implements SmartEntit
 
 	@Override
 	public boolean canSpawn() {
-		// int i = MathHelper.floor(locX);
-		// int j = MathHelper.floor(boundingBox.b);
-		// int k = MathHelper.floor(locZ);
-
 		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
-				&& !world.containsLiquid(boundingBox);// && this.a(i, j, k) >=
-														// 0.0F;
+				&& !world.containsLiquid(boundingBox);
 	}
 
-	/* (non-Javadoc)
-	 * @see myz.mobs.SmartEntity#see(org.bukkit.Location, int)
-	 */
-	@Override
 	public void see(Location location, int priority) {
-		if (random.nextInt(priority + 1) >= 1) {
+		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;
-			PathingSupport.setTarget(this, location, (Double) Configuration.getConfig("mobs.pigman.speed"));
+			double dub = (Double) Configuration.getConfig("mobs.pigman.speed");
+			addPather(location, (float) dub * (isBaby() ? 0.4f : 1f));
 		}
+	}
+
+	public void addPather(Location to, float speed) {
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	}
+
+	public void cleanPather(PathfinderGoal goal) {
+		populateGoals();
 	}
 }

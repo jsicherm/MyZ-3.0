@@ -36,7 +36,7 @@ public enum Localizer {
 			"Slovenš�?ina", "sl_SI"), SERBIAN("Срп�?ки", "sr_SP"), SWEDISH("Svenska", "sv_SE"), THAI("ภาษาไทย",
 			"th_TH"), tlhIngan_Hol("tlhIngan Hol", "tlh_AA"), TURKISH("Türkçe", "tr_TR"), UKRAINIAN("Україн�?ька", "uk_UA"), VIETNAMESE(
 			"Tiếng Việt", "vi_VI"), SIMPLIFIED_CHINESE("简体中文", "zh_CN"), TRADITIONAL_CHINESE("�?體中文", "zh_TW"), POLISH(
-			"Polski", "pl_PL");
+			"Polski", "pl_PL"), DEFAULT("Default", "default");
 
 	private String name;
 	private String code;

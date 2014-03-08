@@ -31,9 +31,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Chest;
 import org.bukkit.scheduler.BukkitTask;
@@ -108,19 +110,29 @@ public class ChestScanner implements Listener {
 		}
 	}
 
-	@EventHandler
-	private void onInventoryClose(InventoryCloseEvent e) {
-		if (e.getInventory().getHolder() instanceof Player) {
-			ItemStack[] contents = ((Player) e.getInventory().getHolder()).getInventory().getContents();
+	private void replaceMedkits(Inventory inventory, boolean trueInventory) {
+		if (inventory.getHolder() instanceof Player || trueInventory) {
+			inventory = trueInventory ? inventory : ((Player) inventory.getHolder()).getInventory();
+			ItemStack[] contents = inventory.getContents();
 			int spot = 0;
 			for (ItemStack i : contents) {
 				MedKit kit;
 				if (i != null && (kit = MedKit.getRawMedKitFor(i)) != null) {
-					((Player) e.getInventory().getHolder()).getInventory().setItem(spot, kit.getTrueOutput());
+					inventory.setItem(spot, kit.getTrueOutput());
 				}
 				spot++;
 			}
 		}
+	}
+
+	@EventHandler
+	private void onInventoryOpen(InventoryOpenEvent e) {
+		replaceMedkits(e.getInventory(), true);
+	}
+
+	@EventHandler
+	private void onInventoryClose(InventoryCloseEvent e) {
+		replaceMedkits(e.getInventory(), false);
 
 		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9
 				&& lootCreators.containsKey(e.getPlayer().getName())) {

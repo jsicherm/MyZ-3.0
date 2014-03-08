@@ -12,6 +12,7 @@ import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Hologram;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -73,6 +74,7 @@ public class PlayerKillEntity implements Listener {
 	private void incrementKills(Entity typeFor, Player playerFor) {
 		PlayerData data = PlayerData.getDataFor(playerFor);
 		int amount = 0;
+		String slug = "";
 		switch (typeFor.getType()) {
 		case ZOMBIE:
 			if (data != null) {
@@ -89,7 +91,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "zombie.kill_amount", amount + ""));
+			slug = "zombie";
 			break;
 		case PIG_ZOMBIE:
 			if (data != null) {
@@ -106,7 +108,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "pigman.kill_amount", amount + ""));
+			slug = "pigman";
 			break;
 		case GIANT:
 			if (data != null) {
@@ -123,7 +125,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "giant.kill_amount", amount + ""));
+			slug = "giant";
 			break;
 		case PLAYER:
 			Messenger.sendFancyDeathMessage(playerFor, (Player) typeFor);
@@ -142,7 +144,6 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life_record", amount, true);
 			}
-			Messenger.sendMessage(playerFor, Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", amount + ""));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(playerFor);
@@ -150,5 +151,11 @@ public class PlayerKillEntity implements Listener {
 		default:
 			break;
 		}
+
+		String message = slug == "" ? Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", "\n" + amount)
+				: Messenger.getConfigMessage(Localizer.getLocale(playerFor), slug + ".kill_amount", "\n" + amount);
+		String delimiter = message.contains(" \n") ? " \n" : "\n";
+		final Hologram hologram = new Hologram(message.split(delimiter));
+		hologram.show(typeFor.getLocation(), playerFor);
 	}
 }

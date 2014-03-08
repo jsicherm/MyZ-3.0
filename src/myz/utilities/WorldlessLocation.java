@@ -58,6 +58,14 @@ public class WorldlessLocation {
 		return z;
 	}
 
+	public float getPitch() {
+		return pitch;
+	}
+
+	public float getYaw() {
+		return yaw;
+	}
+
 	@Override
 	public String toString() {
 		return (int) x + ", " + (int) y + ", " + (int) z + ", " + (int) pitch + " pitch, " + (int) yaw + " yaw";

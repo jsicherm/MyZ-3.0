@@ -99,17 +99,4 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 	protected void a(int i, int j, int k, Block block) {
 		makeSound("mob.zombie.step", 0.15F, 1.0F);
 	}
-
-	/*@Override
-	protected void a(Entity entity, float f) {
-		if (this.attackTicks <= 0 && f < 2.0F && entity.boundingBox.e > this.boundingBox.b && entity.boundingBox.b < this.boundingBox.e) {
-			this.attackTicks = 20;
-			this.m(entity);
-		}
-	}*/
-
-	/*@Override
-	public boolean m(Entity entity) {
-		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getGiantDamage());
-	}*/
 }

@@ -12,6 +12,7 @@ import myz.mobs.pathing.PathingSupport;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Hologram;
 import myz.utilities.Utils;
 
 import org.bukkit.ChatColor;
@@ -32,6 +33,7 @@ public class Chat implements Listener {
 	private void onChat(AsyncPlayerChatEvent e) {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
+
 		Player player = e.getPlayer();
 		String prefix = Configuration.getPrefixForPlayerRank(player);
 		int radio_frequency = -1;
@@ -51,8 +53,12 @@ public class Chat implements Listener {
 
 		// If we're talking in local, not radio, only include those near us.
 		if (radio_frequency == -1) {
-			if (didHandlePrivateChat(e))
+			if (didHandlePrivateChat(e)) {
+				Hologram hologram = new Hologram(e.getMessage());
+				hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
+				hologram.follow(e.getPlayer());
 				return;
+			}
 			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
 				e.getRecipients().addAll(original_recipients);
 			else
@@ -66,6 +72,12 @@ public class Chat implements Listener {
 						&& player_on_server.getInventory().getItem(radio_frequency - 1)
 								.isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO)))
 					e.getRecipients().add(player_on_server);
+
+		Hologram hologram = new Hologram(e.getMessage());
+		hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
+		hologram.follow(e.getPlayer());
+
+		// Make this player more visible to zombies.
 		PathingSupport.elevatePlayer(player, 10);
 	}
 

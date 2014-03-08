@@ -9,6 +9,7 @@ import myz.MyZ;
 import myz.mobs.pathing.PathfinderGoalFollow;
 import myz.mobs.pathing.PathfinderGoalLookAtTarget;
 import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
+import myz.mobs.pathing.PathfinderGoalWalkTo;
 import myz.mobs.pathing.PathfinderGoalZombieAttack;
 import myz.mobs.pathing.PathingSupport;
 import myz.support.interfacing.Configuration;
@@ -26,6 +27,7 @@ import net.minecraft.server.v1_7_R1.Item;
 import net.minecraft.server.v1_7_R1.ItemStack;
 import net.minecraft.server.v1_7_R1.Items;
 import net.minecraft.server.v1_7_R1.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_7_R1.PathfinderGoal;
 import net.minecraft.server.v1_7_R1.PathfinderGoalArrowAttack;
 import net.minecraft.server.v1_7_R1.PathfinderGoalFloat;
 import net.minecraft.server.v1_7_R1.PathfinderGoalHurtByTarget;
@@ -49,7 +51,7 @@ import org.bukkit.potion.PotionType;
  * @author Jordan
  * 
  */
-public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
+public class CustomEntityNPC extends EntitySkeleton {
 
 	private final NPCType type;
 
@@ -64,6 +66,10 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 		super(world);
 		this.type = type;
 
+		populateGoals();
+	}
+
+	private void populateGoals() {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
 			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
@@ -377,15 +383,20 @@ public class CustomEntityNPC extends EntitySkeleton implements SmartEntity {
 				&& !world.containsLiquid(boundingBox);
 	}
 
-	/* (non-Javadoc)
-	 * @see myz.mobs.SmartEntity#see(org.bukkit.Location, int)
-	 */
-	@Override
 	public void see(Location location, int priority) {
-		if (random.nextInt(priority + 1) >= 1) {
+		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;
-			PathingSupport.setTarget(this, location, (Double) Configuration.getConfig("mobs.npc.speed"));
+			double dub = (Double) Configuration.getConfig("mobs.npc.speed");
+			addPather(location, (float) dub);
 		}
+	}
+
+	public void addPather(Location to, float speed) {
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	}
+
+	public void cleanPather(PathfinderGoal goal) {
+		populateGoals();
 	}
 }

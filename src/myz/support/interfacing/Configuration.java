@@ -749,11 +749,11 @@ public class Configuration {
 	}
 
 	public static String getRadioPrefix(int radio_frequency) {
-		return Messenger.getConfigMessage(Localizer.ENGLISH, "radio_name", radio_frequency + "") + ChatColor.RESET;
+		return Messenger.getConfigMessage(Localizer.DEFAULT, "radio_name", radio_frequency + "") + ChatColor.RESET;
 	}
 
 	public static String getRadioColor() {
-		return Messenger.getConfigMessage(Localizer.ENGLISH, "radio_color_override");
+		return Messenger.getConfigMessage(Localizer.DEFAULT, "radio_color_override");
 	}
 
 	public static String getPrefixForPlayerRank(Player playerFor) {

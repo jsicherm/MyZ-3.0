@@ -13,6 +13,7 @@ import java.util.Random;
 
 import myz.api.PlayerBeginBleedingEvent;
 import myz.api.PlayerBeginPoisonEvent;
+import myz.api.PlayerBreakLegEvent;
 import myz.api.PlayerSpawnInWorldEvent;
 import myz.api.PlayerWaterDecayEvent;
 import myz.chests.ChestManager;
@@ -94,6 +95,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.mcstats.MetricsLite;
 
 /**
@@ -104,13 +106,13 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO configurable death loot (?)
-	// TODO sound attraction to (trap)doors.
 	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
 	// TODO grave-digging
 	// TODO use construction parts to create clans. Builder is clan owner.
 	// Requires Build-in-a-box.
-	// TODO 6. Save medkit and npc i there own yml files. Hard to rename npc the
-	// way it is now.
+	// TODO The ability to disable specific mob types in the config.
+	// TODO Knockback range!
+	// TODO Attack range maybe? :)
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -263,7 +265,7 @@ public class MyZ extends JavaPlugin {
 							if (data == null && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
 								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
 										new ArrayList<String>(), 0, (Integer) Configuration.getConfig(Configuration.THIRST_MAX), "", 0, 0,
-										0, 0, 0, 0, 0, 0, false);
+										0, 0, 0, 0, 0, 0, false, false);
 								putPlayerAtSpawn(player, false, true);
 							}
 							if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -620,6 +622,22 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * Whether or not the given player currently has a broken leg.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @return True if the player has a broken leg.
+	 */
+	public boolean isLegBroken(Player player) {
+		PlayerData data = PlayerData.getDataFor(player);
+		if (data != null)
+			return data.isLegBroken();
+		if (sql.isConnected())
+			return sql.getBoolean(player.getName(), "legBroken");
+		return false;
+	}
+
+	/**
 	 * Whether or not the given player is currently poisoned.
 	 * 
 	 * @param player
@@ -659,6 +677,30 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
+	 * Begin leg-break for this player. Will fail if the player already has a
+	 * broken leg or doesn't have a PlayerData associated AND SQL is not
+	 * connected.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+	public void breakLeg(Player player) {
+		if (!isLegBroken(player)) {
+			PlayerBreakLegEvent event = new PlayerBreakLegEvent(player);
+			getServer().getPluginManager().callEvent(event);
+			if (!event.isCancelled()) {
+				PlayerData data = PlayerData.getDataFor(player);
+				if (data != null)
+					data.setLegBroken(true);
+				if (sql.isConnected())
+					sql.set(player.getName(), "legBroken", true, true);
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 2));
+				Messenger.sendConfigMessage(player, "damage.leg_break");
+			}
+		}
+	}
+
+	/**
 	 * Begin poison for this player. Will fail if the player is already poisoned
 	 * or doesn't have a PlayerData associated AND SQL is not connected.
 	 * 
@@ -686,14 +728,35 @@ public class MyZ extends JavaPlugin {
 	 * @param player
 	 *            The player.
 	 */
-	public void stopPoison(Player player) {
+	public void stopPoison(Player player, boolean alert) {
 		if (isPoisoned(player)) {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null)
 				data.setPoisoned(false);
 			if (sql.isConnected())
 				sql.set(player.getName(), "isPoisoned", false, true);
-			Messenger.sendConfigMessage(player, "damage.poison_end");
+			if (alert)
+				Messenger.sendConfigMessage(player, "damage.poison_end");
+		}
+	}
+
+	/**
+	 * End leg-break for this player. Will fail if the player already has a
+	 * broken leg.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+	public void fixLeg(Player player, boolean alert) {
+		if (isLegBroken(player)) {
+			PlayerData data = PlayerData.getDataFor(player);
+			if (data != null)
+				data.setLegBroken(false);
+			if (sql.isConnected())
+				sql.set(player.getName(), "legBroken", false, true);
+			player.removePotionEffect(PotionEffectType.SLOW);
+			if (alert)
+				Messenger.sendConfigMessage(player, "damage.leg_fix");
 		}
 	}
 
@@ -703,14 +766,15 @@ public class MyZ extends JavaPlugin {
 	 * @param player
 	 *            The player.
 	 */
-	public void stopBleeding(Player player) {
+	public void stopBleeding(Player player, boolean alert) {
 		if (isBleeding(player)) {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null)
 				data.setBleeding(false);
 			if (sql.isConnected())
 				sql.set(player.getName(), "isBleeding", false, true);
-			Messenger.sendConfigMessage(player, "damage.bleed_end");
+			if (alert)
+				Messenger.sendConfigMessage(player, "damage.bleed_end");
 		}
 	}
 
@@ -748,7 +812,7 @@ public class MyZ extends JavaPlugin {
 		 */
 		if (playerdata == null && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
 			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
-					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false);
+					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false, false);
 			putPlayerAtSpawn(player, false, clearInventory);
 		}
 		if (sql.isConnected() && !sql.isIn(player.getName())) {
@@ -970,8 +1034,9 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 */
 	private void wipeBuffs(Player player, boolean clearInventory) {
-		stopBleeding(player);
-		stopPoison(player);
+		stopBleeding(player, false);
+		stopPoison(player, false);
+		fixLeg(player, false);
 		player.setHealth(player.getMaxHealth());
 		player.setFireTicks(0);
 		if (clearInventory) {
@@ -1027,13 +1092,14 @@ public class MyZ extends JavaPlugin {
 						// player-entry.
 
 		WorldlessLocation spawnLocation = Configuration.getSpawnpoint(spawnpoint);
-		Location spawn = new Location(world, spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
+		Location spawn = new Location(world, spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ(), spawnLocation.getYaw(),
+				spawnLocation.getPitch());
 		spawn.add(0.5, 0, 0.5);
 
 		/*
 		 * An enemy was nearby, stop the spawning.
 		 */
-		if (Utils.isPlayerNearby(player, spawn, (Integer) Configuration.getSpawn("spawn.safespawn_radius"))) {
+		if (Utils.isCreatureNearby(player, spawn, (Integer) Configuration.getSpawn("spawn.safespawn_radius"))) {
 			if (withInitiallySpecifiedSpawnpoint || spawningAttempts >= 25)
 				Messenger.sendConfigMessage(player, "command.spawn.unable_to_spawn");
 			else

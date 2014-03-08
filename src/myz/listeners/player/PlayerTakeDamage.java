@@ -34,6 +34,8 @@ public class PlayerTakeDamage implements Listener {
 				switch (e.getCause()) {
 				case FALL:
 					PathingSupport.elevatePlayer((Player) e.getEntity(), 10);
+					MyZ.instance.breakLeg((Player) e.getEntity());
+					break;
 				case BLOCK_EXPLOSION:
 				case CONTACT:
 				case CUSTOM:

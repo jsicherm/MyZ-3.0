@@ -61,7 +61,7 @@ public class SQLManager {
 				"zombie_kills_life", "pigman_kills_life", "giant_kills_life", "player_kills_life_record", "zombie_kills_life_record",
 				"pigman_kills_life_record", "giant_kills_life_record", "deaths", "rank", "heals_life", "thirst", "minutes_alive_life",
 				"minutes_alive_record", "research"));
-		booleancolumns.addAll(Arrays.asList("isBleeding", "isPoisoned", "wasNPCKilled", "isZombie"));
+		booleancolumns.addAll(Arrays.asList("isBleeding", "isPoisoned", "wasNPCKilled", "isZombie", "legBroken"));
 		longcolumns.addAll(Arrays.asList("timeOfKickban", "minutes_alive"));
 	}
 

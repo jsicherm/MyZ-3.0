@@ -230,22 +230,22 @@ public class EntityCreator {
 		List<String> possibilities = null;
 		switch (type) {
 		case ENEMY_ARCHER:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.archer.enemy");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.archer.enemy");
 			break;
 		case ENEMY_SWORDSMAN:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.swordsman.enemy");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.swordsman.enemy");
 			break;
 		case ENEMY_WANDERER:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.wanderer.enemy");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.wanderer.enemy");
 			break;
 		case FRIEND_ARCHER:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.archer.friendly");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.archer.friendly");
 			break;
 		case FRIEND_SWORDSMAN:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.swordsman.friendly");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.swordsman.friendly");
 			break;
 		default:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getStringList("npc_names.wanderer.friendly");
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.wanderer.friendly");
 			break;
 		}
 		return possibilities == null ? "Notch" : possibilities.get(random.nextInt(possibilities.size() == 0 ? 1 : possibilities.size()));

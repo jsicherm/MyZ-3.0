@@ -25,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -34,6 +35,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.util.Vector;
 
 /**
  * @author Jordan
@@ -60,7 +62,7 @@ public class Utils {
 	}
 
 	/**
-	 * Whether or not there is a player nearby a location.
+	 * Whether or not there is a creature nearby a location.
 	 * 
 	 * @param player
 	 *            The player that wants to spawn.
@@ -68,10 +70,11 @@ public class Utils {
 	 *            The location.
 	 * @param radius
 	 *            The radius.
-	 * @return True if there is at least one player within the specified radius
-	 *         of the location that isn't a friend of @param player.
+	 * @return True if there is at least one creature/player within the
+	 *         specified radius of the location that isn't a friend of @param
+	 *         player.
 	 */
-	public static boolean isPlayerNearby(Player player, Location location, int radius) {
+	public static boolean isCreatureNearby(Player player, Location location, int radius) {
 		int chunkRadius = radius < 16 ? 1 : (radius - radius % 16) / 16;
 
 		List<String> applicableFriends = new ArrayList<String>();
@@ -98,7 +101,7 @@ public class Utils {
 							if (MyZ.instance.getSQLManager().isConnected() && !applicableFriends.contains(((Player) entity).getName()))
 								return true;
 						}
-					}
+					} else if (entity instanceof Creature) { return true; }
 			}
 		return false;
 	}
@@ -359,7 +362,7 @@ public class Utils {
 					if (position == 8) {
 						// Wrap to new page.
 						page++;
-						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points + "")
+						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.DEFAULT, "science_gui", points + "")
 								+ " (" + page + ")");
 						inventories.add(gui);
 						gui.setItem(0, leftArrow);
@@ -474,6 +477,45 @@ public class Utils {
 				}
 			}
 		}, 20L);
+	}
+
+	/**
+	 * Pull an entity to a location.
+	 * 
+	 * @param e
+	 *            The entity.
+	 * @param loc
+	 *            The location.
+	 */
+	public static void pullTo(Entity e, Location loc) {
+		Location l = e.getLocation();
+
+		// Snowgears
+		if (l.distanceSquared(loc) < 9) {
+			if (loc.getY() > l.getY()) {
+				e.setVelocity(new Vector(0, 0.25, 0));
+				return;
+			}
+			Vector v = loc.toVector().subtract(l.toVector());
+			e.setVelocity(v);
+			return;
+		}
+
+		l.setY(l.getY() + 0.5);
+		e.teleport(l);
+
+		double d = loc.distance(l);
+		// Snowgears
+		double g = -0.08;
+		double x = (1.0 + 0.07 * d) * (loc.getX() - l.getX()) / d;
+		double y = (1.0 + 0.03 * d) * (loc.getY() - l.getY()) / d - 0.5 * g * d;
+		double z = (1.0 + 0.07 * d) * (loc.getZ() - l.getZ()) / d;
+
+		Vector v = e.getVelocity();
+		v.setX(x);
+		v.setY(y);
+		v.setZ(z);
+		e.setVelocity(v);
 	}
 
 	public static void setPrivateField(Object obj, String field, Object value) throws NoSuchFieldException, SecurityException,

@@ -71,7 +71,7 @@ public class ConsumeFood implements Listener {
 			}
 		} else if (item.getType() == Material.POTION && item.getDurability() != (short) 0 || item.getType() == Material.MILK_BUCKET) {
 			if (item.getType() == Material.MILK_BUCKET) {
-				MyZ.instance.stopPoison(player);
+				MyZ.instance.stopPoison(player, true);
 				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
 				MyZ.instance.getServer().getPluginManager().callEvent(event);
 				if (!event.isCancelled())

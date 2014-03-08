@@ -91,7 +91,7 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 		if ((e || b.getEntitySenses().canSee(entityliving)) && --h <= 0) {
 			h = 4 + b.aI().nextInt(7);
 			b.getNavigation().a(entityliving, d);
-		} else if (entityliving != null && !entityliving.isAlive() || !b.getEntitySenses().canSee(entityliving))
+		} else if (entityliving != null && !entityliving.isAlive()/* || !b.getEntitySenses().canSee(entityliving)*/)
 			b.setGoalTarget(null);
 
 		c = Math.max(c - 1, 0);

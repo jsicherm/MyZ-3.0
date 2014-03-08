@@ -10,15 +10,12 @@ import java.util.Map;
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.Entity;
-import net.minecraft.server.v1_7_R1.EntityCreature;
 import net.minecraft.server.v1_7_R1.EntityHorse;
 import net.minecraft.server.v1_7_R1.EntityHuman;
 import net.minecraft.server.v1_7_R1.EntityInsentient;
-import net.minecraft.server.v1_7_R1.PathEntity;
 import net.minecraft.server.v1_7_R1.PathfinderGoalSelector;
 import net.minecraft.server.v1_7_R1.World;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -95,7 +92,7 @@ public class PathingSupport {
 					continue;
 				// Get the players distance from the x, y, z.
 				double distance_to_player_squared = player.e(x, y, z);
-				double refined_radius = experienceBarVisibility((Player) player.getBukkitEntity())
+				double refined_radius = experienceBarVisibility((Player) player.getBukkitEntity(), true)
 						* (Double) Configuration.getConfig("mobs.aggroMultiplier");
 
 				if (distance_to_player_squared < refined_radius * refined_radius
@@ -110,22 +107,6 @@ public class PathingSupport {
 		if (entity instanceof EntityInsentient)
 			((EntityInsentient) entity).setGoalTarget(entityhuman);
 		return entityhuman;
-	}
-
-	/**
-	 * Set a creature's target.
-	 * 
-	 * @param creature
-	 *            The creature.
-	 * @param location
-	 *            The location to target.
-	 * @param speed
-	 *            The speed to move at.
-	 */
-	public static void setTarget(EntityCreature creature, Location location, double speed) {
-		PathEntity path = creature.world.a(creature, location.getBlockX(), location.getBlockY(), location.getBlockZ(), 100.0F, true, false,
-				false, true);
-		creature.pathEntity = path;
 	}
 
 	/**
@@ -146,44 +127,47 @@ public class PathingSupport {
 	 * 
 	 * @param player
 	 *            The player.
+	 * @param isAmplified
+	 *            Whether or not to amplify the results (not for experience
+	 *            bar).
 	 * @return The number of full exp segments (full is 18, empty is 0). To set
 	 *         bars, you must set this value divided by 18f.
-	 */
-	public static double experienceBarVisibility(Player player) {
+	 **/
+	public static double experienceBarVisibility(Player player, boolean isAmplified) {
 		double total = 10;
 		// Default exp bars full is 10. There are 18 total.
 
 		CraftPlayer p = (CraftPlayer) player;
 
 		if (visibility_override.containsKey(player.getName())) {
-			double vis = visibility_override.get(player.getName());
+			double vis = visibility_override.get(player.getName()) * 1.5;
 			visibility_override.remove(player.getName());
 			return vis;
 		}
 		// Sneaking players must be nearer to be seen.
 		if (player.isSneaking())
-			total = 6; // 6 bars of exp filled.
+			total = 8; // 6 bars of exp filled.
 
 		// Sprinting players can be seen more easily.
 		if (player.isSprinting())
-			total = 16; // 16 bars of exp filled.
+			total = 37; // 16 bars of exp filled.
 
 		// Jumping players can be seen more easily.
 		if (!p.isOnGround())
-			total += 2; // Add two blocks of visibility.
+			total += 6; // Add two blocks of visibility.
 
 		// Rain reduces zombie sight slightly.
 		if (p.getHandle().world.isRainingAt((int) player.getLocation().getX(), (int) player.getLocation().getY(), (int) player
 				.getLocation().getZ()))
-			total -= 1.75; // Subtract 1.75 blocks of visibility.
+			total -= 3; // Subtract 1.75 blocks of visibility.
 
 		// Night reduces zombie sight slightly.
 		if (p.getHandle().world.getTime() > 12300 && p.getHandle().world.getTime() < 23850)
-			total -= 1.25; // Subtract 1.25 blocks of visibility.
+			total -= 2; // Subtract 1.25 blocks of visibility.
 
 		// Wearing a zombie head makes you nearly invisible to zombies.
 		if (p.getEquipment().getHelmet() != null && p.getEquipment().getHelmet().isSimilar(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2)))
-			total -= 5.5; // Subtract 5.5 blocks of visibility.
+			total -= 4; // Subtract 5.5 blocks of visibility.
 
 		// Invisible players must be very close to be seen.
 		if (p.getHandle().isInvisible()) {
@@ -202,5 +186,12 @@ public class PathingSupport {
 		if (total < 0.5)
 			total = 0.5;
 		return total;
+	}
+
+	/**
+	 * @see experienceBarVisibility(Player player, boolean isAmplified).
+	 */
+	public static double experienceBarVisibility(Player player) {
+		return experienceBarVisibility(player, false);
 	}
 }

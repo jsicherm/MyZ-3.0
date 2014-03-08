@@ -113,7 +113,7 @@ public class ResearchItem implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	private void onClickResearchItem(InventoryClickEvent e) {
 		if (e.getInventory().getHolder() == null
-				&& e.getInventory().getTitle().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", "69").split("69")[0])
+				&& e.getInventory().getTitle().contains(Messenger.getConfigMessage(Localizer.DEFAULT, "science_gui", "69").split("69")[0])
 				&& e.getInventory().getSize() == 9) {
 			e.setCancelled(true);
 			if (e.getRawSlot() >= 0 && e.getRawSlot() <= 8) {
@@ -185,14 +185,7 @@ public class ResearchItem implements Listener {
 			if (one != null && two != null)
 				return one.getEnchants().equals(two.getEnchants())
 						&& (one.getDisplayName() != null ? one.getDisplayName().equals(two.getDisplayName()) : two.getDisplayName() == null);
-			else {
-				if (one != null)
-					return one.getLore() != null
-							&& one.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", "69").split("69")[0]);
-				return two.getLore() != null
-						&& two.getLore().contains(Messenger.getConfigMessage(Localizer.ENGLISH, "research_gui", "69").split("69")[0]);
-			}
-		} else
-			return false;
+		}
+		return false;
 	}
 }
