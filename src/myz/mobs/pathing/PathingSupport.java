@@ -140,34 +140,37 @@ public class PathingSupport {
 		CraftPlayer p = (CraftPlayer) player;
 
 		if (visibility_override.containsKey(player.getName())) {
-			double vis = visibility_override.get(player.getName()) * 1.5;
+			double vis = visibility_override.get(player.getName());
 			visibility_override.remove(player.getName());
 			return vis;
 		}
 		// Sneaking players must be nearer to be seen.
 		if (player.isSneaking())
-			total = 8; // 6 bars of exp filled.
+			total = isAmplified ? 8 : 6; // 6 bars of exp filled.
 
 		// Sprinting players can be seen more easily.
 		if (player.isSprinting())
-			total = 37; // 16 bars of exp filled.
+			total = isAmplified ? 25 : 16; // 16 bars of exp filled.
 
 		// Jumping players can be seen more easily.
 		if (!p.isOnGround())
-			total += 6; // Add two blocks of visibility.
+			total += isAmplified ? 5 : 2; // Add two blocks of visibility.
 
 		// Rain reduces zombie sight slightly.
 		if (p.getHandle().world.isRainingAt((int) player.getLocation().getX(), (int) player.getLocation().getY(), (int) player
 				.getLocation().getZ()))
-			total -= 3; // Subtract 1.75 blocks of visibility.
+			total -= isAmplified ? 2.5 : 1.75; // Subtract 1.75 blocks of
+												// visibility.
 
 		// Night reduces zombie sight slightly.
 		if (p.getHandle().world.getTime() > 12300 && p.getHandle().world.getTime() < 23850)
-			total -= 2; // Subtract 1.25 blocks of visibility.
+			total -= isAmplified ? 3 : 1.25; // Subtract 1.25 blocks of
+												// visibility.
 
 		// Wearing a zombie head makes you nearly invisible to zombies.
 		if (p.getEquipment().getHelmet() != null && p.getEquipment().getHelmet().isSimilar(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2)))
-			total -= 4; // Subtract 5.5 blocks of visibility.
+			total -= isAmplified ? 8 : 5.5; // Subtract 5.5 blocks of
+											// visibility.
 
 		// Invisible players must be very close to be seen.
 		if (p.getHandle().isInvisible()) {

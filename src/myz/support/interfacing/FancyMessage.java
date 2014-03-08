@@ -77,6 +77,8 @@ public class FancyMessage {
 	}
 
 	public FancyMessage itemTooltip(final ItemStack itemStack) {
+		if (itemStack == null)
+			return this;
 		return itemTooltip(CraftItemStack.asNMSCopy(itemStack).save(new NBTTagCompound()).toString());
 	}
 

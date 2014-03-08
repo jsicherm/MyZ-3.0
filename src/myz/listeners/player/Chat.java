@@ -45,7 +45,7 @@ public class Chat implements Listener {
 			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix(radio_frequency)) + " " + prefix
 					+ ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
 		}
-		e.setFormat(prefix + ": " + e.getMessage());
+		e.setFormat(prefix + e.getMessage());
 
 		// Cache and clear the recipients.
 		Set<Player> original_recipients = new HashSet<Player>(e.getRecipients());

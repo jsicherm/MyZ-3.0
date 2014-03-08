@@ -311,11 +311,6 @@ public class CustomEntityNPC extends EntitySkeleton {
 		}
 	}
 
-	/*@Override
-	public boolean m(Entity entity) {
-		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getNPCDamage() * (isBaby() ? 0.5f : 1f));
-	}*/
-
 	@Override
 	protected Entity findTarget() {
 		Entity entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
@@ -357,7 +352,7 @@ public class CustomEntityNPC extends EntitySkeleton {
 		// Send a destroy packet 3 seconds later (give entity time to do death
 		// animation).
 		if (MyZ.instance.isEnabled())
-			MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
 				@Override
 				public void run() {
 					if (A == 0)
@@ -365,7 +360,7 @@ public class CustomEntityNPC extends EntitySkeleton {
 					PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(A);
 					Utils.distributePacket(getBukkitEntity().getWorld(), packet);
 				}
-			}, 20 * 3);
+			}, 60);
 	}
 
 	@Override

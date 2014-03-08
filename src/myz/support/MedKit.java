@@ -140,7 +140,8 @@ public class MedKit {
 	}
 
 	/**
-	 * Get the MedKit associated with a given ItemStack. Compares stack materials as well as name.
+	 * Get the MedKit associated with a given ItemStack. Compares stack
+	 * materials as well as name.
 	 * 
 	 * @param stack
 	 *            The ItemStack in question.
@@ -148,11 +149,9 @@ public class MedKit {
 	 */
 	public static MedKit getRawMedKitFor(ItemStack stack) {
 		for (MedKit kit : medkits)
-			if (stack.getType() == kit.output.getType()) {
-				if (stack.hasItemMeta()
-						&& kit.getName().equals(stack.getItemMeta().getDisplayName()))
+			if (stack.getType() == kit.output.getType())
+				if (stack.hasItemMeta() && kit.getName().equals(stack.getItemMeta().getDisplayName()))
 					return kit;
-			}
 		return null;
 	}
 

@@ -21,14 +21,13 @@ public class SoulboundUtils {
 	private static Method soulbindItem;
 
 	public static void soulbindItem(ItemStack item, Player player) {
-		if (Bukkit.getPluginManager().getPlugin("Soulbound") == null || !Bukkit.getPluginManager().getPlugin("Soulbound").isEnabled()) { return; }
+		if (Bukkit.getPluginManager().getPlugin("Soulbound") == null || !Bukkit.getPluginManager().getPlugin("Soulbound").isEnabled())
+			return;
 		try {
-			if (itemUtils == null) {
+			if (itemUtils == null)
 				itemUtils = Class.forName("com.me.tft_02.soulbound.util.ItemUtils");
-			}
-			if (soulbindItem == null) {
+			if (soulbindItem == null)
 				soulbindItem = itemUtils.getMethod("soulbindItem", Player.class, ItemStack.class);
-			}
 			soulbindItem.invoke(null, player, item);
 		} catch (Exception exc) {
 			Messenger.sendConsoleMessage("&4Unable to Soulbind item: " + exc.getMessage());

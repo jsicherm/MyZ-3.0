@@ -68,6 +68,7 @@ public class Configuration {
 		configEntries.put(HEALER, 13);
 
 		configEntries.put(CHEST_RESPAWN, 300);
+		configEntries.put("chest.break.on_close", true);
 
 		configEntries.put(CHAT_ENABLED, true);
 		configEntries.put(CHAT_DISTANCE, 250);
@@ -94,6 +95,8 @@ public class Configuration {
 		configEntries.put("mobs.giant.speed", 1.3);
 		configEntries.put("mobs.pigman.damage", 3.0);
 		configEntries.put("mobs.pigman.speed", 1.15);
+		configEntries.put("mobs.pigman.canPickup", false);
+		configEntries.put("mobs.pigman.spawn_z", -2000);
 		configEntries.put("mobs.pigman.pigsplosion.enabled", true);
 		configEntries.put("mobs.pigman.pigsplosion.chance", 0.5);
 		configEntries.put("mobs.pigman.pigsplosion.min", 1);
@@ -115,6 +118,7 @@ public class Configuration {
 		configEntries.put("damage.poison_damage_frequency", 90);
 		configEntries.put("damage.water_damage", 1);
 		configEntries.put("damage.chance_of_bleeding", 0.05);
+		configEntries.put("damage.chance_of_breaking_leg", 0.05);
 		configEntries.put("damage.chance_of_poison_from_zombie", 0.05);
 		configEntries.put("damage.chance_of_poison_from_flesh", 0.05);
 
@@ -131,6 +135,12 @@ public class Configuration {
 		configEntries.put(THIRST_DECAY, 45);
 
 		configEntries.put(ENDERNADE, true);
+		configEntries.put("projectile.snowball.visibility_range", 10);
+		configEntries.put("projectile.arrow.shoot.visibility_range", 10);
+		configEntries.put("projectile.snowball.visibility_priority", 3);
+		configEntries.put("projectile.other.visibility_priority", 1);
+		configEntries.put("projectile.enderpearl.visibility_priority", 4);
+		configEntries.put("projectile.doors.visibility_range", 8);
 
 		configEntries.put("heal.bandage_heal_amount", 1);
 		configEntries.put("heal.delay_seconds", 30);
@@ -160,6 +170,8 @@ public class Configuration {
 		spawnEntries.put("zombie_spawn", false);
 		spawnEntries.put("lobby.min", "0,0,0");
 		spawnEntries.put("lobby.max", "0,0,0");
+		spawnEntries.put("spawn.kit0.soulbind.armor", true);
+		spawnEntries.put("spawn.kit0.soulbind.inventory", true);
 		spawnEntries.put("spawn.kit0.helmet", new ItemStack(Material.LEATHER_HELMET));
 		spawnEntries.put("spawn.kit0.chestplate", new ItemStack(Material.LEATHER_CHESTPLATE));
 		spawnEntries.put("spawn.kit0.leggings", new ItemStack(Material.LEATHER_LEGGINGS));
@@ -408,6 +420,7 @@ public class Configuration {
 	}
 
 	public static void setArmorContents(List<ItemStack> armor, int rank) {
+		spawnEntries.put("spawn.kit" + rank + ".soulbind.armor", true);
 		spawnEntries.put("spawn.kit" + rank + ".boots", armor.get(0));
 		spawnEntries.put("spawn.kit" + rank + ".leggings", armor.get(1));
 		spawnEntries.put("spawn.kit" + rank + ".chestplate", armor.get(2));
@@ -423,20 +436,24 @@ public class Configuration {
 				trimmedInventory.add(stack);
 
 		spawnEntries.put("spawn.kit" + rank + ".inventory_contents", trimmedInventory);
+		spawnEntries.put("spawn.kit" + rank + ".soulbind.inventory", true);
 		save();
 	}
 
 	private static List<ItemStack> getSpawnkit(int rank, boolean withArmor, boolean onlyArmor, Player player) {
 		ArrayList<ItemStack> list = new ArrayList<ItemStack>();
 		if (withArmor) {
+			boolean sa = (Boolean) spawnEntries.get("spawn.kit" + rank + ".soulbind.armor");
 			ItemStack helmet = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".helmet")).clone();
-			SoulboundUtils.soulbindItem(helmet, player);
 			ItemStack chestplate = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".chestplate")).clone();
-			SoulboundUtils.soulbindItem(chestplate, player);
 			ItemStack leggings = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".leggings")).clone();
-			SoulboundUtils.soulbindItem(leggings, player);
 			ItemStack boots = ((ItemStack) spawnEntries.get("spawn.kit" + rank + ".boots")).clone();
-			SoulboundUtils.soulbindItem(boots, player);
+			if (sa) {
+				SoulboundUtils.soulbindItem(helmet, player);
+				SoulboundUtils.soulbindItem(chestplate, player);
+				SoulboundUtils.soulbindItem(leggings, player);
+				SoulboundUtils.soulbindItem(boots, player);
+			}
 			list.add(boots);
 			list.add(leggings);
 			list.add(chestplate);
@@ -445,9 +462,13 @@ public class Configuration {
 			if (onlyArmor)
 				return list;
 		}
+		boolean si = (Boolean) spawnEntries.get("spawn.kit" + rank + ".soulbind.inventory");
 		List<ItemStack> tentative = (List<ItemStack>) spawnEntries.get("spawn.kit" + rank + ".inventory_contents");
 		for (ItemStack item : tentative) {
-			list.add(item.clone());
+			ItemStack i = item.clone();
+			if (si)
+				SoulboundUtils.soulbindItem(i, player);
+			list.add(i);
 		}
 
 		Set<String> allKeys = MyZ.instance.getSpawnConfig().getConfigurationSection("spawn").getKeys(false);
@@ -758,27 +779,31 @@ public class Configuration {
 
 	public static String getPrefixForPlayerRank(Player playerFor) {
 		int rank = MyZ.instance.getRankFor(playerFor);
-		return getPrefixForPlayerRank(playerFor, rank);
+		return getPrefixForPlayerRank(playerFor, rank, 0);
 	}
 
-	private static String getPrefixForPlayerRank(Player playerFor, int rank) {
+	private static String getPrefixForPlayerRank(Player playerFor, int rank, int timeout) {
 		Map<Integer, String> rank_prefix = getRankPrefixes();
 
 		if (playerFor.getName().equals("MrTeePee"))
-			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee" + ChatColor.GRAY;
+			return ChatColor.GRAY + "[" + ChatColor.BLUE + "Dev" + ChatColor.GRAY + "] " + ChatColor.GOLD + "MrTeePee: " + ChatColor.GRAY;
 		if (rank == 0)
 			if (playerFor.getName().equals("lolikillyaaa"))
 				return ChatColor.translateAlternateColorCodes('&', "[&4Web Admin&r] &b&llolikillyaaa&r");
-			else if (playerFor.getName().equals("CraftySubZero"))
+			/*else if (playerFor.getName().equals("Crafty_SubZero"))
 				return ChatColor.GRAY + "[" + ChatColor.ITALIC + "Graphic Designer" + ChatColor.GRAY + "] " + ChatColor.YELLOW + "Crafty"
-						+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero";
+						+ ChatColor.DARK_GRAY + "Sub" + ChatColor.RESET + "Zero: ";*/
 			else if (MyZ.instance.getDescription().getAuthors().contains(playerFor.getName()))
 				return ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + "Contributor" + ChatColor.DARK_GRAY + "] " + ChatColor.RESET
-						+ playerFor.getName();
+						+ playerFor.getName() + ": ";
 		try {
-			return ChatColor.translateAlternateColorCodes('&', getStringWithArguments(rank_prefix.get(rank), playerFor.getDisplayName()));
+			return ChatColor.translateAlternateColorCodes('&',
+					getStringWithArguments(playerFor, rank_prefix.get(rank), playerFor.getDisplayName()));
 		} catch (Exception exc) {
-			return getPrefixForPlayerRank(playerFor, nearestInt(rank, rank_prefix.keySet()));
+			if (timeout < 100)
+				return getPrefixForPlayerRank(playerFor, nearestInt(rank, rank_prefix.keySet()), timeout + 1);
+			Messenger.sendConsoleMessage("&4Unable to generate a rank prefix for rank number " + rank + ".");
+			return playerFor.getName();
 		}
 	}
 
@@ -794,7 +819,8 @@ public class Configuration {
 		return rank_prefix;
 	}
 
-	private static String getStringWithArguments(String message, Object... variables) {
+	private static String getStringWithArguments(Player player, String message, Object... variables) {
+		message = Messenger.processForArguments(player, message);
 		try {
 			message = String.format(message, variables);
 		} catch (MissingFormatArgumentException exc) {
@@ -810,12 +836,12 @@ public class Configuration {
 	}
 
 	public static String getFromPrefix(Player fromPlayer) {
-		return getStringWithArguments(Messenger.getConfigMessage(Localizer.getLocale(fromPlayer), "private.from_prefix"),
+		return getStringWithArguments(fromPlayer, Messenger.getConfigMessage(Localizer.getLocale(fromPlayer), "private.from_prefix"),
 				fromPlayer.getDisplayName());
 	}
 
 	public static String getToPrefix(Player toPlayer) {
-		return getStringWithArguments(Messenger.getConfigMessage(Localizer.getLocale(toPlayer), "private.to_prefix"),
+		return getStringWithArguments(toPlayer, Messenger.getConfigMessage(Localizer.getLocale(toPlayer), "private.to_prefix"),
 				toPlayer.getDisplayName());
 	}
 

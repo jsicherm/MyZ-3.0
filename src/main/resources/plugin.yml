@@ -108,6 +108,7 @@ permissions:
       MyZ.kit_admin: true
       MyZ.scientist: true
       MyZ.update: true
+      MyZ.nokick: true
   MyZ.spawn_giant:
     description: Spawn giants.
     default: op
@@ -119,5 +120,8 @@ permissions:
     default: op
   MyZ.scientist:
     description: Science commands.
+    default: op
+  MyZ.nokick:
+    description: Don't get kicked on death.
     default: op
     

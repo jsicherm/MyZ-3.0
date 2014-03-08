@@ -47,7 +47,7 @@ public class Heal implements Listener {
 		final ItemStack item = e.getItem();
 
 		// Handle bones for broken legs.
-		if (player.getGameMode() != GameMode.CREATIVE && item != null) {
+		if (player.getGameMode() != GameMode.CREATIVE && item != null)
 			if (item.getType() == Material.BONE && MyZ.instance.isLegBroken(player)) {
 				MyZ.instance.fixLeg(player, true);
 				if (item.getAmount() != 1)
@@ -60,7 +60,6 @@ public class Heal implements Listener {
 						}
 					}, 0L);
 			}
-		}
 
 		// Handle MedKits.
 		if (player.getGameMode() != GameMode.CREATIVE && item != null) {

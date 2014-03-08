@@ -113,6 +113,8 @@ public class MyZ extends JavaPlugin {
 	// TODO The ability to disable specific mob types in the config.
 	// TODO Knockback range!
 	// TODO Attack range maybe? :)
+	// @ chat not showing name
+	// TODO %GROUP% tag for PEX groups
 
 	public static MyZ instance;
 	private List<String> online_players = new ArrayList<String>();
@@ -312,9 +314,8 @@ public class MyZ extends JavaPlugin {
 		// do with overriding the pathfinding and entity.
 		for (CustomEntityPlayer player : NPCs)
 			player.getBukkitEntity().remove();
-		for (Player player : Bukkit.getOnlinePlayers()) {
+		for (Player player : Bukkit.getOnlinePlayers())
 			removePlayer(player, false);
-		}
 		if (disguise)
 			for (Player player : getServer().getOnlinePlayers())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
@@ -897,7 +898,8 @@ public class MyZ extends JavaPlugin {
 					&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
 
-			if ((Boolean) Configuration.getConfig(Configuration.KICKBAN) && wasDeath && !player.getName().equals("MrTeePee")) {
+			if ((Boolean) Configuration.getConfig(Configuration.KICKBAN) && wasDeath && !player.getName().equals("MrTeePee")
+					&& !player.hasPermission("myz.nokick")) {
 				if (data != null)
 					data.setTimeOfKickban(System.currentTimeMillis());
 				if (sql.isConnected())

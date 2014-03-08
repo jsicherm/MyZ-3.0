@@ -50,27 +50,26 @@ public class CancelPlayerEvents implements Listener {
 	}
 
 	private void grapple(Player puller, Entity pulled, Location to) {
-		if (puller.equals(pulled)) {
+		if (puller.equals(pulled))
 			Utils.pullTo(puller, to);
-		} else {
+		else
 			Utils.pullTo(pulled, to);
-		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onFish(PlayerFishEvent e) {
 		Player p = e.getPlayer();
-		if (p.getItemInHand().getType() != Material.FISHING_ROD) { return; }
+		if (p.getItemInHand().getType() != Material.FISHING_ROD)
+			return;
 		if (e.getState() == State.IN_GROUND) {
-			for (Entity entity : e.getHook().getNearbyEntities(1.5, 1, 1.5)) {
+			for (Entity entity : e.getHook().getNearbyEntities(1.5, 1, 1.5))
 				if (entity instanceof Item) {
 					p.getItemInHand().setDurability((short) -12);
 					grapple(p, entity, p.getLocation());
 					return;
 				}
-			}
 			grapple(p, p, e.getHook().getLocation());
-		} else if(e.getState() == State.CAUGHT_ENTITY) {
+		} else if (e.getState() == State.CAUGHT_ENTITY) {
 			e.setCancelled(true);
 			grapple(p, e.getCaught(), p.getLocation());
 		}

@@ -18,6 +18,7 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,18 +41,19 @@ public class PlayerKillEntity implements Listener {
 		e.setDroppedExp(0);
 		if (e.getEntity().getKiller() != null)
 			incrementKills(e.getEntity(), e.getEntity().getKiller());
-		if (e.getEntity().getType() == EntityType.PIG_ZOMBIE && (Boolean) Configuration.getConfig("mobs.pigman.pigsplosion.enabled")) {
+		if (e.getEntity().getType() == EntityType.PIG_ZOMBIE && !((PigZombie) e.getEntity()).isBaby()
+				&& (Boolean) Configuration.getConfig("mobs.pigman.pigsplosion.enabled")) {
 			double chance = (Double) Configuration.getConfig("mobs.pigman.pigsplosion.chance");
 			if (random.nextDouble() <= chance && chance != 0.0) {
 				int min = (Integer) Configuration.getConfig("mobs.pigman.pigsplosion.min");
 				int max = (Integer) Configuration.getConfig("mobs.pigman.pigsplosion.max");
-				int amount = min + (int) (random.nextDouble() * ((max - min) + 1));
+				int amount = min + (int) (random.nextDouble() * (max - min + 1));
 				Location location = e.getEntity().getLocation();
 				while (amount > 0) {
 					Location spawn = location.clone().add(random.nextInt(6) * random.nextInt(2) == 0 ? -1 : 1, 0,
 							random.nextInt(6) * random.nextInt(2) == 0 ? -1 : 1);
 					spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn) + 1);
-					EntityCreator.create(spawn, EntityType.PIG_ZOMBIE, SpawnReason.REINFORCEMENTS, true, true);
+					EntityCreator.create(spawn, EntityType.PIG_ZOMBIE, SpawnReason.CUSTOM, true, true);
 					spawn.getWorld().playEffect(spawn, Effect.STEP_SOUND, 11);
 					spawn.getWorld().playEffect(spawn, Effect.STEP_SOUND, 11);
 					amount--;

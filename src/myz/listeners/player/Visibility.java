@@ -47,19 +47,21 @@ public class Visibility implements Listener {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 		if (e.getEntity().getShooter() instanceof Player && e.getEntity() instanceof Arrow)
-			PathingSupport.elevatePlayer((Player) e.getEntity().getShooter(), 10);
+			PathingSupport.elevatePlayer((Player) e.getEntity().getShooter(),
+					(Integer) Configuration.getConfig("projectile.arrow.shoot.visibility_range"));
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onProjectileLand(ProjectileHitEvent e) {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
-		for (Entity nearby : e.getEntity().getNearbyEntities(10, 5, 10))
+		for (Entity nearby : e.getEntity().getNearbyEntities((Integer) Configuration.getConfig("projectile.snowball.visibility_range"), 5,
+				(Integer) Configuration.getConfig("projectile.snowball.visibility_range")))
 			if (nearby.getType() == EntityType.ZOMBIE || nearby.getType() == EntityType.PIG_ZOMBIE
-					|| nearby.getType() == EntityType.SKELETON) {
+					|| nearby.getType() == EntityType.SKELETON)
 				see((EntityInsentient) ((CraftLivingEntity) nearby).getHandle(), e.getEntity().getLocation(),
-						e.getEntity() instanceof Snowball ? 3 : 1);
-			}
+						e.getEntity() instanceof Snowball ? (Integer) Configuration.getConfig("projectile.snowball.visibility_priority")
+								: (Integer) Configuration.getConfig("projectile.other.visibility_priority"));
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -75,7 +77,8 @@ public class Visibility implements Listener {
 			for (Entity nearby : e.getTo().getChunk().getEntities())
 				if (nearby.getType() == EntityType.ZOMBIE || nearby.getType() == EntityType.PIG_ZOMBIE
 						|| nearby.getType() == EntityType.SKELETON)
-					see((EntityInsentient) ((CraftLivingEntity) nearby).getHandle(), e.getTo(), 4);
+					see((EntityInsentient) ((CraftLivingEntity) nearby).getHandle(), e.getTo(),
+							(Integer) Configuration.getConfig("projectile.enderpearl.visibility_priority"));
 		}
 	}
 
@@ -85,7 +88,7 @@ public class Visibility implements Listener {
 			return;
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.CHEST
 				|| e.getClickedBlock().getType() == Material.TRAP_DOOR || e.getClickedBlock().getType() == Material.WOOD_DOOR)
-			PathingSupport.elevatePlayer(e.getPlayer(), 10);
+			PathingSupport.elevatePlayer(e.getPlayer(), (Integer) Configuration.getConfig("projectile.doors.visibility_range"));
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

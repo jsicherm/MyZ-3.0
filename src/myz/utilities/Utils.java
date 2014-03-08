@@ -25,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -101,7 +102,8 @@ public class Utils {
 							if (MyZ.instance.getSQLManager().isConnected() && !applicableFriends.contains(((Player) entity).getName()))
 								return true;
 						}
-					} else if (entity instanceof Creature) { return true; }
+					} else if (entity instanceof Creature)
+						return true;
 			}
 		return false;
 	}
@@ -301,15 +303,17 @@ public class Utils {
 	 * 
 	 * @param customEntityPlayer
 	 *            The NPC that died.
+	 * @param world
+	 *            The World the player died in.
 	 */
-	public static void playerNPCDied(CustomEntityPlayer player) {
+	public static void playerNPCDied(CustomEntityPlayer player, World world) {
 		MyZ.instance.getNPCs().remove(player);
 		PlayerData data = PlayerData.getDataFor(player.getName());
 		if (data != null)
 			data.setWasKilledNPC(true);
 		if (MyZ.instance.getSQLManager().isConnected())
 			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
-		Messenger.sendMessage(player.getBukkitEntity().getWorld(), "player_npc_killed", player.getName());
+		Messenger.sendMessage(world, "player_npc_killed", player.getName());
 	}
 
 	/**

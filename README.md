@@ -54,7 +54,8 @@ What's left?
 
 So far, here are the base features that haven't yet been added.
 
-- [ ] Complete sound attraction
+- [ ] Clan system rewrite
+- [ ] Grave digging
 
 Known Caveats
 =============

@@ -117,9 +117,8 @@ public class ChestScanner implements Listener {
 			int spot = 0;
 			for (ItemStack i : contents) {
 				MedKit kit;
-				if (i != null && (kit = MedKit.getRawMedKitFor(i)) != null) {
+				if (i != null && (kit = MedKit.getRawMedKitFor(i)) != null)
 					inventory.setItem(spot, kit.getTrueOutput());
-				}
 				spot++;
 			}
 		}
@@ -148,9 +147,8 @@ public class ChestScanner implements Listener {
 			for (ItemStack item : lootset.spawnable.keySet())
 				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
 			lootCreators.remove(e.getPlayer().getName());
-		} else if (e.getInventory().getType() == InventoryType.CHEST) {
+		} else if (e.getInventory().getType() == InventoryType.CHEST && (Boolean) Configuration.getConfig("chest.break.on_close"))
 			ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
-		}
 	}
 
 	@EventHandler

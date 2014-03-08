@@ -844,7 +844,7 @@ public class PlayerData {
 		this.isZombie = isZombie;
 		save();
 	}
-	
+
 	/**
 	 * @return the isBrokenLeg
 	 */
@@ -857,7 +857,7 @@ public class PlayerData {
 	 *            the isBrokenLeg to set
 	 */
 	public void setLegBroken(boolean isLegBroken) {
-		this.isBrokenLeg = isLegBroken;
+		isBrokenLeg = isLegBroken;
 		save();
 	}
 

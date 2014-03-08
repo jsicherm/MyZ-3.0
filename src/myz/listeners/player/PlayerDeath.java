@@ -66,7 +66,7 @@ public class PlayerDeath implements Listener {
 	private void onRespawn(final PlayerRespawnEvent e) {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
-		
+
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 			@Override
 			public void run() {

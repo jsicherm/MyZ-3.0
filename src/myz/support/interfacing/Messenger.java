@@ -11,6 +11,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * @author Jordan
@@ -39,7 +40,9 @@ public class Messenger {
 	 *            The input message.
 	 * @return The message with all arguments replaced.
 	 */
-	private static String processForArguments(Player player, String msg) {
+	public static String processForArguments(Player player, String msg) {
+		if (player == null)
+			return msg;
 		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null) {
 			msg = msg.replaceAll("%CLAN%", data.getClan());
@@ -82,10 +85,13 @@ public class Messenger {
 	 *            The murdered.
 	 */
 	public static void sendFancyDeathMessage(Player playerFor, Player typeFor) {
+		ItemStack pH = playerFor.getItemInHand();
+		ItemStack tH = typeFor.getItemInHand();
+
 		for (Player player : playerFor.getWorld().getPlayers())
-			new FancyMessage(Configuration.getPrefixForPlayerRank(playerFor)).itemTooltip(playerFor.getItemInHand())
+			new FancyMessage(Configuration.getPrefixForPlayerRank(playerFor)).itemTooltip(pH)
 					.then(" " + Messenger.getConfigMessage(Localizer.getLocale(player), "murdered") + " ")
-					.then(Configuration.getPrefixForPlayerRank(typeFor)).itemTooltip(typeFor.getItemInHand());
+					.then(Configuration.getPrefixForPlayerRank(typeFor)).itemTooltip(tH);
 	}
 
 	/**
@@ -101,7 +107,8 @@ public class Messenger {
 	 */
 	public static void sendMessage(World inWorld, String uncolored_config_message, String variable) {
 		for (Player player : inWorld.getPlayers())
-			sendConfigMessage(player, getConfigMessage(Localizer.getLocale(player), uncolored_config_message, variable));
+			if (player != null)
+				sendConfigMessage(player, getConfigMessage(Localizer.getLocale(player), uncolored_config_message, variable));
 	}
 
 	/**

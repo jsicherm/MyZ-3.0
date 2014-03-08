@@ -29,13 +29,9 @@ public class PlayerTakeDamage implements Listener {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
 		if (e.getEntity() instanceof Player)
-			if (random.nextDouble() <= (Integer) Configuration.getConfig("damage.chance_of_bleeding")
-					&& (Integer) Configuration.getConfig("damage.chance_of_bleeding") != 0.0)
+			if (random.nextDouble() <= (Double) Configuration.getConfig("damage.chance_of_bleeding")
+					&& (Double) Configuration.getConfig("damage.chance_of_bleeding") != 0.0)
 				switch (e.getCause()) {
-				case FALL:
-					PathingSupport.elevatePlayer((Player) e.getEntity(), 10);
-					MyZ.instance.breakLeg((Player) e.getEntity());
-					break;
 				case BLOCK_EXPLOSION:
 				case CONTACT:
 				case CUSTOM:
@@ -50,5 +46,15 @@ public class PlayerTakeDamage implements Listener {
 					break;
 
 				}
+		if (random.nextDouble() <= (Double) Configuration.getConfig("damage.chance_of_breaking_leg")
+				&& (Double) Configuration.getConfig("damage.chance_of_breaking_leg") != 0.0)
+			switch (e.getCause()) {
+			case FALL:
+				PathingSupport.elevatePlayer((Player) e.getEntity(), 10);
+				MyZ.instance.breakLeg((Player) e.getEntity());
+				break;
+			default:
+				break;
+			}
 	}
 }

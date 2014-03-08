@@ -33,8 +33,8 @@ public class EntityHurtPlayer implements Listener {
 		if ((e.getDamager() instanceof Horse || e.getDamager() instanceof Zombie) && e.getEntity() instanceof Player) {
 			if (e.getDamager() instanceof Horse && ((Horse) e.getDamager()).getVariant() != Variant.UNDEAD_HORSE)
 				return;
-			if (random.nextDouble() <= (Integer) Configuration.getConfig("damage.chance_poison_from_zombie")
-					&& (Integer) Configuration.getConfig("damage.chance_poison_from_zombie") != 0.0)
+			if (random.nextDouble() <= (Double) Configuration.getConfig("damage.chance_of_poison_from_zombie")
+					&& (Double) Configuration.getConfig("damage.chance_of_poison_from_zombie") != 0.0)
 				MyZ.instance.startPoison((Player) e.getEntity());
 		}
 

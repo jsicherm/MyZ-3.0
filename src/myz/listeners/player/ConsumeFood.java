@@ -84,8 +84,8 @@ public class ConsumeFood implements Listener {
 				}
 			}, 0L);
 		} else if (item.getType() == Material.ROTTEN_FLESH) {
-			if (random.nextDouble() <= (Integer) Configuration.getConfig("damage.chance_of_poison_from_flesh")
-					&& (Integer) Configuration.getConfig("damage.chance_of_poison_from_flesh") != 0.0)
+			if (random.nextDouble() <= (Double) Configuration.getConfig("damage.chance_of_poison_from_flesh")
+					&& (Double) Configuration.getConfig("damage.chance_of_poison_from_flesh") != 0.0)
 				MyZ.instance.startPoison(player);
 			addEffects(player, item);
 		}

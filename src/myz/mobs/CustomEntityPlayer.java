@@ -29,6 +29,7 @@ import net.minecraft.server.v1_7_R1.StatisticList;
 import net.minecraft.server.v1_7_R1.WorldServer;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
@@ -72,7 +73,7 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	@Override
 	public void die(DamageSource source) {
-		Utils.playerNPCDied(this);
+		Utils.playerNPCDied(this, getBukkitEntity().getWorld());
 		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
 		inventoryItems = null;
 
@@ -86,7 +87,7 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	@Override
 	public void die() {
-		Utils.playerNPCDied(this);
+		Utils.playerNPCDied(this, getBukkitEntity().getWorld());
 		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
 		inventoryItems = null;
 
@@ -119,151 +120,145 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 	@Override
 	public boolean damageEntity(DamageSource damagesource, float f) {
-		if (isInvulnerable())
+		// EntityPlayer default start.
+		boolean flag = server.V() && server.getPvP() && "fall".equals(damagesource.translationIndex);
+
+		if (!flag && invulnerableTicks > 0 && !damagesource.ignoresInvulnerability())
 			return false;
-		else if (world.isStatic)
+		else if (damagesource instanceof EntityDamageSource) {
+			Entity entity = damagesource.getEntity();
+
+			if (entity instanceof EntityHuman && !this.a((EntityHuman) entity))
+				return false;
+
+			if (entity instanceof EntityArrow) {
+				EntityArrow entityarrow = (EntityArrow) entity;
+
+				if (entityarrow.shooter instanceof EntityHuman && !this.a((EntityHuman) entityarrow.shooter))
+					return false;
+			}
+		}
+
+		aV = 0;
+		if (getHealth() <= 0.0F)
+			return false;
+		else if (damagesource.o() && this.hasEffect(MobEffectList.FIRE_RESISTANCE))
 			return false;
 		else {
-			// EntityPlayer default start.
-			boolean flag = server.V() && server.getPvP() && "fall".equals(damagesource.translationIndex);
+			// EntityHuman default start.
+			if (isSleeping() && !world.isStatic)
+				this.a(true, true, false);
 
-			if (!flag && invulnerableTicks > 0 && !damagesource.ignoresInvulnerability())
-				return false;
-			else if (damagesource instanceof EntityDamageSource) {
-				Entity entity = damagesource.getEntity();
-
-				if (entity instanceof EntityHuman && !this.a((EntityHuman) entity))
+			if (damagesource.r()) {
+				if (world.difficulty == EnumDifficulty.PEACEFUL)
 					return false;
 
-				if (entity instanceof EntityArrow) {
-					EntityArrow entityarrow = (EntityArrow) entity;
+				if (world.difficulty == EnumDifficulty.EASY)
+					f = f / 2.0F + 1.0F;
 
-					if (entityarrow.shooter instanceof EntityHuman && !this.a((EntityHuman) entityarrow.shooter))
-						return false;
-				}
+				if (world.difficulty == EnumDifficulty.HARD)
+					f = f * 3.0F / 2.0F;
 			}
 
-			aV = 0;
-			if (getHealth() <= 0.0F)
-				return false;
-			else if (damagesource.o() && this.hasEffect(MobEffectList.FIRE_RESISTANCE))
+			if (f == 0.0F)
 				return false;
 			else {
-				// EntityHuman default start.
-				if (isSleeping() && !world.isStatic)
-					this.a(true, true, false);
-
-				if (damagesource.r()) {
-					if (world.difficulty == EnumDifficulty.PEACEFUL)
-						return false;
-
-					if (world.difficulty == EnumDifficulty.EASY)
-						f = f / 2.0F + 1.0F;
-
-					if (world.difficulty == EnumDifficulty.HARD)
-						f = f * 3.0F / 2.0F;
-				}
-
-				if (f == 0.0F)
-					return false;
-				else {
-					Entity entity = damagesource.getEntity();
-
-					if (entity instanceof EntityArrow && ((EntityArrow) entity).shooter != null)
-						entity = ((EntityArrow) entity).shooter;
-
-					this.a(StatisticList.x, Math.round(f * 10.0F));
-				}
-				// EntityHuman default end.
-
-				if ((damagesource == DamageSource.ANVIL || damagesource == DamageSource.FALLING_BLOCK) && this.getEquipment(4) != null) {
-					this.getEquipment(4).damage((int) (f * 4.0F + random.nextFloat() * f * 2.0F), this);
-					f *= 0.75F;
-				}
-
-				aG = 1.5F;
-				flag = true;
-
-				EntityDamageEvent event = CraftEventFactory.handleEntityDamageEvent(this, damagesource, f);
-				if (event != null) {
-					if (event.isCancelled())
-						return false;
-					f = (float) event.getDamage();
-				}
-
-				if (noDamageTicks > maxNoDamageTicks / 2.0F) {
-					if (f <= lastDamage)
-						return false;
-
-					this.d(damagesource, f - lastDamage);
-					lastDamage = f;
-					flag = false;
-				} else {
-					lastDamage = f;
-					ax = getHealth();
-					noDamageTicks = maxNoDamageTicks;
-					this.d(damagesource, f);
-					hurtTicks = az = 10;
-				}
-
-				aA = 0.0F;
 				Entity entity = damagesource.getEntity();
 
-				if (entity != null) {
-					if (entity instanceof EntityLiving)
-						this.b((EntityLiving) entity);
+				if (entity instanceof EntityArrow && ((EntityArrow) entity).shooter != null)
+					entity = ((EntityArrow) entity).shooter;
 
-					if (entity instanceof EntityHuman) {
-						lastDamageByPlayerTime = 100;
-						killer = (EntityHuman) entity;
-					} else if (entity instanceof EntityWolf) {
-						EntityWolf entitywolf = (EntityWolf) entity;
-
-						if (entitywolf.isTamed()) {
-							lastDamageByPlayerTime = 100;
-							killer = null;
-						}
-						// MyZ start
-					} else if (entity instanceof EntityHorse) {
-						EntityHorse entityhorse = (EntityHorse) entity;
-
-						if (entityhorse.getOwnerName() != null && !entityhorse.getOwnerName().isEmpty()) {
-							lastDamageByPlayerTime = 100;
-							killer = null;
-						}
-					}
-					// MyZ end
-				}
-
-				if (flag) {
-					world.broadcastEntityEffect(this, (byte) 2);
-					if (damagesource != DamageSource.DROWN)
-						Q();
-
-					if (entity != null /* MyZ start */&& onGround /* MyZ end */) {
-						double d0 = entity.locX - locX;
-
-						double d1;
-
-						for (d1 = entity.locZ - locZ; d0 * d0 + d1 * d1 < 1.0E-4D; d1 = (Math.random() - Math.random()) * 0.01D)
-							d0 = (Math.random() - Math.random()) * 0.01D;
-
-						aA = (float) (Math.atan2(d1, d0) * 180.0D / 3.1415927410125732D) - yaw;
-						this.a(entity, f, d0, d1);
-					} else
-						aA = (int) (Math.random() * 2.0D) * 180;
-				}
-
-				if (getHealth() <= 0.0F) {
-					if (flag && aU() != null)
-						makeSound(aU(), bf(), bg());
-
-					this.die(damagesource);
-				} else if (flag && aT() != null)
-					makeSound(aT(), bf(), bg());
-
-				return true;
+				this.a(StatisticList.x, Math.round(f * 10.0F));
 			}
+			// EntityHuman default end.
+
+			if ((damagesource == DamageSource.ANVIL || damagesource == DamageSource.FALLING_BLOCK) && this.getEquipment(4) != null) {
+				this.getEquipment(4).damage((int) (f * 4.0F + random.nextFloat() * f * 2.0F), this);
+				f *= 0.75F;
+			}
+
+			aG = 1.5F;
+			flag = true;
+
+			EntityDamageEvent event = CraftEventFactory.handleEntityDamageEvent(this, damagesource, f);
+			if (event != null) {
+				if (event.isCancelled())
+					return false;
+				f = (float) event.getDamage();
+			}
+
+			if (noDamageTicks > maxNoDamageTicks / 2.0F) {
+				if (f <= lastDamage)
+					return false;
+
+				this.d(damagesource, f - lastDamage);
+				lastDamage = f;
+				flag = false;
+			} else {
+				lastDamage = f;
+				ax = getHealth();
+				noDamageTicks = maxNoDamageTicks;
+				this.d(damagesource, f);
+				hurtTicks = az = 10;
+			}
+
+			aA = 0.0F;
+			Entity entity = damagesource.getEntity();
+
+			if (entity != null) {
+				if (entity instanceof EntityLiving)
+					this.b((EntityLiving) entity);
+
+				if (entity instanceof EntityHuman) {
+					lastDamageByPlayerTime = 100;
+					killer = (EntityHuman) entity;
+				} else if (entity instanceof EntityWolf) {
+					EntityWolf entitywolf = (EntityWolf) entity;
+
+					if (entitywolf.isTamed()) {
+						lastDamageByPlayerTime = 100;
+						killer = null;
+					}
+					// MyZ start
+				} else if (entity instanceof EntityHorse) {
+					EntityHorse entityhorse = (EntityHorse) entity;
+
+					if (entityhorse.getOwnerName() != null && !entityhorse.getOwnerName().isEmpty()) {
+						lastDamageByPlayerTime = 100;
+						killer = null;
+					}
+				}
+				// MyZ end
+			}
+
+			if (flag) {
+				world.broadcastEntityEffect(this, (byte) 2);
+				if (damagesource != DamageSource.DROWN)
+					Q();
+
+				if (entity != null /* MyZ start */&& onGround /* MyZ end */) {
+					double d0 = entity.locX - locX;
+
+					double d1;
+
+					for (d1 = entity.locZ - locZ; d0 * d0 + d1 * d1 < 1.0E-4D; d1 = (Math.random() - Math.random()) * 0.01D)
+						d0 = (Math.random() - Math.random()) * 0.01D;
+
+					aA = (float) (Math.atan2(d1, d0) * 180.0D / 3.1415927410125732D) - yaw;
+					this.a(entity, f, d0, d1);
+				} else
+					aA = (int) (Math.random() * 2.0D) * 180;
+			}
+
+			if (getHealth() <= 0.0F) {
+				if (flag && aU() != null)
+					makeSound(aU(), bf(), bg());
+
+				this.die(damagesource);
+			} else if (flag && aT() != null)
+				makeSound(aT(), bf(), bg());
+
+			return true;
 		}
 	}
 
@@ -279,6 +274,8 @@ public class CustomEntityPlayer extends EntityPlayer {
 		((Player) player.getBukkitEntity()).setCustomName(playerDuplicate.getName());
 		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
 		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
+		player.getBukkitEntity().setGameMode(GameMode.SURVIVAL);
+		player.getBukkitEntity().setCanPickupItems(false);
 
 		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
 		((Player) player.getBukkitEntity()).setMaxHealth(playerDuplicate.getMaxHealth());

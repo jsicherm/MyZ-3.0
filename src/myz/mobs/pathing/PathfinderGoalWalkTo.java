@@ -3,13 +3,13 @@
  */
 package myz.mobs.pathing;
 
-import org.bukkit.Location;
-
 import myz.mobs.CustomEntityNPC;
 import myz.mobs.CustomEntityPigZombie;
 import myz.mobs.CustomEntityZombie;
 import net.minecraft.server.v1_7_R1.EntityInsentient;
 import net.minecraft.server.v1_7_R1.PathfinderGoal;
+
+import org.bukkit.Location;
 
 /**
  * @author Jordan
@@ -22,7 +22,7 @@ public class PathfinderGoalWalkTo extends PathfinderGoal {
 	private final Location to;
 
 	public PathfinderGoalWalkTo(EntityInsentient entity, Location to, float speed) {
-		this.insentient = entity;
+		insentient = entity;
 		this.speed = speed;
 		this.to = to;
 	}
@@ -43,6 +43,6 @@ public class PathfinderGoalWalkTo extends PathfinderGoal {
 
 	@Override
 	public void c() {
-		this.insentient.getNavigation().a(to.getX(), to.getY(), to.getZ(), speed);
+		insentient.getNavigation().a(to.getX(), to.getY(), to.getZ(), speed);
 	}
 }

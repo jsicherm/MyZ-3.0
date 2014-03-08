@@ -121,7 +121,8 @@ public class EntitySpawn implements Listener {
 			((Zombie) e.getEntity()).setBaby(random.nextInt(20) < 3);
 
 		// Make some natural pigmen spawn.
-		if (e.getLocation().getZ() >= 2000 && type == EntityType.ZOMBIE && random.nextInt(30) == 1) {
+		if (e.getLocation().getZ() <= (Integer) Configuration.getConfig("mobs.pigman.spawn_z") && type == EntityType.ZOMBIE
+				&& random.nextInt(30) == 1) {
 			EntityCreator.create(e.getLocation(), EntityType.PIG_ZOMBIE, SpawnReason.NATURAL, true);
 			e.setCancelled(true);
 			return;
