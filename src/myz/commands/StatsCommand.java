@@ -5,6 +5,7 @@ package myz.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.PlayerData;
@@ -39,7 +40,8 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
 				name = name.trim();
 			}
 
-			PlayerData data = PlayerData.getDataFor(name);
+			UUID uid = MyZ.instance.getUID(name);
+			PlayerData data = PlayerData.getDataFor(uid);
 			int zombie = 0, pigman = 0, giant = 0, player = 0, life = 0;
 			long total = 0;
 
@@ -52,12 +54,12 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
 				life = data.getMinutesAliveLife();
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				zombie = MyZ.instance.getSQLManager().getInt(sender.getName(), "zombie_kills");
-				pigman = MyZ.instance.getSQLManager().getInt(sender.getName(), "pigman_kills");
-				giant = MyZ.instance.getSQLManager().getInt(sender.getName(), "giant_kills");
-				player = MyZ.instance.getSQLManager().getInt(sender.getName(), "player_kills");
-				total = MyZ.instance.getSQLManager().getLong(sender.getName(), "minutes_alive");
-				life = MyZ.instance.getSQLManager().getInt(sender.getName(), "minutes_alive_life");
+				zombie = MyZ.instance.getSQLManager().getInt(uid, "zombie_kills");
+				pigman = MyZ.instance.getSQLManager().getInt(uid, "pigman_kills");
+				giant = MyZ.instance.getSQLManager().getInt(uid, "giant_kills");
+				player = MyZ.instance.getSQLManager().getInt(uid, "player_kills");
+				total = MyZ.instance.getSQLManager().getLong(uid, "minutes_alive");
+				life = MyZ.instance.getSQLManager().getInt(uid, "minutes_alive_life");
 			}
 			Messenger.sendMessage(sender, Messenger.getConfigMessage(sender instanceof Player ? Localizer.getLocale((Player) sender)
 					: Localizer.ENGLISH, "command.stats.header", name));

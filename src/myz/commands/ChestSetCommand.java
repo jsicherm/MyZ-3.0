@@ -32,7 +32,7 @@ public class ChestSetCommand implements CommandExecutor, TabCompleter {
 			for (String arg : args)
 				lootset += arg + " ";
 			lootset = lootset.trim();
-			ChestScanner.setters.put(sender.getName(), lootset.isEmpty() ? null : lootset);
+			ChestScanner.setters.put(((Player) sender).getUniqueId(), lootset.isEmpty() ? null : lootset);
 			Messenger.sendConfigMessage(sender, "chest.set.click");
 		}
 

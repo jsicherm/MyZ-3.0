@@ -81,7 +81,7 @@ public class Utils {
 		List<String> applicableFriends = new ArrayList<String>();
 		PlayerData data = PlayerData.getDataFor(player);
 		if (MyZ.instance.getSQLManager().isConnected())
-			applicableFriends = MyZ.instance.getSQLManager().getStringList(player.getName(), "friends");
+			applicableFriends = MyZ.instance.getSQLManager().getStringList(player.getUniqueId(), "friends");
 
 		for (int chunkX = 0 - chunkRadius; chunkX <= chunkRadius; chunkX++)
 			for (int chunkZ = 0 - chunkRadius; chunkZ <= chunkRadius; chunkZ++) {
@@ -91,7 +91,7 @@ public class Utils {
 
 				for (Entity entity : new Location(location.getWorld(), x + chunkX * 16, y, z + chunkZ * 16).getChunk().getEntities())
 					if (entity instanceof Player) {
-						if (((Player) entity).getName().equals(player.getName()))
+						if (((Player) entity).getUniqueId().equals(player.getUniqueId()))
 							continue;
 						if (entity.getLocation().distance(location) <= radius && entity.getLocation().getBlock() != location.getBlock()) {
 							/*
@@ -99,13 +99,41 @@ public class Utils {
 							 */
 							if (data != null && !data.isFriend((Player) entity))
 								return true;
-							if (MyZ.instance.getSQLManager().isConnected() && !applicableFriends.contains(((Player) entity).getName()))
+							if (MyZ.instance.getSQLManager().isConnected()
+									&& !applicableFriends.contains(((Player) entity).getUniqueId().toString()))
 								return true;
 						}
 					} else if (entity instanceof Creature)
 						return true;
 			}
 		return false;
+	}
+
+	/**
+	 * Get all entities near a location.
+	 * 
+	 * @param location
+	 *            The location.
+	 * @param radius
+	 *            The radius to search.
+	 * @return The list of entities near the location or an empty list if none
+	 *         found.
+	 */
+	public static List<Entity> getNearbyEntities(Location location, int radius) {
+		int chunkRadius = radius < 16 ? 1 : (radius - radius % 16) / 16;
+
+		List<Entity> entities = new ArrayList<Entity>();
+
+		for (int chunkX = 0 - chunkRadius; chunkX <= chunkRadius; chunkX++)
+			for (int chunkZ = 0 - chunkRadius; chunkZ <= chunkRadius; chunkZ++) {
+				int x = (int) location.getX();
+				int y = (int) location.getY();
+				int z = (int) location.getZ();
+
+				for (Entity entity : new Location(location.getWorld(), x + chunkX * 16, y, z + chunkZ * 16).getChunk().getEntities())
+					entities.add(entity);
+			}
+		return entities;
 	}
 
 	// Source:
@@ -175,11 +203,11 @@ public class Utils {
 								hit = target;
 					}
 
-					if (hit != null && !MyZ.instance.isFriend(player, hit.getName())) {
+					if (hit != null && !MyZ.instance.isFriend(player, hit.getUniqueId())) {
 						PlayerFriendEvent event = new PlayerFriendEvent(player, hit.getName());
 						MyZ.instance.getServer().getPluginManager().callEvent(event);
 						if (!event.isCancelled())
-							MyZ.instance.addFriend(player, hit.getName());
+							MyZ.instance.addFriend(player, hit.getUniqueId());
 					}
 				}
 			}
@@ -228,7 +256,7 @@ public class Utils {
 	 *            The player.
 	 */
 	public static void startSafeLogout(Player player) {
-		if (!Sync.getSafeLogoutPlayers().containsKey(player.getName())) {
+		if (!Sync.getSafeLogoutPlayers().containsKey(player.getUniqueId())) {
 			Messenger.sendConfigMessage(player, "safe_logout.beginning");
 			Sync.addSafeLogoutPlayer(player);
 		}
@@ -277,24 +305,28 @@ public class Utils {
 	 * @param playerDuplicate
 	 *            The player to duplicate an NPC for.
 	 */
-	public static void spawnNPC(Player playerDuplicate) {
+	public static void spawnNPC(final Player playerDuplicate) {
 		// The NPC won't even be on the screen for a second, may as well not add
 		// it.
 		if ((Integer) Configuration.getConfig(Configuration.LOGOUT_TIME) <= 0)
 			return;
 
-		final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
-
-		player.world.players.remove(player);
-		MyZ.instance.getNPCs().add(player);
-
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
-			@Override
 			public void run() {
-				MyZ.instance.getNPCs().remove(player);
-				player.getBukkitEntity().remove();
+				final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
+
+				player.world.players.remove(player);
+				MyZ.instance.getNPCs().add(player);
+
+				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+					@Override
+					public void run() {
+						MyZ.instance.getNPCs().remove(player);
+						player.getBukkitEntity().remove();
+					}
+				}, (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME) * 20L);
 			}
-		}, (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME) * 20L);
+		}, 0L);
 	}
 
 	/**
@@ -308,11 +340,11 @@ public class Utils {
 	 */
 	public static void playerNPCDied(CustomEntityPlayer player, World world) {
 		MyZ.instance.getNPCs().remove(player);
-		PlayerData data = PlayerData.getDataFor(player.getName());
+		PlayerData data = PlayerData.getDataFor(player.getBukkitEntity().getUniqueId());
 		if (data != null)
 			data.setWasKilledNPC(true);
 		if (MyZ.instance.getSQLManager().isConnected())
-			MyZ.instance.getSQLManager().set(player.getName(), "wasNPCKilled", true, true);
+			MyZ.instance.getSQLManager().set(player.getBukkitEntity().getUniqueId(), "wasNPCKilled", true, true);
 		Messenger.sendMessage(world, "player_npc_killed", player.getName());
 	}
 
@@ -327,11 +359,11 @@ public class Utils {
 	public static void showResearchDialog(Player player, int pg) {
 		// Load points.
 		int points = 0;
-		PlayerData data = PlayerData.getDataFor(player.getName());
+		PlayerData data = PlayerData.getDataFor(player.getUniqueId());
 		if (data != null)
 			points = data.getResearchPoints();
 		if (MyZ.instance.getSQLManager().isConnected())
-			points = MyZ.instance.getSQLManager().getInt(player.getName(), "research");
+			points = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "research");
 
 		// Create inventories and initial arrows.
 		ItemStack leftArrow = new ItemStack(Material.PISTON_EXTENSION);
@@ -344,7 +376,7 @@ public class Utils {
 		rightArrow.setItemMeta(meta);
 
 		List<Inventory> inventories = new ArrayList<Inventory>();
-		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.ENGLISH, "science_gui", points + "") + " (1)");
+		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.DEFAULT, "science_gui", points + "") + " (1)");
 		inventories.add(gui);
 		gui.setItem(0, leftArrow);
 		gui.setItem(8, rightArrow);
@@ -490,8 +522,10 @@ public class Utils {
 	 *            The entity.
 	 * @param loc
 	 *            The location.
+	 * @param direct
+	 *            False to pull parabolically, true otherwise.
 	 */
-	public static void pullTo(Entity e, Location loc) {
+	public static void pullTo(Entity e, Location loc, boolean direct) {
 		Location l = e.getLocation();
 
 		// Snowgears
@@ -508,17 +542,18 @@ public class Utils {
 		l.setY(l.getY() + 0.5);
 		e.teleport(l);
 
-		double d = loc.distance(l);
 		// Snowgears
+		double d = loc.distance(l);
 		double g = -0.08;
 		double x = (1.0 + 0.07 * d) * (loc.getX() - l.getX()) / d;
-		double y = (1.0 + 0.03 * d) * (loc.getY() - l.getY()) / d - 0.5 * g * d;
+		double y = (1.0 + 0.03 * d) * (loc.getY() - l.getY()) / d + (direct ? 0 : -0.5 * g * d);
 		double z = (1.0 + 0.07 * d) * (loc.getZ() - l.getZ()) / d;
 
 		Vector v = e.getVelocity();
 		v.setX(x);
 		v.setY(y);
 		v.setZ(z);
+		v.multiply(direct ? 1.5 : 1.0);
 		e.setVelocity(v);
 	}
 

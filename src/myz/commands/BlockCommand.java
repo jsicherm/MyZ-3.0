@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
@@ -28,7 +29,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BlockCommand implements CommandExecutor, TabCompleter {
 
-	public static Map<String, BlockFunction> blockChangers = new HashMap<String, BlockFunction>();
+	public static Map<UUID, BlockFunction> blockChangers = new HashMap<UUID, BlockFunction>();
 
 	/* (non-Javadoc)
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
@@ -50,12 +51,12 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 							Messenger.sendConfigMessage(sender, "command.block.place.arguments");
 							return true;
 						}
-						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_ADD, seconds));
+						blockChangers.put(((Player) sender).getUniqueId(), new BlockFunction(BlockFunction.type.PLACE_ADD, seconds));
 						Messenger.sendConfigMessage(sender, "command.block.place.add.help");
 					} else
 						Messenger.sendConfigMessage(sender, "command.block.place.arguments");
 				} else if (args[1].equalsIgnoreCase("remove")) {
-					blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.PLACE_REMOVE, -1));
+					blockChangers.put(((Player) sender).getUniqueId(), new BlockFunction(BlockFunction.type.PLACE_REMOVE, -1));
 					Messenger.sendConfigMessage(sender, "command.block.place.remove.help");
 				} else
 					Messenger.sendConfigMessage(sender, "command.block.place.arguments");
@@ -71,12 +72,12 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 							Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
 							return true;
 						}
-						blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_ADD, seconds));
+						blockChangers.put(((Player) sender).getUniqueId(), new BlockFunction(BlockFunction.type.DESTROY_ADD, seconds));
 						Messenger.sendConfigMessage(sender, "command.block.destroy.add.help");
 					} else
 						Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
 				} else if (args[1].equalsIgnoreCase("remove")) {
-					blockChangers.put(sender.getName(), new BlockFunction(BlockFunction.type.DESTROY_REMOVE, -1));
+					blockChangers.put(((Player) sender).getUniqueId(), new BlockFunction(BlockFunction.type.DESTROY_REMOVE, -1));
 					Messenger.sendConfigMessage(sender, "command.block.destroy.remove.help");
 				} else
 					Messenger.sendConfigMessage(sender, "command.block.destroy.arguments");
@@ -110,7 +111,7 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 		 */
 		public void doOnHit(ItemStack hand, Block hit, Player player) {
 			boolean contains = Configuration.canBreak(hit, hand);
-			blockChangers.remove(player.getName());
+			blockChangers.remove(player.getUniqueId());
 
 			String slug = "";
 			switch (function) {
@@ -151,7 +152,7 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 		 */
 		public void doOnPlace(Block placed, Player player) {
 			boolean contains = Configuration.canPlace(placed);
-			blockChangers.remove(player.getName());
+			blockChangers.remove(player.getUniqueId());
 
 			String slug = "";
 			switch (function) {

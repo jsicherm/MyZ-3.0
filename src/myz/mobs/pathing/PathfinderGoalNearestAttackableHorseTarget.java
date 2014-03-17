@@ -98,11 +98,12 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 				return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
 
 			if (d.cc.getOwnerName() != null && !d.cc.getOwnerName().isEmpty()) {
-				if (!MyZ.instance.isBandit(d.cc.getOwnerName()))
+				if (!MyZ.instance.isBandit(MyZ.instance.getUID(d.cc.getOwnerName())))
 					return false;
 				if (entity instanceof EntityHuman)
 					if (d.cc.getOwnerName().equals(((EntityHuman) entity).getName())
-							|| MyZ.instance.isFriend(d.cc.getOwnerName(), ((EntityHuman) entity).getName()))
+							|| MyZ.instance.isFriend(MyZ.instance.getUID(d.cc.getOwnerName()),
+									MyZ.instance.getUID(((EntityHuman) entity).getName())))
 						return false;
 			}
 			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);

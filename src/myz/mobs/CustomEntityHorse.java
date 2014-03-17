@@ -97,20 +97,20 @@ public class CustomEntityHorse extends EntityHorse {
 
 	@Override
 	public boolean m(Entity entity) {
+		Double d = (Double) Configuration.getConfig("mobs.horse.damage");
+		float f = Float.valueOf(Double.toString(d));
 		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
 				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
-			return entity.damageEntity(DamageSource.mobAttack(this), (Float) Configuration.getConfig("mobs.horse.damage")
-					* (isBaby() ? 0.5f : 1f));
+			return entity.damageEntity(DamageSource.mobAttack(this), f * (isBaby() ? 0.5f : 1f));
 		if (getOwnerName() == null || getOwnerName().isEmpty())
 			return false;
-		if (!MyZ.instance.isBandit(getOwnerName()))
+		if (!MyZ.instance.isBandit(MyZ.instance.getUID(getOwnerName())))
 			return false;
 		if (entity instanceof EntityHuman
-				&& (getOwnerName().equals(((EntityHuman) entity).getName()) || MyZ.instance.isFriend(getOwnerName(),
-						((EntityHuman) entity).getName())))
+				&& (getOwnerName().equals(((EntityHuman) entity).getName()) || MyZ.instance.isFriend(MyZ.instance.getUID(getOwnerName()),
+						MyZ.instance.getUID(((EntityHuman) entity).getName()))))
 			return false;
-		return entity.damageEntity(DamageSource.mobAttack(this), (Float) Configuration.getConfig("mobs.horse.damage")
-				* (isBaby() ? 0.5f : 1f));
+		return entity.damageEntity(DamageSource.mobAttack(this), f * (isBaby() ? 0.5f : 1f));
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class CustomEntityHorse extends EntityHorse {
 			return super.getGoalTarget();
 		if (getOwnerName() == null || getOwnerName().isEmpty())
 			return null;
-		if (!MyZ.instance.isBandit(getOwnerName()))
+		if (!MyZ.instance.isBandit(MyZ.instance.getUID(getOwnerName())))
 			return null;
 		return super.getGoalTarget();
 	}

@@ -6,6 +6,7 @@ package myz.mobs.pathing;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
@@ -27,7 +28,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class PathingSupport {
 
-	private static Map<String, Double> visibility_override = new HashMap<String, Double>();
+	private static Map<UUID, Double> visibility_override = new HashMap<UUID, Double>();
 	private static Field field, field2;
 
 	public static Field getField() throws NoSuchFieldException, SecurityException {
@@ -88,7 +89,7 @@ public class PathingSupport {
 				if (entity instanceof EntityHorse
 						&& ((EntityHorse) entity).getOwnerName() != null
 						&& (((EntityHorse) entity).getOwnerName().equals(player.getName()) || MyZ.instance.isFriend(
-								((EntityHorse) entity).getOwnerName(), player.getName())))
+								MyZ.instance.getUID(((EntityHorse) entity).getOwnerName()), MyZ.instance.getUID(player.getName()))))
 					continue;
 				// Get the players distance from the x, y, z.
 				double distance_to_player_squared = player.e(x, y, z);
@@ -118,7 +119,7 @@ public class PathingSupport {
 	 *            The visibility in blocks to override with.
 	 */
 	public static void elevatePlayer(Player player, double visibility) {
-		visibility_override.put(player.getName(), visibility);
+		visibility_override.put(player.getUniqueId(), visibility);
 	}
 
 	/**
@@ -139,9 +140,9 @@ public class PathingSupport {
 
 		CraftPlayer p = (CraftPlayer) player;
 
-		if (visibility_override.containsKey(player.getName())) {
-			double vis = visibility_override.get(player.getName());
-			visibility_override.remove(player.getName());
+		if (visibility_override.containsKey(player.getUniqueId())) {
+			double vis = visibility_override.get(player.getUniqueId());
+			visibility_override.remove(player.getUniqueId());
 			return vis;
 		}
 		// Sneaking players must be nearer to be seen.

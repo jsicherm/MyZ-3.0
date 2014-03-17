@@ -42,7 +42,7 @@ public class JoinClanCommand implements CommandExecutor {
 				}
 				if (MyZ.instance.getSQLManager().isConnected()) {
 					Messenger.sendConfigMessage(sender, "clan.joining");
-					MyZ.instance.getSQLManager().setClan(sender.getName(), clan);
+					MyZ.instance.getSQLManager().setClan(((Player) sender).getUniqueId(), clan);
 				}
 			} else {
 				PlayerData data = PlayerData.getDataFor((Player) sender);
@@ -52,9 +52,9 @@ public class JoinClanCommand implements CommandExecutor {
 						data.setClan("");
 					}
 				if (MyZ.instance.getSQLManager().isConnected())
-					if (MyZ.instance.getSQLManager().inClan(sender.getName())) {
+					if (MyZ.instance.getSQLManager().inClan(((Player) sender).getUniqueId())) {
 						Messenger.sendConfigMessage(sender, "command.clan.leave");
-						MyZ.instance.getSQLManager().setClan(sender.getName(), "");
+						MyZ.instance.getSQLManager().setClan(((Player) sender).getUniqueId(), "");
 					}
 			}
 		} else

@@ -3,6 +3,8 @@
  */
 package myz.commands;
 
+import java.util.UUID;
+
 import myz.MyZ;
 import myz.support.PlayerData;
 import myz.support.interfacing.Messenger;
@@ -29,16 +31,16 @@ public class FriendsCommand implements CommandExecutor {
 			String output = "";
 			PlayerData data = PlayerData.getDataFor((Player) sender);
 			if (data != null)
-				for (String name : data.getFriends()) {
-					output += current + name + ChatColor.WHITE + ", ";
+				for (UUID name : data.getFriends()) {
+					output += current + MyZ.instance.getName(name) + ChatColor.WHITE + ", ";
 					if (current == ChatColor.DARK_RED)
 						current = ChatColor.RED;
 					else
 						current = ChatColor.DARK_RED;
 				}
 			else if (MyZ.instance.getSQLManager().isConnected())
-				for (String name : MyZ.instance.getSQLManager().getStringList(sender.getName(), "friends")) {
-					output += current + name + ChatColor.WHITE + ", ";
+				for (String name : MyZ.instance.getSQLManager().getStringList(((Player) sender).getUniqueId(), "friends")) {
+					output += current + MyZ.instance.getName(UUID.fromString(name)) + ChatColor.WHITE + ", ";
 					if (current == ChatColor.DARK_RED)
 						current = ChatColor.RED;
 					else

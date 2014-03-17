@@ -33,7 +33,7 @@ public class KittehTag implements Listener {
 			e.setTag(ChatColor.RED + e.getTag());
 		else if (MyZ.instance.isHealer(player))
 			e.setTag(ChatColor.GREEN + e.getTag());
-		if (MyZ.instance.isFriend(e.getPlayer().getName(), player.getName()))
+		if (MyZ.instance.isFriend(e.getPlayer().getUniqueId(), player.getUniqueId()))
 			e.setTag(ChatColor.BLUE + e.getTag());
 	}
 

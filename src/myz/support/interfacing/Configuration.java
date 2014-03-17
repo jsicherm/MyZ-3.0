@@ -75,7 +75,7 @@ public class Configuration {
 
 		configEntries.put(RANK_NAME_N + "0", "[%s]");
 		configEntries.put(RANKED_RESEARCH, 0);
-		configEntries.put(SAVE_UNRANKED, false);
+		configEntries.put(SAVE_UNRANKED, true);
 
 		configEntries.put(AUTOUPDATE, true);
 
@@ -803,7 +803,7 @@ public class Configuration {
 			if (timeout < 100)
 				return getPrefixForPlayerRank(playerFor, nearestInt(rank, rank_prefix.keySet()), timeout + 1);
 			Messenger.sendConsoleMessage("&4Unable to generate a rank prefix for rank number " + rank + ".");
-			return playerFor.getName();
+			return playerFor.getName() + ": ";
 		}
 	}
 

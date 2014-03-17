@@ -7,13 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -24,22 +24,22 @@ import org.bukkit.entity.Player;
  */
 public class PlayerData {
 
-	private final String name;
+	private final UUID uid;
 	private int player_kills, zombie_kills, pigman_kills, giant_kills, player_kills_life, zombie_kills_life, pigman_kills_life,
 			giant_kills_life, player_kills_life_record, zombie_kills_life_record, pigman_kills_life_record, giant_kills_life_record,
 			deaths, rank, heals_life, thirst, minutes_alive_life, minutes_alive_life_record, research;
 	private boolean isBleeding, isPoisoned, wasKilledNPC, isZombie, isBrokenLeg;
 	private long timeOfKickban, minutes_alive;
 	private String clan;
-	private List<String> friends = new ArrayList<String>();
+	private List<UUID> friends = new ArrayList<UUID>();
 
-	private PlayerData(String name, int player_kills, int zombie_kills, int pigman_kills, int giant_kills, int player_kills_life,
+	private PlayerData(UUID uid, int player_kills, int zombie_kills, int pigman_kills, int giant_kills, int player_kills_life,
 			int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int deaths, int rank, boolean isBleeding,
-			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life, int thirst, String clan,
+			boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<UUID> friends, int heals_life, int thirst, String clan,
 			long minutes_alive, int minutes_alive_life, int minutes_alive_life_record, int player_kills_life_record,
 			int zombie_kills_life_record, int pigman_kills_life_record, int giant_kills_life_record, int research, boolean isZombie,
 			boolean isBrokenLeg) {
-		this.name = name;
+		this.uid = uid;
 		this.player_kills = player_kills;
 		this.zombie_kills = zombie_kills;
 		this.pigman_kills = pigman_kills;
@@ -64,7 +64,7 @@ public class PlayerData {
 		this.thirst = thirst;
 		this.clan = clan;
 		this.isZombie = isZombie;
-		this.friends = new ArrayList<String>(friends);
+		this.friends = new ArrayList<UUID>(friends);
 		this.minutes_alive = minutes_alive;
 		this.minutes_alive_life = minutes_alive_life;
 		this.minutes_alive_life_record = minutes_alive_life_record;
@@ -74,7 +74,7 @@ public class PlayerData {
 	 * @see getDataFor(String player)
 	 */
 	public static PlayerData getDataFor(Player player) {
-		return getDataFor(player.getName());
+		return getDataFor(player.getUniqueId());
 	}
 
 	/**
@@ -113,17 +113,21 @@ public class PlayerData {
 	 *            The player's name in question.
 	 * @return The PlayerData stored or null if no data is stored.
 	 */
-	public static PlayerData getDataFor(String player) {
+	public static PlayerData getDataFor(UUID player) {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return null;
 		if (!playerDataExists(player))
 			return null;
 		FileConfiguration section = MyZ.instance.getPlayerDataConfig(player);
+		List<String> stringFriends = section.getStringList("friends");
+		List<UUID> friends = new ArrayList<UUID>();
+		for (String s : stringFriends)
+			friends.add(MyZ.instance.getUID(s));
 		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie.kills"), section.getInt("pigman.kills"),
 				section.getInt("giant.kills"), section.getInt("player.kills_life"), section.getInt("zombie.kills_life"),
 				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("deaths"), section.getInt("rank"),
 				section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"), section.getBoolean("wasKilledNPC"),
-				section.getLong("timeOfKickban"), section.getStringList("friends"), section.getInt("heals_life"), section.getInt("thirst"),
+				section.getLong("timeOfKickban"), friends, section.getInt("heals_life"), section.getInt("thirst"),
 				section.getString("clan"), section.getInt("minutes.played"), section.getInt("minutes.played_life"),
 				section.getInt("minutes.played_life_record"), section.getInt("player.kills_life_record"),
 				section.getInt("zombie.kills_life_record"), section.getInt("pigman.kills_life_record"),
@@ -136,6 +140,8 @@ public class PlayerData {
 	 * 
 	 * @param player
 	 *            The player.
+	 * @param uid
+	 *            The UUID.
 	 * @param player_kills
 	 *            How many player kills to begin with.
 	 * @param zombie_kills
@@ -192,7 +198,7 @@ public class PlayerData {
 	 *            Whether or not the players' leg is broken.
 	 * @return The PlayerData object created.
 	 */
-	public static PlayerData createDataFor(Player player, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
+	public static PlayerData createDataFor(Player player, UUID uid, int player_kills, int zombie_kills, int pigman_kills, int giant_kills,
 			int player_kills_life, int zombie_kills_life, int pigman_kills_life, int giant_kills_life, int deaths, int rank,
 			boolean isBleeding, boolean isPoisoned, boolean wasKilledNPC, long timeOfKickban, List<String> friends, int heals_life,
 			int thirst, String clan, long minutes_alive, int minutes_alive_life, int minutes_alive_life_record,
@@ -201,7 +207,7 @@ public class PlayerData {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return null;
 		if (!playerDataExists(player)) {
-			FileConfiguration section = MyZ.instance.getPlayerDataConfig(player.getName());
+			FileConfiguration section = MyZ.instance.getPlayerDataConfig(player.getUniqueId());
 			section.set("player.kills", player_kills);
 			section.set("zombie.kills", zombie_kills);
 			section.set("pigman.kills", pigman_kills);
@@ -231,9 +237,11 @@ public class PlayerData {
 			section.set("isZombie", isZombie);
 			section.set("legBroken", isBrokenLeg);
 			try {
-				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + player.getName() + ".yml"));
+				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator
+						+ player.getUniqueId().toString() + ".yml"));
 			} catch (IOException e) {
-				MyZ.instance.getLogger().warning("Unable to save a new PlayerData for " + player.getName() + ": " + e.getMessage());
+				MyZ.instance.getLogger().warning(
+						"Unable to save a new PlayerData for " + player.getUniqueId().toString() + ": " + e.getMessage());
 			}
 		}
 		return getDataFor(player);
@@ -243,7 +251,7 @@ public class PlayerData {
 	 * @see playerDataExists(String player)
 	 */
 	private static boolean playerDataExists(Player player) {
-		return playerDataExists(player.getName());
+		return playerDataExists(player.getUniqueId());
 	}
 
 	/**
@@ -253,7 +261,7 @@ public class PlayerData {
 	 *            The player in question.
 	 * @return True if the entry exists, false otherwise.
 	 */
-	private static boolean playerDataExists(String player) {
+	private static boolean playerDataExists(UUID player) {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return false;
 		FileConfiguration config = MyZ.instance.getPlayerDataConfig(player);
@@ -268,8 +276,11 @@ public class PlayerData {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
 			return;
 
-		if (playerDataExists(name)) {
-			FileConfiguration section = MyZ.instance.getPlayerDataConfig(name);
+		if (playerDataExists(uid)) {
+			FileConfiguration section = MyZ.instance.getPlayerDataConfig(uid);
+			List<String> stringFriends = new ArrayList<String>();
+			for (UUID id : friends)
+				stringFriends.add(id.toString());
 			section.set("player.kills", player_kills);
 			section.set("zombie.kills", zombie_kills);
 			section.set("pigman.kills", pigman_kills);
@@ -288,7 +299,7 @@ public class PlayerData {
 			section.set("isPoisoned", isPoisoned);
 			section.set("wasKilledNPC", wasKilledNPC);
 			section.set("timeOfKickban", timeOfKickban);
-			section.set("friends", friends);
+			section.set("friends", stringFriends);
 			section.set("heals_life", heals_life);
 			section.set("thirst", thirst);
 			section.set("clan", clan);
@@ -299,18 +310,18 @@ public class PlayerData {
 			section.set("isZombie", isZombie);
 			section.set("legBroken", isBrokenLeg);
 			try {
-				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + name + ".yml"));
+				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + uid.toString() + ".yml"));
 			} catch (IOException e) {
-				MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + name + ": " + e.getMessage());
+				MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + uid.toString() + ": " + e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * @return the name
+	 * @return the uid
 	 */
-	public String getName() {
-		return name;
+	public UUID getUID() {
+		return uid;
 	}
 
 	/**
@@ -333,24 +344,16 @@ public class PlayerData {
 	public int getNumberInClan() {
 		if (!inClan())
 			return 0;
-		List<String> playersInClan = new ArrayList<String>();
-		playersInClan.add(name);
+		List<UUID> playersInClan = new ArrayList<UUID>();
+		playersInClan.add(uid);
 		PlayerData data;
-		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (playersInClan.contains(player.getName()))
+		for (UUID player : MyZ.instance.lookupPlayers().keySet()) {
+			if (playersInClan.contains(player))
 				continue;
-			data = getDataFor(player.getName());
+			data = getDataFor(player);
 			if (data != null)
 				if (data.inClan() && data.getClan().equals(getClan()))
-					playersInClan.add(player.getName());
-		}
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getName()))
-				continue;
-			data = getDataFor(player.getName());
-			if (data != null)
-				if (data.inClan() && data.getClan().equals(getClan()))
-					playersInClan.add(player.getName());
+					playersInClan.add(player);
 		}
 		return playersInClan.size();
 	}
@@ -362,12 +365,12 @@ public class PlayerData {
 		List<Player> playersInClan = new ArrayList<Player>();
 		if (!inClan())
 			return playersInClan;
-		playersInClan.add(Bukkit.getPlayerExact(name));
+		playersInClan.add(MyZ.instance.getPlayer(uid));
 		PlayerData data;
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getName()))
+			if (playersInClan.contains(player.getUniqueId()))
 				continue;
-			data = getDataFor(player.getName());
+			data = getDataFor(player.getUniqueId());
 			if (data != null)
 				if (data.inClan() && data.getClan().equals(getClan()))
 					playersInClan.add(player);
@@ -538,8 +541,8 @@ public class PlayerData {
 	/**
 	 * @return The player's friends.
 	 */
-	public List<String> getFriends() {
-		return new ArrayList<String>(friends);
+	public List<UUID> getFriends() {
+		return new ArrayList<UUID>(friends);
 	}
 
 	/**
@@ -552,7 +555,7 @@ public class PlayerData {
 	 * @return True if the friends list contains the player's name.
 	 */
 	public boolean isFriend(Player player) {
-		return isFriend(player.getName());
+		return isFriend(player.getUniqueId());
 	}
 
 	/**
@@ -561,7 +564,7 @@ public class PlayerData {
 	 * @param name
 	 * @return True if friends contains @param name.
 	 */
-	public boolean isFriend(String name) {
+	public boolean isFriend(UUID name) {
 		return friends.contains(name);
 	}
 
@@ -571,7 +574,7 @@ public class PlayerData {
 	 * @param name
 	 *            The friend's name.
 	 */
-	public void addFriend(String name) {
+	public void addFriend(UUID name) {
 		friends.add(name);
 		save();
 	}
@@ -582,7 +585,7 @@ public class PlayerData {
 	 * @param name
 	 *            The friend's name.
 	 */
-	public void removeFriend(String name) {
+	public void removeFriend(UUID name) {
 		friends.remove(name);
 		save();
 	}

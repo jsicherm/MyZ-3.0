@@ -35,9 +35,9 @@ public class ClanCommand implements CommandExecutor {
 				total = data.getNumberInClan();
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				clan = MyZ.instance.getSQLManager().getClan(sender.getName());
-				online = MyZ.instance.getSQLManager().getOnlinePlayersInClan(sender.getName()).size();
-				total = MyZ.instance.getSQLManager().getNumberInClan(sender.getName());
+				clan = MyZ.instance.getSQLManager().getClan(((Player) sender).getUniqueId());
+				online = MyZ.instance.getSQLManager().getOnlinePlayersInClan(((Player) sender).getUniqueId()).size();
+				total = MyZ.instance.getSQLManager().getNumberInClan(((Player) sender).getUniqueId());
 			}
 			if (clan == null || clan.isEmpty())
 				Messenger.sendConfigMessage(sender, "command.clan.not_in");

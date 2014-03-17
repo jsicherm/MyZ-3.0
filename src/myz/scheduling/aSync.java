@@ -3,6 +3,7 @@
  */
 package myz.scheduling;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -33,7 +34,7 @@ import org.bukkit.potion.PotionEffectType;
 public class aSync implements Runnable {
 
 	private static int ticks = 0;
-	private Random random = new Random();
+	private static final Random random = new Random();
 	private final boolean isDisguise;
 
 	public aSync() {
@@ -50,7 +51,7 @@ public class aSync implements Runnable {
 				Messenger.sendConsoleMessage("&4Specified world (" + world + ") does not exist! Please update your config.yml");
 				continue;
 			}
-			for (Player player : MyZ.instance.getServer().getWorld(world).getPlayers()) {
+			for (Player player : new ArrayList<Player>(MyZ.instance.getServer().getWorld(world).getPlayers())) {
 				if (player.getGameMode() == GameMode.CREATIVE || Configuration.isInLobby(player))
 					continue;
 
@@ -65,12 +66,12 @@ public class aSync implements Runnable {
 							data.setMinutesAliveLifeRecord(amount);
 					}
 					if (MyZ.instance.getSQLManager().isConnected()) {
-						MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive",
-								MyZ.instance.getSQLManager().getLong(player.getName(), "minutes_alive") + 1, true);
-						MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive_life",
-								amount = MyZ.instance.getSQLManager().getInt(player.getName(), "minutes_alive_life") + 1, true);
-						if (amount > MyZ.instance.getSQLManager().getInt(player.getName(), "minutes_alive_record"))
-							MyZ.instance.getSQLManager().set(player.getName(), "minutes_alive_record", amount, true);
+						MyZ.instance.getSQLManager().set(player.getUniqueId(), "minutes_alive",
+								MyZ.instance.getSQLManager().getLong(player.getUniqueId(), "minutes_alive") + 1, true);
+						MyZ.instance.getSQLManager().set(player.getUniqueId(), "minutes_alive_life",
+								amount = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "minutes_alive_life") + 1, true);
+						if (amount > MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "minutes_alive_record"))
+							MyZ.instance.getSQLManager().set(player.getUniqueId(), "minutes_alive_record", amount, true);
 					}
 				}
 

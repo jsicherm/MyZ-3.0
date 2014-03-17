@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import myz.api.PlayerBeginBleedingEvent;
 import myz.api.PlayerBeginPoisonEvent;
@@ -76,6 +77,7 @@ import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 import myz.utilities.DisguiseUtils;
+import myz.utilities.Hologram;
 import myz.utilities.LibsDisguiseUtils;
 import myz.utilities.Utils;
 import myz.utilities.WorldlessLocation;
@@ -113,18 +115,19 @@ public class MyZ extends JavaPlugin {
 	// TODO The ability to disable specific mob types in the config.
 	// TODO Knockback range!
 	// TODO Attack range maybe? :)
-	// @ chat not showing name
+	// TODO @ chat not showing name
 	// TODO %GROUP% tag for PEX groups
 
 	public static MyZ instance;
-	private List<String> online_players = new ArrayList<String>();
+	private List<UUID> online_players = new ArrayList<UUID>();
 	private FileConfiguration blocks, spawn, chests, research;
 	private Map<String, FileConfiguration> localizable = new HashMap<String, FileConfiguration>();
 	private SQLManager sql;
 	private static final Random random = new Random();
+	public static boolean alertOps;
 	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
-	private Map<String, FileConfiguration> playerdata = new HashMap<String, FileConfiguration>();
-	private List<String> flags = new ArrayList<String>();
+	private Map<UUID, FileConfiguration> playerdata = new HashMap<UUID, FileConfiguration>();
+	private List<UUID> flags = new ArrayList<UUID>();
 
 	@Override
 	public void onEnable() {
@@ -243,12 +246,12 @@ public class MyZ extends JavaPlugin {
 			public void run() {
 				sql.connect();
 				if (!sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
-					Messenger.sendConsoleMessage(ChatColor.RED
-							+ "MySQL is not connected and PlayerData is disabled. Enabling PlayerData for this session.");
+					Messenger.sendConsoleMessage(ChatColor.GREEN + "Using PlayerData for this session.");
+					alertOps = true;
+					Messenger.sendConsoleMessage(ChatColor.YELLOW + "Visit http://my-z.org/request.php to get a free MyZ MySQL database.");
 					Configuration.saveConfig(Configuration.DATASTORAGE, true, false);
 				} else if (sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
-					Messenger
-							.sendConsoleMessage(ChatColor.RED + "MySQL and PlayerData are enabled. Disabling PlayerData for this session.");
+					Messenger.sendConsoleMessage(ChatColor.GREEN + "Using MySQL for this session.");
 					Configuration.saveConfig(Configuration.DATASTORAGE, false, false);
 				}
 
@@ -263,14 +266,14 @@ public class MyZ extends JavaPlugin {
 					for (Player player : Bukkit.getWorld(world).getPlayers()) {
 						addPlayer(player, true);
 						PlayerData data = null;
-						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getName())) {
+						if ((data = PlayerData.getDataFor(player)) == null || sql.isConnected() && !sql.isIn(player.getUniqueId())) {
 							if (data == null && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
-								PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
-										new ArrayList<String>(), 0, (Integer) Configuration.getConfig(Configuration.THIRST_MAX), "", 0, 0,
-										0, 0, 0, 0, 0, 0, false, false);
+								PlayerData.createDataFor(player, player.getUniqueId(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false,
+										0L, new ArrayList<String>(), 0, (Integer) Configuration.getConfig(Configuration.THIRST_MAX), "", 0,
+										0, 0, 0, 0, 0, 0, 0, false, false);
 								putPlayerAtSpawn(player, false, true);
 							}
-							if (sql.isConnected() && !sql.isIn(player.getName())) {
+							if (sql.isConnected() && !sql.isIn(player.getUniqueId())) {
 								sql.add(player);
 								putPlayerAtSpawn(player, false, true);
 							}
@@ -338,6 +341,7 @@ public class MyZ extends JavaPlugin {
 		CustomEntityType.unregisterEntities();
 		if (Utils.packets != null)
 			Utils.packets.clear();
+		Hologram.removeAll();
 		nullifyStatics();
 	}
 
@@ -471,25 +475,81 @@ public class MyZ extends JavaPlugin {
 		research = YamlConfiguration.loadConfiguration(research_file);
 	}
 
+	public Player getPlayer(UUID uid) {
+		for (Player p : Bukkit.getOnlinePlayers())
+			if (p.getUniqueId().equals(uid))
+				return p;
+		return null;
+	}
+
+	public UUID getUID(String name) {
+		Map<UUID, String> map = lookupPlayers();
+		if (map.containsValue(name))
+			for (UUID key : map.keySet())
+				if (map.get(key).equals(name))
+					return key;
+		return UUID.randomUUID();
+	}
+
+	public String getName(UUID uid) {
+		Map<UUID, String> map = lookupPlayers();
+		for (UUID key : map.keySet())
+			if (key.equals(uid))
+				return map.get(key);
+		return "Guest";
+	}
+
+	public void map(Player player) {
+		try {
+			File folder = new File(getDataFolder() + File.separator + "mappings.yml");
+			if (!folder.exists())
+				folder.createNewFile();
+			FileConfiguration yaml = YamlConfiguration.loadConfiguration(folder);
+			yaml.set(player.getUniqueId().toString(), player.getName());
+			yaml.save(folder);
+
+			// Store their name.
+			if (sql.isConnected())
+				sql.set(player.getUniqueId(), "name", player.getName(), true);
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4Unable to add, save or retrieve UUID mappings: " + exc.getMessage());
+		}
+	}
+
+	public Map<UUID, String> lookupPlayers() {
+		Map<UUID, String> map = new HashMap<UUID, String>();
+		try {
+			File folder = new File(getDataFolder() + File.separator + "mappings.yml");
+			if (!folder.exists())
+				folder.createNewFile();
+			FileConfiguration yaml = YamlConfiguration.loadConfiguration(folder);
+			for (String key : yaml.getKeys(false))
+				map.put(UUID.fromString(key), yaml.getString(key));
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4Unable to retrieve UUID mappings: " + exc.getMessage());
+		}
+		return map;
+	}
+
 	/**
 	 * Get the playerdata YAML.
 	 * 
 	 * @param player
-	 *            The player name of the data to get for.
+	 *            The player uuid of the data to get for.
 	 * @return The FileConfiguration for the specified player's PlayerData or
 	 *         null if not loaded or can't load.
 	 */
-	public FileConfiguration getPlayerDataConfig(String player) {
+	public FileConfiguration getPlayerDataConfig(UUID player) {
 		if (!playerdata.containsKey(player)) {
 			File datafolder = new File(getDataFolder() + File.separator + "data");
 			if (!datafolder.exists())
 				datafolder.mkdir();
-			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + player + ".yml");
+			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + player.toString() + ".yml");
 			if (!datafile.exists())
 				try {
 					datafile.createNewFile();
 				} catch (Exception e) {
-					Messenger.sendConsoleMessage("&4Unable to save a new PlayerData file for " + player + ": " + e.getMessage());
+					Messenger.sendConsoleMessage("&4Unable to save a new PlayerData file for " + player.toString() + ": " + e.getMessage());
 					return null;
 				}
 			FileConfiguration config = YamlConfiguration.loadConfiguration(datafile);
@@ -618,7 +678,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isBleeding();
 		if (sql.isConnected())
-			return sql.getBoolean(player.getName(), "isBleeding");
+			return sql.getBoolean(player.getUniqueId(), "isBleeding");
 		return false;
 	}
 
@@ -634,7 +694,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isLegBroken();
 		if (sql.isConnected())
-			return sql.getBoolean(player.getName(), "legBroken");
+			return sql.getBoolean(player.getUniqueId(), "legBroken");
 		return false;
 	}
 
@@ -650,7 +710,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isPoisoned();
 		if (sql.isConnected())
-			return sql.getBoolean(player.getName(), "isPoisoned");
+			return sql.getBoolean(player.getUniqueId(), "isPoisoned");
 		return false;
 	}
 
@@ -671,7 +731,7 @@ public class MyZ extends JavaPlugin {
 				if (data != null)
 					data.setBleeding(true);
 				if (sql.isConnected())
-					sql.set(player.getName(), "isBleeding", true, true);
+					sql.set(player.getUniqueId(), "isBleeding", true, true);
 				Messenger.sendConfigMessage(player, "damage.bleed_begin");
 			}
 		}
@@ -694,7 +754,7 @@ public class MyZ extends JavaPlugin {
 				if (data != null)
 					data.setLegBroken(true);
 				if (sql.isConnected())
-					sql.set(player.getName(), "legBroken", true, true);
+					sql.set(player.getUniqueId(), "legBroken", true, true);
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 2));
 				Messenger.sendConfigMessage(player, "damage.leg_break");
 			}
@@ -717,7 +777,7 @@ public class MyZ extends JavaPlugin {
 				if (data != null)
 					data.setPoisoned(true);
 				if (sql.isConnected())
-					sql.set(player.getName(), "isPoisoned", true, true);
+					sql.set(player.getUniqueId(), "isPoisoned", true, true);
 				Messenger.sendConfigMessage(player, "damage.poison_begin");
 			}
 		}
@@ -735,7 +795,7 @@ public class MyZ extends JavaPlugin {
 			if (data != null)
 				data.setPoisoned(false);
 			if (sql.isConnected())
-				sql.set(player.getName(), "isPoisoned", false, true);
+				sql.set(player.getUniqueId(), "isPoisoned", false, true);
 			if (alert)
 				Messenger.sendConfigMessage(player, "damage.poison_end");
 		}
@@ -754,7 +814,7 @@ public class MyZ extends JavaPlugin {
 			if (data != null)
 				data.setLegBroken(false);
 			if (sql.isConnected())
-				sql.set(player.getName(), "legBroken", false, true);
+				sql.set(player.getUniqueId(), "legBroken", false, true);
 			player.removePotionEffect(PotionEffectType.SLOW);
 			if (alert)
 				Messenger.sendConfigMessage(player, "damage.leg_fix");
@@ -773,7 +833,7 @@ public class MyZ extends JavaPlugin {
 			if (data != null)
 				data.setBleeding(false);
 			if (sql.isConnected())
-				sql.set(player.getName(), "isBleeding", false, true);
+				sql.set(player.getUniqueId(), "isBleeding", false, true);
 			if (alert)
 				Messenger.sendConfigMessage(player, "damage.bleed_end");
 		}
@@ -787,7 +847,7 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 */
 	public void addPlayer(Player player, boolean clearInventory) {
-		PlayerData playerdata = PlayerData.getDataFor(player.getName());
+		PlayerData playerdata = PlayerData.getDataFor(player);
 
 		if (!(Boolean) Configuration.getConfig(Configuration.PRELOGIN)) {
 			/*
@@ -799,24 +859,24 @@ public class MyZ extends JavaPlugin {
 					&& (timeOfKickExpiry = playerdata.getTimeOfKickban() + (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME)
 							* 1000) >= now
 					|| MyZ.instance.getSQLManager().isConnected()
-					&& (timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(player.getName(), "timeOfKickban")
+					&& (timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(player.getUniqueId(), "timeOfKickban")
 							+ (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000) >= now) {
-				player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.recur", (timeOfKickExpiry - now) / 1000
+				player.kickPlayer(Messenger.getConfigMessage(Localizer.DEFAULT, "kick.recur", (timeOfKickExpiry - now) / 1000
 						+ ""));
 				return;
 			}
 		}
-		online_players.add(player.getName());
+		online_players.add(player.getUniqueId());
 
 		/*
 		 * Add the player to the dataset if they're not in it yet. If they weren't in it, put them at the spawn.
 		 */
 		if (playerdata == null && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
-			playerdata = PlayerData.createDataFor(player, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L, new ArrayList<String>(),
-					0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false, false);
+			playerdata = PlayerData.createDataFor(player, player.getUniqueId(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, false, false, 0L,
+					new ArrayList<String>(), 0, 20, "", 0, 0, 0, 0, 0, 0, 0, 0, false, false);
 			putPlayerAtSpawn(player, false, clearInventory);
 		}
-		if (sql.isConnected() && !sql.isIn(player.getName())) {
+		if (sql.isConnected() && !sql.isIn(player.getUniqueId())) {
 			sql.add(player);
 			putPlayerAtSpawn(player, false, clearInventory);
 		}
@@ -825,19 +885,19 @@ public class MyZ extends JavaPlugin {
 
 		if (playerdata != null && playerdata.getTimeOfKickban() != 0)
 			playerdata.setTimeOfKickban(0L);
-		if (sql.isConnected() && sql.getLong(player.getName(), "timeOfKickban") != 0)
-			sql.set(player.getName(), "timeOfKickban", 0L, true);
+		if (sql.isConnected() && sql.getLong(player.getUniqueId(), "timeOfKickban") != 0)
+			sql.set(player.getUniqueId(), "timeOfKickban", 0L, true);
 
 		/*
 		 * Cache all values asynchronously to reduce runtime lag.
 		 */
 		if (sql.isConnected())
-			sql.createLinks(player.getName());
+			sql.createLinks(player.getUniqueId());
 
 		/*
 		 * Teleport the player back to the world spawn if they were killed by an NPC logout.
 		 */
-		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getName(), "wasNPCKilled")) {
+		if (playerdata != null && playerdata.wasKilledNPC() || sql.isConnected() && sql.getBoolean(player.getUniqueId(), "wasNPCKilled")) {
 			Messenger.sendConfigMessage(player, "player_was_killed_npc");
 			putPlayerAtSpawn(player, true, clearInventory);
 		}
@@ -845,12 +905,12 @@ public class MyZ extends JavaPlugin {
 		if (MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled())
 			if (playerdata != null && playerdata.isZombie() || MyZ.instance.getSQLManager().isConnected()
-					&& MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))
+					&& MyZ.instance.getSQLManager().getBoolean(player.getUniqueId(), "isZombie"))
 				DisguiseUtils.becomeZombie(player);
 		if (MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
 			if (playerdata != null && playerdata.isZombie() || MyZ.instance.getSQLManager().isConnected()
-					&& MyZ.instance.getSQLManager().getBoolean(player.getName(), "isZombie"))
+					&& MyZ.instance.getSQLManager().getBoolean(player.getUniqueId(), "isZombie"))
 				LibsDisguiseUtils.becomeZombie(player);
 	}
 
@@ -862,7 +922,7 @@ public class MyZ extends JavaPlugin {
 	 * @return True if the player is playing MyZ.
 	 */
 	public boolean isPlayer(Player player) {
-		return online_players.contains(player.getName());
+		return online_players.contains(player.getUniqueId());
 	}
 
 	/**
@@ -885,10 +945,10 @@ public class MyZ extends JavaPlugin {
 				data.setZombie(false);
 			}
 			if (sql.isConnected() && wasDeath) {
-				sql.set(player.getName(), "isBleeding", false, true);
-				sql.set(player.getName(), "isPoisoned", false, true);
-				sql.set(player.getName(), "thirst", Configuration.getConfig(Configuration.THIRST_MAX), true);
-				sql.set(player.getName(), "isZombie", false, true);
+				sql.set(player.getUniqueId(), "isBleeding", false, true);
+				sql.set(player.getUniqueId(), "isPoisoned", false, true);
+				sql.set(player.getUniqueId(), "thirst", Configuration.getConfig(Configuration.THIRST_MAX), true);
+				sql.set(player.getUniqueId(), "isZombie", false, true);
 			}
 
 			if (getServer().getPluginManager().getPlugin("DisguiseCraft") != null
@@ -903,13 +963,13 @@ public class MyZ extends JavaPlugin {
 				if (data != null)
 					data.setTimeOfKickban(System.currentTimeMillis());
 				if (sql.isConnected())
-					sql.set(player.getName(), "timeOfKickban", System.currentTimeMillis(), true);
+					sql.set(player.getUniqueId(), "timeOfKickban", System.currentTimeMillis(), true);
 			}
 
 			if (!(Boolean) Configuration.getConfig(Configuration.SAVE_UNRANKED) && getRankFor(player) <= 0
 					&& !player.getName().equals("MrTeePee")) {
 				if (data != null) {
-					for (String friend : data.getFriends())
+					for (UUID friend : data.getFriends())
 						data.removeFriend(friend);
 					data.setDeaths(0);
 					data.setGiantKills(0);
@@ -929,26 +989,26 @@ public class MyZ extends JavaPlugin {
 					data.setMinutesAliveLifeRecord(0);
 				}
 				if (sql.isConnected()) {
-					sql.set(player.getName(), "friends", "''", true);
-					sql.set(player.getName(), "deaths", 0, true);
-					sql.set(player.getName(), "giant_kills", 0, true);
-					sql.set(player.getName(), "giant_kills_life", 0, true);
-					sql.set(player.getName(), "giant_kills_life_record", 0, true);
-					sql.set(player.getName(), "pigman_kills", 0, true);
-					sql.set(player.getName(), "pigman_kills_life", 0, true);
-					sql.set(player.getName(), "pigman_kills_life_record", 0, true);
-					sql.set(player.getName(), "player_kills", 0, true);
-					sql.set(player.getName(), "player_kills_life", 0, true);
-					sql.set(player.getName(), "player_kills_life_record", 0, true);
-					sql.set(player.getName(), "zombie_kills", 0, true);
-					sql.set(player.getName(), "zombie_kills_life", 0, true);
-					sql.set(player.getName(), "zombie_kills_life_record", 0, true);
-					sql.set(player.getName(), "minutes_alive", 0L, true);
-					sql.set(player.getName(), "minutes_alive_life", 0, true);
-					sql.set(player.getName(), "minutes_alive_record", 0, true);
+					sql.set(player.getUniqueId(), "friends", "''", true);
+					sql.set(player.getUniqueId(), "deaths", 0, true);
+					sql.set(player.getUniqueId(), "giant_kills", 0, true);
+					sql.set(player.getUniqueId(), "giant_kills_life", 0, true);
+					sql.set(player.getUniqueId(), "giant_kills_life_record", 0, true);
+					sql.set(player.getUniqueId(), "pigman_kills", 0, true);
+					sql.set(player.getUniqueId(), "pigman_kills_life", 0, true);
+					sql.set(player.getUniqueId(), "pigman_kills_life_record", 0, true);
+					sql.set(player.getUniqueId(), "player_kills", 0, true);
+					sql.set(player.getUniqueId(), "player_kills_life", 0, true);
+					sql.set(player.getUniqueId(), "player_kills_life_record", 0, true);
+					sql.set(player.getUniqueId(), "zombie_kills", 0, true);
+					sql.set(player.getUniqueId(), "zombie_kills_life", 0, true);
+					sql.set(player.getUniqueId(), "zombie_kills_life_record", 0, true);
+					sql.set(player.getUniqueId(), "minutes_alive", 0L, true);
+					sql.set(player.getUniqueId(), "minutes_alive_life", 0, true);
+					sql.set(player.getUniqueId(), "minutes_alive_record", 0, true);
 				}
 			}
-			online_players.remove(player.getName());
+			online_players.remove(player.getUniqueId());
 			return true;
 		}
 		return false;
@@ -988,22 +1048,22 @@ public class MyZ extends JavaPlugin {
 				data.setGiantKillsLife(0);
 			}
 			if (sql.isConnected()) {
-				wasNPCKilled = sql.getBoolean(player.getName(), "wasNPCKilled");
-				sql.set(player.getName(), "wasNPCKilled", false, true);
-				sql.set(player.getName(), "deaths", sql.getInt(player.getName(), "deaths") + 1, true);
-				sql.set(player.getName(), "player_kills_life", 0, true);
-				sql.set(player.getName(), "zombie_kills_life", 0, true);
-				sql.set(player.getName(), "pigman_kills_life", 0, true);
-				sql.set(player.getName(), "giant_kills_life", 0, true);
-				sql.set(player.getName(), "minutes_alive_life", 0, true);
+				wasNPCKilled = sql.getBoolean(player.getUniqueId(), "wasNPCKilled");
+				sql.set(player.getUniqueId(), "wasNPCKilled", false, true);
+				sql.set(player.getUniqueId(), "deaths", sql.getInt(player.getUniqueId(), "deaths") + 1, true);
+				sql.set(player.getUniqueId(), "player_kills_life", 0, true);
+				sql.set(player.getUniqueId(), "zombie_kills_life", 0, true);
+				sql.set(player.getUniqueId(), "pigman_kills_life", 0, true);
+				sql.set(player.getUniqueId(), "giant_kills_life", 0, true);
+				sql.set(player.getUniqueId(), "minutes_alive_life", 0, true);
 			}
 			/*
 			 * Kick the player if kickban is enabled and log their time of kick.
 			 */
 			if ((Boolean) Configuration.getConfig(Configuration.KICKBAN) && !wasNPCKilled)
-				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getName(), "rank") <= 0
-						&& !player.getName().equals("MrTeePee")) {
-					flags.add(player.getName());
+				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getUniqueId(), "rank") <= 0
+						&& !player.getUniqueId().equals("MrTeePee")) {
+					flags.add(player.getUniqueId());
 					player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.come_back",
 							Configuration.getConfig(Configuration.KICKBAN_TIME) + ""));
 				}
@@ -1025,7 +1085,7 @@ public class MyZ extends JavaPlugin {
 	 * 
 	 * @return The list of players.
 	 */
-	public List<String> getFlagged() {
+	public List<UUID> getFlagged() {
 		return flags;
 	}
 
@@ -1079,7 +1139,7 @@ public class MyZ extends JavaPlugin {
 					return;
 				}
 			if (sql.isConnected())
-				if (sql.getInt(player.getName(), "rank") < (Integer) Configuration.getSpawn("spawn.numbered_requires_rank")) {
+				if (sql.getInt(player.getUniqueId(), "rank") < (Integer) Configuration.getSpawn("spawn.numbered_requires_rank")) {
 					Messenger.sendConfigMessage(player, "command.spawn.requires_rank");
 					return;
 				}
@@ -1129,7 +1189,7 @@ public class MyZ extends JavaPlugin {
 					if (data != null)
 						data.setZombie(true);
 					if (sql.isConnected())
-						sql.set(player.getName(), "isZombie", true, true);
+						sql.set(player.getUniqueId(), "isZombie", true, true);
 					return;
 				} else if (random.nextInt(20) == 0 && getServer().getPluginManager().getPlugin("LibsDisguises") != null
 						&& getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled()) {
@@ -1138,7 +1198,7 @@ public class MyZ extends JavaPlugin {
 					if (data != null)
 						data.setZombie(true);
 					if (sql.isConnected())
-						sql.set(player.getName(), "isZombie", true, true);
+						sql.set(player.getUniqueId(), "isZombie", true, true);
 					return;
 				}
 
@@ -1146,7 +1206,7 @@ public class MyZ extends JavaPlugin {
 			if (data != null)
 				rank = data.getRank();
 			if (sql.isConnected())
-				rank = sql.getInt(player.getName(), "rank");
+				rank = sql.getInt(player.getUniqueId(), "rank");
 
 			try {
 				player.getInventory().setArmorContents(Configuration.getArmorContents(rank, player));
@@ -1185,7 +1245,7 @@ public class MyZ extends JavaPlugin {
 				if (data != null)
 					data.setThirst(level);
 				if (sql.isConnected())
-					sql.set(player.getName(), "thirst", level, true);
+					sql.set(player.getUniqueId(), "thirst", level, true);
 				player.setLevel(level);
 			}
 		} else {
@@ -1193,7 +1253,7 @@ public class MyZ extends JavaPlugin {
 			if (data != null)
 				data.setThirst(level);
 			if (sql.isConnected())
-				sql.set(player.getName(), "thirst", level, true);
+				sql.set(player.getUniqueId(), "thirst", level, true);
 			player.setLevel(level);
 		}
 	}
@@ -1209,7 +1269,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			player.setLevel(data.getThirst());
 		if (sql.isConnected())
-			player.setLevel(sql.getInt(player.getName(), "thirst"));
+			player.setLevel(sql.getInt(player.getUniqueId(), "thirst"));
 	}
 
 	/**
@@ -1220,16 +1280,16 @@ public class MyZ extends JavaPlugin {
 	 * @param friended
 	 *            The friended player.
 	 */
-	public void addFriend(Player friender, String friended) {
+	public void addFriend(Player friender, UUID friended) {
 		PlayerData data = PlayerData.getDataFor(friender);
-		if (data != null && !data.getFriends().contains(friended)) {
+		if (data != null && !data.getFriends().contains(friended.toString())) {
 			data.addFriend(friended);
-			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", friended));
+			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", getName(friended)));
 		}
-		if (sql.isConnected() && !sql.getStringList(friender.getName(), "friends").contains(friended)) {
-			String current = sql.getString(friender.getName(), "friends");
-			sql.set(friender.getName(), "friends", current + (current.isEmpty() ? "" : ",") + friended, true);
-			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", friended));
+		if (sql.isConnected() && !sql.getStringList(friender.getUniqueId(), "friends").contains(friended.toString())) {
+			String current = sql.getString(friender.getUniqueId(), "friends");
+			sql.set(friender.getUniqueId(), "friends", current + (current.isEmpty() ? "" : ",") + friended.toString(), true);
+			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", getName(friended)));
 		}
 	}
 
@@ -1241,16 +1301,18 @@ public class MyZ extends JavaPlugin {
 	 * @param unfriended
 	 *            The unfriended player.
 	 */
-	public void removeFriend(Player unfriender, String unfriended) {
+	public void removeFriend(Player unfriender, UUID unfriended) {
 		PlayerData data = PlayerData.getDataFor(unfriender);
-		if (data != null && data.getFriends().contains(unfriended)) {
+		if (data != null && data.getFriends().contains(unfriended.toString())) {
 			data.removeFriend(unfriended);
-			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", unfriended));
+			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", getName(unfriended)));
 		}
-		if (sql.isConnected() && sql.getStringList(unfriender.getName(), "friends").contains(unfriended)) {
-			sql.set(unfriender.getName(), "friends", sql.getString(unfriender.getName(), "friends").replaceAll("," + unfriended, "")
-					.replaceAll(unfriended + ",", ""), true);
-			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", unfriended));
+		if (sql.isConnected() && sql.getStringList(unfriender.getUniqueId(), "friends").contains(unfriended.toString())) {
+			sql.set(unfriender.getUniqueId(),
+					"friends",
+					sql.getString(unfriender.getUniqueId(), "friends").replaceAll("," + unfriended.toString(), "")
+							.replaceAll(unfriended.toString() + ",", ""), true);
+			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", getName(unfriended)));
 		}
 	}
 
@@ -1269,22 +1331,22 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
-	 * @see isFriend(String player, String name)
+	 * @see isFriend(UUID player, UUID name)
 	 */
-	public boolean isFriend(Player player, String name) {
-		return isFriend(player.getName(), name);
+	public boolean isFriend(Player player, UUID name) {
+		return isFriend(player.getUniqueId(), name);
 	}
 
 	/**
-	 * Whether or not the name provided is a friend of the given player.
+	 * Whether or not the uuid provided is a friend of the given player.
 	 * 
 	 * @param player
-	 *            The player name.
+	 *            The player uuid.
 	 * @param name
-	 *            The friend name to check.
+	 *            The friend uuid to check.
 	 * @return True if @param name is a friend of @param player.
 	 */
-	public boolean isFriend(String player, String name) {
+	public boolean isFriend(UUID player, UUID name) {
 		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null)
 			return data.isFriend(name);
@@ -1295,10 +1357,10 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
-	 * @see isHealer(Player player)
+	 * @see isHealer(UUID player)
 	 */
 	public boolean isHealer(Player player) {
-		return isHealer(player.getName());
+		return isHealer(player.getUniqueId());
 	}
 
 	/**
@@ -1308,7 +1370,7 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 * @return True if the player is a healer.
 	 */
-	public boolean isHealer(String player) {
+	public boolean isHealer(UUID player) {
 		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null)
 			return data.isHealer();
@@ -1319,10 +1381,10 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
-	 * @see isBandit(Player player)
+	 * @see isBandit(UUID player)
 	 */
 	public boolean isBandit(Player player) {
-		return isBandit(player.getName());
+		return isBandit(player.getUniqueId());
 	}
 
 	/**
@@ -1332,7 +1394,7 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 * @return True if the player is a bandit.
 	 */
-	public boolean isBandit(String player) {
+	public boolean isBandit(UUID player) {
 		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null)
 			return data.isBandit();
@@ -1354,7 +1416,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.getRank();
 		if (sql.isConnected())
-			return sql.getInt(player.getName(), "rank");
+			return sql.getInt(player.getUniqueId(), "rank");
 		return 0;
 	}
 }

@@ -39,7 +39,7 @@ public class EntityHurtPlayer implements Listener {
 		}
 
 		if (e.getDamager() instanceof Player && e.getEntity() instanceof Player)
-			if (MyZ.instance.isFriend(((Player) e.getDamager()).getName(), ((Player) e.getEntity()).getName()))
+			if (MyZ.instance.isFriend(((Player) e.getDamager()).getUniqueId(), ((Player) e.getEntity()).getUniqueId()))
 				e.setCancelled(true);
 	}
 }

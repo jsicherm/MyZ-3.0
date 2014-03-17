@@ -30,7 +30,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class Hologram {
 
-	private static List<Hologram> holograms;
+	private static final List<Hologram> holograms = new ArrayList<Hologram>();;
 	private static final double distance = 0.23;
 	private List<String> lines = new ArrayList<String>();
 	private Map<Integer, Integer> entities = new HashMap<Integer, Integer>();
@@ -39,17 +39,16 @@ public class Hologram {
 
 	public Hologram(String... lines) {
 		this.lines.addAll(Arrays.asList(lines));
-		if (holograms == null)
-			holograms = new ArrayList<Hologram>();
+	}
+
+	public static void removeAll() {
+		for (Hologram h : new ArrayList<Hologram>(holograms))
+			h.destroy();
 	}
 
 	public void show(Location loc, Player... p) {
-		if (showing == true)
-			try {
-				throw new Exception("Is already showing!");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		if (showing)
+			return;
 		Location first = loc.clone().add(0, lines.size() / 2 * distance, 0);
 		for (int i = 0; i < lines.size(); i++) {
 			entities.putAll(showLine(first.clone(), lines.get(i), p));
@@ -62,12 +61,8 @@ public class Hologram {
 	}
 
 	public void destroy() {
-		if (showing == false)
-			try {
-				throw new Exception("Isn't showing!");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		if (!showing)
+			return;
 
 		int[] ints = toInt(entities.keySet());
 		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(ints);
@@ -102,7 +97,8 @@ public class Hologram {
 				PacketPlayOutSpawnEntityLiving packedt = new PacketPlayOutSpawnEntityLiving(horse);
 				PacketPlayOutAttachEntity pa = new PacketPlayOutAttachEntity(0, horse, skull);
 
-				List<Player> players = Arrays.asList(p);
+				List<Player> players = new ArrayList<Player>(Arrays.asList(p));
+				players.remove(following);
 				for (Player player : players) {
 					EntityPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
 					nmsPlayer.playerConnection.sendPacket(packedt);
@@ -116,11 +112,16 @@ public class Hologram {
 		return map;
 	}
 
-	public void follow(Player p) {
-		for (Hologram h : holograms)
-			if (h.following.equals(p))
-				h.interrupt();
+	public void setFollow(Player p) {
 		following = p;
+	}
+
+	public void follow() {
+		if (following == null)
+			return;
+		for (Hologram h : new ArrayList<Hologram>(holograms))
+			if (h.following.equals(following))
+				h.interrupt();
 		holograms.add(this);
 	}
 
@@ -135,7 +136,8 @@ public class Hologram {
 		Hologram holo;
 
 		public HologramRunnable(Hologram holo, Player... players) {
-			this.players = Arrays.asList(players);
+			this.players = new ArrayList<Player>(Arrays.asList(players));
+			this.players.remove(following);
 			this.holo = holo;
 		}
 
@@ -151,17 +153,12 @@ public class Hologram {
 						((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 				}
 			}
-			if (ticks >= 100 || !holo.showing) {
+			if (ticks >= 200 || !holo.showing) {
 				holograms.remove(holo);
-				cancel();
+				following = null;
+				destroy();
 				task.cancel();
 			}
-		}
-
-		@Override
-		public void cancel() {
-			following = null;
-			destroy();
 		}
 	}
 }

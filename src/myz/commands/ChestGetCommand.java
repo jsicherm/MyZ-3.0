@@ -24,7 +24,7 @@ public class ChestGetCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
 			Messenger.sendConfigMessage(sender, "chest.get.click");
-			ChestScanner.getters.add(sender.getName());
+			ChestScanner.getters.add(((Player) sender).getUniqueId());
 		}
 
 		return true;

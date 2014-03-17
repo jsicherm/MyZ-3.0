@@ -74,6 +74,8 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityHuman.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityVillager.class, 0, false));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntitySkeleton.class, 0, false));
+
+		bA();
 	}
 
 	@Override

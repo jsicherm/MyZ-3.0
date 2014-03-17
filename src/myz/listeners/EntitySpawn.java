@@ -69,8 +69,9 @@ public class EntitySpawn implements Listener {
 		if (e.getEntityType() == EntityType.VILLAGER)
 			EntityCreator.overrideVillager(e.getEntity());
 
-		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && e.getSpawnReason() != SpawnReason.CUSTOM
-				&& (Boolean) Configuration.getConfig("mobs.npc.enabled")) {
+		// So rare.
+		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && random.nextDouble() <= 0.1 && random.nextDouble() <= 0.1
+				&& e.getSpawnReason() != SpawnReason.CUSTOM && (Boolean) Configuration.getConfig("mobs.npc.enabled")) {
 			e.setCancelled(true);
 			if (random.nextDouble() <= 0.9)
 				return;
@@ -122,8 +123,8 @@ public class EntitySpawn implements Listener {
 
 		// Make some natural pigmen spawn.
 		if (e.getLocation().getZ() <= (Integer) Configuration.getConfig("mobs.pigman.spawn_z") && type == EntityType.ZOMBIE
-				&& random.nextInt(30) == 1) {
-			EntityCreator.create(e.getLocation(), EntityType.PIG_ZOMBIE, SpawnReason.NATURAL, true);
+				&& random.nextInt(20) == 1) {
+			EntityCreator.create(e.getLocation(), EntityType.PIG_ZOMBIE, SpawnReason.CUSTOM, true);
 			e.setCancelled(true);
 			return;
 		}

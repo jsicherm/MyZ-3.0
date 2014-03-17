@@ -5,6 +5,7 @@ package myz.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import myz.support.MedKit;
 import myz.support.interfacing.Messenger;
@@ -23,7 +24,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class CreateMedKitCommand implements CommandExecutor {
 
-	private Map<String, UnfinishedMedKit> kitCreators = new HashMap<String, UnfinishedMedKit>();
+	private Map<UUID, UnfinishedMedKit> kitCreators = new HashMap<UUID, UnfinishedMedKit>();
 
 	/* (non-Javadoc)
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
@@ -31,7 +32,7 @@ public class CreateMedKitCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!kitCreators.containsKey(sender.getName()))
+			if (!kitCreators.containsKey(((Player) sender).getUniqueId()))
 				if (args.length >= 1) {
 
 					String configID = "", name;
@@ -67,18 +68,18 @@ public class CreateMedKitCommand implements CommandExecutor {
 							configID)));
 					medkit.name = name;
 
-					kitCreators.put(sender.getName(), medkit);
+					kitCreators.put(((Player) sender).getUniqueId(), medkit);
 				} else
 					return false;
 			else {
-				UnfinishedMedKit kit = kitCreators.get(sender.getName());
+				UnfinishedMedKit kit = kitCreators.get(((Player) sender).getUniqueId());
 				ItemStack input = ((Player) sender).getInventory().getItem(0);
 				ItemStack ointment = ((Player) sender).getInventory().getItem(1);
 				ItemStack antiseptic = ((Player) sender).getInventory().getItem(2);
 				ItemStack output = ((Player) sender).getInventory().getItem(3);
 				if (input == null || input.getType() == Material.AIR || output == null || output.getType() == Material.AIR) {
 					sender.sendMessage(ChatColor.RED + "Cancelled.");
-					kitCreators.remove(sender.getName());
+					kitCreators.remove(((Player) sender).getUniqueId());
 					return true;
 				}
 				kit.input = input;
@@ -86,7 +87,7 @@ public class CreateMedKitCommand implements CommandExecutor {
 				kit.antiseptic = antiseptic == null ? 0 : antiseptic.getAmount();
 				kit.output = output;
 				sender.sendMessage(kit.toMedKit().toString());
-				kitCreators.remove(sender.getName());
+				kitCreators.remove(((Player) sender).getUniqueId());
 			}
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");

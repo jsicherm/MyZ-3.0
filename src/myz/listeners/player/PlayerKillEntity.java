@@ -86,12 +86,12 @@ public class PlayerKillEntity implements Listener {
 					data.setZombieKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life",
-						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life") + 1, true);
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills",
-						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills") + 1, true);
-				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "zombie_kills_life_record"))
-					MyZ.instance.getSQLManager().set(playerFor.getName(), "zombie_kills_life_record", amount, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "zombie_kills_life",
+						amount = MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "zombie_kills_life") + 1, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "zombie_kills",
+						MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "zombie_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "zombie_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "zombie_kills_life_record", amount, true);
 			}
 			slug = "zombie";
 			break;
@@ -103,12 +103,12 @@ public class PlayerKillEntity implements Listener {
 					data.setPigmanKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life",
-						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life") + 1, true);
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills",
-						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills") + 1, true);
-				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "pigman_kills_life_record"))
-					MyZ.instance.getSQLManager().set(playerFor.getName(), "pigman_kills_life_record", amount, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "pigman_kills_life",
+						amount = MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "pigman_kills_life") + 1, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "pigman_kills",
+						MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "pigman_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "pigman_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "pigman_kills_life_record", amount, true);
 			}
 			slug = "pigman";
 			break;
@@ -120,12 +120,12 @@ public class PlayerKillEntity implements Listener {
 					data.setGiantKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life",
-						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life") + 1, true);
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills",
-						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills") + 1, true);
-				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "giant_kills_life_record"))
-					MyZ.instance.getSQLManager().set(playerFor.getName(), "giant_kills_life_record", amount, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "giant_kills_life",
+						amount = MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "giant_kills_life") + 1, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "giant_kills",
+						MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "giant_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "giant_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "giant_kills_life_record", amount, true);
 			}
 			slug = "giant";
 			break;
@@ -139,12 +139,12 @@ public class PlayerKillEntity implements Listener {
 					data.setPlayerKillsLifeRecord(amount);
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life",
-						amount = MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life") + 1, true);
-				MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills",
-						MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills") + 1, true);
-				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getName(), "player_kills_life_record"))
-					MyZ.instance.getSQLManager().set(playerFor.getName(), "player_kills_life_record", amount, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "player_kills_life",
+						amount = MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "player_kills_life") + 1, true);
+				MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "player_kills",
+						MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "player_kills") + 1, true);
+				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "player_kills_life_record"))
+					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "player_kills_life_record", amount, true);
 			}
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())

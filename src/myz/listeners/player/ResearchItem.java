@@ -15,7 +15,6 @@ import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,13 +33,13 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class ResearchItem implements Listener {
 
-	private Map<String, UUID> lastDropped = new HashMap<String, UUID>();
+	private Map<UUID, UUID> lastDropped = new HashMap<UUID, UUID>();
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDrop(PlayerDropItemEvent e) {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
-		lastDropped.put(e.getPlayer().getName(), e.getItemDrop().getUniqueId());
+		lastDropped.put(e.getPlayer().getUniqueId(), e.getItemDrop().getUniqueId());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -49,10 +48,10 @@ public class ResearchItem implements Listener {
 			return;
 		if (e.getInventory().getType() == InventoryType.HOPPER)
 			if (lastDropped.containsValue(e.getItem().getUniqueId()))
-				for (String entry : lastDropped.keySet())
+				for (UUID entry : lastDropped.keySet())
 					if (lastDropped.get(entry).equals(e.getItem().getUniqueId())) {
 						lastDropped.remove(entry);
-						Player player = Bukkit.getPlayerExact(entry);
+						Player player = MyZ.instance.getPlayer(entry);
 						e.setCancelled(true);
 						if (player != null) {
 							PlayerData data = PlayerData.getDataFor(player);
@@ -60,7 +59,7 @@ public class ResearchItem implements Listener {
 							if (data != null)
 								rank = data.getRank();
 							if (MyZ.instance.getSQLManager().isConnected())
-								rank = MyZ.instance.getSQLManager().getInt(player.getName(), "rank");
+								rank = MyZ.instance.getSQLManager().getInt(entry, "rank");
 
 							if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH))
 								Messenger.sendConfigMessage(player, "research.rank");
@@ -75,11 +74,8 @@ public class ResearchItem implements Listener {
 									if (data != null)
 										data.setResearchPoints((before = data.getResearchPoints()) + points);
 									if (MyZ.instance.getSQLManager().isConnected())
-										MyZ.instance.getSQLManager()
-												.set(player.getName(),
-														"research",
-														(before = MyZ.instance.getSQLManager().getInt(player.getName(), "research"))
-																+ points, true);
+										MyZ.instance.getSQLManager().set(player.getUniqueId(), "research",
+												(before = MyZ.instance.getSQLManager().getInt(entry, "research")) + points, true);
 									after = before + points;
 									checkRankIncrease(player, before, after, rank);
 									return;
@@ -133,11 +129,11 @@ public class ResearchItem implements Listener {
 						if ((configured = MyZ.instance.getResearchConfig().getItemStack("item." + key + ".item")) != null
 								&& isSimilar(configured, item)) {
 							int points = 0;
-							PlayerData data = PlayerData.getDataFor(e.getWhoClicked().getName());
+							PlayerData data = PlayerData.getDataFor(e.getWhoClicked().getUniqueId());
 							if (data != null)
 								points = data.getResearchPoints();
 							if (MyZ.instance.getSQLManager().isConnected())
-								points = MyZ.instance.getSQLManager().getInt(e.getWhoClicked().getName(), "research");
+								points = MyZ.instance.getSQLManager().getInt(e.getWhoClicked().getUniqueId(), "research");
 
 							if (points > MyZ.instance.getResearchConfig().getInt("item." + key + ".cost")) {
 								if (e.getWhoClicked().getInventory().firstEmpty() >= 0)
@@ -148,7 +144,7 @@ public class ResearchItem implements Listener {
 								if (data != null)
 									data.setResearchPoints(points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost"));
 								if (MyZ.instance.getSQLManager().isConnected())
-									MyZ.instance.getSQLManager().set(e.getWhoClicked().getName(), "research",
+									MyZ.instance.getSQLManager().set(e.getWhoClicked().getUniqueId(), "research",
 											points - MyZ.instance.getResearchConfig().getInt("item." + key + ".cost"), true);
 
 								e.getWhoClicked().closeInventory();

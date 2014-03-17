@@ -5,14 +5,13 @@ package myz.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,12 +38,12 @@ public class FriendCommand implements CommandExecutor, TabCompleter {
 				if (name.equals(((Player) sender).getName()))
 					return true;
 
-				OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-				if (player != null && player.hasPlayedBefore()) {
-					if (MyZ.instance.isFriend((Player) sender, name))
-						MyZ.instance.removeFriend((Player) sender, name);
+				UUID uid = MyZ.instance.getUID(name);
+				if (uid != null) {
+					if (MyZ.instance.isFriend((Player) sender, uid))
+						MyZ.instance.removeFriend((Player) sender, uid);
 					else
-						MyZ.instance.addFriend((Player) sender, name);
+						MyZ.instance.addFriend((Player) sender, uid);
 				} else
 					sender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "command.friend.non_exist", name));
 			} else

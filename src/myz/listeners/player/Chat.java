@@ -55,8 +55,9 @@ public class Chat implements Listener {
 		if (radio_frequency == -1) {
 			if (didHandlePrivateChat(e)) {
 				Hologram hologram = new Hologram(e.getMessage());
+				hologram.setFollow(e.getPlayer());
 				hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-				hologram.follow(e.getPlayer());
+				hologram.follow();
 				return;
 			}
 			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
@@ -74,8 +75,9 @@ public class Chat implements Listener {
 					e.getRecipients().add(player_on_server);
 
 		Hologram hologram = new Hologram(e.getMessage());
+		hologram.setFollow(e.getPlayer());
 		hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-		hologram.follow(e.getPlayer());
+		hologram.follow();
 
 		// Make this player more visible to zombies.
 		PathingSupport.elevatePlayer(player, 10);
@@ -144,7 +146,7 @@ public class Chat implements Listener {
 				e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
 						+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
 				e.getRecipients().clear();
-				e.getRecipients().addAll(MyZ.instance.getSQLManager().getOnlinePlayersInClan(e.getPlayer().getName()));
+				e.getRecipients().addAll(MyZ.instance.getSQLManager().getOnlinePlayersInClan(e.getPlayer().getUniqueId()));
 				return true;
 			}
 		}

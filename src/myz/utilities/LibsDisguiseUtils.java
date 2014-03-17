@@ -3,11 +3,17 @@
  */
 package myz.utilities;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import me.libraryaddict.disguise.disguisetypes.PlayerDisguise;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -16,6 +22,8 @@ import org.bukkit.entity.Player;
  * 
  */
 public class LibsDisguiseUtils {
+
+	private static final Map<LivingEntity, String> packets = new HashMap<LivingEntity, String>();
 
 	/**
 	 * Make sure players can see disguises, including their own.
@@ -66,9 +74,24 @@ public class LibsDisguiseUtils {
 	 */
 	public static void becomeNPC(LivingEntity entity, String name) {
 		if (entity != null)
-			DisguiseAPI.disguiseToAll(entity, new PlayerDisguise(name + "")); // Null-buster
-																				// 3000
-																				// (patent
-																				// pending)
+			packets.put(entity, name);
+	}
+
+	/**
+	 * Update all the stashed entities to become NPCs.
+	 */
+	public static void beNPCs() {
+		if (packets.isEmpty() || Bukkit.getOnlinePlayers() == null)
+			return;
+		Set<LivingEntity> useless = new HashSet<LivingEntity>();
+		for (LivingEntity entity : packets.keySet()) {
+			if (entity == null || entity.isDead()) {
+				useless.add(entity);
+				continue;
+			}
+			DisguiseAPI.disguiseToAll(entity, new PlayerDisguise(packets.get(entity) + ""));
+		}
+		for (LivingEntity entity : useless)
+			packets.remove(entity);
 	}
 }

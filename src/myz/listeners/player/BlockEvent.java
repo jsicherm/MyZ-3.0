@@ -9,6 +9,7 @@ import myz.chests.ChestManager;
 import myz.commands.BlockCommand;
 import myz.support.Teleport;
 import myz.support.interfacing.Configuration;
+import myz.utilities.Utils;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,8 +37,8 @@ public class BlockEvent implements Listener {
 			return;
 		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
 			return;
-		if (BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
-			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnPlace(e.getBlockPlaced(), e.getPlayer());
+		if (BlockCommand.blockChangers.containsKey(e.getPlayer().getUniqueId())) {
+			BlockCommand.blockChangers.get(e.getPlayer().getUniqueId()).doOnPlace(e.getBlockPlaced(), e.getPlayer());
 			e.setCancelled(true);
 			return;
 		}
@@ -48,8 +49,8 @@ public class BlockEvent implements Listener {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
 		Location grave;
-		if (e.getAction() == Action.LEFT_CLICK_BLOCK && BlockCommand.blockChangers.containsKey(e.getPlayer().getName())) {
-			BlockCommand.blockChangers.get(e.getPlayer().getName()).doOnHit(e.getItem(), e.getClickedBlock(), e.getPlayer());
+		if (e.getAction() == Action.LEFT_CLICK_BLOCK && BlockCommand.blockChangers.containsKey(e.getPlayer().getUniqueId())) {
+			BlockCommand.blockChangers.get(e.getPlayer().getUniqueId()).doOnHit(e.getItem(), e.getClickedBlock(), e.getPlayer());
 			e.setCancelled(true);
 		} else if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock().getType() == Material.CHEST
 				&& ChestManager.isMyZChest(e.getClickedBlock().getLocation())) {

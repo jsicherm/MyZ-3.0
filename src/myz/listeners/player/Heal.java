@@ -6,6 +6,7 @@ package myz.listeners.player;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.MedKit;
@@ -35,7 +36,7 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class Heal implements Listener {
 
-	private Map<String, Long> lastHeals = new HashMap<String, Long>();
+	private Map<UUID, Long> lastHeals = new HashMap<UUID, Long>();
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onRightClick(PlayerInteractEvent e) {
@@ -136,12 +137,12 @@ public class Heal implements Listener {
 		if (player.getGameMode() != GameMode.CREATIVE && item != null) {
 			MedKit kit;
 			if ((kit = MedKit.getMedKitFor(item)) != null) {
-				if (lastHeals.containsKey(healer.getName())
-						&& (now - lastHeals.get(healer.getName())) / 1000 < (Integer) Configuration.getConfig("heal.delay_seconds"))
+				if (lastHeals.containsKey(healer.getUniqueId())
+						&& (now - lastHeals.get(healer.getUniqueId())) / 1000 < (Integer) Configuration.getConfig("heal.delay_seconds"))
 					Messenger.sendMessage(
 							healer,
 							Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait",
-									(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getName()))
+									(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getUniqueId()))
 											/ 1000 + ""));
 				else {
 					MyZ.instance.stopBleeding(player, true);
@@ -175,13 +176,13 @@ public class Heal implements Listener {
 				&& item != null
 				&& item.isSimilar((ItemStack) Configuration.getConfig("heal.bandage") != null ? (ItemStack) Configuration
 						.getConfig("heal.bandage") : new ItemStack(Material.PAPER))) {
-			if (lastHeals.containsKey(healer.getName())
-					&& (now - lastHeals.get(healer.getName())) / 1000 < (Integer) Configuration.getConfig("heal.delay_seconds"))
+			if (lastHeals.containsKey(healer.getUniqueId())
+					&& (now - lastHeals.get(healer.getUniqueId())) / 1000 < (Integer) Configuration.getConfig("heal.delay_seconds"))
 				Messenger.sendMessage(
 						healer,
 						Messenger.getConfigMessage(Localizer.getLocale(player), "heal.wait",
-								(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getName())) / 1000
-										+ ""));
+								(Integer) Configuration.getConfig("heal.delay_seconds") - (now - lastHeals.get(healer.getUniqueId()))
+										/ 1000 + ""));
 			else {
 				MyZ.instance.stopBleeding(player, true);
 				if (player.getHealth() + (Integer) Configuration.getConfig("heal.bandage_heal_amount") <= player.getMaxHealth()) {
@@ -207,15 +208,15 @@ public class Heal implements Listener {
 		}
 
 		if (flag) {
-			lastHeals.put(healer.getName(), now);
+			lastHeals.put(healer.getUniqueId(), now);
 
 			PlayerData data = PlayerData.getDataFor(healer);
 			int amount = 0;
 			if (data != null)
 				data.setHealsLife(amount = data.getHealsLife() + 1);
 			if (MyZ.instance.getSQLManager().isConnected())
-				MyZ.instance.getSQLManager().set(healer.getName(), "heals_life",
-						amount = MyZ.instance.getSQLManager().getInt(healer.getName(), "heals_life") + 1, true);
+				MyZ.instance.getSQLManager().set(healer.getUniqueId(), "heals_life",
+						amount = MyZ.instance.getSQLManager().getInt(healer.getUniqueId(), "heals_life") + 1, true);
 			Messenger.sendMessage(healer, Messenger.getConfigMessage(Localizer.getLocale(player), "heal.amount", amount + ""));
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())

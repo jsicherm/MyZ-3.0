@@ -51,9 +51,9 @@ public class CancelPlayerEvents implements Listener {
 
 	private void grapple(Player puller, Entity pulled, Location to) {
 		if (puller.equals(pulled))
-			Utils.pullTo(puller, to);
+			Utils.pullTo(puller, to, false);
 		else
-			Utils.pullTo(pulled, to);
+			Utils.pullTo(pulled, to, false);
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)

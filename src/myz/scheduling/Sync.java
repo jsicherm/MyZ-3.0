@@ -5,12 +5,14 @@ package myz.scheduling;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.chests.ChestManager;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
+import myz.utilities.LibsDisguiseUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,13 +30,13 @@ import org.bukkit.entity.Player;
  */
 public class Sync implements Runnable {
 
-	public static Map<String, Integer> safeLogoutPlayers = new HashMap<String, Integer>();
+	public static Map<UUID, Integer> safeLogoutPlayers = new HashMap<UUID, Integer>();
 	private static long ticks = 0;
 
 	@Override
 	public void run() {
-		for (String player : getSafeLogoutPlayers().keySet()) {
-			Player the_player = Bukkit.getPlayerExact(player);
+		for (UUID player : getSafeLogoutPlayers().keySet()) {
+			Player the_player = MyZ.instance.getPlayer(player);
 			if (the_player == null) {
 				safeLogoutPlayers.remove(player);
 				continue;
@@ -55,16 +57,20 @@ public class Sync implements Runnable {
 				if (ticks >= MyZ.instance.getBlocksConfig().getLong(location + ".time"))
 					actOnBlock(location, true);
 
-		if (ticks % (Integer) Configuration.getConfig(Configuration.CHEST_RESPAWN) == 0) {
-			Messenger.sendConsoleMessage("&eMyZ respawned chests as scheduled.");
+		if (ticks % (Integer) Configuration.getConfig(Configuration.CHEST_RESPAWN) == 0)
 			ChestManager.respawnAll(false);
-		}
+
+		if (ticks % 10 == 0 && MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
+				&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled())
+			LibsDisguiseUtils.beNPCs();
 
 		if (ticks == Long.MAX_VALUE || ticks == 0) {
 			ticks = 0;
 
-			// Restore all blocks because we're wrapping around after 2^63 -1
-			// seconds and we would lose track OR we're at 0 because we might
+			// Restore all blocks because we're wrapping around after 2^63
+			// -1
+			// seconds and we would lose track OR we're at 0 because we
+			// might
 			// have restarted the server.
 			wipeBlocks();
 		}
@@ -121,7 +127,7 @@ public class Sync implements Runnable {
 	 *            The player.
 	 */
 	public static void removeSafeLogoutPlayer(Player player) {
-		safeLogoutPlayers.remove(player.getName());
+		safeLogoutPlayers.remove(player.getUniqueId());
 	}
 
 	/**
@@ -131,7 +137,7 @@ public class Sync implements Runnable {
 	 *            The player.
 	 */
 	public static void addSafeLogoutPlayer(Player player) {
-		safeLogoutPlayers.put(player.getName(), (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME));
+		safeLogoutPlayers.put(player.getUniqueId(), (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME));
 	}
 
 	/**
@@ -140,7 +146,7 @@ public class Sync implements Runnable {
 	 * @param players
 	 *            The list of players.
 	 */
-	public static void setSafeLogoutPlayers(Map<String, Integer> players) {
+	public static void setSafeLogoutPlayers(Map<UUID, Integer> players) {
 		safeLogoutPlayers = players;
 	}
 
@@ -149,8 +155,8 @@ public class Sync implements Runnable {
 	 * 
 	 * @return The list of players that are safely logging out.
 	 */
-	public static HashMap<String, Integer> getSafeLogoutPlayers() {
-		return new HashMap<String, Integer>(safeLogoutPlayers);
+	public static HashMap<UUID, Integer> getSafeLogoutPlayers() {
+		return new HashMap<UUID, Integer>(safeLogoutPlayers);
 	}
 
 	/**

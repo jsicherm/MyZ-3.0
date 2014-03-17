@@ -5,6 +5,7 @@ package myz.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.PlayerData;
@@ -12,7 +13,6 @@ import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -55,8 +55,8 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 				player += args[i] + " ";
 			player = player.trim();
 
-			OfflinePlayer offline_player = Bukkit.getOfflinePlayer(player);
-			if (offline_player == null || !offline_player.hasPlayedBefore()) {
+			UUID uid = MyZ.instance.getUID(player);
+			if (uid != null) {
 				if (sender instanceof Player)
 					Messenger.sendConfigMessage(sender, "command.setrank.failure");
 				else
@@ -64,11 +64,11 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 				return true;
 			}
 
-			PlayerData data = PlayerData.getDataFor(player);
+			PlayerData data = PlayerData.getDataFor(uid);
 			if (data != null)
 				data.setRank(rank);
 			if (MyZ.instance.getSQLManager().isConnected())
-				MyZ.instance.getSQLManager().set(player, "rank", rank, true);
+				MyZ.instance.getSQLManager().set(uid, "rank", rank, true);
 			if (sender instanceof Player)
 				Messenger.sendConfigMessage(sender, "command.setrank.success");
 			else

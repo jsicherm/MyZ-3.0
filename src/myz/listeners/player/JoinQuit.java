@@ -5,6 +5,7 @@ package myz.listeners.player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.mobs.CustomEntityPlayer;
@@ -14,7 +15,7 @@ import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Utils;
 
-import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,8 +36,8 @@ public class JoinQuit implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPreJoin(AsyncPlayerPreLoginEvent e) {
 		if ((Boolean) Configuration.getConfig(Configuration.PRELOGIN)) {
-			String name = e.getName();
-			PlayerData data = PlayerData.getDataFor(name);
+			UUID uid = MyZ.instance.getUID(e.getName());
+			PlayerData data = PlayerData.getDataFor(uid);
 			/*
 			 * Check if the player is still banned against the playerdata and sql.
 			 */
@@ -45,7 +46,7 @@ public class JoinQuit implements Listener {
 			if (data != null)
 				timeOfKickExpiry = data.getTimeOfKickban() + (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000;
 			if (MyZ.instance.getSQLManager().isConnected())
-				timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(name, "timeOfKickban")
+				timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(uid, "timeOfKickban")
 						+ (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000;
 
 			if (timeOfKickExpiry >= now)
@@ -56,8 +57,11 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onJoin(PlayerJoinEvent e) {
+		MyZ.instance.map(e.getPlayer());
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
 			return;
+		if (MyZ.alertOps && e.getPlayer().isOp())
+			Messenger.sendMessage(e.getPlayer(), ChatColor.YELLOW + "Visit http://my-z.org/request.php to get a free MyZ MySQL database.");
 		doJoin(e);
 	}
 
@@ -84,7 +88,7 @@ public class JoinQuit implements Listener {
 		// Ensure our NPC doesn't remain on when we log in.
 		CustomEntityPlayer ourNPC = null;
 		for (CustomEntityPlayer npc : MyZ.instance.getNPCs())
-			if (npc.getName().equals(player.getName())) {
+			if (npc.getUniqueID().equals(player.getUniqueId())) {
 				ourNPC = npc;
 				break;
 			}
@@ -100,19 +104,23 @@ public class JoinQuit implements Listener {
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled()) {
 			KittehTag.colorName(player);
 
-			List<String> friends = new ArrayList<String>();
+			List<UUID> friends = new ArrayList<UUID>();
+			List<String> stringFriends = new ArrayList<String>();
+
 			if (data != null)
 				friends = data.getFriends();
 			if (MyZ.instance.getSQLManager().isConnected())
-				friends = MyZ.instance.getSQLManager().getStringList(player.getName(), "friends");
-			for (String friend : friends) {
-				Player online_friend = Bukkit.getPlayer(friend);
-				if (online_friend != null && online_friend.isOnline())
+				stringFriends = MyZ.instance.getSQLManager().getStringList(player.getUniqueId(), "friends");
+			for (String s : stringFriends)
+				friends.add(UUID.fromString(s));
+			for (UUID friend : friends) {
+				Player online_friend = MyZ.instance.getPlayer(friend);
+				if (online_friend != null)
 					KittehTag.colorName(online_friend);
 			}
 		}
 
-		MyZ.instance.getFlagged().remove(player.getName());
+		MyZ.instance.getFlagged().remove(player.getUniqueId());
 
 		if (Utils.packets != null)
 			for (Object packet : Utils.packets.keySet())
@@ -131,7 +139,7 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onLeave(PlayerQuitEvent e) {
-		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getName()))) {
+		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()))) {
 			e.setQuitMessage(null);
 
 			if (e.getPlayer().getVehicle() != null)
@@ -147,9 +155,9 @@ public class JoinQuit implements Listener {
 				}
 
 			// Spawn our NPC unless we were flagged.
-			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getName()))
+			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()))
 				Utils.spawnNPC(e.getPlayer());
-			MyZ.instance.getFlagged().remove(e.getPlayer().getName());
+			MyZ.instance.getFlagged().remove(e.getPlayer().getUniqueId());
 		}
 	}
 }

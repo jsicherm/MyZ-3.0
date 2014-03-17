@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.MedKit;
@@ -46,11 +47,11 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class ChestScanner implements Listener {
 
-	private static Map<String, MaxMin> scanners = new HashMap<String, MaxMin>();
-	public static List<String> getters = new ArrayList<String>();
-	public static Map<String, String> setters = new HashMap<String, String>();
-	private static Map<String, LootsetCreate> lootCreators = new HashMap<String, LootsetCreate>();
-	private static Map<String, String> looters = new HashMap<String, String>();
+	private static Map<UUID, MaxMin> scanners = new HashMap<UUID, MaxMin>();
+	public static List<UUID> getters = new ArrayList<UUID>();
+	public static Map<UUID, String> setters = new HashMap<UUID, String>();
+	private static Map<UUID, LootsetCreate> lootCreators = new HashMap<UUID, LootsetCreate>();
+	private static Map<UUID, String> looters = new HashMap<UUID, String>();
 
 	private class LootsetCreate {
 		private final String name;
@@ -69,7 +70,7 @@ public class ChestScanner implements Listener {
 	 *            The player to initialize for.
 	 */
 	public static void initialize(Player playerFor) {
-		scanners.put(playerFor.getName(), new MaxMin());
+		scanners.put(playerFor.getUniqueId(), new MaxMin());
 		Messenger.sendConfigMessage(playerFor, "chest.set.begin");
 		Messenger.sendConfigMessage(playerFor, "chest.set.coordinate1");
 	}
@@ -83,18 +84,18 @@ public class ChestScanner implements Listener {
 	 *            The name of the lootset.
 	 */
 	public static void addLooter(Player player, String lootset) {
-		looters.put(player.getName(), lootset);
+		looters.put(player.getUniqueId(), lootset);
 		Messenger.sendConfigMessage(player, "loot.set.info");
 	}
 
 	@EventHandler
 	private void onChat(AsyncPlayerChatEvent e) {
-		if (looters.containsKey(e.getPlayer().getName())) {
+		if (looters.containsKey(e.getPlayer().getUniqueId())) {
 			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
-			lootCreators.put(e.getPlayer().getName(), new LootsetCreate(looters.get(e.getPlayer().getName())));
-			looters.remove(e.getPlayer().getName());
+			lootCreators.put(e.getPlayer().getUniqueId(), new LootsetCreate(looters.get(e.getPlayer().getUniqueId())));
+			looters.remove(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
-		} else if (lootCreators.containsKey(e.getPlayer().getName())) {
+		} else if (lootCreators.containsKey(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 			int percent = 0;
 			try {
@@ -103,9 +104,9 @@ public class ChestScanner implements Listener {
 					percent = 100;
 			} catch (Exception exc) {
 			}
-			Messenger.sendMessage(e.getPlayer(), "&e" + Utils.getNameOf(lootCreators.get(e.getPlayer().getName()).newest) + ": &a"
+			Messenger.sendMessage(e.getPlayer(), "&e" + Utils.getNameOf(lootCreators.get(e.getPlayer().getUniqueId()).newest) + ": &a"
 					+ percent + "%");
-			lootCreators.get(e.getPlayer().getName()).spawnable.put(lootCreators.get(e.getPlayer().getName()).newest, percent);
+			lootCreators.get(e.getPlayer().getUniqueId()).spawnable.put(lootCreators.get(e.getPlayer().getUniqueId()).newest, percent);
 			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
 		}
 	}
@@ -134,8 +135,8 @@ public class ChestScanner implements Listener {
 		replaceMedkits(e.getInventory(), false);
 
 		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9
-				&& lootCreators.containsKey(e.getPlayer().getName())) {
-			LootsetCreate lootset = lootCreators.get(e.getPlayer().getName());
+				&& lootCreators.containsKey(e.getPlayer().getUniqueId())) {
+			LootsetCreate lootset = lootCreators.get(e.getPlayer().getUniqueId());
 			for (ItemStack item : e.getInventory().getContents())
 				if (item != null) {
 					lootset.newest = item;
@@ -146,16 +147,16 @@ public class ChestScanner implements Listener {
 			Configuration.setLootset(lootset.name, lootset.spawnable);
 			for (ItemStack item : lootset.spawnable.keySet())
 				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
-			lootCreators.remove(e.getPlayer().getName());
+			lootCreators.remove(e.getPlayer().getUniqueId());
 		} else if (e.getInventory().getType() == InventoryType.CHEST && (Boolean) Configuration.getConfig("chest.break.on_close"))
 			ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
 	}
 
 	@EventHandler
 	private void onClick(PlayerInteractEvent e) {
-		if (scanners.containsKey(e.getPlayer().getName())) {
+		if (scanners.containsKey(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
-			MaxMin mm = scanners.get(e.getPlayer().getName());
+			MaxMin mm = scanners.get(e.getPlayer().getUniqueId());
 			if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
 				if (!mm.hasSetCoord1()) {
 					mm.x1 = e.getClickedBlock().getX();
@@ -164,33 +165,33 @@ public class ChestScanner implements Listener {
 				} else {
 					mm.x2 = e.getClickedBlock().getX();
 					mm.z2 = e.getClickedBlock().getZ();
-					scanners.remove(e.getPlayer().getName());
+					scanners.remove(e.getPlayer().getUniqueId());
 					beginScanning(e.getPlayer(), mm);
 				}
-		} else if (setters.containsKey(e.getPlayer().getName())) {
+		} else if (setters.containsKey(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 			Location inLoc = e.getClickedBlock().getLocation();
 			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
 			if (e.getClickedBlock().getType() != Material.CHEST) {
 				Messenger.sendConfigMessage(e.getPlayer(), "chest.set.nonchest");
-				setters.remove(e.getPlayer().getName());
+				setters.remove(e.getPlayer().getUniqueId());
 				return;
 			}
 			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
 			location += "," + chestObject.getFacing().toString();
 
-			Configuration.setChest(location, setters.get(e.getPlayer().getName()));
+			Configuration.setChest(location, setters.get(e.getPlayer().getUniqueId()));
 			String slug = "&4N/A";
-			if (setters.get(e.getPlayer().getName()) != null) {
-				slug = setters.get(e.getPlayer().getName());
+			if (setters.get(e.getPlayer().getUniqueId()) != null) {
+				slug = setters.get(e.getPlayer().getUniqueId());
 
 				nameChest(e.getClickedBlock(), slug);
 			}
 			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.set.typeis", slug));
-			setters.remove(e.getPlayer().getName());
-		} else if (getters.contains(e.getPlayer().getName())) {
+			setters.remove(e.getPlayer().getUniqueId());
+		} else if (getters.contains(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
-			getters.remove(e.getPlayer().getName());
+			getters.remove(e.getPlayer().getUniqueId());
 			Location inLoc = e.getClickedBlock().getLocation();
 			String location = inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
 			if (e.getClickedBlock().getType() != Material.CHEST) {

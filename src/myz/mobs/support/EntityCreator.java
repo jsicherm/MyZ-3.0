@@ -268,7 +268,7 @@ public class EntityCreator {
 			Potion strength = new Potion(PotionType.STRENGTH);
 			Potion regen = new Potion(PotionType.REGEN);
 			org.bukkit.inventory.ItemStack sword = new org.bukkit.inventory.ItemStack(Material.STONE_SWORD);
-			sword.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+			sword.addEnchantment(Enchantment.DAMAGE_ALL, 3);
 
 			switch (((Villager) entity).getProfession()) {
 			case BLACKSMITH:

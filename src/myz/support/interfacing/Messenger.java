@@ -51,9 +51,9 @@ public class Messenger {
 		}
 
 		if (MyZ.instance.getSQLManager().isConnected()) {
-			msg = msg.replaceAll("%CLAN%", MyZ.instance.getSQLManager().getClan(player.getName()));
-			msg = msg.replaceAll("%RANK%", "" + MyZ.instance.getSQLManager().getInt(player.getName(), "rank"));
-			msg = msg.replaceAll("%RESEARCH%", "" + MyZ.instance.getSQLManager().getInt(player.getName(), "research"));
+			msg = msg.replaceAll("%CLAN%", MyZ.instance.getSQLManager().getClan(player.getUniqueId()));
+			msg = msg.replaceAll("%RANK%", "" + MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "rank"));
+			msg = msg.replaceAll("%RESEARCH%", "" + MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "research"));
 		}
 
 		msg = msg.replaceAll("%NAME%", player.getName());
