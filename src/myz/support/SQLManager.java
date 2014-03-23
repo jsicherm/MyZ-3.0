@@ -14,6 +14,7 @@ import java.util.UUID;
 import myz.MyZ;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
+import myz.utilities.VaultUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -120,8 +121,21 @@ public class SQLManager {
 			return;
 		try {
 			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(40) PRIMARY KEY, name VARCHAR(17) NOT NULL DEFAULT 'Guest', player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends TEXT NOT NULL DEFAULT '', heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0, research INT UNSIGNED NOT NULL DEFAULT 0, isZombie TINYINT(1) NOT NULL DEFAULT 0, legBroken TINYINT(1) NOT NULL DEFAULT 0)");
+			updateRanks();
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
+		}
+	}
+
+	public void updateRanks() {
+		try {
+			if (MyZ.vault)
+				for (UUID uid : getKeys()) {
+					VaultUtils.permission.playerAdd((String) null, MyZ.instance.getName(uid), "MyZ.rank." + getInt(uid, "rank"));
+				}
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.BLUE + "Unable to execute MySQL setup command. This may not be an error: "
+					+ e.getMessage());
 		}
 	}
 
@@ -275,6 +289,11 @@ public class SQLManager {
 	 *            wasn't updated aSynchronously.
 	 */
 	public void set(final UUID name, final String field, final Object value, boolean aSync, boolean forcingaSync) {
+		if ("rank".equals(field)) {
+			Player p = MyZ.instance.getPlayer(name);
+			if (p != null && MyZ.vault)
+				VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + value);
+		}
 		if (aSync) {
 			// Make sure we update our cached values when we set new ones. Do it
 			// before we execute the query in case of async demands.
@@ -385,24 +404,51 @@ public class SQLManager {
 				cachedIntegerValues.put(name, received);
 			} else
 				// The player had the key already so let's return it.
-				return cachedIntegerValues.get(name).get(field);
+				getint = cachedIntegerValues.get(name).get(field);
 		}
 
-		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
-			if (rs.next())
-				getint = rs.getInt(field);
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + name.toString() + "." + field
-					+ ": " + e.getMessage());
-			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
-			connect();
+		if (getint == 0) {
+			try {
+				ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
+				if (rs.next())
+					getint = rs.getInt(field);
+			} catch (Exception e) {
+				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + name.toString() + "." + field
+						+ ": " + e.getMessage());
+				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+				connect();
+			}
+
+			// Update the keyset because we don't have the current value.
+			Map<String, Integer> received = new HashMap<String, Integer>(cachedIntegerValues.get(name));
+			received.put(field, getint);
+			cachedIntegerValues.put(name, received);
 		}
 
-		// Update the keyset because we don't have the current value.
-		Map<String, Integer> received = new HashMap<String, Integer>(cachedIntegerValues.get(name));
-		received.put(field, getint);
-		cachedIntegerValues.put(name, received);
+		if ("rank".equals(field)) {
+			int rank = 0;
+			if (MyZ.vault) {
+				Player p = MyZ.instance.getPlayer(name);
+				if (p == null) { return getint; }
+				if (p.isOp()) { return 100; }
+				for (int i = 0; i <= 100; i++) {
+					if (p.hasPermission("MyZ.rank." + i)) {
+						rank = i;
+					}
+				}
+				if (rank < getint) {
+					if (MyZ.vault) {
+						VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + getint);
+					}
+					return getint;
+				} else if (rank > getint) {
+					this.set(name, field, rank, true);
+				}
+			} else {
+				rank = getint;
+			}
+			return rank;
+		}
 
 		return getint;
 	}

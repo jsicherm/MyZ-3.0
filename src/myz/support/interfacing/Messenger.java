@@ -5,6 +5,7 @@ package myz.support.interfacing;
 
 import myz.MyZ;
 import myz.support.PlayerData;
+import myz.utilities.VaultUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -59,6 +60,8 @@ public class Messenger {
 		msg = msg.replaceAll("%NAME%", player.getName());
 		msg = msg.replaceAll("%THIRST%", "" + player.getLevel());
 		msg = msg.replaceAll("%HEALTH%", "" + (int) player.getHealth());
+		if (MyZ.vault)
+			msg = msg.replaceAll("%GROUP%", VaultUtils.permission.getPrimaryGroup(player));
 
 		return msg;
 	}

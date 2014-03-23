@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import myz.MyZ;
+import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Messenger;
 import net.minecraft.server.v1_7_R1.EntityHorse;
 import net.minecraft.server.v1_7_R1.EntityPlayer;
 import net.minecraft.server.v1_7_R1.EntityWitherSkull;
@@ -49,15 +51,23 @@ public class Hologram {
 	public void show(Location loc, Player... p) {
 		if (showing)
 			return;
-		Location first = loc.clone().add(0, lines.size() / 2 * distance, 0);
-		for (int i = 0; i < lines.size(); i++) {
-			entities.putAll(showLine(first.clone(), lines.get(i), p));
-			first.subtract(0, distance, 0);
-		}
-		showing = true;
 
-		HologramRunnable runnable = new HologramRunnable(this, p);
-		runnable.task = MyZ.instance.getServer().getScheduler().runTaskTimerAsynchronously(MyZ.instance, runnable, 0, 1);
+		if ((Boolean) Configuration.getConfig("hologram.enabled")) {
+			showing = true;
+			Location first = loc.clone().add(0, lines.size() / 2 * distance, 0);
+			for (int i = 0; i < lines.size(); i++) {
+				entities.putAll(showLine(first.clone(), lines.get(i), p));
+				first.subtract(0, distance, 0);
+			}
+
+			HologramRunnable runnable = new HologramRunnable(this, p);
+			runnable.task = MyZ.instance.getServer().getScheduler().runTaskTimerAsynchronously(MyZ.instance, runnable, 0, 1);
+		} else {
+			for (Player ps : p) {
+				for (String s : lines)
+					Messenger.sendMessage(ps, s);
+			}
+		}
 	}
 
 	public void destroy() {
@@ -153,7 +163,7 @@ public class Hologram {
 						((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 				}
 			}
-			if (ticks >= 200 || !holo.showing) {
+			if (ticks >= (Integer) Configuration.getConfig("hologram.showtime") * 20 || !holo.showing) {
 				holograms.remove(holo);
 				following = null;
 				destroy();

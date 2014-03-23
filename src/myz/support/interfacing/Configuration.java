@@ -124,6 +124,9 @@ public class Configuration {
 		configEntries.put(KICKBAN, true);
 		configEntries.put(KICKBAN_TIME, 30);
 
+		configEntries.put("hologram.showtime", 10);
+		configEntries.put("hologram.enabled", true);
+
 		configEntries.put("damage.bleed_damage", 1);
 		configEntries.put("damage.bleed_damage_frequency", 60);
 		configEntries.put("damage.poison_damage", 1);

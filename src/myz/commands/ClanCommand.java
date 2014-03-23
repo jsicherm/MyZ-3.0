@@ -31,12 +31,12 @@ public class ClanCommand implements CommandExecutor {
 			int online = 1, total = 1;
 			if (data != null) {
 				clan = data.getClan();
-				online = data.getOnlinePlayersInClan().size();
+				online = data.getOnlinePlayersInClan().size() - 1;
 				total = data.getNumberInClan();
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
 				clan = MyZ.instance.getSQLManager().getClan(((Player) sender).getUniqueId());
-				online = MyZ.instance.getSQLManager().getOnlinePlayersInClan(((Player) sender).getUniqueId()).size();
+				online = MyZ.instance.getSQLManager().getOnlinePlayersInClan(((Player) sender).getUniqueId()).size() - 1;
 				total = MyZ.instance.getSQLManager().getNumberInClan(((Player) sender).getUniqueId());
 			}
 			if (clan == null || clan.isEmpty())

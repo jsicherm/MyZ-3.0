@@ -16,7 +16,7 @@ commands:
   blockallow:
     description: Allow breaking/placing of blocks.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
+
   blocks:
     description: Block help.
   friend:
@@ -26,19 +26,15 @@ commands:
   setlobby:
     description: Set the lobby region.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
   addspawn:
     description: Add a spawnpoint.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
   configure:
     description: Get the configuration for an item.
     permission: MyZ.*
-    permission-message: You don't have permission.
   removespawn:
     description: Remove a spawnpoint.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
     aliases: [delspawn]
   spawnpoints:
     description: List spawnpoints.
@@ -52,23 +48,19 @@ commands:
   savemedkit:
     description: Save a MedKit.
     permission: MyZ.kit_admin
-    permission-message: You don't have permission.
     aliases: [setmedkit, medkit]
     usage: /<command> <name>
   savekit:
     description: Save a starting kit.
     permission: MyZ.kit_admin
-    permission-message: You don't have permission.
     aliases: [setkit]
   saverank:
     description: Set a chat prefix.
     permission: MyZ.admin
-    permission-message: You don't have permission.
     aliases: [setrankprefix]
   setrank:
     description: Set a player's rank.
     permission: MyZ.admin
-    permission-message: You don't have permission.
     aliases: [setplayerrank]
   joinclan:
     description: Join a clan.
@@ -79,19 +71,15 @@ commands:
   chestscan:
     description: Scan an area for chests.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
   chestget:
     description: Get the lootset of a chest.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
   chestset:
     description: Set the lootset of a chest.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
   lootset:
     description: Set the contents of a lootset.
     permission: MyZ.world_admin
-    permission-message: You don't have permission.
 
 permissions:
   MyZ.*:
@@ -109,6 +97,7 @@ permissions:
       MyZ.scientist: true
       MyZ.update: true
       MyZ.nokick: true
+      MyZ.clan.*: true
   MyZ.spawn_giant:
     description: Spawn giants.
     default: op
@@ -124,4 +113,48 @@ permissions:
   MyZ.nokick:
     description: Don't get kicked on death.
     default: op
-    
+  MyZ.clan.*:
+    description: All things clan-related.
+    default: op
+  MyZ.clan.create:
+    description: Ability to create a clan.
+    default: op
+  MyZ.clan.join:
+    description: Ability to join clans.
+    default: true
+  MyZ.rank.0:
+    description: The default rank.
+    default: not op
+  MyZ.rank.1:
+    description: A rank.
+    default: false
+  MyZ.rank.2:
+    description: A rank.
+    default: false
+  MyZ.rank.3:
+    description: A rank.
+    default: false
+  MyZ.rank.4:
+    description: A rank.
+    default: false
+  MyZ.rank.5:
+    description: A rank.
+    default: false
+  MyZ.rank.6:
+    description: A rank.
+    default: false
+  MyZ.rank.7:
+    description: A rank.
+    default: false
+  MyZ.rank.8:
+    description: A rank.
+    default: false
+  MyZ.rank.9:
+    description: A rank.
+    default: false
+  MyZ.rank.10:
+    description: A rank.
+    default: false
+  MyZ.rank.100:
+    description: The OP rank.
+    default: op

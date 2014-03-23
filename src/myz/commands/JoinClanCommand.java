@@ -37,8 +37,15 @@ public class JoinClanCommand implements CommandExecutor {
 				}
 				PlayerData data = PlayerData.getDataFor((Player) sender);
 				if (data != null) {
-					data.setClan(clan);
-					Messenger.sendMessage(sender, Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "clan.joined", clan));
+					if (sender.hasPermission("myz.clan.join")) {
+						Messenger.sendConfigMessage(sender, "clan.joining");
+						data.setClan(clan);
+						Messenger
+								.sendMessage(sender, Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "clan.joined", clan));
+					} else {
+						Messenger.sendMessage(sender,
+								Messenger.getConfigMessage(Localizer.getLocale((Player) sender), "clan.notjoined", clan));
+					}
 				}
 				if (MyZ.instance.getSQLManager().isConnected()) {
 					Messenger.sendConfigMessage(sender, "clan.joining");

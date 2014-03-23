@@ -12,6 +12,7 @@ import java.util.UUID;
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.VaultUtils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -462,6 +463,28 @@ public class PlayerData {
 	 * @return the rank
 	 */
 	public int getRank() {
+		int rank = 0;
+		if (MyZ.vault) {
+			Player p = MyZ.instance.getPlayer(uid);
+			if (p == null) { return this.rank; }
+			if (p.isOp()) { return 100; }
+			for (int i = 0; i <= 100; i++) {
+				if (p.hasPermission("MyZ.rank." + i)) {
+					rank = i;
+				}
+			}
+			if (rank < this.rank) {
+				if (MyZ.vault) {
+					VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + this.rank);
+				}
+				return this.rank;
+			} else if (rank > this.rank) {
+				this.rank = rank;
+				save();
+			}
+		} else {
+			rank = this.rank;
+		}
 		return rank;
 	}
 
@@ -469,9 +492,16 @@ public class PlayerData {
 	 * @param rank
 	 *            the rank to set
 	 */
-	public void setRank(int rank) {
-		this.rank = rank;
-		save();
+	public boolean setRank(int rank) {
+		Player p = MyZ.instance.getPlayer(uid);
+		if (p == null || !MyZ.vault) {
+			this.rank = rank;
+			save();
+			return true;
+		}
+
+		VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + rank);
+		return true;
 	}
 
 	/**

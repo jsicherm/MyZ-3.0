@@ -80,6 +80,7 @@ import myz.utilities.DisguiseUtils;
 import myz.utilities.Hologram;
 import myz.utilities.LibsDisguiseUtils;
 import myz.utilities.Utils;
+import myz.utilities.VaultUtils;
 import myz.utilities.WorldlessLocation;
 
 import org.bukkit.Bukkit;
@@ -116,8 +117,11 @@ public class MyZ extends JavaPlugin {
 	// TODO @ chat not showing name (?)
 
 	// TODO Research point rank uppance @see ResearchItem#checkRankIncrease
+	
+	// TODO clan create permission in joinclan.
 
 	public static MyZ instance;
+	public static boolean vault;
 	private List<UUID> online_players = new ArrayList<UUID>();
 	private FileConfiguration blocks, spawn, chests, research;
 	private Map<String, FileConfiguration> localizable = new HashMap<String, FileConfiguration>();
@@ -139,6 +143,11 @@ public class MyZ extends JavaPlugin {
 		}
 
 		instance = this;
+
+		if (getServer().getPluginManager().getPlugin("Vault") != null && getServer().getPluginManager().isPluginEnabled("Vault")) {
+			vault = VaultUtils.setupPermissions();
+		}
+
 		getDataFolder().mkdir();
 		File defaultConfig = new File(getDataFolder() + File.separator + "config.yml");
 		if (!defaultConfig.exists())

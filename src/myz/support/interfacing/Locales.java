@@ -229,6 +229,7 @@ public class Locales {
 		// Clan
 		defaultSet.put("clan.name.too_long", "&4Clan names must be less than 20 characters.");
 		defaultSet.put("clan.joined", "Your join request to '&e%s&r' was accepted.");
+		defaultSet.put("clan.notjoined", "&4You cannot join clans.");
 		defaultSet.put("clan.joining", "Sent request to join clan.");
 		defaultSet.put("command.clan.leave", "You are no longer in a clan.");
 		defaultSet.put("command.clan.not_in", "You are not in a clan.");
@@ -392,6 +393,7 @@ public class Locales {
 		// Clan
 		pirateSet.put("clan.name.too_long", "&4Crew names must be less than 20 scuttles.");
 		pirateSet.put("clan.joined", "Yer join request to '&e%s&r' was accepted.");
+		pirateSet.put("clan.notjoined", "&4Ye can't join crews, ya scurvy dog.");
 		pirateSet.put("clan.joining", "Sent request t' join crew.");
 		pirateSet.put("command.clan.leave", "Ye have abandoned ship.");
 		pirateSet.put("command.clan.not_in", "Yer not part of a crew.");

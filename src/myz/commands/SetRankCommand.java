@@ -56,7 +56,7 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 			player = player.trim();
 
 			UUID uid = MyZ.instance.getUID(player);
-			if (uid != null) {
+			if (uid == null) {
 				if (sender instanceof Player)
 					Messenger.sendConfigMessage(sender, "command.setrank.failure");
 				else

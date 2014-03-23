@@ -155,7 +155,7 @@ public class JoinQuit implements Listener {
 				}
 
 			// Spawn our NPC unless we were flagged.
-			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()))
+			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()) && !Configuration.isInLobby(e.getPlayer()))
 				Utils.spawnNPC(e.getPlayer());
 			MyZ.instance.getFlagged().remove(e.getPlayer().getUniqueId());
 		}
