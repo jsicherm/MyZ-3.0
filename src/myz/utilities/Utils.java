@@ -312,6 +312,7 @@ public class Utils {
 			return;
 
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
+			@Override
 			public void run() {
 				final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
 

@@ -46,10 +46,9 @@ public class Visibility implements Listener {
 	private void onShootArrow(ProjectileLaunchEvent e) {
 		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
 			return;
-		if (e.getEntity().getShooter() instanceof Player && e.getEntity() instanceof Arrow) {
+		if (e.getEntity().getShooter() instanceof Player && e.getEntity() instanceof Arrow)
 			PathingSupport.elevatePlayer((Player) e.getEntity().getShooter(),
 					(Integer) Configuration.getConfig("projectile.arrow.shoot.visibility_range"));
-		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

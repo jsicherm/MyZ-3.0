@@ -58,6 +58,9 @@ public class CancelPlayerEvents implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onFish(PlayerFishEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
 		Player p = e.getPlayer();
 		if (p.getItemInHand().getType() != Material.FISHING_ROD)
 			return;

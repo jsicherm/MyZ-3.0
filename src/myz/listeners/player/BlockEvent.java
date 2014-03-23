@@ -9,7 +9,6 @@ import myz.chests.ChestManager;
 import myz.commands.BlockCommand;
 import myz.support.Teleport;
 import myz.support.interfacing.Configuration;
-import myz.utilities.Utils;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

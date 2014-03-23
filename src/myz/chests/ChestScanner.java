@@ -127,11 +127,17 @@ public class ChestScanner implements Listener {
 
 	@EventHandler
 	private void onInventoryOpen(InventoryOpenEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
 		replaceMedkits(e.getInventory(), true);
 	}
 
 	@EventHandler
 	private void onInventoryClose(InventoryCloseEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
 		replaceMedkits(e.getInventory(), false);
 
 		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9

@@ -70,6 +70,8 @@ public class Configuration {
 		configEntries.put(CHEST_RESPAWN, 300);
 		configEntries.put("chest.break.on_close", true);
 
+		configEntries.put("chat.format", true);
+		configEntries.put("chat.overhead", true);
 		configEntries.put(CHAT_ENABLED, true);
 		configEntries.put(CHAT_DISTANCE, 250);
 

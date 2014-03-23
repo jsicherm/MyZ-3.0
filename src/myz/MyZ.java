@@ -108,15 +108,11 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO configurable death loot (?)
-	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
-	// TODO grave-digging
 	// TODO use construction parts to create clans. Builder is clan owner.
 	// Requires Build-in-a-box.
-	// TODO The ability to disable specific mob types in the config.
-	// TODO Knockback range!
-	// TODO Attack range maybe? :)
-	// TODO @ chat not showing name
-	// TODO %GROUP% tag for PEX groups
+	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
+	// TODO grave-digging
+	// TODO @ chat not showing name (?)
 
 	public static MyZ instance;
 	private List<UUID> online_players = new ArrayList<UUID>();
@@ -861,8 +857,7 @@ public class MyZ extends JavaPlugin {
 					|| MyZ.instance.getSQLManager().isConnected()
 					&& (timeOfKickExpiry = MyZ.instance.getSQLManager().getLong(player.getUniqueId(), "timeOfKickban")
 							+ (Integer) Configuration.getConfig(Configuration.KICKBAN_TIME) * 1000) >= now) {
-				player.kickPlayer(Messenger.getConfigMessage(Localizer.DEFAULT, "kick.recur", (timeOfKickExpiry - now) / 1000
-						+ ""));
+				player.kickPlayer(Messenger.getConfigMessage(Localizer.DEFAULT, "kick.recur", (timeOfKickExpiry - now) / 1000 + ""));
 				return;
 			}
 		}

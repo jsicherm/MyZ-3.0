@@ -45,7 +45,8 @@ public class Chat implements Listener {
 			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix(radio_frequency)) + " " + prefix
 					+ ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
 		}
-		e.setFormat(prefix + e.getMessage());
+		if ((Boolean) Configuration.getConfig("chat.format"))
+			e.setFormat(prefix + e.getMessage());
 
 		// Cache and clear the recipients.
 		Set<Player> original_recipients = new HashSet<Player>(e.getRecipients());
@@ -54,10 +55,12 @@ public class Chat implements Listener {
 		// If we're talking in local, not radio, only include those near us.
 		if (radio_frequency == -1) {
 			if (didHandlePrivateChat(e)) {
-				Hologram hologram = new Hologram(e.getMessage());
-				hologram.setFollow(e.getPlayer());
-				hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-				hologram.follow();
+				if ((Boolean) Configuration.getConfig("chat.overhead")) {
+					Hologram hologram = new Hologram(e.getMessage());
+					hologram.setFollow(e.getPlayer());
+					hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
+					hologram.follow();
+				}
 				return;
 			}
 			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
@@ -74,10 +77,12 @@ public class Chat implements Listener {
 								.isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO)))
 					e.getRecipients().add(player_on_server);
 
-		Hologram hologram = new Hologram(e.getMessage());
-		hologram.setFollow(e.getPlayer());
-		hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-		hologram.follow();
+		if ((Boolean) Configuration.getConfig("chat.overhead")) {
+			Hologram hologram = new Hologram(e.getMessage());
+			hologram.setFollow(e.getPlayer());
+			hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
+			hologram.follow();
+		}
 
 		// Make this player more visible to zombies.
 		PathingSupport.elevatePlayer(player, 10);
@@ -123,8 +128,9 @@ public class Chat implements Listener {
 			case 1:
 				player.sendMessage(toMessage + finalMessage);
 				recipient.sendMessage(fromMessage + finalMessage);
-				e.setFormat(Configuration.getPrefixForPlayerRank(player) + ChatColor.RESET + " to "
-						+ Configuration.getPrefixForPlayerRank(recipient) + " " + ChatColor.RESET + e.getMessage());
+				if ((Boolean) Configuration.getConfig("chat.format"))
+					e.setFormat(Configuration.getPrefixForPlayerRank(player) + ChatColor.RESET + " to "
+							+ Configuration.getPrefixForPlayerRank(recipient) + " " + ChatColor.RESET + e.getMessage());
 				e.setMessage(ChatColor.GRAY + toMessage + finalMessage);
 				break;
 			default:
@@ -136,15 +142,17 @@ public class Chat implements Listener {
 		} else if (e.getMessage().startsWith(".")) {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null) {
-				e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
-						+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
+				if ((Boolean) Configuration.getConfig("chat.format"))
+					e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
+							+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
 				e.getRecipients().clear();
 				e.getRecipients().addAll(data.getOnlinePlayersInClan());
 				return true;
 			}
 			if (MyZ.instance.getSQLManager().isConnected()) {
-				e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
-						+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
+				if ((Boolean) Configuration.getConfig("chat.format"))
+					e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
+							+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
 				e.getRecipients().clear();
 				e.getRecipients().addAll(MyZ.instance.getSQLManager().getOnlinePlayersInClan(e.getPlayer().getUniqueId()));
 				return true;
