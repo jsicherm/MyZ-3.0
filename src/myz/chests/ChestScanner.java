@@ -112,6 +112,16 @@ public class ChestScanner implements Listener {
 		}
 	}
 
+	/**
+	 * Replace named objects in the inventory with their medkit equivalent.
+	 * 
+	 * @param inventory
+	 *            The Inventory.
+	 * @param trueInventory
+	 *            Whether or not to use the inventory provided (player
+	 *            inventory) or the inventory of the player holding the given
+	 *            inventory.
+	 */
 	private void replaceMedkits(Inventory inventory, boolean trueInventory) {
 		if (inventory.getHolder() instanceof Player || trueInventory) {
 			inventory = trueInventory ? inventory : ((Player) inventory.getHolder()).getInventory();

@@ -39,6 +39,8 @@ import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
  */
 public class CustomEntityPigZombie extends EntityPigZombie {
 
+	private int priority = 0;
+	
 	public CustomEntityPigZombie(World world) {
 		super(world);
 
@@ -103,6 +105,7 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 	}
 
 	public void see(Location location, int priority) {
+		if(priority < this.priority) { return; }
 		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;
@@ -117,5 +120,6 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 
 	public void cleanPather(PathfinderGoal goal) {
 		populateGoals();
+		priority = 0;
 	}
 }

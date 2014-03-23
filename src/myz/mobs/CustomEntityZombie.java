@@ -50,6 +50,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 public class CustomEntityZombie extends EntityZombie {
 
 	protected List<org.bukkit.inventory.ItemStack> inventory = new ArrayList<org.bukkit.inventory.ItemStack>();
+	private int priority = 0;
 
 	public CustomEntityZombie(World world) {
 		super(world);
@@ -213,6 +214,7 @@ public class CustomEntityZombie extends EntityZombie {
 	}
 
 	public void see(Location location, int priority) {
+		if(priority < this.priority) { return; }
 		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;
@@ -227,6 +229,7 @@ public class CustomEntityZombie extends EntityZombie {
 
 	public void cleanPather(PathfinderGoal goal) {
 		populateGoals();
+		priority = 0;
 	}
 
 	public static CustomEntityZombie newInstance(Player player) {

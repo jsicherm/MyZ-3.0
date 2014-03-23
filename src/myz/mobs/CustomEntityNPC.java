@@ -54,6 +54,7 @@ import org.bukkit.potion.PotionType;
 public class CustomEntityNPC extends EntitySkeleton {
 
 	private final NPCType type;
+	private int priority = 0;
 
 	public CustomEntityNPC(World world) {
 		this(world, NPCType.getRandom());
@@ -379,6 +380,7 @@ public class CustomEntityNPC extends EntitySkeleton {
 	}
 
 	public void see(Location location, int priority) {
+		if(priority < this.priority) { return; }
 		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;
@@ -393,5 +395,6 @@ public class CustomEntityNPC extends EntitySkeleton {
 
 	public void cleanPather(PathfinderGoal goal) {
 		populateGoals();
+		priority = 0;
 	}
 }
