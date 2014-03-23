@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import myz.MyZ;
+import myz.listeners.player.ResearchItem;
 import myz.support.MedKit;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
@@ -154,8 +155,13 @@ public class ChestScanner implements Listener {
 			for (ItemStack item : lootset.spawnable.keySet())
 				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
 			lootCreators.remove(e.getPlayer().getUniqueId());
-		} else if (e.getInventory().getType() == InventoryType.CHEST && (Boolean) Configuration.getConfig("chest.break.on_close"))
-			ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
+		} else if (e.getInventory().getType() == InventoryType.CHEST) {
+			ResearchItem.research((Player) e.getPlayer(), (Integer) Configuration.getConfig("chest.research-reward"),
+					((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation(), "research.success-short");
+
+			if ((Boolean) Configuration.getConfig("chest.break.on_close"))
+				ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
+		}
 	}
 
 	@EventHandler

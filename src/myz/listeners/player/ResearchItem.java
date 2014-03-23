@@ -13,6 +13,7 @@ import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Hologram;
 import myz.utilities.Utils;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -68,16 +69,8 @@ public class ResearchItem implements Listener {
 								if (config.getItemStack("item." + key + ".item").equals(e.getItem().getItemStack())) {
 									e.getItem().remove();
 									int points = config.getInt("item." + key + ".value");
-									Messenger.sendMessage(player,
-											Messenger.getConfigMessage(Localizer.getLocale(player), "research.success", points + ""));
-									int before = 0, after;
-									if (data != null)
-										data.setResearchPoints((before = data.getResearchPoints()) + points);
-									if (MyZ.instance.getSQLManager().isConnected())
-										MyZ.instance.getSQLManager().set(player.getUniqueId(), "research",
-												(before = MyZ.instance.getSQLManager().getInt(entry, "research")) + points, true);
-									after = before + points;
-									checkRankIncrease(player, before, after, rank);
+									research(player, points, ((org.bukkit.block.Hopper) e.getInventory().getHolder()).getLocation(),
+											"research.success");
 									return;
 								}
 							Messenger.sendConfigMessage(player, "research.fail");
@@ -87,6 +80,51 @@ public class ResearchItem implements Listener {
 						} else
 							e.getItem().remove();
 					}
+	}
+
+	/**
+	 * Make a player research something for the set points.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @param points
+	 *            The points gained.
+	 * @param location
+	 *            The location to show the research message.
+	 * @param slug
+	 *            The config message to send.
+	 * @return True if the research completed, false otherwise.
+	 */
+	public static boolean research(Player player, int points, org.bukkit.Location location, String slug) {
+		PlayerData data = PlayerData.getDataFor(player);
+		int rank = 0;
+		if (data != null)
+			rank = data.getRank();
+		if (MyZ.instance.getSQLManager().isConnected())
+			rank = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "rank");
+
+		if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH)) { return false; }
+
+		double mult = (Double) Configuration.getConfig("ranks.research-multiplier." + rank);
+		if ((int) mult <= 0) {
+			mult = 1.0;
+		}
+
+		points *= mult;
+
+		int before = 0, after;
+		if (data != null)
+			data.setResearchPoints((before = data.getResearchPoints()) + points);
+		if (MyZ.instance.getSQLManager().isConnected())
+			MyZ.instance.getSQLManager().set(player.getUniqueId(), "research",
+					(before = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "research")) + points, true);
+		after = before + points;
+		checkRankIncrease(player, before, after, rank);
+
+		String msg = Messenger.getConfigMessage(Localizer.getLocale(player), slug, points + "");
+		Hologram hologram = new Hologram(msg);
+		hologram.show(location.clone().subtract(0, Hologram.distance, 0), player);
+		return true;
 	}
 
 	/**
@@ -102,7 +140,7 @@ public class ResearchItem implements Listener {
 	 * @param rank
 	 *            The players current rank.
 	 */
-	private void checkRankIncrease(Player player, int before, int after, int rank) {
+	private static void checkRankIncrease(Player player, int before, int after, int rank) {
 		// TODO
 	}
 

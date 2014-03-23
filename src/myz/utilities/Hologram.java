@@ -31,7 +31,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class Hologram {
 
 	private static final List<Hologram> holograms = new ArrayList<Hologram>();;
-	private static final double distance = 0.23;
+	public static final double distance = 0.24;
 	private List<String> lines = new ArrayList<String>();
 	private Map<Integer, Integer> entities = new HashMap<Integer, Integer>();
 	private boolean showing = false;

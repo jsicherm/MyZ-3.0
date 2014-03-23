@@ -77,6 +77,7 @@ public class PlayerKillEntity implements Listener {
 		PlayerData data = PlayerData.getDataFor(playerFor);
 		int amount = 0;
 		String slug = "";
+		String mobslug = "";
 		switch (typeFor.getType()) {
 		case ZOMBIE:
 			if (data != null) {
@@ -93,7 +94,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "zombie_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "zombie_kills_life_record", amount, true);
 			}
-			slug = "zombie";
+			mobslug = slug = "zombie";
 			break;
 		case PIG_ZOMBIE:
 			if (data != null) {
@@ -110,7 +111,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "pigman_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "pigman_kills_life_record", amount, true);
 			}
-			slug = "pigman";
+			mobslug = slug = "pigman";
 			break;
 		case GIANT:
 			if (data != null) {
@@ -127,7 +128,7 @@ public class PlayerKillEntity implements Listener {
 				if (amount > MyZ.instance.getSQLManager().getInt(playerFor.getUniqueId(), "giant_kills_life_record"))
 					MyZ.instance.getSQLManager().set(playerFor.getUniqueId(), "giant_kills_life_record", amount, true);
 			}
-			slug = "giant";
+			mobslug = slug = "giant";
 			break;
 		case PLAYER:
 			Messenger.sendFancyDeathMessage(playerFor, (Player) typeFor);
@@ -149,15 +150,20 @@ public class PlayerKillEntity implements Listener {
 			if (MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI") != null
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(playerFor);
+			mobslug = "player";
 			break;
 		default:
 			break;
 		}
 
+		if (mobslug != "")
+			ResearchItem.research(playerFor, (Integer) Configuration.getConfig("mobs." + mobslug + ".research-reward"),
+					typeFor.getLocation(), "research.success-short");
+
 		String message = slug == "" ? Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", "\n" + amount)
 				: Messenger.getConfigMessage(Localizer.getLocale(playerFor), slug + ".kill_amount", "\n" + amount);
 		String delimiter = message.contains(" \n") ? " \n" : "\n";
-		final Hologram hologram = new Hologram(message.split(delimiter));
+		Hologram hologram = new Hologram(message.split(delimiter));
 		hologram.show(typeFor.getLocation(), playerFor);
 	}
 }

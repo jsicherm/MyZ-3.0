@@ -108,11 +108,14 @@ import org.mcstats.MetricsLite;
 public class MyZ extends JavaPlugin {
 
 	// TODO configurable death loot (?)
+
 	// TODO use construction parts to create clans. Builder is clan owner.
 	// Requires Build-in-a-box.
-	// TODO research point rank uppance @see ResearchItem#checkRankIncrease
+
 	// TODO grave-digging
 	// TODO @ chat not showing name (?)
+
+	// TODO Research point rank uppance @see ResearchItem#checkRankIncrease
 
 	public static MyZ instance;
 	private List<UUID> online_players = new ArrayList<UUID>();

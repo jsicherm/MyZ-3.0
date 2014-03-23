@@ -69,6 +69,7 @@ public class Configuration {
 
 		configEntries.put(CHEST_RESPAWN, 300);
 		configEntries.put("chest.break.on_close", true);
+		configEntries.put("chest.research-reward", 2);
 
 		configEntries.put("chat.format", true);
 		configEntries.put("chat.overhead", true);
@@ -76,6 +77,9 @@ public class Configuration {
 		configEntries.put(CHAT_DISTANCE, 250);
 
 		configEntries.put(RANK_NAME_N + "0", "[%s]");
+		configEntries.put(RANK_NAME_N + "1", "&e[&a%s&e]&r");
+		configEntries.put("ranks.research-multiplier.0", 1.0);
+		configEntries.put("ranks.research-multiplier.1", 1.5);
 		configEntries.put(RANKED_RESEARCH, 0);
 		configEntries.put(SAVE_UNRANKED, true);
 
@@ -90,14 +94,18 @@ public class Configuration {
 
 		configEntries.put(PRELOGIN, true);
 
+		configEntries.put("mobs.player.research-reward", 1);
 		configEntries.put("mobs.zombie.damage", 2.0);
 		configEntries.put("mobs.zombie.speed", 1.2);
 		configEntries.put("mobs.zombie.canPickup", true);
+		configEntries.put("mobs.zombie.research-reward", 2);
 		configEntries.put("mobs.giant.damage", 4.0);
 		configEntries.put("mobs.giant.speed", 1.3);
+		configEntries.put("mobs.giant.research-reward", 10);
 		configEntries.put("mobs.pigman.damage", 3.0);
 		configEntries.put("mobs.pigman.speed", 1.15);
 		configEntries.put("mobs.pigman.canPickup", false);
+		configEntries.put("mobs.pigman.research-reward", 4);
 		configEntries.put("mobs.pigman.spawn_z", -2000);
 		configEntries.put("mobs.pigman.pigsplosion.enabled", true);
 		configEntries.put("mobs.pigman.pigsplosion.chance", 0.5);
@@ -105,9 +113,11 @@ public class Configuration {
 		configEntries.put("mobs.pigman.pigsplosion.max", 4);
 		configEntries.put("mobs.horse.damage", 1.0);
 		configEntries.put("mobs.horse.speed", 1.2);
+		configEntries.put("mobs.horse.research-reward", 0);
 		configEntries.put("mobs.npc.enabled", false);
 		configEntries.put("mobs.npc.damage", 1.0);
 		configEntries.put("mobs.npc.speed", 1.2);
+		configEntries.put("mobs.npc.research-reward", 0);
 		configEntries.put("mobs.bleed", true);
 		configEntries.put("mobs.aggroMultiplier", 1.0);
 

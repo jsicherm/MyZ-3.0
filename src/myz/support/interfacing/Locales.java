@@ -100,6 +100,7 @@ public class Locales {
 		defaultSet.put("gui.cost", "%s Research Points");
 		defaultSet.put("research.fail", "&eThe Science Gods refuse your offering.");
 		defaultSet.put("research.success", "&eYou gain a better understanding of the disease and %s research points.");
+		defaultSet.put("research.success-short", "&e+%s research points!");
 		defaultSet.put("research.rank", "&eThe Science Gods will not hear you. You must be ranked on this server to do research.");
 
 		// Chat
@@ -272,6 +273,7 @@ public class Locales {
 		pirateSet.put("gui.cost", "%s Dubloons");
 		pirateSet.put("research.fail", "&eYarr.");
 		pirateSet.put("research.success", "&eYarrrr, ye found %s dubloons!");
+		pirateSet.put("research.success-short", "&e+%s dubloons!");
 		pirateSet.put("research.rank", "&eYe must be important on da server t' find gold dubloons.");
 
 		// Chat
