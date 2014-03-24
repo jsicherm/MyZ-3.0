@@ -3,10 +3,10 @@
  */
 package myz.utilities;
 
-import org.bukkit.plugin.RegisteredServiceProvider;
-
-import net.milkbowl.vault.permission.Permission;
 import myz.MyZ;
+import net.milkbowl.vault.permission.Permission;
+
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  * @author Jordan
@@ -19,9 +19,8 @@ public class VaultUtils {
 	public static boolean setupPermissions() {
 		RegisteredServiceProvider<Permission> permissionProvider = MyZ.instance.getServer().getServicesManager()
 				.getRegistration(net.milkbowl.vault.permission.Permission.class);
-		if (permissionProvider != null) {
+		if (permissionProvider != null)
 			permission = permissionProvider.getProvider();
-		}
-		return (permission != null);
+		return permission != null;
 	}
 }

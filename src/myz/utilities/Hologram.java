@@ -62,12 +62,10 @@ public class Hologram {
 
 			HologramRunnable runnable = new HologramRunnable(this, p);
 			runnable.task = MyZ.instance.getServer().getScheduler().runTaskTimerAsynchronously(MyZ.instance, runnable, 0, 1);
-		} else {
-			for (Player ps : p) {
+		} else
+			for (Player ps : p)
 				for (String s : lines)
 					Messenger.sendMessage(ps, s);
-			}
-		}
 	}
 
 	public void destroy() {

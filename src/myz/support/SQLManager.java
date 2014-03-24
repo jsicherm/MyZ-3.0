@@ -66,6 +66,14 @@ public class SQLManager {
 		longcolumns.addAll(Arrays.asList("timeOfKickban", "minutes_alive"));
 	}
 
+	public static String UUIDtoString(UUID uid) {
+		return uid.toString().replaceAll("-", "");
+	}
+
+	public static UUID fromString(String uid) {
+		return UUID.fromString(uid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
+	}
+
 	public void executeQuery(String query) throws SQLException {
 		sql.createStatement().executeUpdate(query);
 	}
@@ -120,7 +128,7 @@ public class SQLManager {
 		if (!isConnected())
 			return;
 		try {
-			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(40) PRIMARY KEY, name VARCHAR(17) NOT NULL DEFAULT 'Guest', player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends TEXT NOT NULL DEFAULT '', heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0, research INT UNSIGNED NOT NULL DEFAULT 0, isZombie TINYINT(1) NOT NULL DEFAULT 0, legBroken TINYINT(1) NOT NULL DEFAULT 0)");
+			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(40) PRIMARY KEY, name VARCHAR(17) NOT NULL DEFAULT 'Guest', player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends TEXT NOT NULL, heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0, research INT UNSIGNED NOT NULL DEFAULT 0, isZombie TINYINT(1) NOT NULL DEFAULT 0, legBroken TINYINT(1) NOT NULL DEFAULT 0)");
 			updateRanks();
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
@@ -130,9 +138,8 @@ public class SQLManager {
 	public void updateRanks() {
 		try {
 			if (MyZ.vault)
-				for (UUID uid : getKeys()) {
+				for (UUID uid : getKeys())
 					VaultUtils.permission.playerAdd((String) null, MyZ.instance.getName(uid), "MyZ.rank." + getInt(uid, "rank"));
-				}
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.BLUE + "Unable to execute MySQL setup command. This may not be an error: "
 					+ e.getMessage());
@@ -160,7 +167,8 @@ public class SQLManager {
 		if (!isIn(player.getUniqueId()))
 			try {
 				cachedKeyValues.add(player.getUniqueId());
-				executeQuery("INSERT INTO playerdata (username) VALUES ('" + player.getUniqueId().toString() + "')");
+				executeQuery("INSERT INTO playerdata (username, name) VALUES ('" + UUIDtoString(player.getUniqueId()) + "', '"
+						+ player.getName() + "')");
 			} catch (Exception e) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
 				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
@@ -198,7 +206,7 @@ public class SQLManager {
 	public boolean isIn(UUID name) {
 		boolean isin = false;
 
-		// Make sure our player is in the data cache.
+		/*// Make sure our player is in the data cache.
 		if (!cachedBooleanValues.containsKey(name)) {
 			Map<String, Boolean> insert = new HashMap<String, Boolean>();
 			insert.put("isin", false);
@@ -213,23 +221,22 @@ public class SQLManager {
 			} else
 				// The player had the key already so let's return it.
 				return cachedBooleanValues.get(name).get("isin");
-		}
+		}*/
 
 		if (!isConnected())
 			return isin;
 		try {
-			isin = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1").next();
+			isin = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1").next();
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL isin command: " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();
 			isin = false;
 		}
-
-		// Update the keyset because we don't have the current value.
+		/*// Update the keyset because we don't have the current value.
 		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
 		received.put("isin", isin);
-		cachedBooleanValues.put(name, received);
+		cachedBooleanValues.put(name, received);*/
 
 		return isin;
 	}
@@ -253,7 +260,7 @@ public class SQLManager {
 			if (rs != null)
 				while (rs.next())
 					if (rs.getString("username") != null)
-						list.add(UUID.fromString(rs.getString("username")));
+						list.add(fromString(rs.getString("username")));
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
@@ -310,10 +317,10 @@ public class SQLManager {
 			if (forcingaSync)
 				// Make sure we update our cached values when we set new ones.
 				doUpdateCache(name, field, value);
-			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + name.toString() + "' LIMIT 1");
+			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + name.toString() + "." + field + ": "
-					+ e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + UUIDtoString(name) + "." + field
+					+ ": " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();
 		}
@@ -409,12 +416,12 @@ public class SQLManager {
 
 		if (getint == 0) {
 			try {
-				ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
+				ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 				if (rs.next())
 					getint = rs.getInt(field);
 			} catch (Exception e) {
-				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + name.toString() + "." + field
-						+ ": " + e.getMessage());
+				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getint command for " + UUIDtoString(name) + "."
+						+ field + ": " + e.getMessage());
 				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 				connect();
 			}
@@ -429,24 +436,21 @@ public class SQLManager {
 			int rank = 0;
 			if (MyZ.vault) {
 				Player p = MyZ.instance.getPlayer(name);
-				if (p == null) { return getint; }
-				if (p.isOp()) { return 100; }
-				for (int i = 0; i <= 100; i++) {
-					if (p.hasPermission("MyZ.rank." + i)) {
-						rank = i;
-					}
-				}
-				if (rank < getint) {
-					if (MyZ.vault) {
-						VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + getint);
-					}
+				if (p == null)
 					return getint;
-				} else if (rank > getint) {
+				if (p.isOp())
+					return 100;
+				for (int i = 0; i <= 100; i++)
+					if (p.hasPermission("MyZ.rank." + i))
+						rank = i;
+				if (rank < getint) {
+					if (MyZ.vault)
+						VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + getint);
+					return getint;
+				} else if (rank > getint)
 					this.set(name, field, rank, true);
-				}
-			} else {
+			} else
 				rank = getint;
-			}
 			return rank;
 		}
 
@@ -483,12 +487,12 @@ public class SQLManager {
 		}
 
 		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
+			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 			if (rs.next())
 				getboolean = rs.getBoolean(field);
 		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + name.toString() + "." + field
-					+ ": " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + UUIDtoString(name) + "."
+					+ field + ": " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();
 		}
@@ -531,11 +535,11 @@ public class SQLManager {
 		}
 
 		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
+			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 			if (rs.next())
 				getlong = rs.getLong(field);
 		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getlong command for " + name.toString() + "." + field
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getlong command for " + UUIDtoString(name) + "." + field
 					+ ": " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();
@@ -579,12 +583,12 @@ public class SQLManager {
 		}
 
 		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
+			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 			if (rs.next())
 				getstring = rs.getString(field);
 		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstring command for " + name.toString() + "." + field
-					+ ": " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstring command for " + UUIDtoString(name) + "."
+					+ field + ": " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();
 		}
@@ -625,21 +629,27 @@ public class SQLManager {
 				cachedStringValues.put(name, received);
 			} else {
 				// The player had the key already so let's return it.
-				for (String player : cachedStringValues.get(name).get(field).split(","))
-					returnList.add(player);
+				Map<String, String> cache = cachedStringValues.get(name);
+				if (cache != null) {
+					String s = cache.get(field);
+					if (s != null)
+						for (String player : s.split(","))
+							returnList.add(player);
+				}
 				return returnList;
 			}
 		}
 
 		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + name.toString() + "' LIMIT 1");
+			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 			if (rs.next()) {
 				raw = rs.getString(field);
-				for (String player : raw.split(","))
-					returnList.add(player);
+				if (raw != null)
+					for (String player : raw.split(","))
+						returnList.add(player);
 			}
 		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstringlist command for" + name.toString() + "."
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getstringlist command for" + UUIDtoString(name) + "."
 					+ field + ": " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();

@@ -77,10 +77,13 @@ public class ChestManager {
 				if (wasChest) {
 					org.bukkit.block.Chest test = (org.bukkit.block.Chest) location.getBlock().getState();
 					wasChest = test.getBlockInventory().getContents().length > 0;
-				} else
+				} else {
 					location.getBlock().setType(Material.CHEST);
-				Chest chest = (Chest) location.getBlock().getState().getData();
-				chest.setFacingDirection(getFacingDirection(location));
+					Chest chest = (Chest) location.getBlock().getState().getData();
+					chest.setFacingDirection(getFacingDirection(location));
+					location.getBlock().setData(chest.getData(), true);
+				}
+
 				String lootset = getLootset(location);
 				ChestScanner.nameChest(location.getBlock(), lootset);
 				if (!wasChest)

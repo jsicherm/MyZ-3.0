@@ -4,8 +4,10 @@
 package myz.listeners.player;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import myz.MyZ;
@@ -103,12 +105,15 @@ public class ResearchItem implements Listener {
 		if (MyZ.instance.getSQLManager().isConnected())
 			rank = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "rank");
 
-		if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH)) { return false; }
+		if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH))
+			return false;
 
-		double mult = (Double) Configuration.getConfig("ranks.research-multiplier." + rank);
-		if ((int) mult <= 0) {
+		Set<Integer> keys = new HashSet<Integer>();
+		for (String s : MyZ.instance.getConfig().getConfigurationSection("ranks.research-multiplier").getKeys(false))
+			keys.add(Integer.parseInt(s));
+		double mult = (Double) Configuration.getConfig("ranks.research-multiplier." + Configuration.nearestInt(rank, keys));
+		if ((int) mult <= 0)
 			mult = 1.0;
-		}
 
 		points *= mult;
 

@@ -311,7 +311,8 @@ public class PlayerData {
 			section.set("isZombie", isZombie);
 			section.set("legBroken", isBrokenLeg);
 			try {
-				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + uid.toString() + ".yml"));
+				section.save(new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator
+						+ SQLManager.UUIDtoString(uid) + ".yml"));
 			} catch (IOException e) {
 				MyZ.instance.getLogger().warning("Unable to save a PlayerData for " + uid.toString() + ": " + e.getMessage());
 			}
@@ -466,25 +467,23 @@ public class PlayerData {
 		int rank = 0;
 		if (MyZ.vault) {
 			Player p = MyZ.instance.getPlayer(uid);
-			if (p == null) { return this.rank; }
-			if (p.isOp()) { return 100; }
-			for (int i = 0; i <= 100; i++) {
-				if (p.hasPermission("MyZ.rank." + i)) {
+			if (p == null)
+				return this.rank;
+			if (p.isOp())
+				return 100;
+			for (int i = 0; i <= 100; i++)
+				if (p.hasPermission("MyZ.rank." + i))
 					rank = i;
-				}
-			}
 			if (rank < this.rank) {
-				if (MyZ.vault) {
+				if (MyZ.vault)
 					VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + this.rank);
-				}
 				return this.rank;
 			} else if (rank > this.rank) {
 				this.rank = rank;
 				save();
 			}
-		} else {
+		} else
 			rank = this.rank;
-		}
 		return rank;
 	}
 

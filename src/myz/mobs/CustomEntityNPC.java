@@ -380,7 +380,8 @@ public class CustomEntityNPC extends EntitySkeleton {
 	}
 
 	public void see(Location location, int priority) {
-		if(priority < this.priority) { return; }
+		if (priority < this.priority)
+			return;
 		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
 			setGoalTarget(null);
 			target = null;

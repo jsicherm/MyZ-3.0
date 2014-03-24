@@ -277,19 +277,19 @@ public class Configuration {
 		FileConfiguration spawnConfig = MyZ.instance.getSpawnConfig();
 		FileConfiguration chestConfig = MyZ.instance.getChestsConfig();
 
-		for (String entry : configEntries.keySet()) {
+		for (String entry : new HashSet<String>(configEntries.keySet())) {
 			config.set(entry, configEntries.get(entry));
 			if (configEntries.get(entry) == null)
 				configEntries.remove(entry);
 		}
 
-		for (String entry : spawnEntries.keySet()) {
+		for (String entry : new HashSet<String>(spawnEntries.keySet())) {
 			spawnConfig.set(entry, spawnEntries.get(entry));
 			if (spawnEntries.get(entry) == null)
 				spawnEntries.remove(entry);
 		}
 
-		for (String entry : chestEntries.keySet()) {
+		for (String entry : new HashSet<String>(chestEntries.keySet())) {
 			chestConfig.set(entry, chestEntries.get(entry));
 			if (chestEntries.get(entry) == null)
 				chestEntries.remove(entry);
@@ -500,7 +500,7 @@ public class Configuration {
 		return list;
 	}
 
-	private static int nearestInt(int of, Set<Integer> list) {
+	public static int nearestInt(int of, Set<Integer> list) {
 		int min = Integer.MAX_VALUE, closest = of;
 
 		for (int value : list) {

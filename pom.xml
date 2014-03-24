@@ -2,13 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>myz.MyZ</groupId>
   <artifactId>MyZ</artifactId>
-  <version>3.0.7.01</version>
+  <version>3.0.8</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.authors>TeeePeee</project.authors>
     <project.main>myz.MyZ</project.main>
     <project.name>MyZ-3</project.name>
-    <project.softdepends>[WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises, Soulbound]</project.softdepends>
+    <project.softdepends>[WorldEdit, WorldGuard, TagAPI, BuildInABox, DisguiseCraft, LibsDisguises, Soulbound, Vault]</project.softdepends>
     <project.description>The best post-apocalyptic plugin in existance.</project.description>
   </properties>
   
@@ -37,6 +37,10 @@
       <id>md5-repo</id>
       <url>http://repo.md-5.net/content/groups/public/</url>
     </repository>
+    <repository>
+	  <id>milkbowl-repo</id>
+	  <url>http://ci.milkbowl.net/plugin/repository/everything/</url>
+	</repository>
   </repositories>
 
   <dependencies>
@@ -86,6 +90,11 @@
       <artifactId>json</artifactId>
       <version>20090211</version>
     </dependency>
+    <dependency>
+	  <groupId>net.milkbowl.vault</groupId>
+	  <artifactId>Vault</artifactId>
+	  <version>LATEST</version>
+	</dependency>
   </dependencies>
   	
   <build>

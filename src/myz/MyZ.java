@@ -117,7 +117,7 @@ public class MyZ extends JavaPlugin {
 	// TODO @ chat not showing name (?)
 
 	// TODO Research point rank uppance @see ResearchItem#checkRankIncrease
-	
+
 	// TODO clan create permission in joinclan.
 
 	public static MyZ instance;
@@ -144,9 +144,8 @@ public class MyZ extends JavaPlugin {
 
 		instance = this;
 
-		if (getServer().getPluginManager().getPlugin("Vault") != null && getServer().getPluginManager().isPluginEnabled("Vault")) {
+		if (getServer().getPluginManager().getPlugin("Vault") != null && getServer().getPluginManager().isPluginEnabled("Vault"))
 			vault = VaultUtils.setupPermissions();
-		}
 
 		getDataFolder().mkdir();
 		File defaultConfig = new File(getDataFolder() + File.separator + "config.yml");
@@ -552,12 +551,13 @@ public class MyZ extends JavaPlugin {
 			File datafolder = new File(getDataFolder() + File.separator + "data");
 			if (!datafolder.exists())
 				datafolder.mkdir();
-			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + player.toString() + ".yml");
+			File datafile = new File(getDataFolder() + File.separator + "data" + File.separator + SQLManager.UUIDtoString(player) + ".yml");
 			if (!datafile.exists())
 				try {
 					datafile.createNewFile();
 				} catch (Exception e) {
-					Messenger.sendConsoleMessage("&4Unable to save a new PlayerData file for " + player.toString() + ": " + e.getMessage());
+					Messenger.sendConsoleMessage("&4Unable to save a new PlayerData file for " + SQLManager.UUIDtoString(player) + ": "
+							+ e.getMessage());
 					return null;
 				}
 			FileConfiguration config = YamlConfiguration.loadConfiguration(datafile);

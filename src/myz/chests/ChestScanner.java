@@ -7,9 +7,12 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import myz.MyZ;
@@ -22,6 +25,7 @@ import myz.utilities.NMSUtils;
 import myz.utilities.Utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -70,10 +74,22 @@ public class ChestScanner implements Listener {
 	 * @param playerFor
 	 *            The player to initialize for.
 	 */
-	public static void initialize(Player playerFor) {
-		scanners.put(playerFor.getUniqueId(), new MaxMin());
+	public static void initialize(Player playerFor, String[] args) {
+		Set<String> lootsets = Configuration.getLootsets();
+		List<String> loot = new ArrayList<String>();
+		for (String s : args)
+			if (containsIgnoreCase(lootsets, s))
+				loot.add(s);
+		scanners.put(playerFor.getUniqueId(), new MaxMin(loot));
 		Messenger.sendConfigMessage(playerFor, "chest.set.begin");
 		Messenger.sendConfigMessage(playerFor, "chest.set.coordinate1");
+	}
+
+	private static boolean containsIgnoreCase(Collection<String> l, String s) {
+		for (String x : l)
+			if (x.equalsIgnoreCase(s))
+				return true;
+		return false;
 	}
 
 	/**
@@ -209,6 +225,7 @@ public class ChestScanner implements Listener {
 
 				nameChest(e.getClickedBlock(), slug);
 			}
+			ChestManager.respawn(inLoc, true);
 			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.set.typeis", slug));
 			setters.remove(e.getPlayer().getUniqueId());
 		} else if (getters.contains(e.getPlayer().getUniqueId())) {
@@ -240,7 +257,7 @@ public class ChestScanner implements Listener {
 	 */
 	private void beginScanning(Player playerFor, final MaxMin maxmin) {
 		Messenger.sendConfigMessage(playerFor, "chest.set.initialize");
-		ScannerRunnable sr = new ScannerRunnable(maxmin, playerFor);
+		ScannerRunnable sr = new ScannerRunnable(maxmin, playerFor, maxmin.lootsets);
 		sr.task = MyZ.instance.getServer().getScheduler().runTaskTimer(MyZ.instance, sr, 0L, 2L);
 	}
 
@@ -250,10 +267,12 @@ public class ChestScanner implements Listener {
 		private int x, iters;
 		private final Player player;
 		private final World world;
+		private final Random r = new Random();
 		private BukkitTask task;
 		private List<String> chestsFound = new ArrayList<String>();
+		private List<String> lootsets;
 
-		public ScannerRunnable(MaxMin maxmin, Player player) {
+		public ScannerRunnable(MaxMin maxmin, Player player, List<String> lootsets) {
 			world = player.getWorld();
 			if (maxmin.x1 < maxmin.x2) {
 				x1 = maxmin.x1;
@@ -272,15 +291,30 @@ public class ChestScanner implements Listener {
 			x = x1;
 			totalIters = x2 - x1;
 			this.player = player;
+			this.lootsets = lootsets;
 		}
 
 		@Override
 		public void run() {
 			for (int z = z1; z < z2; z++) {
 				int highY = world.getHighestBlockYAt(x, z);
-				for (int y = highY; y > 0; y--)
-					if (world.getBlockAt(x, y, z).getType() == Material.CHEST)
+				for (int y = highY; y > 0; y--) {
+					Block b = world.getBlockAt(x, y, z);
+					if (b.getType() == Material.CHEST) {
 						chestsFound.add(x + "," + y + "," + z);
+						if (lootsets != null && !lootsets.isEmpty()) {
+							String s = lootsets.get(r.nextInt(lootsets.size()));
+							Chest chestObject = (Chest) b.getState().getData();
+							String location = b.getWorld().getName() + "," + b.getX() + "," + b.getY() + "," + b.getZ();
+							location += "," + chestObject.getFacing().toString();
+							Configuration.setChest(location, s);
+							nameChest(b, s);
+							ChestManager.respawn(b.getLocation(), true);
+							Messenger.sendMessage(player, "&eChest at " + ChatColor.BLUE + b.getX() + ", " + b.getY() + ", " + b.getZ()
+									+ " &eset to hold " + ChatColor.BLUE + s + "&e.");
+						}
+					}
+				}
 			}
 			Messenger.sendMessage(player, "&eScan completed: " + iters + "/" + totalIters);
 			iters++;
@@ -321,6 +355,12 @@ public class ChestScanner implements Listener {
 
 	private static class MaxMin {
 		private int x1 = Integer.MAX_VALUE, z1 = Integer.MAX_VALUE, x2 = Integer.MAX_VALUE, z2 = Integer.MAX_VALUE;
+
+		private final List<String> lootsets;
+
+		public MaxMin(List<String> lootsets) {
+			this.lootsets = lootsets;
+		}
 
 		public boolean hasSetCoord1() {
 			return x1 != Integer.MAX_VALUE;
