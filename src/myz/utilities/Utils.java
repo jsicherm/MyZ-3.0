@@ -414,7 +414,8 @@ public class Utils {
 		if (page < 1)
 			page = inventories.size();
 		page--;
-		player.openInventory(inventories.get(page));
+		if (inventories.get(page) != null)
+			player.openInventory(inventories.get(page));
 	}
 
 	/**

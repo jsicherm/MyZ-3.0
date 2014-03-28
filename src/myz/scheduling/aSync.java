@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -51,7 +52,7 @@ public class aSync implements Runnable {
 				Messenger.sendConsoleMessage("&4Specified world (" + world + ") does not exist! Please update your config.yml");
 				continue;
 			}
-			for (Player player : new ArrayList<Player>(MyZ.instance.getServer().getWorld(world).getPlayers())) {
+			for (final Player player : getSyncPlayers(world)) {
 				if (player.getGameMode() == GameMode.CREATIVE || Configuration.isInLobby(player))
 					continue;
 
@@ -81,26 +82,24 @@ public class aSync implements Runnable {
 
 				player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
 
-				// Increase thirst level by swimming or by standing in the rain.
-				boolean isRaining = false;
-				Object nmsplayer = NMSUtils.castToNMS(player);
-				if (nmsplayer != null)
-					try {
-						isRaining = (Boolean) nmsplayer
-								.getClass()
-								.getMethod("isRainingAt", int.class, int.class, int.class)
-								.invoke(nmsplayer, player.getLocation().getBlockX(), player.getLocation().getBlockY(),
-										player.getLocation().getBlockZ());
-					} catch (Exception exc) {
+				MyZ.instance.getServer().getScheduler().runTask(MyZ.instance, new Runnable() {
+					public void run() {
+						// Increase thirst level by swimming or by standing in
+						// the rain.
+						boolean isRaining = false;
+						Object nmsplayer = NMSUtils.castToNMS(player);
+						if (nmsplayer != null)
+							try {
+								isRaining = (Boolean) nmsplayer
+										.getClass()
+										.getMethod("isRainingAt", int.class, int.class, int.class)
+										.invoke(nmsplayer, player.getLocation().getBlockX(), player.getLocation().getBlockY(),
+												player.getLocation().getBlockZ());
+							} catch (Exception exc) {
+							}
+						syncLiquidCheck(player, isRaining);
 					}
-				if (player.getLevel() < (Integer) Configuration.getConfig(Configuration.THIRST_MAX)
-						&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
-								&& noBlocksAbove(player.getLocation())))
-					if (ticks % (random.nextInt(2) + 1) == 0) {
-						PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
-						if (!event.isCancelled())
-							MyZ.instance.setThirst(player, player.getLevel() + 1);
-					}
+				});
 
 				// Take bleeding damage.
 				if (ticks % (Integer) Configuration.getConfig("damage.bleed_damage_frequency") == 0 && MyZ.instance.isBleeding(player)
@@ -144,6 +143,42 @@ public class aSync implements Runnable {
 	}
 
 	/**
+	 * Get a list of online players synchronously.
+	 * 
+	 * @param world
+	 *            The name of the world to get players in.
+	 * @return The list of players.
+	 */
+	private List<Player> getSyncPlayers(final String world) {
+		return MyZ.instance.getServer().getWorld(world).getPlayers();
+	}
+
+	/**
+	 * Force a sync check of the location surrounding the player to see if it's
+	 * liquidy around them.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @param isRaining
+	 *            Whether or not it's raining where they are.
+	 */
+	private void syncLiquidCheck(final Player player, final boolean isRaining) {
+		// MyZ.instance.getServer().getScheduler().runTask(MyZ.instance, new
+		// Runnable() {
+		// public void run() {
+		if (player.getLevel() < (Integer) Configuration.getConfig(Configuration.THIRST_MAX)
+				&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
+						&& noBlocksAbove(player.getLocation())))
+			if (ticks % (random.nextInt(2) + 1) == 0) {
+				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
+				if (!event.isCancelled())
+					MyZ.instance.setThirst(player, player.getLevel() + 1);
+			}
+		// }
+		// });
+	}
+
+	/**
 	 * Check if there are any blocks above the specified location. Searches from
 	 * this location's y to max build height.
 	 * 
@@ -152,9 +187,11 @@ public class aSync implements Runnable {
 	 * @return False if there are any blocks above the given location.
 	 */
 	private boolean noBlocksAbove(Location loc) {
-		for (int y = loc.getBlockY(); y < loc.getWorld().getMaxHeight(); y++)
-			if (loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ()).getType() != Material.AIR)
+		for (int y = loc.getBlockY(); y < loc.getBlockY() + 30; y++) {
+			Block b;
+			if ((b = loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ())) != null && b.getType() != Material.AIR)
 				return false;
+		}
 		return true;
 	}
 }

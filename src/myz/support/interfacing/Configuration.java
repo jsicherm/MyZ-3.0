@@ -24,6 +24,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -549,8 +550,10 @@ public class Configuration {
 	public static Set<String> getLootsets() {
 		FileConfiguration config = MyZ.instance.getChestsConfig();
 		Set<String> keys = new HashSet<String>();
-		for (String key : config.getConfigurationSection("loot").getKeys(false))
-			keys.add(key);
+		ConfigurationSection s = config.getConfigurationSection("loot");
+		if (s != null)
+			for (String key : s.getKeys(false))
+				keys.add(key);
 		return keys;
 	}
 

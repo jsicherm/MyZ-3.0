@@ -81,6 +81,9 @@ commands:
   lootset:
     description: Set the contents of a lootset.
     permission: MyZ.world_admin
+  mtranslate:
+    description: Transpose a translation file.
+    permission: MyZ.admin
 
 permissions:
   MyZ.*:

@@ -76,7 +76,7 @@ public class ChestManager {
 				boolean wasChest = location.getBlock().getType() == Material.CHEST;
 				if (wasChest) {
 					org.bukkit.block.Chest test = (org.bukkit.block.Chest) location.getBlock().getState();
-					wasChest = test.getBlockInventory().getContents().length > 0;
+					wasChest = !isEmpty(test.getBlockInventory());
 				} else {
 					location.getBlock().setType(Material.CHEST);
 					Chest chest = (Chest) location.getBlock().getState().getData();
@@ -86,9 +86,24 @@ public class ChestManager {
 
 				String lootset = getLootset(location);
 				ChestScanner.nameChest(location.getBlock(), lootset);
-				if (!wasChest)
+				if (!wasChest) {
 					fillChest(((org.bukkit.block.Chest) location.getBlock().getState()).getBlockInventory(), lootset);
+				}
 			}
+	}
+
+	/**
+	 * Get whether or not an inventory is empty.
+	 * 
+	 * @param i
+	 *            The inventory.
+	 * @return True if it was empty, false otherwise.
+	 */
+	private static boolean isEmpty(Inventory i) {
+		for (ItemStack item : i.getContents()) {
+			if (item != null && item.getType() != Material.AIR) { return false; }
+		}
+		return true;
 	}
 
 	/**

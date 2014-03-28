@@ -22,7 +22,7 @@ import myz.chests.ChestScanner;
 import myz.commands.AddResearchCommand;
 import myz.commands.AddSpawnCommand;
 import myz.commands.AllowedCommand;
-import myz.commands.BaseCommand;
+import myz.commands.TranslateCommand;
 import myz.commands.BlockCommand;
 import myz.commands.ChestGetCommand;
 import myz.commands.ChestScanCommand;
@@ -204,12 +204,13 @@ public class MyZ extends JavaPlugin {
 		getCommand("research").setExecutor(new ResearchCommand());
 		getCommand("setresearch").setExecutor(new AddResearchCommand());
 		getCommand("stats").setExecutor(new StatsCommand());
-		getCommand("myz").setExecutor(new BaseCommand());
+		getCommand("myz").setExecutor(new TranslateCommand());
 		getCommand("configure").setExecutor(new ItemConfigurationCommand());
 		getCommand("chestscan").setExecutor(new ChestScanCommand());
 		getCommand("chestset").setExecutor(new ChestSetCommand());
 		getCommand("chestget").setExecutor(new ChestGetCommand());
 		getCommand("lootset").setExecutor(new LootSetCommand());
+		getCommand("mtranslate").setExecutor(new TranslateCommand());
 
 		/*
 		 * Register all listeners.
@@ -409,12 +410,22 @@ public class MyZ extends JavaPlugin {
 	}
 
 	/**
-	 * Load the localizable YAML file.
+	 * Get the folder that holds the locales.
+	 * 
+	 * @return The folder (MyZ-3/locales/).
 	 */
-	private void loadLocalizable() {
+	public File getLocales() {
 		File folder = new File(getDataFolder() + File.separator + "locales");
 		if (!folder.exists())
 			folder.mkdir();
+		return folder;
+	}
+
+	/**
+	 * Load the localizable YAML file.
+	 */
+	private void loadLocalizable() {
+		getLocales();
 		for (Localizer locale : Localizer.values()) {
 			File localeable = new File(getDataFolder() + File.separator + "locales" + File.separator + locale.getCode() + ".yml");
 			if (!localeable.exists())

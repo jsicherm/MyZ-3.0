@@ -124,11 +124,13 @@ public class ResearchItem implements Listener {
 			MyZ.instance.getSQLManager().set(player.getUniqueId(), "research",
 					(before = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "research")) + points, true);
 		after = before + points;
-		checkRankIncrease(player, before, after, rank);
+		if (points != 0) {
+			checkRankIncrease(player, before, after, rank);
 
-		String msg = Messenger.getConfigMessage(Localizer.getLocale(player), slug, points + "");
-		Hologram hologram = new Hologram(msg);
-		hologram.show(location.clone().subtract(0, Hologram.distance, 0), player);
+			String msg = Messenger.getConfigMessage(Localizer.getLocale(player), slug, points + "");
+			Hologram hologram = new Hologram(msg);
+			hologram.show(location.clone().subtract(0, Hologram.distance, 0), player);
+		}
 		return true;
 	}
 

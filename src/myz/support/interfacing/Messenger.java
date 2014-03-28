@@ -61,7 +61,12 @@ public class Messenger {
 		msg = msg.replaceAll("%THIRST%", "" + player.getLevel());
 		msg = msg.replaceAll("%HEALTH%", "" + (int) player.getHealth());
 		if (MyZ.vault)
-			msg = msg.replaceAll("%GROUP%", VaultUtils.permission.getPrimaryGroup(player));
+			try {
+				msg = msg.replaceAll("%GROUP%", VaultUtils.permission.getPrimaryGroup(player));
+			} catch (Exception exc) {
+				String c = ChatColor.getLastColors(msg);
+				msg = msg.replaceAll("%GROUP%", ChatColor.RED + "N/A" + c);
+			}
 
 		return msg;
 	}

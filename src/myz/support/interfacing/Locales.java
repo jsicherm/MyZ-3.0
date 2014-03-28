@@ -21,6 +21,7 @@ public class Locales {
 
 	private static final Map<String, Object> defaultSet = new HashMap<String, Object>();
 	private static final Map<String, Object> pirateSet = new HashMap<String, Object>();
+	private static final Map<String, Object> turkishSet = new HashMap<String, Object>();
 	private static final Map<String, Object> unSet = new HashMap<String, Object>();
 
 	/**
@@ -46,6 +47,9 @@ public class Locales {
 				case PIRATE_SPEAK:
 					map = pirateSet;
 					break;
+				case TURKISH:
+					map = turkishSet;
+					break;
 				default:
 					map = defaultSet;
 					break;
@@ -53,6 +57,15 @@ public class Locales {
 				for (String key : map.keySet())
 					if (!file.isSet(key))
 						file.set(key, map.get(key));
+
+				// Make sure we assign an english default to locales that aren't
+				// updated.
+				if (locale != Localizer.DEFAULT)
+					for (String key : defaultSet.keySet()) {
+						if (!file.isSet(key)) {
+							file.set(key, defaultSet.get(key));
+						}
+					}
 				codesCovered.add(locale.getCode());
 				MyZ.instance.saveLocalizableConfig(locale);
 			}
@@ -78,8 +91,8 @@ public class Locales {
 		defaultSet.put("chest.set.begin", "&eStarting MyZ Chest Log. This will cause some lag and take awhile.");
 		defaultSet.put("chest.set.nonchest", "&4That isn't a chest.");
 		defaultSet.put("chest.set.typeis", "&eThat chest now has the loot table: %s");
-		defaultSet.put("chest.set.coordinate1", "&ePunch one corner of the area you want scanned.");
-		defaultSet.put("chest.set.coordinate2", "&ePunch the other corner of the area you want scanned.");
+		defaultSet.put("chest.set.coordinate1", "&eRight-click one corner of the area you want scanned.");
+		defaultSet.put("chest.set.coordinate2", "&eRight-click the other corner of the area you want scanned.");
 		defaultSet.put("chest.set.initialize",
 				"&eInitializing a scan on the selected area. Run another scan concurrently at your own peril.");
 
@@ -243,6 +256,7 @@ public class Locales {
 		defaultSet.put("friend.removed", "&e%s &9has been removed from your friends list.");
 
 		loadPirate();
+		loadTurkish();
 	}
 
 	/**
@@ -405,5 +419,126 @@ public class Locales {
 		pirateSet.put("command.friend.empty", "&4Yer crew has abandoned you.");
 		pirateSet.put("friend.added", "&e%s &9has been added to your crew.");
 		pirateSet.put("friend.removed", "&e%s &9has been removed from your crew list.");
+	}
+
+	private static void loadTurkish() {
+		Map<String, Object> set = turkishSet;
+
+		set.put("command.research.item_no_exists", "&4Bu esya aratilabilir degil.");
+		set.put("command.research.arguments", "&4Kullanim: /setresearch <addreward [puan degeri]/add [point degeri]/remove>");
+		set.put("command.research.added", "&eArtik oyuncular %s ile %s arama noktalari icin arama yapabiliyorlar!");
+		set.put("command.research.item", "&eElinde aranabilirlige eklemek/cikarmak istedigin esyayi tutuyor olman gerek.");
+		set.put("command.research.reward.added", "&ePlayers can now research %s with %s research points.");
+		set.put("command.research.removed", "&ePlayers can no longer research %s.");
+		set.put("command.research.item_exists", "&4Bu madde zaten arastirilabilir oldugunu.");
+		set.put("command.spawn.unable_to_spawn", "&4Belirtiginiz yerde canlanma mumkun olamadi. Lutfen biraz sonra deneyin.");
+		set.put("command.spawn.requires_rank", "&4Arkadaslarinin yaninda canlanmak VIP Ozelligidir! Hemen Kos bir tane al derim.");
+		set.put("command.spawn.too_far_from_lobby", "&4Lobiden cok uzaksin.");
+		set.put("command.friend.non_exist", "&4%s boyle bir oyuncu daha once hic bu servera gelmemis.");
+		set.put("command.friend.requires_name", "&4Arkadasinin ismini de yazmalisin.");
+		set.put("command.friend.empty", "&4Hic arkadasin yok.");
+		set.put("command.stats.kills_header", "==== &eKILLS&r ====");
+		set.put("command.stats.footer", "Tum statlarini buradan gorebilirsin http://my-z.org#statistics");
+		set.put("command.stats.time", "Toplam: &e%s dakika&r Bu yasaminda: &e%s dakika.");
+		set.put("command.stats.header", "==== &e%s&r icin istatikler ====");
+		set.put("command.stats.time_header", "==== &eHayatta Kalinan sure&r ====");
+		set.put("command.stats.kills", "Zombi: &e%s&r  Zombi Domuz: &e%s&r  Dev: &e%s&r  Oyuncu: &e%s");
+		set.put("command.saverank.saved", "&eDerece %s icin prefix %s olarak ayarlandi.");
+		set.put("command.saverank.requires_number", "&4Kaydetmek icin belli bir derece belirtmen gerek.");
+		set.put("command.saverank.requires_prefix", "&4Belli bir prefix belirtmeniz gerek.");
+		set.put("command.block.destroy.remove.help", "&eSimdi karalistelemek istedigin bloka suan kirabildigin bir esya ile vur.");
+		set.put("command.block.destroy.remove.fail", "&eOyuncular %s blocklarini  %ss kullanarak kiramiyorlar.");
+		set.put("command.block.destroy.remove.summary", "&eArtik oyuncular %s bloklarini %ss kullanarak yok edemiyorlar.");
+		set.put("command.block.destroy.add.summary", "&eArtik oyuncular %s blocklari %ss kullanarak kirabilirler.");
+		set.put("command.block.destroy.add.fail", "&eOyuncular zaten %s bloklarini %ss kullanarak kirabiliyorlar");
+		set.put("command.block.destroy.add.help",
+				"&eSimdi beyazlisteye eklemek istedigin bloka hangi esya ile kirilmasini istiyorsan o esyayi kullanarak vur.");
+		set.put("command.block.destroy.arguments", "&4Kullanim: /blockallow destroy <add [canlanmasina kadar gececek olan saniye]/remove>");
+		set.put("command.block.place.remove.help", "&eKaralistelemek istedigin blogu yere koy.");
+		set.put("command.block.place.remove.summary", "&eArtik oyuncular %s bloklarini koyamiyorlar.");
+		set.put("command.block.place.remove.fail", "&eOyuncular %s lari koyamiyorlar.");
+		set.put("command.block.place.add.help", "&eBeyaz listelemek istedigin blogu yere koy.");
+		set.put("command.block.place.add.summary", "&eArtik oyuncular %s bloklarini koyabiliyorlar.");
+		set.put("command.block.place.add.fail", "&eOyuncular zaten %s bloklarini koyabiliyorlar.");
+		set.put("command.block.place.arguments", "&4Kullanim: /blockallow place <add [yok olmasina kadar gececek olan saniye]/remove>");
+		set.put("command.block.arguments", "&4Kullanim: /blockallow <place/destroy>");
+		set.put("command.setlobby.updated", "&2Lobi guncellendi.");
+		set.put("command.setlobby.requires_cuboid", "&4WorldEdit kullanarak &ocuboid&r &4bir secim yapmalisin.");
+		set.put("command.setrank.success", "&eOyuncunun derecesini basariyla ayarladiniz.");
+		set.put("command.setrank.failure", "&4Oyuncunun ismini ve derece seviyesini(0'a esit veya 0'dan buyuk) belirtmeniz gerek.");
+		set.put("command.addspawn.added", "&eCanlanma noktasi eklendi.");
+		set.put("command.addspawn.already_exists", "&4Burasi zaten bir canlanma noktasi.");
+		set.put("command.removespawn.requires_number",
+				"&4Canlanma noktasi numarasi belirtmelisiniz. Numaralari gormek icin /spawnpoints yazin.");
+		set.put("command.removespawn.unable_to_remove", "&4yazdiginiz numara cok uzakta.");
+		set.put("command.removespawn.removed", "&eCanlanma noktasi kaldirildi.");
+		set.put("command.base.help", "=== MyZ Yardim ===");
+		set.put("command.savekit.saved", "&e%s derecesi icin canlanma kiti suanki envanterinize gore duzenlendi.");
+		set.put("command.savekit.requires_number", "&4Kaydetmek icin belli bir derece belirtmeniz gerek.");
+		set.put("command.clan.in", "Oldugun klan &e%s&r (%s acik / %s toplam).");
+		set.put("command.clan.not_in", "Bir klanda degilsin.");
+		set.put("command.clan.leave", "Artik klanda degilsin.");
+		set.put("command.allowed.breakable", "&eKirabileceklerin:");
+		set.put("command.allowed.placeable", "&eKoyabileceklerin:");
+		set.put("damage.headshot", "&eTam kafadan! &42x &ehasar.");
+		set.put("damage.leg_break", "&4Of! Biraz yuksek bir duşustu!");
+		set.put("damage.leg_fix", "Heh, artik daha iyi yuruyebilirim!");
+		set.put("damage.poison_end", "Ah, cok daha iyi!");
+		set.put("damage.bleed_end", "Bunun kanamayi durdurmasi gerek.");
+		set.put("damage.poison_begin", "&5Wh&ko&r&da, &5&kBen &1p&ke&4k &3i&4&ky&r&5i &6h&2i&1s&4&ks&r&7e&8t&9mi&ay&b&ko&r&4r&cu&dm!");
+		set.put("damage.bleed_begin", "&4Ovovovov! Galiba kaniyorum!");
+		set.put("loot.set.arguments", "&4Lutfen loot listesine bir isim verin.");
+		set.put("loot.set.percent", "Lutfen %de kac canlanma sansi oldugunu sohbet bolumune yazarak belirtin (0-100).");
+		set.put("loot.set.info",
+				"&eSimdi envanterinize loot listesinde bulunmasini istediginiz esyalari alin ve sohbet bolumune her hangi bir sey yazin ve onunuze gelen ekranda yukari bolume esyalari kacar kacar canlanmasini istiyorsaniz o kadarli koyun ve sohbet bolumune canlanma yuzdesini yazin bu islemi istediginiz kadar tekrarlayin.");
+		set.put("friend.added", "&e%s &9arkadas listene eklendi.");
+		set.put("friend.removed", "&e%s &9arkadas listenden silindi.");
+		set.put("gui.purchased", "Artik &e%s&r puanin var.");
+		set.put("gui.cost", "%s Arama Puani");
+		set.put("gui.previous_page", "Onceki Sayfa");
+		set.put("gui.next_page", "Siradaki Sayfa");
+		set.put("gui.afford", "Bunu kullanmak icin yeterli bilgin yok.");
+		set.put("zombie.kill_amount", "&eZombi olduruldu. toplam oldurme %s.");
+		set.put("murdered", "&4OLDURULDU");
+		set.put("research.fail", "&eTip tanrilari istegini red ettiler gibi.");
+		set.put("research.success", "&eArtik hastalik hakkinda daha fazla bilgin var ve %s kadar arama puani kazandin. Tebrikler!");
+		set.put("research.rank", "&eTanrilar seni duyamiyor. Arama yapmak icin dereceli olman gerek.");
+		set.put("safe_logout.cancelled", "&4Hareket ettiginiz icin guvenli cikis iptal edildi.");
+		set.put("safe_logout.beginning", "&2Guvenli cikis icin:");
+		set.put("chest.set.typeis", "&eBu sandik artik %s adli loot listesindeki lootlara sahip.");
+		set.put("chest.set.begin", "&eMyZ sandik logu calistiriliyor.Bu Biraz laga sebeb olabilir.");
+		set.put("chest.set.click", "&eAyarlamak istedigin sandiga sag tikla.");
+		set.put("chest.set.initialize", "&eTarama basliyor!");
+		set.put("chest.set.coordinate2", "&eSimdide taramak istedigin yerin obur kosesine vur.");
+		set.put("chest.set.coordinate1", "&eTaramak istedigin yerin bir kosesine vur.");
+		set.put("chest.set.nonchest", "&4O bir sandik degil.");
+		set.put("chest.get.typeis", "&eBu sandik %s lootlarina sahip.");
+		set.put("chest.get.nonchest", "&4O bir sandik degil.");
+		set.put("chest.get.click", "&eAlmak istedigin sandiga sag tikla.");
+		set.put("private.to_prefix", "&7Gonderilen %s:");
+		set.put("private.no_player", "&4Oyuncu bulunamadi.");
+		set.put("private.many_players", "&4Birden fazla oyuncu bulundu.");
+		set.put("private.from_prefix", "&7Gonderen kisi %s:");
+		set.put("private.clan_prefix", "&8Klan konusmasi:");
+		set.put("giant.kill_amount", "&eDev olduruldu. Toplam dev oldurmelerin %s.");
+		set.put("special.giant_summon_permission", "&4Bu VIPlere ozel bir ozellik! Hemen kos bir tane al.");
+		set.put("special.giant_could_not_summon", "&eBurada bir dev icin yeterli alan yok.");
+		set.put("special.giant_summoned", "&eYer sallaniyor! Bu bir anlama gelebilir, bir dev geliyor!");
+		set.put("heal.wait", "Lutfen birini iyilestirmek icin %s saniye bekleyin.");
+		set.put("heal.waste", "&eHm, guzel bir harcama oldu.");
+		set.put("heal.amount", "&eOyuncu &2iyilestirildi&e. Toplam iyilestirmeler %s.");
+		set.put("pigman.kill_amount", "&eZombi domuz olduruldu. Toplam %s tane oldurdun.");
+		set.put("clan.namez.too_long", "&4Klan isimleri 20 harften kisa olmalidir.");
+		set.put("clan.joined", "&e%s&r adli klana katilma istedigin kabul edildi.");
+		set.put("clan.joining", "Klana katilma istegi gonderildi.");
+		set.put("kick.safe_logout", "&eBasariyla guvenli cikis yaptiniz.");
+		set.put("kick.come_back", "&4Git bir icecek al ! %s saniyeye geri gel.");
+		set.put("bandit.amount", "&eOyuncu &olduruldu&e. toplam oldurmeler %s.");
+		set.put("ranks.spawnmessage.0", "Zalim dunyaya canlandin. Hayatta kal!");
+		set.put("player_npc_killed", "&e%s combat logginde oldu.");
+		set.put("player_was_killed_npc", "&eCombat logginde oldun.");
+		set.put("spawn.zombie",
+				"Artik bir &2zombisin&r! Zombiyken obur zombiler sana saldirmayacaktir. Asla susamassin veya kanamazsin ancak canlanma kitin yoktur ve yasayanlara karsi dusmansin!");
+
 	}
 }

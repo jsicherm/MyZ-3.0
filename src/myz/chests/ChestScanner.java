@@ -34,8 +34,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -105,7 +107,7 @@ public class ChestScanner implements Listener {
 		Messenger.sendConfigMessage(player, "loot.set.info");
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	private void onChat(AsyncPlayerChatEvent e) {
 		if (looters.containsKey(e.getPlayer().getUniqueId())) {
 			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
@@ -125,6 +127,16 @@ public class ChestScanner implements Listener {
 					+ percent + "%");
 			lootCreators.get(e.getPlayer().getUniqueId()).spawnable.put(lootCreators.get(e.getPlayer().getUniqueId()).newest, percent);
 			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
+		}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	private void onPlaceChest(BlockPlaceEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
+		if (e.getBlock().getType() == Material.CHEST && ChestManager.isMyZChest(e.getBlock().getLocation())) {
+			ChestManager.respawn(e.getBlock().getLocation(), true);
 		}
 	}
 
@@ -181,7 +193,9 @@ public class ChestScanner implements Listener {
 			for (ItemStack item : lootset.spawnable.keySet())
 				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
 			lootCreators.remove(e.getPlayer().getUniqueId());
-		} else if (e.getInventory().getType() == InventoryType.CHEST) {
+		} else if (e.getInventory().getType() == InventoryType.CHEST && e.getInventory().getHolder() != null
+				&& e.getInventory().getHolder() instanceof org.bukkit.block.Chest
+				&& ChestManager.isMyZChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation())) {
 			ResearchItem.research((Player) e.getPlayer(), (Integer) Configuration.getConfig("chest.research-reward"),
 					((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation(), "research.success-short");
 
@@ -190,7 +204,7 @@ public class ChestScanner implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	private void onClick(PlayerInteractEvent e) {
 		if (scanners.containsKey(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
@@ -232,11 +246,13 @@ public class ChestScanner implements Listener {
 			e.setCancelled(true);
 			getters.remove(e.getPlayer().getUniqueId());
 			Location inLoc = e.getClickedBlock().getLocation();
-			String location = inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
+			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
 			if (e.getClickedBlock().getType() != Material.CHEST) {
 				Messenger.sendConfigMessage(e.getPlayer(), "chest.get.nonchest");
 				return;
 			}
+			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
+			location += "," + chestObject.getFacing().toString();
 			String slug = "&4N/A";
 			if (Configuration.getChests().containsKey(location)) {
 				slug = Configuration.getChests().get(location);
