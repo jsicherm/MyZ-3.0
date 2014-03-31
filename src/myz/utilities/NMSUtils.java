@@ -21,17 +21,6 @@ public class NMSUtils {
 	private static Method getHandle, sendPacket;
 	private static Field connection;
 
-	public static void setDeclaredField(Object obj, String fieldName, Object value) {
-		try {
-			Field f = obj.getClass().getDeclaredField(fieldName);
-			f.setAccessible(true);
-			f.set(obj, value);
-			f.setAccessible(false);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * Try to cast a player to a CraftPlayer.
 	 * 
@@ -103,5 +92,16 @@ public class NMSUtils {
 			sendPacket = con.getClass().getMethod("sendPacket", packet);
 		if (sendPacket != null)
 			sendPacket.invoke(con, inPacket);
+	}
+
+	public static void setDeclaredField(Object obj, String fieldName, Object value) {
+		try {
+			Field f = obj.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
+			f.set(obj, value);
+			f.setAccessible(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

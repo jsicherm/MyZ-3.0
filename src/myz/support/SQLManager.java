@@ -66,264 +66,12 @@ public class SQLManager {
 		longcolumns.addAll(Arrays.asList("timeOfKickban", "minutes_alive"));
 	}
 
-	public static String UUIDtoString(UUID uid) {
-		return uid.toString().replaceAll("-", "");
-	}
-
 	public static UUID fromString(String uid) {
 		return UUID.fromString(uid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
 	}
 
-	public void executeQuery(String query) throws SQLException {
-		sql.createStatement().executeUpdate(query);
-	}
-
-	/**
-	 * Establish connection with MySQL.
-	 */
-	public void connect() {
-		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
-
-		String url = "jdbc:mysql://" + hostname + ":" + port + "/" + database;
-
-		// Attempt to connect
-		try {
-			// Connection succeeded
-			sql = DriverManager.getConnection(url, username, password);
-			connected = true;
-			Messenger.sendConsoleMessage(ChatColor.GREEN + "Connection successful.");
-			setup();
-		} catch (Exception e) {
-			// Couldn't connect to the database
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to connect: " + e.getMessage());
-			connected = false;
-		}
-	}
-
-	/**
-	 * Disconnect from MySQL.
-	 */
-	public void disconnect() {
-		if (sql != null && connected) {
-			Messenger.sendConsoleMessage(ChatColor.YELLOW + "Disconnected from MySQL.");
-			try {
-				sql.close();
-			} catch (SQLException e) {
-				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to close MySQL connection: " + e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * @return true if connected to MySQL.
-	 */
-	public boolean isConnected() {
-		return connected;
-	}
-
-	/**
-	 * Create tables.
-	 */
-	public void setup() {
-		if (!isConnected())
-			return;
-		try {
-			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(40) PRIMARY KEY, name VARCHAR(17) NOT NULL DEFAULT 'Guest', player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends TEXT NOT NULL, heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0, research INT UNSIGNED NOT NULL DEFAULT 0, isZombie TINYINT(1) NOT NULL DEFAULT 0, legBroken TINYINT(1) NOT NULL DEFAULT 0)");
-			updateRanks();
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
-		}
-	}
-
-	public void updateRanks() {
-		try {
-			if (MyZ.vault)
-				for (UUID uid : getKeys())
-					VaultUtils.permission.playerAdd((String) null, MyZ.instance.getName(uid), "MyZ.rank." + getInt(uid, "rank"));
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.BLUE + "Unable to execute MySQL setup command. This may not be an error: "
-					+ e.getMessage());
-		}
-	}
-
-	/**
-	 * Empty the given table.
-	 * 
-	 * @param table
-	 *            The table name
-	 * @return non null if deletion was successful
-	 */
-	public ResultSet emptyTable(String table) {
-		return query("TRUNCATE TABLE " + table);
-	}
-
-	/**
-	 * Add a player to the table if they're not currently in.
-	 * 
-	 * @param player
-	 *            The user to add
-	 */
-	public void add(Player player) {
-		if (!isIn(player.getUniqueId()))
-			try {
-				cachedKeyValues.add(player.getUniqueId());
-				executeQuery("INSERT INTO playerdata (username, name) VALUES ('" + UUIDtoString(player.getUniqueId()) + "', '"
-						+ player.getName() + "')");
-			} catch (Exception e) {
-				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
-				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
-				connect();
-			}
-	}
-
-	/**
-	 * Query a MySQL command
-	 * 
-	 * @param cmd
-	 *            The command
-	 * @return If the command executed properly
-	 */
-	private ResultSet query(String cmd) {
-		if (!isConnected())
-			return null;
-		try {
-			return sql.createStatement().executeQuery(cmd);
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL query command '" + cmd + "': " + e.getMessage());
-			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
-			connect();
-			return null;
-		}
-	}
-
-	/**
-	 * Determine whether or not a given username is in the table.
-	 * 
-	 * @param name
-	 *            The username to check
-	 * @return true if the user is in the table.
-	 */
-	public boolean isIn(UUID name) {
-		boolean isin = false;
-
-		/*// Make sure our player is in the data cache.
-		if (!cachedBooleanValues.containsKey(name)) {
-			Map<String, Boolean> insert = new HashMap<String, Boolean>();
-			insert.put("isin", false);
-			cachedBooleanValues.put(name, insert);
-		} else {
-			// Our player was already in the data cache so let's see if the
-			// player has the right key.
-			Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
-			if (!received.containsKey("isin")) {
-				received.put("isin", false);
-				cachedBooleanValues.put(name, received);
-			} else
-				// The player had the key already so let's return it.
-				return cachedBooleanValues.get(name).get("isin");
-		}*/
-
-		if (!isConnected())
-			return isin;
-		try {
-			isin = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1").next();
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL isin command: " + e.getMessage());
-			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
-			connect();
-			isin = false;
-		}
-		/*// Update the keyset because we don't have the current value.
-		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
-		received.put("isin", isin);
-		cachedBooleanValues.put(name, received);*/
-
-		return isin;
-	}
-
-	/**
-	 * Get a list of all primary keys in the table.
-	 * 
-	 * @return A list of all the primary keys, an empty list if none found or
-	 *         null if not connected.
-	 */
-	public List<UUID> getKeys() {
-		// Return the cached values if we have them.
-		if (!cachedKeyValues.isEmpty())
-			return cachedKeyValues;
-
-		if (!isConnected())
-			return null;
-		List<UUID> list = new ArrayList<UUID>();
-		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username != 'null'");
-			if (rs != null)
-				while (rs.next())
-					if (rs.getString("username") != null)
-						list.add(fromString(rs.getString("username")));
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
-			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
-			connect();
-		}
-
-		// We didn't have any key values stored so let's add all of them.
-		cachedKeyValues.addAll(list);
-		return list;
-	}
-
-	/**
-	 * Run a query to set data in MySQL.
-	 * 
-	 * @param name
-	 *            The primary key.
-	 * @param field
-	 *            The field.
-	 * @param value
-	 *            The value.
-	 * @param aSync
-	 *            Whether or not to use an aSync thread to execute the command.
-	 */
-	public void set(UUID name, String field, Object value, boolean aSync) {
-		set(name, field, value, aSync, !aSync);
-	}
-
-	/**
-	 * @see set(String name, String field, Object value, boolean aSync).
-	 * 
-	 * @param forcingaSync
-	 *            A distinguisher to ensure we update the cache because it
-	 *            wasn't updated aSynchronously.
-	 */
-	public void set(final UUID name, final String field, final Object value, boolean aSync, boolean forcingaSync) {
-		if ("rank".equals(field)) {
-			Player p = MyZ.instance.getPlayer(name);
-			if (p != null && MyZ.vault)
-				VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + value);
-		}
-		if (aSync) {
-			// Make sure we update our cached values when we set new ones. Do it
-			// before we execute the query in case of async demands.
-			doUpdateCache(name, field, value);
-			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
-				@Override
-				public void run() {
-					set(name, field, value, false, true);
-				}
-			}, 0L);
-			return;
-		}
-		try {
-			if (forcingaSync)
-				// Make sure we update our cached values when we set new ones.
-				doUpdateCache(name, field, value);
-			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
-		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + UUIDtoString(name) + "." + field
-					+ ": " + e.getMessage());
-			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
-			connect();
-		}
+	public static String UUIDtoString(UUID uid) {
+		return uid.toString().replaceAll("-", "");
 	}
 
 	/**
@@ -383,6 +131,179 @@ public class SQLManager {
 				received.put(field, (Boolean) value);
 				cachedBooleanValues.put(name, received);
 			}
+	}
+
+	/**
+	 * Query a MySQL command
+	 * 
+	 * @param cmd
+	 *            The command
+	 * @return If the command executed properly
+	 */
+	private ResultSet query(String cmd) {
+		if (!isConnected())
+			return null;
+		try {
+			return sql.createStatement().executeQuery(cmd);
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL query command '" + cmd + "': " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
+			return null;
+		}
+	}
+
+	/**
+	 * Add a player to the table if they're not currently in.
+	 * 
+	 * @param player
+	 *            The user to add
+	 */
+	public void add(Player player) {
+		if (!isIn(player.getUniqueId()))
+			try {
+				cachedKeyValues.add(player.getUniqueId());
+				executeQuery("INSERT INTO playerdata (username, name) VALUES ('" + UUIDtoString(player.getUniqueId()) + "', '"
+						+ player.getName() + "')");
+			} catch (Exception e) {
+				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
+				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+				connect();
+			}
+	}
+
+	/**
+	 * Establish connection with MySQL.
+	 */
+	public void connect() {
+		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
+
+		String url = "jdbc:mysql://" + hostname + ":" + port + "/" + database;
+
+		// Attempt to connect
+		try {
+			// Connection succeeded
+			sql = DriverManager.getConnection(url, username, password);
+			connected = true;
+			Messenger.sendConsoleMessage(ChatColor.GREEN + "Connection successful.");
+			setup();
+		} catch (Exception e) {
+			// Couldn't connect to the database
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to connect: " + e.getMessage());
+			connected = false;
+		}
+	}
+
+	/**
+	 * Create all the necessary caches for the player
+	 * 
+	 * @param p
+	 *            The player name to cache for.
+	 */
+	public void createLinks(final UUID p) {
+		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+			@Override
+			public void run() {
+				for (String entry : intcolumns)
+					getInt(p, entry);
+				for (String entry : longcolumns)
+					getLong(p, entry);
+			}
+		}, 0L);
+
+		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+			@Override
+			public void run() {
+				for (String entry : stringcolumns)
+					getString(p, entry);
+				for (String entry : booleancolumns)
+					getBoolean(p, entry);
+			}
+		}, 0L);
+	}
+
+	/**
+	 * Disconnect from MySQL.
+	 */
+	public void disconnect() {
+		if (sql != null && connected) {
+			Messenger.sendConsoleMessage(ChatColor.YELLOW + "Disconnected from MySQL.");
+			try {
+				sql.close();
+			} catch (SQLException e) {
+				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to close MySQL connection: " + e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Empty the given table.
+	 * 
+	 * @param table
+	 *            The table name
+	 * @return non null if deletion was successful
+	 */
+	public ResultSet emptyTable(String table) {
+		return query("TRUNCATE TABLE " + table);
+	}
+
+	public void executeQuery(String query) throws SQLException {
+		sql.createStatement().executeUpdate(query);
+	}
+
+	/**
+	 * Get a piece of boolean data out of the MySQL database.
+	 * 
+	 * @param name
+	 *            The primary key
+	 * @param field
+	 *            The field
+	 * @return The boolean received or false if nothing found
+	 */
+	public boolean getBoolean(UUID name, String field) {
+		boolean getboolean = false;
+
+		// Make sure our player is in the data cache.
+		if (!cachedBooleanValues.containsKey(name)) {
+			Map<String, Boolean> insert = new HashMap<String, Boolean>();
+			insert.put(field, false);
+			cachedBooleanValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+			if (!received.containsKey(field)) {
+				received.put(field, false);
+				cachedBooleanValues.put(name, received);
+			} else
+				// The player had the key already so let's return it.
+				return cachedBooleanValues.get(name).get(field);
+		}
+
+		try {
+			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
+			if (rs.next())
+				getboolean = rs.getBoolean(field);
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + UUIDtoString(name) + "."
+					+ field + ": " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
+		}
+
+		// Update the keyset because we don't have the current value.
+		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+		received.put(field, getboolean);
+		cachedBooleanValues.put(name, received);
+
+		return getboolean;
+	}
+
+	/**
+	 * @return the clan
+	 */
+	public String getClan(UUID name) {
+		return getString(name, "clan");
 	}
 
 	/**
@@ -458,51 +379,34 @@ public class SQLManager {
 	}
 
 	/**
-	 * Get a piece of boolean data out of the MySQL database.
+	 * Get a list of all primary keys in the table.
 	 * 
-	 * @param name
-	 *            The primary key
-	 * @param field
-	 *            The field
-	 * @return The boolean received or false if nothing found
+	 * @return A list of all the primary keys, an empty list if none found or
+	 *         null if not connected.
 	 */
-	public boolean getBoolean(UUID name, String field) {
-		boolean getboolean = false;
+	public List<UUID> getKeys() {
+		// Return the cached values if we have them.
+		if (!cachedKeyValues.isEmpty())
+			return cachedKeyValues;
 
-		// Make sure our player is in the data cache.
-		if (!cachedBooleanValues.containsKey(name)) {
-			Map<String, Boolean> insert = new HashMap<String, Boolean>();
-			insert.put(field, false);
-			cachedBooleanValues.put(name, insert);
-		} else {
-			// Our player was already in the data cache so let's see if the
-			// player has the right key.
-			Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
-			if (!received.containsKey(field)) {
-				received.put(field, false);
-				cachedBooleanValues.put(name, received);
-			} else
-				// The player had the key already so let's return it.
-				return cachedBooleanValues.get(name).get(field);
-		}
-
+		if (!isConnected())
+			return null;
+		List<UUID> list = new ArrayList<UUID>();
 		try {
-			ResultSet rs = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
-			if (rs.next())
-				getboolean = rs.getBoolean(field);
+			ResultSet rs = query("SELECT * FROM playerdata WHERE username != 'null'");
+			if (rs != null)
+				while (rs.next())
+					if (rs.getString("username") != null)
+						list.add(fromString(rs.getString("username")));
 		} catch (Exception e) {
-			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getboolean command for " + UUIDtoString(name) + "."
-					+ field + ": " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
 			connect();
 		}
 
-		// Update the keyset because we don't have the current value.
-		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
-		received.put(field, getboolean);
-		cachedBooleanValues.put(name, received);
-
-		return getboolean;
+		// We didn't have any key values stored so let's add all of them.
+		cachedKeyValues.addAll(list);
+		return list;
 	}
 
 	/**
@@ -551,6 +455,46 @@ public class SQLManager {
 		cachedLongValues.put(name, received);
 
 		return getlong;
+	}
+
+	/**
+	 * @return The number of players in the same clan as this player.
+	 */
+	public int getNumberInClan(UUID name) {
+		String clan = getClan(name);
+		if (clan == null || clan.isEmpty())
+			return 0;
+		List<UUID> playersInClan = new ArrayList<UUID>();
+		playersInClan.add(name);
+		for (UUID uid : MyZ.instance.lookupPlayers().keySet()) {
+			if (playersInClan.contains(uid))
+				continue;
+			String clan1 = getClan(uid);
+			if (clan1 != null && clan1.equals(clan))
+				playersInClan.add(uid);
+		}
+		return playersInClan.size();
+	}
+
+	/**
+	 * @return All the online players in the same clan as this player.
+	 */
+	public List<Player> getOnlinePlayersInClan(UUID name) {
+		String clan = getClan(name);
+		List<Player> playersInClan = new ArrayList<Player>();
+		if (clan == null || clan.isEmpty())
+			return playersInClan;
+
+		playersInClan.add(MyZ.instance.getPlayer(name));
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (playersInClan.contains(player))
+				continue;
+			String clan1 = getClan(player.getUniqueId());
+			if (clan1 != null && clan1.equals(clan))
+				playersInClan.add(player);
+		}
+		return playersInClan;
 	}
 
 	/**
@@ -664,13 +608,6 @@ public class SQLManager {
 	}
 
 	/**
-	 * @return the clan
-	 */
-	public String getClan(UUID name) {
-		return getString(name, "clan");
-	}
-
-	/**
 	 * @return True if this player is in a clan, false otherwise.
 	 */
 	public boolean inClan(UUID name) {
@@ -679,43 +616,109 @@ public class SQLManager {
 	}
 
 	/**
-	 * @return The number of players in the same clan as this player.
+	 * @return true if connected to MySQL.
 	 */
-	public int getNumberInClan(UUID name) {
-		String clan = getClan(name);
-		if (clan == null || clan.isEmpty())
-			return 0;
-		List<UUID> playersInClan = new ArrayList<UUID>();
-		playersInClan.add(name);
-		for (UUID uid : MyZ.instance.lookupPlayers().keySet()) {
-			if (playersInClan.contains(uid))
-				continue;
-			String clan1 = getClan(uid);
-			if (clan1 != null && clan1.equals(clan))
-				playersInClan.add(uid);
-		}
-		return playersInClan.size();
+	public boolean isConnected() {
+		return connected;
 	}
 
 	/**
-	 * @return All the online players in the same clan as this player.
+	 * Determine whether or not a given username is in the table.
+	 * 
+	 * @param name
+	 *            The username to check
+	 * @return true if the user is in the table.
 	 */
-	public List<Player> getOnlinePlayersInClan(UUID name) {
-		String clan = getClan(name);
-		List<Player> playersInClan = new ArrayList<Player>();
-		if (clan == null || clan.isEmpty())
-			return playersInClan;
+	public boolean isIn(UUID name) {
+		boolean isin = false;
 
-		playersInClan.add(MyZ.instance.getPlayer(name));
+		/*// Make sure our player is in the data cache.
+		if (!cachedBooleanValues.containsKey(name)) {
+			Map<String, Boolean> insert = new HashMap<String, Boolean>();
+			insert.put("isin", false);
+			cachedBooleanValues.put(name, insert);
+		} else {
+			// Our player was already in the data cache so let's see if the
+			// player has the right key.
+			Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+			if (!received.containsKey("isin")) {
+				received.put("isin", false);
+				cachedBooleanValues.put(name, received);
+			} else
+				// The player had the key already so let's return it.
+				return cachedBooleanValues.get(name).get("isin");
+		}*/
 
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player))
-				continue;
-			String clan1 = getClan(player.getUniqueId());
-			if (clan1 != null && clan1.equals(clan))
-				playersInClan.add(player);
+		if (!isConnected())
+			return isin;
+		try {
+			isin = query("SELECT * FROM playerdata WHERE username = '" + UUIDtoString(name) + "' LIMIT 1").next();
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL isin command: " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
+			isin = false;
 		}
-		return playersInClan;
+		/*// Update the keyset because we don't have the current value.
+		Map<String, Boolean> received = new HashMap<String, Boolean>(cachedBooleanValues.get(name));
+		received.put("isin", isin);
+		cachedBooleanValues.put(name, received);*/
+
+		return isin;
+	}
+
+	/**
+	 * Run a query to set data in MySQL.
+	 * 
+	 * @param name
+	 *            The primary key.
+	 * @param field
+	 *            The field.
+	 * @param value
+	 *            The value.
+	 * @param aSync
+	 *            Whether or not to use an aSync thread to execute the command.
+	 */
+	public void set(UUID name, String field, Object value, boolean aSync) {
+		set(name, field, value, aSync, !aSync);
+	}
+
+	/**
+	 * @see set(String name, String field, Object value, boolean aSync).
+	 * 
+	 * @param forcingaSync
+	 *            A distinguisher to ensure we update the cache because it
+	 *            wasn't updated aSynchronously.
+	 */
+	public void set(final UUID name, final String field, final Object value, boolean aSync, boolean forcingaSync) {
+		if ("rank".equals(field)) {
+			Player p = MyZ.instance.getPlayer(name);
+			if (p != null && MyZ.vault)
+				VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + value);
+		}
+		if (aSync) {
+			// Make sure we update our cached values when we set new ones. Do it
+			// before we execute the query in case of async demands.
+			doUpdateCache(name, field, value);
+			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+				@Override
+				public void run() {
+					set(name, field, value, false, true);
+				}
+			}, 0L);
+			return;
+		}
+		try {
+			if (forcingaSync)
+				// Make sure we update our cached values when we set new ones.
+				doUpdateCache(name, field, value);
+			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + UUIDtoString(name) + "." + field
+					+ ": " + e.getMessage());
+			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
+			connect();
+		}
 	}
 
 	/**
@@ -751,30 +754,27 @@ public class SQLManager {
 	}
 
 	/**
-	 * Create all the necessary caches for the player
-	 * 
-	 * @param p
-	 *            The player name to cache for.
+	 * Create tables.
 	 */
-	public void createLinks(final UUID p) {
-		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
-			@Override
-			public void run() {
-				for (String entry : intcolumns)
-					getInt(p, entry);
-				for (String entry : longcolumns)
-					getLong(p, entry);
-			}
-		}, 0L);
+	public void setup() {
+		if (!isConnected())
+			return;
+		try {
+			executeQuery("CREATE TABLE IF NOT EXISTS playerdata (username VARCHAR(40) PRIMARY KEY, name VARCHAR(17) NOT NULL DEFAULT 'Guest', player_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, player_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, zombie_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, pigman_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, giant_kills_life_record SMALLINT UNSIGNED NOT NULL DEFAULT 0, deaths SMALLINT UNSIGNED NOT NULL DEFAULT 0, rank SMALLINT UNSIGNED NOT NULL DEFAULT 0, isBleeding TINYINT(1) NOT NULL DEFAULT 0, isPoisoned TINYINT(1) NOT NULL DEFAULT 0, wasNPCKilled TINYINT(1) NOT NULL DEFAULT 0, timeOfKickban BIGINT(20) NOT NULL DEFAULT 0, friends TEXT NOT NULL, heals_life SMALLINT UNSIGNED NOT NULL DEFAULT 0, thirst SMALLINT UNSIGNED NOT NULL DEFAULT 20, clan VARCHAR(20) NOT NULL DEFAULT '', minutes_alive BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, minutes_alive_life INT UNSIGNED NOT NULL DEFAULT 0, minutes_alive_record INT UNSIGNED NOT NULL DEFAULT 0, research INT UNSIGNED NOT NULL DEFAULT 0, isZombie TINYINT(1) NOT NULL DEFAULT 0, legBroken TINYINT(1) NOT NULL DEFAULT 0)");
+			updateRanks();
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL setup command: " + e.getMessage());
+		}
+	}
 
-		MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
-			@Override
-			public void run() {
-				for (String entry : stringcolumns)
-					getString(p, entry);
-				for (String entry : booleancolumns)
-					getBoolean(p, entry);
-			}
-		}, 0L);
+	public void updateRanks() {
+		try {
+			if (MyZ.vault)
+				for (UUID uid : getKeys())
+					VaultUtils.permission.playerAdd((String) null, MyZ.instance.getName(uid), "MyZ.rank." + getInt(uid, "rank"));
+		} catch (Exception e) {
+			Messenger.sendConsoleMessage(ChatColor.BLUE + "Unable to execute MySQL setup command. This may not be an error: "
+					+ e.getMessage());
+		}
 	}
 }

@@ -68,12 +68,24 @@ public class Vector3D {
 	}
 
 	/**
-	 * Convert this instance to an equivalent real 3D vector.
+	 * Retrieve the absolute value of this vector.
 	 * 
-	 * @return Real 3D vector.
+	 * @return The new result.
 	 */
-	public Vector toVector() {
-		return new Vector(x, y, z);
+	public Vector3D abs() {
+		return new Vector3D(Math.abs(x), Math.abs(y), Math.abs(z));
+	}
+
+	/**
+	 * Adds the current vector and a given vector together, producing a result
+	 * vector.
+	 * 
+	 * @param other
+	 *            - the other vector.
+	 * @return The new result vector.
+	 */
+	public Vector3D add(double x, double y, double z) {
+		return new Vector3D(this.x + x, this.y + y, this.z + z);
 	}
 
 	/**
@@ -91,63 +103,16 @@ public class Vector3D {
 	}
 
 	/**
-	 * Adds the current vector and a given vector together, producing a result
-	 * vector.
+	 * Divide each dimension in the current vector by the given divisor.
 	 * 
-	 * @param other
-	 *            - the other vector.
-	 * @return The new result vector.
-	 */
-	public Vector3D add(double x, double y, double z) {
-		return new Vector3D(this.x + x, this.y + y, this.z + z);
-	}
-
-	/**
-	 * Substracts the current vector and a given vector, producing a result
-	 * position.
-	 * 
-	 * @param other
-	 *            - the other position.
-	 * @return The new result position.
-	 */
-	public Vector3D subtract(Vector3D other) {
-		if (other == null)
-			throw new IllegalArgumentException("other cannot be NULL");
-		return new Vector3D(x - other.x, y - other.y, z - other.z);
-	}
-
-	/**
-	 * Substracts the current vector and a given vector together, producing a
-	 * result vector.
-	 * 
-	 * @param other
-	 *            - the other vector.
-	 * @return The new result vector.
-	 */
-	public Vector3D subtract(double x, double y, double z) {
-		return new Vector3D(this.x - x, this.y - y, this.z - z);
-	}
-
-	/**
-	 * Multiply each dimension in the current vector by the given factor.
-	 * 
-	 * @param factor
-	 *            - multiplier.
+	 * @param divisor
+	 *            - the divisor.
 	 * @return The new result.
 	 */
-	public Vector3D multiply(int factor) {
-		return new Vector3D(x * factor, y * factor, z * factor);
-	}
-
-	/**
-	 * Multiply each dimension in the current vector by the given factor.
-	 * 
-	 * @param factor
-	 *            - multiplier.
-	 * @return The new result.
-	 */
-	public Vector3D multiply(double factor) {
-		return new Vector3D(x * factor, y * factor, z * factor);
+	public Vector3D divide(double divisor) {
+		if (divisor == 0)
+			throw new IllegalArgumentException("Cannot divide by null.");
+		return new Vector3D(x / divisor, y / divisor, z / divisor);
 	}
 
 	/**
@@ -164,29 +129,64 @@ public class Vector3D {
 	}
 
 	/**
-	 * Divide each dimension in the current vector by the given divisor.
+	 * Multiply each dimension in the current vector by the given factor.
 	 * 
-	 * @param divisor
-	 *            - the divisor.
+	 * @param factor
+	 *            - multiplier.
 	 * @return The new result.
 	 */
-	public Vector3D divide(double divisor) {
-		if (divisor == 0)
-			throw new IllegalArgumentException("Cannot divide by null.");
-		return new Vector3D(x / divisor, y / divisor, z / divisor);
+	public Vector3D multiply(double factor) {
+		return new Vector3D(x * factor, y * factor, z * factor);
 	}
 
 	/**
-	 * Retrieve the absolute value of this vector.
+	 * Multiply each dimension in the current vector by the given factor.
 	 * 
+	 * @param factor
+	 *            - multiplier.
 	 * @return The new result.
 	 */
-	public Vector3D abs() {
-		return new Vector3D(Math.abs(x), Math.abs(y), Math.abs(z));
+	public Vector3D multiply(int factor) {
+		return new Vector3D(x * factor, y * factor, z * factor);
+	}
+
+	/**
+	 * Substracts the current vector and a given vector together, producing a
+	 * result vector.
+	 * 
+	 * @param other
+	 *            - the other vector.
+	 * @return The new result vector.
+	 */
+	public Vector3D subtract(double x, double y, double z) {
+		return new Vector3D(this.x - x, this.y - y, this.z - z);
+	}
+
+	/**
+	 * Substracts the current vector and a given vector, producing a result
+	 * position.
+	 * 
+	 * @param other
+	 *            - the other position.
+	 * @return The new result position.
+	 */
+	public Vector3D subtract(Vector3D other) {
+		if (other == null)
+			throw new IllegalArgumentException("other cannot be NULL");
+		return new Vector3D(x - other.x, y - other.y, z - other.z);
 	}
 
 	@Override
 	public String toString() {
 		return String.format("[x: %s, y: %s, z: %s]", x, y, z);
+	}
+
+	/**
+	 * Convert this instance to an equivalent real 3D vector.
+	 * 
+	 * @return Real 3D vector.
+	 */
+	public Vector toVector() {
+		return new Vector(x, y, z);
 	}
 }

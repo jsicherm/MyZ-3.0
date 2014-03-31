@@ -3,10 +3,9 @@
  */
 package myz.commands;
 
-import java.util.List;
-
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -27,7 +26,7 @@ public class AddSpawnCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(((Player) sender).getWorld().getName()))
+			if (!Validate.inWorld(((Player) sender).getLocation()))
 				return true;
 
 			Location new_location = ((Player) sender).getLocation();

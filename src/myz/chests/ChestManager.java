@@ -27,21 +27,6 @@ import org.bukkit.material.Chest;
 public class ChestManager {
 
 	/**
-	 * Respawn all MyZ chests.
-	 * 
-	 * @param bypass
-	 *            Whether or not to bypass nearby player range.
-	 */
-	public static void respawnAll(boolean bypass) {
-		if (MyZ.instance.getChestsConfig().isConfigurationSection("chests"))
-			for (String entry : MyZ.instance.getChestsConfig().getConfigurationSection("chests").getKeys(false)) {
-				Location location = configToLocation(entry);
-				if (location != null)
-					respawn(location, bypass);
-			}
-	}
-
-	/**
 	 * Convert a config string representing a chest location to a location.
 	 * 
 	 * @param entry
@@ -63,47 +48,36 @@ public class ChestManager {
 	}
 
 	/**
-	 * Respawn a specific MyZ chest.
+	 * Make sure a MyZ chest exists. Accounts for slugs with a world but no
+	 * direction, without a world or direction, with a world and direction or
+	 * without a world but with a direction.
 	 * 
 	 * @param location
 	 *            The location.
-	 * @param bypass
-	 *            Whether or not to bypass nearby player range.
+	 * @return The BlockFace the chest is supposed to face or null if the chest
+	 *         listing doesn't exist in the config.
 	 */
-	public static void respawn(Location location, boolean bypass) {
-		if (isMyZChest(location))
-			if (Utils.getPlayersInRange(location, 5).isEmpty() || bypass) {
-				boolean wasChest = location.getBlock().getType() == Material.CHEST;
-				if (wasChest) {
-					org.bukkit.block.Chest test = (org.bukkit.block.Chest) location.getBlock().getState();
-					wasChest = !isEmpty(test.getBlockInventory());
-				} else {
-					location.getBlock().setType(Material.CHEST);
-					Chest chest = (Chest) location.getBlock().getState().getData();
-					chest.setFacingDirection(getFacingDirection(location));
-					location.getBlock().setData(chest.getData(), true);
-				}
+	private static BlockFace doesExist(Location location) {
+		// Look for set directions.
+		BlockFace[] values = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
+		for (BlockFace slug : values)
+			if (MyZ.instance.getChestsConfig().contains(
+					"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ() + "," + slug)
+					|| MyZ.instance.getChestsConfig().contains(
+							"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
+									+ location.getBlockZ() + "," + slug))
+				return slug;
 
-				String lootset = getLootset(location);
-				ChestScanner.nameChest(location.getBlock(), lootset);
-				if (!wasChest) {
-					fillChest(((org.bukkit.block.Chest) location.getBlock().getState()).getBlockInventory(), lootset);
-				}
-			}
-	}
+		// Contains without a direction set.
+		if (MyZ.instance.getChestsConfig().contains(
+				"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ())
+				|| MyZ.instance.getChestsConfig().contains(
+						"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
+								+ location.getBlockZ()))
+			return null;
 
-	/**
-	 * Get whether or not an inventory is empty.
-	 * 
-	 * @param i
-	 *            The inventory.
-	 * @return True if it was empty, false otherwise.
-	 */
-	private static boolean isEmpty(Inventory i) {
-		for (ItemStack item : i.getContents()) {
-			if (item != null && item.getType() != Material.AIR) { return false; }
-		}
-		return true;
+		// Not even a chest.
+		return null;
 	}
 
 	/**
@@ -138,17 +112,6 @@ public class ChestManager {
 	}
 
 	/**
-	 * Whether or not a specific location holds a MyZ chest
-	 * 
-	 * @param location
-	 *            The location.
-	 * @return True if the location has a MyZ chest, false otherwise.
-	 */
-	public static boolean isMyZChest(Location location) {
-		return doesExist(location) != null;
-	}
-
-	/**
 	 * Get the facing direction of a MyZ chest at a location.
 	 * 
 	 * @param location
@@ -161,39 +124,6 @@ public class ChestManager {
 			return face != null ? face : BlockFace.NORTH;
 		}
 		return BlockFace.NORTH;
-	}
-
-	/**
-	 * Make sure a MyZ chest exists. Accounts for slugs with a world but no
-	 * direction, without a world or direction, with a world and direction or
-	 * without a world but with a direction.
-	 * 
-	 * @param location
-	 *            The location.
-	 * @return The BlockFace the chest is supposed to face or null if the chest
-	 *         listing doesn't exist in the config.
-	 */
-	private static BlockFace doesExist(Location location) {
-		// Look for set directions.
-		BlockFace[] values = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
-		for (BlockFace slug : values)
-			if (MyZ.instance.getChestsConfig().contains(
-					"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ() + "," + slug)
-					|| MyZ.instance.getChestsConfig().contains(
-							"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
-									+ location.getBlockZ() + "," + slug))
-				return slug;
-
-		// Contains without a direction set.
-		if (MyZ.instance.getChestsConfig().contains(
-				"chests." + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ())
-				|| MyZ.instance.getChestsConfig().contains(
-						"chests." + location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + ","
-								+ location.getBlockZ()))
-			return null;
-
-		// Not even a chest.
-		return null;
 	}
 
 	/**
@@ -239,6 +169,20 @@ public class ChestManager {
 	}
 
 	/**
+	 * Get whether or not an inventory is empty.
+	 * 
+	 * @param i
+	 *            The inventory.
+	 * @return True if it was empty, false otherwise.
+	 */
+	private static boolean isEmpty(Inventory i) {
+		for (ItemStack item : i.getContents())
+			if (item != null && item.getType() != Material.AIR)
+				return false;
+		return true;
+	}
+
+	/**
 	 * Break a MyZ chest.
 	 * 
 	 * @param block
@@ -246,5 +190,64 @@ public class ChestManager {
 	 */
 	public static void breakChest(Block block) {
 		block.setType(Material.AIR);
+	}
+
+	/**
+	 * Whether or not a specific location holds a MyZ chest
+	 * 
+	 * @param location
+	 *            The location.
+	 * @return True if the location has a MyZ chest, false otherwise.
+	 */
+	public static boolean isMyZChest(Location location) {
+		return doesExist(location) != null;
+	}
+
+	/**
+	 * Respawn a specific MyZ chest.
+	 * 
+	 * @param location
+	 *            The location.
+	 * @param bypass
+	 *            Whether or not to bypass nearby player range.
+	 */
+	public static void respawn(Location location, boolean bypass) {
+		if (isMyZChest(location))
+			if (Utils.getPlayersInRange(location, 5).isEmpty() || bypass) {
+				boolean wasChest = location.getBlock() != null && location.getBlock().getType() == Material.CHEST;
+				if (wasChest) {
+					org.bukkit.block.Chest test = (org.bukkit.block.Chest) location.getBlock().getState();
+					wasChest = !isEmpty(test.getBlockInventory());
+				} else {
+					location.getBlock().setType(Material.CHEST);
+					Chest chest = (Chest) location.getBlock().getState().getData();
+					chest.setFacingDirection(getFacingDirection(location));
+					location.getBlock().setData(chest.getData(), true);
+				}
+
+				String lootset = getLootset(location);
+				if (lootset != null) {
+					ChestScanner.nameChest(location.getBlock(), lootset);
+					if (!wasChest)
+						fillChest(((org.bukkit.block.Chest) location.getBlock().getState()).getBlockInventory(), lootset);
+				}
+			}
+	}
+
+	/**
+	 * Respawn all MyZ chests.
+	 * 
+	 * @param bypass
+	 *            Whether or not to bypass nearby player range.
+	 */
+	public static void respawnAll(boolean bypass) {
+		if (MyZ.instance.getChestsConfig() == null)
+			return;
+		if (MyZ.instance.getChestsConfig().isConfigurationSection("chests"))
+			for (String entry : MyZ.instance.getChestsConfig().getConfigurationSection("chests").getKeys(false)) {
+				Location location = configToLocation(entry);
+				if (location != null)
+					respawn(location, bypass);
+			}
 	}
 }

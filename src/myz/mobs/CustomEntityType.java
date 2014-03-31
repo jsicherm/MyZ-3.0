@@ -46,24 +46,23 @@ public enum CustomEntityType {
 		this.customClass = customClass;
 	}
 
-	public String getName() {
-		return name;
+	private static void a(Class paramClass, String paramString, int paramInt) {
+		try {
+			((Map) getPrivateStatic(EntityTypes.class, "c")).put(paramString, paramClass);
+			((Map) getPrivateStatic(EntityTypes.class, "d")).put(paramClass, paramString);
+			((Map) getPrivateStatic(EntityTypes.class, "e")).put(Integer.valueOf(paramInt), paramClass);
+			((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, Integer.valueOf(paramInt));
+			((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, Integer.valueOf(paramInt));
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4Registration issue!");
+		}
 	}
 
-	public int getID() {
-		return id;
-	}
-
-	public EntityType getEntityType() {
-		return entityType;
-	}
-
-	public Class<? extends EntityInsentient> getNMSClass() {
-		return nmsClass;
-	}
-
-	public Class<? extends EntityInsentient> getCustomClass() {
-		return customClass;
+	private static Object getPrivateStatic(Class clazz, String f) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+			IllegalAccessException {
+		Field field = clazz.getDeclaredField(f);
+		field.setAccessible(true);
+		return field.get(null);
 	}
 
 	public static void registerEntities() {
@@ -148,22 +147,23 @@ public enum CustomEntityType {
 		}
 	}
 
-	private static Object getPrivateStatic(Class clazz, String f) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
-		Field field = clazz.getDeclaredField(f);
-		field.setAccessible(true);
-		return field.get(null);
+	public Class<? extends EntityInsentient> getCustomClass() {
+		return customClass;
 	}
 
-	private static void a(Class paramClass, String paramString, int paramInt) {
-		try {
-			((Map) getPrivateStatic(EntityTypes.class, "c")).put(paramString, paramClass);
-			((Map) getPrivateStatic(EntityTypes.class, "d")).put(paramClass, paramString);
-			((Map) getPrivateStatic(EntityTypes.class, "e")).put(Integer.valueOf(paramInt), paramClass);
-			((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, Integer.valueOf(paramInt));
-			((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, Integer.valueOf(paramInt));
-		} catch (Exception exc) {
-			Messenger.sendConsoleMessage("&4Registration issue!");
-		}
+	public EntityType getEntityType() {
+		return entityType;
+	}
+
+	public int getID() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Class<? extends EntityInsentient> getNMSClass() {
+		return nmsClass;
 	}
 }

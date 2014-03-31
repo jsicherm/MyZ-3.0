@@ -58,6 +58,23 @@ public class CustomEntityZombie extends EntityZombie {
 		populateGoals();
 	}
 
+	public static CustomEntityZombie newInstance(Player player) {
+		World world = ((CraftWorld) player.getWorld()).getHandle();
+		CustomEntityZombie zombie = new CustomEntityZombie(world);
+
+		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
+		world.addEntity(zombie, SpawnReason.CUSTOM);
+		return zombie;
+	}
+
+	private void emptyInventory() {
+		if (inventory != null)
+			for (org.bukkit.inventory.ItemStack item : inventory)
+				if (item != null)
+					getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
+		inventory = null;
+	}
+
 	private void populateGoals() {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
@@ -90,10 +107,24 @@ public class CustomEntityZombie extends EntityZombie {
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntitySkeleton.class, 0, false));
 	}
 
+	public void addPather(Location to, float speed) {
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	}
+
 	@Override
-	protected void aD() {
-		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.zombie.damage") * (isBaby() ? 0.75 : 1));
+	public boolean canSpawn() {
+		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
+				&& !world.containsLiquid(boundingBox);
+	}
+
+	/*@Override
+	public boolean m(Entity entity) {
+		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getZombieDamage() * (isBaby() ? 0.5f : 1f));
+	}*/
+
+	public void cleanPather(PathfinderGoal goal) {
+		populateGoals();
+		priority = 0;
 	}
 
 	@Override
@@ -139,17 +170,43 @@ public class CustomEntityZombie extends EntityZombie {
 	}
 
 	@Override
-	protected ItemStack getRareDrop(int i) {
-		switch (random.nextInt(3)) {
-		case 0:
-			return new ItemStack(Items.POTION);
+	public void die() {
+		super.die();
+		emptyInventory();
+	}
 
-		case 1:
-			return new ItemStack(Items.BOWL);
+	@Override
+	public void die(DamageSource source) {
+		super.die(source);
+		emptyInventory();
+	}
 
-		default:
-			return new ItemStack(Items.LEASH);
+	public void see(Location location, int priority) {
+		if (priority < this.priority)
+			return;
+		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
+			setGoalTarget(null);
+			target = null;
+			double dub = (Double) Configuration.getConfig("mobs.zombie.speed");
+			addPather(location, (float) dub * (isBaby() ? 0.4f : 1f));
 		}
+	}
+
+	/**
+	 * Set this zombie's inventory contents. Generally contains a player's
+	 * inventory plus their helmet and subtract their item in hand.
+	 * 
+	 * @param inventory
+	 *            The list of items to set.
+	 */
+	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
+		this.inventory = inventory;
+	}
+
+	@Override
+	protected void aD() {
+		super.aD();
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.zombie.damage") * (isBaby() ? 0.75 : 1));
 	}
 
 	@Override
@@ -164,11 +221,6 @@ public class CustomEntityZombie extends EntityZombie {
 		}
 	}
 
-	/*@Override
-	public boolean m(Entity entity) {
-		return entity.damageEntity(DamageSource.mobAttack(this), (float) Configuration.getZombieDamage() * (isBaby() ? 0.5f : 1f));
-	}*/
-
 	@Override
 	protected Entity findTarget() {
 		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
@@ -176,69 +228,17 @@ public class CustomEntityZombie extends EntityZombie {
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}
 
-	/**
-	 * Set this zombie's inventory contents. Generally contains a player's
-	 * inventory plus their helmet and subtract their item in hand.
-	 * 
-	 * @param inventory
-	 *            The list of items to set.
-	 */
-	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
-		this.inventory = inventory;
-	}
-
-	private void emptyInventory() {
-		if (inventory != null)
-			for (org.bukkit.inventory.ItemStack item : inventory)
-				if (item != null)
-					getBukkitEntity().getWorld().dropItemNaturally(getBukkitEntity().getLocation(), item);
-		inventory = null;
-	}
-
 	@Override
-	public void die(DamageSource source) {
-		super.die(source);
-		emptyInventory();
-	}
+	protected ItemStack getRareDrop(int i) {
+		switch (random.nextInt(3)) {
+		case 0:
+			return new ItemStack(Items.POTION);
 
-	@Override
-	public void die() {
-		super.die();
-		emptyInventory();
-	}
+		case 1:
+			return new ItemStack(Items.BOWL);
 
-	@Override
-	public boolean canSpawn() {
-		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
-				&& !world.containsLiquid(boundingBox);
-	}
-
-	public void see(Location location, int priority) {
-		if (priority < this.priority)
-			return;
-		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
-			setGoalTarget(null);
-			target = null;
-			double dub = (Double) Configuration.getConfig("mobs.zombie.speed");
-			addPather(location, (float) dub * (isBaby() ? 0.4f : 1f));
+		default:
+			return new ItemStack(Items.LEASH);
 		}
-	}
-
-	public void addPather(Location to, float speed) {
-		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
-	}
-
-	public void cleanPather(PathfinderGoal goal) {
-		populateGoals();
-		priority = 0;
-	}
-
-	public static CustomEntityZombie newInstance(Player player) {
-		World world = ((CraftWorld) player.getWorld()).getHandle();
-		CustomEntityZombie zombie = new CustomEntityZombie(world);
-
-		zombie.setPosition(player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
-		world.addEntity(zombie, SpawnReason.CUSTOM);
-		return zombie;
 	}
 }

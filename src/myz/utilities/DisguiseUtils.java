@@ -19,6 +19,23 @@ public class DisguiseUtils {
 	private static DisguiseCraftAPI api;
 
 	/**
+	 * Become a zombie.
+	 * 
+	 * @param player
+	 *            The player to zombify.
+	 */
+	public static void becomeZombie(Player player) {
+		if (api == null)
+			api = DisguiseCraft.getAPI();
+		if (api != null)
+			api.disguisePlayer(player, new Disguise(DisguiseCraft.getAPI().newEntityID(), DisguiseType.Zombie));
+	}
+
+	public static void disable() {
+		api = null;
+	}
+
+	/**
 	 * Whether or not the player is a zombie (disguised).
 	 * 
 	 * @param player
@@ -31,23 +48,6 @@ public class DisguiseUtils {
 		if (api == null)
 			return false;
 		return api.isDisguised(player);
-	}
-
-	public static void disable() {
-		api = null;
-	}
-
-	/**
-	 * Become a zombie.
-	 * 
-	 * @param player
-	 *            The player to zombify.
-	 */
-	public static void becomeZombie(Player player) {
-		if (api == null)
-			api = DisguiseCraft.getAPI();
-		if (api != null)
-			api.disguisePlayer(player, new Disguise(DisguiseCraft.getAPI().newEntityID(), DisguiseType.Zombie));
 	}
 
 	/**

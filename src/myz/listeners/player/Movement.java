@@ -3,11 +3,9 @@
  */
 package myz.listeners.player;
 
-import java.util.List;
-
 import myz.scheduling.Sync;
-import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,7 +20,7 @@ public class Movement implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onMove(PlayerMoveEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
 			return;
 		if (Sync.getSafeLogoutPlayers().containsKey(e.getPlayer().getUniqueId()) && e.getFrom().distance(e.getTo()) >= 0.1) {
 			Sync.removeSafeLogoutPlayer(e.getPlayer());

@@ -90,6 +90,42 @@ public class Updater implements CommandExecutor, CommandSender {
 	private static final int BYTE_SIZE = 1024; // Used for downloading files
 	private String updateFolder;// The folder that downloads will be placed in
 
+	private class UpdateRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			if (url != null)
+				// Obtain the results of the project's file feed
+				if (read())
+					if (versionCheck(versionName))
+						if (versionLink != null) {
+							try {
+								int version = Integer.parseInt(plugin.getDescription().getVersion().replaceAll(".", ""));
+								int nversion = Integer.parseInt(newVersionName.replaceAll(".", ""));
+								// x.x.xxx is the maximum version name slug I
+								// ever
+								// use.
+								// Which is 10000 minimum total.
+								while (version < 10000)
+									version *= 10;
+								while (nversion < 10000)
+									nversion *= 10;
+								if (nversion < version) {
+									Messenger.sendConsoleMessage("&aYour version of MyZ is &eupstream&a. You're running &e"
+											+ plugin.getDescription().getVersion() + "&a but the latest release is &e" + newVersionName
+											+ "&a.");
+									return;
+								}
+							} catch (Exception exc) {
+								// Misformatted version. Silly me!
+							}
+							hasUpdate = true;
+							Messenger.sendConsoleMessage("&aAn update was found for MyZ 3.0. If you wish to update from &e"
+									+ plugin.getDescription().getVersion() + "&a to &e" + newVersionName + "&a, use &e/update MyZ&a.");
+						}
+		}
+	}
+
 	/**
 	 * Initialize the updater
 	 * 
@@ -126,49 +162,51 @@ public class Updater implements CommandExecutor, CommandSender {
 	}
 
 	/**
-	 * Get the latest version's release type (release, beta, or alpha).
+	 * Check if the name of a jar is one of the plugins currently installed,
+	 * used for extracting the correct files out of a zip.
 	 */
-	public String getLatestType() {
-		waitForThread();
-		return versionType;
+	private boolean pluginFile(String name) {
+		for (final File file : new File("plugins").listFiles())
+			if (file.getName().equals(name))
+				return true;
+		return false;
 	}
 
-	/**
-	 * Get the latest version's game version.
-	 */
-	public String getLatestGameVersion() {
-		waitForThread();
-		return versionGameVersion;
-	}
+	private boolean read() {
+		try {
+			final URLConnection conn = url.openConnection();
+			conn.setConnectTimeout(5000);
 
-	/**
-	 * Get the latest version's name.
-	 */
-	public String getLatestName() {
-		waitForThread();
-		return versionName;
-	}
+			conn.addRequestProperty("User-Agent", "Updater (by Gravity)");
 
-	/**
-	 * Get the latest version's file link.
-	 */
-	public String getLatestFileLink() {
-		waitForThread();
-		return versionLink;
-	}
+			conn.setDoOutput(true);
 
-	/**
-	 * As the result of Updater output depends on the thread's completion, it is
-	 * necessary to wait for the thread to finish before allowing anyone to
-	 * check the result.
-	 */
-	private void waitForThread() {
-		if (thread != null && thread.isAlive())
-			try {
-				thread.join();
-			} catch (final InterruptedException e) {
-				e.printStackTrace();
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			final String response = reader.readLine();
+
+			final JSONArray array = (JSONArray) JSONValue.parse(response);
+
+			if (array.size() == 0) {
+				Messenger.sendConsoleMessage("&4The updater could not find any files for MyZ");
+				return false;
 			}
+
+			versionName = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TITLE_VALUE);
+			versionLink = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.LINK_VALUE);
+			versionType = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TYPE_VALUE);
+			versionGameVersion = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.VERSION_VALUE);
+
+			return true;
+		} catch (final IOException e) {
+			if (e.getMessage().contains("HTTP response code: 403"))
+				plugin.getLogger().warning("dev.bukkit.org rejected the API key for downloading plugins.");
+			else {
+				Messenger.sendConsoleMessage("&4The updater could not contact dev.bukkit.org for updating.");
+				Messenger.sendConsoleMessage("&4The site may be experiencing temporary downtime.");
+			}
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	private void registerCommand() {
@@ -189,31 +227,6 @@ public class Updater implements CommandExecutor, CommandSender {
 			}
 		} catch (Throwable t) {
 		}
-	}
-
-	@Override
-	public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
-		if (!hasUpdate) {
-			sender.sendMessage("No update was found.");
-			return true;
-		}
-		if (sender.hasPermission("MyZ.update"))
-			if (args.length != 0)
-				if (args[0].equalsIgnoreCase("MyZ"))
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							String name = file.getName();
-							// If it's a zip file, it shouldn't be downloaded as
-							// the plugin's name
-							if (versionLink.endsWith(".zip")) {
-								final String[] split = versionLink.split("/");
-								name = split[split.length - 1];
-							}
-							Updater.this.saveFile(new File(plugin.getDataFolder().getParent(), updateFolder), name, versionLink, sender);
-						}
-					}).run();
-		return true;
 	}
 
 	/**
@@ -343,17 +356,6 @@ public class Updater implements CommandExecutor, CommandSender {
 	}
 
 	/**
-	 * Check if the name of a jar is one of the plugins currently installed,
-	 * used for extracting the correct files out of a zip.
-	 */
-	private boolean pluginFile(String name) {
-		for (final File file : new File("plugins").listFiles())
-			if (file.getName().equals(name))
-				return true;
-		return false;
-	}
-
-	/**
 	 * Check to see if the program should continue by evaluation whether the
 	 * plugin is already updated, or shouldn't be updated
 	 */
@@ -364,204 +366,154 @@ public class Updater implements CommandExecutor, CommandSender {
 		return !newVersionName.startsWith("2");
 	}
 
-	private boolean read() {
-		try {
-			final URLConnection conn = url.openConnection();
-			conn.setConnectTimeout(5000);
-
-			conn.addRequestProperty("User-Agent", "Updater (by Gravity)");
-
-			conn.setDoOutput(true);
-
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			final String response = reader.readLine();
-
-			final JSONArray array = (JSONArray) JSONValue.parse(response);
-
-			if (array.size() == 0) {
-				Messenger.sendConsoleMessage("&4The updater could not find any files for MyZ");
-				return false;
-			}
-
-			versionName = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TITLE_VALUE);
-			versionLink = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.LINK_VALUE);
-			versionType = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.TYPE_VALUE);
-			versionGameVersion = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.VERSION_VALUE);
-
-			return true;
-		} catch (final IOException e) {
-			if (e.getMessage().contains("HTTP response code: 403"))
-				plugin.getLogger().warning("dev.bukkit.org rejected the API key for downloading plugins.");
-			else {
-				Messenger.sendConsoleMessage("&4The updater could not contact dev.bukkit.org for updating.");
-				Messenger.sendConsoleMessage("&4The site may be experiencing temporary downtime.");
-			}
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	private class UpdateRunnable implements Runnable {
-
-		@Override
-		public void run() {
-			if (url != null)
-				// Obtain the results of the project's file feed
-				if (read())
-					if (versionCheck(versionName))
-						if (versionLink != null) {
-							hasUpdate = true;
-							Messenger.sendConsoleMessage("&aAn update was found for MyZ 3.0. If you wish to update from &e"
-									+ plugin.getDescription().getVersion() + "&a to &e" + newVersionName + "&a, use &e/update MyZ&a.");
-						}
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin)
+	/**
+	 * As the result of Updater output depends on the thread's completion, it is
+	 * necessary to wait for the thread to finish before allowing anyone to
+	 * check the result.
 	 */
+	private void waitForThread() {
+		if (thread != null && thread.isAlive())
+			try {
+				thread.join();
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
+	}
+
 	@Override
 	public PermissionAttachment addAttachment(Plugin arg0) {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin, int)
-	 */
 	@Override
 	public PermissionAttachment addAttachment(Plugin arg0, int arg1) {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin, java.lang.String, boolean)
-	 */
 	@Override
 	public PermissionAttachment addAttachment(Plugin arg0, String arg1, boolean arg2) {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#addAttachment(org.bukkit.plugin.Plugin, java.lang.String, boolean, int)
-	 */
 	@Override
 	public PermissionAttachment addAttachment(Plugin arg0, String arg1, boolean arg2, int arg3) {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#getEffectivePermissions()
-	 */
 	@Override
 	public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#hasPermission(java.lang.String)
+	/**
+	 * Get the latest version's file link.
 	 */
-	@Override
-	public boolean hasPermission(String arg0) {
-
-		return false;
+	public String getLatestFileLink() {
+		waitForThread();
+		return versionLink;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#hasPermission(org.bukkit.permissions.Permission)
+	/**
+	 * Get the latest version's game version.
 	 */
-	@Override
-	public boolean hasPermission(Permission arg0) {
-
-		return false;
+	public String getLatestGameVersion() {
+		waitForThread();
+		return versionGameVersion;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#isPermissionSet(java.lang.String)
+	/**
+	 * Get the latest version's name.
 	 */
-	@Override
-	public boolean isPermissionSet(String arg0) {
-
-		return false;
+	public String getLatestName() {
+		waitForThread();
+		return versionName;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#isPermissionSet(org.bukkit.permissions.Permission)
+	/**
+	 * Get the latest version's release type (release, beta, or alpha).
 	 */
-	@Override
-	public boolean isPermissionSet(Permission arg0) {
-
-		return false;
+	public String getLatestType() {
+		waitForThread();
+		return versionType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#recalculatePermissions()
-	 */
-	@Override
-	public void recalculatePermissions() {
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.Permissible#removeAttachment(org.bukkit.permissions.PermissionAttachment)
-	 */
-	@Override
-	public void removeAttachment(PermissionAttachment arg0) {
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.ServerOperator#isOp()
-	 */
-	@Override
-	public boolean isOp() {
-
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.permissions.ServerOperator#setOp(boolean)
-	 */
-	@Override
-	public void setOp(boolean arg0) {
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.command.CommandSender#getName()
-	 */
 	@Override
 	public String getName() {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.command.CommandSender#getServer()
-	 */
 	@Override
 	public Server getServer() {
-
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.command.CommandSender#sendMessage(java.lang.String)
-	 */
 	@Override
-	public void sendMessage(String arg0) {
-
+	public boolean hasPermission(Permission arg0) {
+		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.bukkit.command.CommandSender#sendMessage(java.lang.String[])
-	 */
+	@Override
+	public boolean hasPermission(String arg0) {
+		return false;
+	}
+
+	@Override
+	public boolean isOp() {
+		return false;
+	}
+
+	@Override
+	public boolean isPermissionSet(Permission arg0) {
+		return false;
+	}
+
+	@Override
+	public boolean isPermissionSet(String arg0) {
+		return false;
+	}
+
+	@Override
+	public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
+		if (!hasUpdate) {
+			sender.sendMessage("No update was found.");
+			return true;
+		}
+		if (sender.hasPermission("MyZ.update"))
+			if (args.length != 0)
+				if (args[0].equalsIgnoreCase("MyZ"))
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							String name = file.getName();
+							// If it's a zip file, it shouldn't be downloaded as
+							// the plugin's name
+							if (versionLink.endsWith(".zip")) {
+								final String[] split = versionLink.split("/");
+								name = split[split.length - 1];
+							}
+							Updater.this.saveFile(new File(plugin.getDataFolder().getParent(), updateFolder), name, versionLink, sender);
+						}
+					}).run();
+		return true;
+	}
+
+	@Override
+	public void recalculatePermissions() {
+	}
+
+	@Override
+	public void removeAttachment(PermissionAttachment arg0) {
+	}
+
+	@Override
+	public void sendMessage(String arg0) {
+	}
+
 	@Override
 	public void sendMessage(String[] arg0) {
+	}
 
+	@Override
+	public void setOp(boolean arg0) {
 	}
 }

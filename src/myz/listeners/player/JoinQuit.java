@@ -14,6 +14,7 @@ import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Utils;
+import myz.utilities.Validate;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Horse;
@@ -32,6 +33,51 @@ import org.bukkit.event.player.PlayerQuitEvent;
  * 
  */
 public class JoinQuit implements Listener {
+
+	/**
+	 * Run all join actions for a player join event.
+	 * 
+	 * @param e
+	 *            The event.
+	 */
+	private void doJoin(PlayerJoinEvent e) {
+		playerJoin(e.getPlayer());
+		e.setJoinMessage(null);
+	}
+
+	@EventHandler
+	private void onJoin(PlayerJoinEvent e) {
+		MyZ.instance.map(e.getPlayer());
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
+			return;
+		if (MyZ.alertOps && e.getPlayer().isOp())
+			Messenger.sendMessage(e.getPlayer(), ChatColor.YELLOW + "Visit http://my-z.org/request.php to get a free MyZ MySQL database.");
+		doJoin(e);
+	}
+
+	@EventHandler
+	private void onLeave(PlayerQuitEvent e) {
+		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()))) {
+			e.setQuitMessage(null);
+
+			if (e.getPlayer().getVehicle() != null)
+				e.getPlayer().getVehicle().eject();
+
+			// Get rid of our horse.
+			for (Horse horse : e.getPlayer().getWorld().getEntitiesByClass(Horse.class))
+				if (horse.getOwner() != null && horse.getOwner().getName() != null
+						&& horse.getOwner().getName().equals(e.getPlayer().getName())) {
+					horse.setOwner(null);
+					horse.setTamed(false);
+					horse.setDomestication(0);
+				}
+
+			// Spawn our NPC unless we were flagged.
+			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()) && !Configuration.isInLobby(e.getPlayer()))
+				Utils.spawnNPC(e.getPlayer());
+			MyZ.instance.getFlagged().remove(e.getPlayer().getUniqueId());
+		}
+	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPreJoin(AsyncPlayerPreLoginEvent e) {
@@ -56,24 +102,12 @@ public class JoinQuit implements Listener {
 	}
 
 	@EventHandler
-	private void onJoin(PlayerJoinEvent e) {
-		MyZ.instance.map(e.getPlayer());
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			return;
-		if (MyZ.alertOps && e.getPlayer().isOp())
-			Messenger.sendMessage(e.getPlayer(), ChatColor.YELLOW + "Visit http://my-z.org/request.php to get a free MyZ MySQL database.");
-		doJoin(e);
-	}
-
-	/**
-	 * Run all join actions for a player join event.
-	 * 
-	 * @param e
-	 *            The event.
-	 */
-	private void doJoin(PlayerJoinEvent e) {
-		playerJoin(e.getPlayer());
-		e.setJoinMessage(null);
+	private void onWorldChange(PlayerChangedWorldEvent e) {
+		if (Validate.inWorld(e.getPlayer().getLocation())) {
+			if (!MyZ.instance.isPlayer(e.getPlayer()))
+				playerJoin(e.getPlayer());
+		} else
+			MyZ.instance.removePlayer(e.getPlayer(), false);
 	}
 
 	/**
@@ -126,38 +160,5 @@ public class JoinQuit implements Listener {
 			for (Object packet : Utils.packets.keySet())
 				if (player.getWorld().getName().equals(Utils.packets.get(packet).getWorld()))
 					Utils.sendPacket(player, packet);
-	}
-
-	@EventHandler
-	private void onWorldChange(PlayerChangedWorldEvent e) {
-		if (!MyZ.instance.isPlayer(e.getPlayer())) {
-			if (((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-				playerJoin(e.getPlayer());
-		} else if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			MyZ.instance.removePlayer(e.getPlayer(), false);
-	}
-
-	@EventHandler
-	private void onLeave(PlayerQuitEvent e) {
-		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()))) {
-			e.setQuitMessage(null);
-
-			if (e.getPlayer().getVehicle() != null)
-				e.getPlayer().getVehicle().eject();
-
-			// Get rid of our horse.
-			for (Horse horse : e.getPlayer().getWorld().getEntitiesByClass(Horse.class))
-				if (horse.getOwner() != null && horse.getOwner().getName() != null
-						&& horse.getOwner().getName().equals(e.getPlayer().getName())) {
-					horse.setOwner(null);
-					horse.setTamed(false);
-					horse.setDomestication(0);
-				}
-
-			// Spawn our NPC unless we were flagged.
-			if (!MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()) && !Configuration.isInLobby(e.getPlayer()))
-				Utils.spawnNPC(e.getPlayer());
-			MyZ.instance.getFlagged().remove(e.getPlayer().getUniqueId());
-		}
 	}
 }

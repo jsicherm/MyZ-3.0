@@ -3,11 +3,11 @@
  */
 package myz.listeners;
 
-import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
+import myz.utilities.Validate;
 
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Horse.Variant;
@@ -28,7 +28,7 @@ public class EntityHurtPlayer implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onZombification(EntityDamageByEntityEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
+		if (!Validate.inWorld(e.getEntity().getLocation()))
 			return;
 		if ((e.getDamager() instanceof Horse || e.getDamager() instanceof Zombie) && e.getEntity() instanceof Player) {
 			if (e.getDamager() instanceof Horse && ((Horse) e.getDamager()).getVariant() != Variant.UNDEAD_HORSE)

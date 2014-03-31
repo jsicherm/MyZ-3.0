@@ -88,51 +88,48 @@ public class CustomEntityHorse extends EntityHorse {
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntitySkeleton.class, 0, true));
 	}
 
-	@Override
-	protected void aD() {
-		super.aD();
-		bc().b(GenericAttributes.e);
-		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.horse.damage"));
+	private void b(int i, boolean flag) {
+		int j = datawatcher.getInt(16);
+
+		if (flag)
+			datawatcher.watch(16, Integer.valueOf(j | i));
+		else
+			datawatcher.watch(16, Integer.valueOf(j & ~i));
 	}
 
-	@Override
-	public boolean m(Entity entity) {
-		Double d = (Double) Configuration.getConfig("mobs.horse.damage");
-		float f = Float.valueOf(Double.toString(d));
-		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
-				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
-			return entity.damageEntity(DamageSource.mobAttack(this), f * (isBaby() ? 0.5f : 1f));
-		if (getOwnerName() == null || getOwnerName().isEmpty())
-			return false;
-		if (!MyZ.instance.isBandit(MyZ.instance.getUID(getOwnerName())))
-			return false;
-		if (entity instanceof EntityHuman
-				&& (getOwnerName().equals(((EntityHuman) entity).getName()) || MyZ.instance.isFriend(MyZ.instance.getUID(getOwnerName()),
-						MyZ.instance.getUID(((EntityHuman) entity).getName()))))
-			return false;
-		return entity.damageEntity(DamageSource.mobAttack(this), f * (isBaby() ? 0.5f : 1f));
+	private void cJ() {
+		cQ();
+		world.makeSound(this, "eating", 1.0F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.2F);
 	}
 
-	@Override
-	protected Entity findTarget() {
-		if ((getOwnerName() == null || getOwnerName().isEmpty()) && ((Horse) getBukkitEntity()).getVariant() != Variant.UNDEAD_HORSE
-				&& ((Horse) getBukkitEntity()).getVariant() != Variant.SKELETON_HORSE)
-			return null;
-		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
-
-		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
+	private void cN() {
 	}
 
-	@Override
-	public EntityLiving getGoalTarget() {
-		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
-				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
-			return super.getGoalTarget();
-		if (getOwnerName() == null || getOwnerName().isEmpty())
-			return null;
-		if (!MyZ.instance.isBandit(MyZ.instance.getUID(getOwnerName())))
-			return null;
-		return super.getGoalTarget();
+	private void cQ() {
+		if (!world.isStatic) {
+			bE = 1;
+			this.b(128, true);
+		}
+	}
+
+	private void cS() {
+		if (!world.isStatic) {
+			bF = 1;
+			this.p(true);
+		}
+	}
+
+	private void i(EntityHuman entityhuman) {
+		entityhuman.yaw = yaw;
+		entityhuman.pitch = pitch;
+		this.o(false);
+		this.p(false);
+		if (!world.isStatic)
+			entityhuman.mount(this);
+	}
+
+	private boolean x(int i) {
+		return (datawatcher.getInt(16) & i) != 0;
 	}
 
 	@Override
@@ -285,127 +282,6 @@ public class CustomEntityHorse extends EntityHorse {
 		}
 	}
 
-	/**
-	 * BELOW REQUIRED ONLY TO PROPERLY OVERRIDE FOOD TAMING. BELOW REQUIRED ONLY
-	 * TO PROPERLY OVERRIDE FOOD TAMING. BELOW REQUIRED ONLY TO PROPERLY
-	 * OVERRIDE FOOD TAMING. BELOW REQUIRED ONLY TO PROPERLY OVERRIDE FOOD
-	 * TAMING. BELOW REQUIRED ONLY TO PROPERLY OVERRIDE FOOD TAMING.
-	 */
-
-	@Override
-	public boolean cA() {
-		int i = getType();
-
-		return i == 2 || i == 1;
-	}
-
-	@Override
-	public boolean bZ() {
-		return !isBaby();
-	}
-
-	private void i(EntityHuman entityhuman) {
-		entityhuman.yaw = yaw;
-		entityhuman.pitch = pitch;
-		this.o(false);
-		this.p(false);
-		if (!world.isStatic)
-			entityhuman.mount(this);
-	}
-
-	private void cJ() {
-		cQ();
-		world.makeSound(this, "eating", 1.0F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.2F);
-	}
-
-	private void cN() {
-	}
-
-	@Override
-	public void h() {
-		super.h();
-		if (world.isStatic && datawatcher.a()) {
-			datawatcher.e();
-			cN();
-		}
-
-		if (bE > 0 && ++bE > 30) {
-			bE = 0;
-			this.b(128, false);
-		}
-
-		if (!world.isStatic && bF > 0 && ++bF > 20) {
-			bF = 0;
-			this.p(false);
-		}
-
-		if (bp > 0 && ++bp > 8)
-			bp = 0;
-
-		if (bq > 0) {
-			++bq;
-			if (bq > 300)
-				bq = 0;
-		}
-
-		bK = bJ;
-
-		if (ck()) {
-			bJ += (1.0F - bJ) * 0.4F + 0.05F;
-			if (bJ > 1.0F)
-				bJ = 1.0F;
-		} else {
-			bJ += (0.0F - bJ) * 0.4F - 0.05F;
-			if (bJ < 0.0F)
-				bJ = 0.0F;
-		}
-
-		bM = bL;
-		if (cl()) {
-			bK = bJ = 0.0F;
-			bL += (1.0F - bL) * 0.4F + 0.05F;
-			if (bL > 1.0F)
-				bL = 1.0F;
-		} else {
-			bI = false;
-			bL += (0.8F * bL * bL * bL - bL) * 0.6F - 0.05F;
-			if (bL < 0.0F)
-				bL = 0.0F;
-		}
-
-		if (x(128)) {
-			bN += (1.0F - bN) * 0.7F + 0.05F;
-			if (bN > 1.0F)
-				bN = 1.0F;
-		} else {
-			bN += (0.0F - bN) * 0.7F - 0.05F;
-			if (bN < 0.0F)
-				bN = 0.0F;
-		}
-	}
-
-	@Override
-	public void w(int i) {
-		if (cs()) {
-			if (i < 0)
-				i = 0;
-
-			float power;
-			if (i >= 90)
-				power = 1.0F;
-			else
-				power = 0.4F + 0.4F * i / 90.0F;
-
-			org.bukkit.event.entity.HorseJumpEvent event = org.bukkit.craftbukkit.v1_7_R1.event.CraftEventFactory.callHorseJumpEvent(this,
-					power);
-			if (!event.isCancelled()) {
-				bI = true;
-				cS();
-				bt = event.getPower();
-			}
-		}
-	}
-
 	@Override
 	public void ac() {
 		super.ac();
@@ -421,56 +297,23 @@ public class CustomEntityHorse extends EntityHorse {
 		}
 	}
 
-	private boolean x(int i) {
-		return (datawatcher.getInt(16) & i) != 0;
+	@Override
+	public boolean bZ() {
+		return !isBaby();
 	}
 
-	private void cS() {
-		if (!world.isStatic) {
-			bF = 1;
-			this.p(true);
-		}
-	}
-
-	private void cQ() {
-		if (!world.isStatic) {
-			bE = 1;
-			this.b(128, true);
-		}
-	}
-
-	private void b(int i, boolean flag) {
-		int j = datawatcher.getInt(16);
-
-		if (flag)
-			datawatcher.watch(16, Integer.valueOf(j | i));
-		else
-			datawatcher.watch(16, Integer.valueOf(j & ~i));
-	}
+	/**
+	 * BELOW REQUIRED ONLY TO PROPERLY OVERRIDE FOOD TAMING. BELOW REQUIRED ONLY
+	 * TO PROPERLY OVERRIDE FOOD TAMING. BELOW REQUIRED ONLY TO PROPERLY
+	 * OVERRIDE FOOD TAMING. BELOW REQUIRED ONLY TO PROPERLY OVERRIDE FOOD
+	 * TAMING. BELOW REQUIRED ONLY TO PROPERLY OVERRIDE FOOD TAMING.
+	 */
 
 	@Override
-	protected void a(int i, int j, int k, Block block) {
-		StepSound stepsound = block.stepSound;
+	public boolean cA() {
+		int i = getType();
 
-		if (world.getType(i, j + 1, k) == Blocks.SNOW)
-			stepsound = Blocks.SNOW.stepSound;
-
-		if (!block.getMaterial().isLiquid()) {
-			int l = getType();
-
-			if (passenger != null && l != 1 && l != 2) {
-				++bP;
-				if (bP > 5 && bP % 3 == 0) {
-					makeSound("mob.horse.gallop", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-					if (l == 0 && random.nextInt(10) == 0)
-						makeSound("mob.horse.breathe", stepsound.getVolume1() * 0.6F, stepsound.getVolume2());
-				} else if (bP <= 5)
-					makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-			} else if (stepsound == Block.f)
-				makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-			else
-				makeSound("mob.horse.soft", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-		}
+		return i == 2 || i == 1;
 	}
 
 	@Override
@@ -538,5 +381,162 @@ public class CustomEntityHorse extends EntityHorse {
 			aR = 0.02F;
 			super.e(f, f1);
 		}
+	}
+
+	@Override
+	public EntityLiving getGoalTarget() {
+		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+			return super.getGoalTarget();
+		if (getOwnerName() == null || getOwnerName().isEmpty())
+			return null;
+		if (!MyZ.instance.isBandit(MyZ.instance.getUID(getOwnerName())))
+			return null;
+		return super.getGoalTarget();
+	}
+
+	@Override
+	public void h() {
+		super.h();
+		if (world.isStatic && datawatcher.a()) {
+			datawatcher.e();
+			cN();
+		}
+
+		if (bE > 0 && ++bE > 30) {
+			bE = 0;
+			this.b(128, false);
+		}
+
+		if (!world.isStatic && bF > 0 && ++bF > 20) {
+			bF = 0;
+			this.p(false);
+		}
+
+		if (bp > 0 && ++bp > 8)
+			bp = 0;
+
+		if (bq > 0) {
+			++bq;
+			if (bq > 300)
+				bq = 0;
+		}
+
+		bK = bJ;
+
+		if (ck()) {
+			bJ += (1.0F - bJ) * 0.4F + 0.05F;
+			if (bJ > 1.0F)
+				bJ = 1.0F;
+		} else {
+			bJ += (0.0F - bJ) * 0.4F - 0.05F;
+			if (bJ < 0.0F)
+				bJ = 0.0F;
+		}
+
+		bM = bL;
+		if (cl()) {
+			bK = bJ = 0.0F;
+			bL += (1.0F - bL) * 0.4F + 0.05F;
+			if (bL > 1.0F)
+				bL = 1.0F;
+		} else {
+			bI = false;
+			bL += (0.8F * bL * bL * bL - bL) * 0.6F - 0.05F;
+			if (bL < 0.0F)
+				bL = 0.0F;
+		}
+
+		if (x(128)) {
+			bN += (1.0F - bN) * 0.7F + 0.05F;
+			if (bN > 1.0F)
+				bN = 1.0F;
+		} else {
+			bN += (0.0F - bN) * 0.7F - 0.05F;
+			if (bN < 0.0F)
+				bN = 0.0F;
+		}
+	}
+
+	@Override
+	public boolean m(Entity entity) {
+		Double d = (Double) Configuration.getConfig("mobs.horse.damage");
+		float f = Float.valueOf(Double.toString(d));
+		if (((Horse) getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+				|| ((Horse) getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+			return entity.damageEntity(DamageSource.mobAttack(this), f * (isBaby() ? 0.5f : 1f));
+		if (getOwnerName() == null || getOwnerName().isEmpty())
+			return false;
+		if (!MyZ.instance.isBandit(MyZ.instance.getUID(getOwnerName())))
+			return false;
+		if (entity instanceof EntityHuman
+				&& (getOwnerName().equals(((EntityHuman) entity).getName()) || MyZ.instance.isFriend(MyZ.instance.getUID(getOwnerName()),
+						MyZ.instance.getUID(((EntityHuman) entity).getName()))))
+			return false;
+		return entity.damageEntity(DamageSource.mobAttack(this), f * (isBaby() ? 0.5f : 1f));
+	}
+
+	@Override
+	public void w(int i) {
+		if (cs()) {
+			if (i < 0)
+				i = 0;
+
+			float power;
+			if (i >= 90)
+				power = 1.0F;
+			else
+				power = 0.4F + 0.4F * i / 90.0F;
+
+			org.bukkit.event.entity.HorseJumpEvent event = org.bukkit.craftbukkit.v1_7_R1.event.CraftEventFactory.callHorseJumpEvent(this,
+					power);
+			if (!event.isCancelled()) {
+				bI = true;
+				cS();
+				bt = event.getPower();
+			}
+		}
+	}
+
+	@Override
+	protected void a(int i, int j, int k, Block block) {
+		StepSound stepsound = block.stepSound;
+
+		if (world.getType(i, j + 1, k) == Blocks.SNOW)
+			stepsound = Blocks.SNOW.stepSound;
+
+		if (!block.getMaterial().isLiquid()) {
+			int l = getType();
+
+			if (passenger != null && l != 1 && l != 2) {
+				++bP;
+				if (bP > 5 && bP % 3 == 0) {
+					makeSound("mob.horse.gallop", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+					if (l == 0 && random.nextInt(10) == 0)
+						makeSound("mob.horse.breathe", stepsound.getVolume1() * 0.6F, stepsound.getVolume2());
+				} else if (bP <= 5)
+					makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+			} else if (stepsound == Block.f)
+				makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+			else
+				makeSound("mob.horse.soft", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+		}
+	}
+
+	@Override
+	protected void aD() {
+		super.aD();
+		bc().b(GenericAttributes.e);
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.horse.damage"));
+	}
+
+	@Override
+	protected Entity findTarget() {
+		if ((getOwnerName() == null || getOwnerName().isEmpty()) && ((Horse) getBukkitEntity()).getVariant() != Variant.UNDEAD_HORSE
+				&& ((Horse) getBukkitEntity()).getVariant() != Variant.SKELETON_HORSE)
+			return null;
+		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+
+		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}
 }

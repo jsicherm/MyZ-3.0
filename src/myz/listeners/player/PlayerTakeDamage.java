@@ -3,12 +3,12 @@
  */
 package myz.listeners.player;
 
-import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
 import myz.mobs.pathing.PathingSupport;
 import myz.support.interfacing.Configuration;
+import myz.utilities.Validate;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -27,7 +27,7 @@ public class PlayerTakeDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
+		if (!Validate.inWorld(e.getEntity().getLocation()))
 			return;
 		if (e.getEntity() instanceof Player && ((Player) e.getEntity()).getGameMode() != GameMode.CREATIVE) {
 			if (random.nextDouble() <= (Double) Configuration.getConfig("damage.chance_of_bleeding")

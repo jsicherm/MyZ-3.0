@@ -25,241 +25,6 @@ public class Locales {
 	private static final Map<String, Object> unSet = new HashMap<String, Object>();
 
 	/**
-	 * Make sure all locales have the appropriate mappings. Defaults
-	 * non-english, non-mapped ones to english.
-	 */
-	public static void save() {
-		if (defaultSet.isEmpty())
-			loadDefault();
-		List<String> codesCovered = new ArrayList<String>();
-
-		// Makes everything that doesn't have a default value english.
-		for (Localizer locale : Localizer.values()) {
-			if (codesCovered.contains(locale.getCode()))
-				continue;
-			FileConfiguration file = MyZ.instance.getLocalizableConfig(locale);
-			if (file != null) {
-				Map<String, Object> map;
-				switch (locale) {
-				case DEFAULT:
-					map = unSet;
-					break;
-				case PIRATE_SPEAK:
-					map = pirateSet;
-					break;
-				case TURKISH:
-					map = turkishSet;
-					break;
-				default:
-					map = defaultSet;
-					break;
-				}
-				for (String key : map.keySet())
-					if (!file.isSet(key))
-						file.set(key, map.get(key));
-
-				// Make sure we assign an english default to locales that aren't
-				// updated.
-				if (locale != Localizer.DEFAULT)
-					for (String key : defaultSet.keySet()) {
-						if (!file.isSet(key)) {
-							file.set(key, defaultSet.get(key));
-						}
-					}
-				codesCovered.add(locale.getCode());
-				MyZ.instance.saveLocalizableConfig(locale);
-			}
-		}
-	}
-
-	/**
-	 * Load all the values for the default ENGLISH configuration. Non-english
-	 * files will still get english as a default unless they are hardcoded in
-	 * too.
-	 */
-	public static void loadDefault() {
-		// Chest commands
-		defaultSet.put("loot.set.arguments", "&4Please specify the name of the lootset.");
-		defaultSet.put("loot.set.percent", "Enter the spawn chance percent (0-100)");
-		defaultSet
-				.put("loot.set.info",
-						"&ePlace ONE item (with proper stack size) into the inventory that opens above. Once you close the inventory, enter the percent chance of spawning the item. Type anything to continue.");
-		defaultSet.put("chest.get.click", "&eRight-click the chest you want to get.");
-		defaultSet.put("chest.get.nonchest", "&4That isn't a chest.");
-		defaultSet.put("chest.get.typeis", "&eThat chest has the loot table: %s");
-		defaultSet.put("chest.set.click", "&eRight-click the chest you want to set.");
-		defaultSet.put("chest.set.begin", "&eStarting MyZ Chest Log. This will cause some lag and take awhile.");
-		defaultSet.put("chest.set.nonchest", "&4That isn't a chest.");
-		defaultSet.put("chest.set.typeis", "&eThat chest now has the loot table: %s");
-		defaultSet.put("chest.set.coordinate1", "&eRight-click one corner of the area you want scanned.");
-		defaultSet.put("chest.set.coordinate2", "&eRight-click the other corner of the area you want scanned.");
-		defaultSet.put("chest.set.initialize",
-				"&eInitializing a scan on the selected area. Run another scan concurrently at your own peril.");
-
-		// NPC names
-		unSet.put("npc_names.archer.friendly", new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
-		unSet.put("npc_names.archer.enemy", new ArrayList<String>(Arrays.asList("Evil Bob", "Stephen", "Monte")));
-		unSet.put("npc_names.swordsman.friendly", new ArrayList<String>(Arrays.asList("Knight Phil", "MrTeePee", "Isocrates")));
-		unSet.put("npc_names.swordsman.enemy", new ArrayList<String>(Arrays.asList("Amadeus", "Jason", "Clayton")));
-		unSet.put("npc_names.wanderer.friendly", new ArrayList<String>(Arrays.asList("Frederico", "Arthur", "Virgil")));
-		unSet.put("npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
-
-		// Science
-		unSet.put("science_gui", "Science Centre - %s pts.");
-		defaultSet.put("gui.purchased", "You now have &e%s&r points.");
-		defaultSet.put("gui.afford", "You don't know enough to use that.");
-		defaultSet.put("gui.next_page", "Next Page");
-		defaultSet.put("gui.previous_page", "Previous Page");
-		defaultSet.put("gui.cost", "%s Research Points");
-		defaultSet.put("research.fail", "&eThe Science Gods refuse your offering.");
-		defaultSet.put("research.success", "&eYou gain a better understanding of the disease and %s research points.");
-		defaultSet.put("research.success-short", "&e+%s research points!");
-		defaultSet.put("research.rank", "&eThe Science Gods will not hear you. You must be ranked on this server to do research.");
-
-		// Chat
-		unSet.put("radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
-		unSet.put("radio_color_override", "&2");
-		defaultSet.put("private.to_prefix", "&7To %s:");
-		defaultSet.put("private.from_prefix", "&7From %s:");
-		defaultSet.put("private.clan_prefix", "&8Clan chat:");
-		defaultSet.put("private.many_players", "&4More than one player was found.");
-		defaultSet.put("private.no_player", "&4The player could not be found.");
-
-		// Special Events
-		defaultSet.put("damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
-		defaultSet.put("damage.bleed_end", "That ought to stop the bleeding.");
-		defaultSet.put("damage.leg_break", "&4Oof! That was a far fall!");
-		defaultSet.put("damage.leg_fix", "That's more like it.");
-		defaultSet.put("damage.poison_begin", "&5Wh&ko&r&da, &5&kI &1d&kon&r&3't &kF&r&afeel &4so &kg&r&6oo&cd...");
-		defaultSet.put("damage.poison_end", "Ah, much better!");
-		defaultSet.put("damage.headshot", "&eHeadshot! 2x damage.");
-		defaultSet.put("special.giant_summoned", "&eYou hear the ground shake. A giant is about to be summoned.");
-		defaultSet.put("special.giant_could_not_summon", "&eThere is not enough space here to summon a giant.");
-		defaultSet.put("special.giant_summon_permission",
-				"&4This is a donator-only feature. Donate today for the ability to spawn the fabled boss mobs.");
-
-		// Safe logout
-		defaultSet.put("safe_logout.beginning", "&2Safe logout will occur in:");
-		defaultSet.put("safe_logout.cancelled", "&4Safe logout cancelled due to movement.");
-
-		// Heal
-		defaultSet.put("heal.amount", "&ePlayer &2healed&e. You now have %s heals this life.");
-		defaultSet.put("heal.wait", "Please wait %s seconds before healing another player again.");
-		defaultSet.put("heal.waste", "&eWell that was a waste.");
-		unSet.put("heal.medkit.regeneration", "Regeneration");
-		unSet.put("heal.medkit.heal", "Heal");
-		unSet.put("heal.medkit.antiseptic", "Antiseptic");
-
-		// Kill
-		defaultSet.put("bandit.amount", "&ePlayer &4killed&e. You now have %s kills this life.");
-		defaultSet.put("zombie.kill_amount", "&eZombie down. %s this life.");
-		defaultSet.put("pigman.kill_amount", "&ePigman down. %s this life.");
-		defaultSet.put("giant.kill_amount", "&eGiant down. %s this life.");
-		defaultSet.put("player_npc_killed", "&e%s has been killed while combat logging.");
-		defaultSet.put("player_was_killed_npc", "&eYou were killed while combat logging.");
-		defaultSet.put("murdered", "&4MURDERED");
-
-		// Kick
-		defaultSet.put("kick.come_back", "&4Grab a drink. Come back in %s seconds.");
-		defaultSet.put("kick.safe_logout", "&eYou have been safely logged out.");
-		unSet.put("kick.recur", "&4Stop stressing. %s seconds to go.");
-
-		// Commands
-		defaultSet.put("command.base.help", "=== MyZ Help ===");
-
-		// Blocks Command
-		defaultSet.put("command.allowed.breakable", "&eYou can break:");
-		defaultSet.put("command.allowed.placeable", "&eYou can place:");
-		defaultSet.put("command.block.arguments", "&4Usage: /blockallow <place/destroy>");
-		defaultSet.put("command.block.place.arguments", "&4Usage: /blockallow place <add [seconds until despawn]/remove>");
-		defaultSet.put("command.block.destroy.arguments", "&4Usage: /blockallow destroy <add [seconds until respawn]/remove>");
-		defaultSet.put("command.block.destroy.add.help",
-				"&eNow break the block you want to whitelist with the item you want to allow breaking with.");
-		defaultSet.put("command.block.destroy.remove.help",
-				"&eNow break the block you want blacklist with the item that you can currently break with.");
-		defaultSet.put("command.block.place.add.help", "&eNow place the block you would like to whitelist.");
-		defaultSet.put("command.block.place.remove.help", "&eNow place the block you would like to blacklist.");
-		defaultSet.put("command.block.destroy.add.summary", "&ePlayers can now destroy %s blocks with %ss.");
-		defaultSet.put("command.block.destroy.remove.summary", "&ePlayers can no longer destroy %s blocks with %ss.");
-		defaultSet.put("command.block.place.add.summary", "&ePlayers can now place %s blocks.");
-		defaultSet.put("command.block.place.remove.summary", "&ePlayers can no longer place %s blocks.");
-		defaultSet.put("command.block.destroy.add.fail", "&ePlayers can already break %s blocks with %ss.");
-		defaultSet.put("command.block.destroy.remove.fail", "&ePlayers cannot destroy %s blocks with %ss.");
-		defaultSet.put("command.block.place.add.fail", "&ePlayers can already place %s blocks.");
-		defaultSet.put("command.block.place.remove.fail", "&ePlayers cannot place %s blocks.");
-
-		// Spawn
-		defaultSet.put("command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
-		defaultSet.put("command.spawn.unable_to_spawn", "&4Unable to spawn there. Please try again shortly.");
-		defaultSet.put("command.spawn.requires_rank",
-				"&4This is a donator-only feature. Donate today for the ability to spawn near your friends!");
-		defaultSet
-				.put("spawn.zombie",
-						"You are &2infected&r! As a zombie, you aren't targetted by other zombies. You never get thirsty or bleed but don't start with a spawn kit and are hunted by the living.");
-		defaultSet.put("ranks.spawnmessage.0", "You have spawned in the world, find food and water.");
-
-		// Stats Command
-		defaultSet.put("command.stats.header", "==== Statistics for &e%s&r ====");
-		defaultSet.put("command.stats.kills_header", "==== &eKILLS&r ====");
-		defaultSet.put("command.stats.kills", "Zombie: &e%s&r  Pigman: &e%s&r  Giant: &e%s&r  Player: &e%s");
-		defaultSet.put("command.stats.time_header", "==== &eTIME SURVIVED&r ====");
-		defaultSet.put("command.stats.time", "Total: &e%s minutes&r  This life: &e%s minutes");
-		defaultSet.put("command.stats.footer", "See complete stats at http://my-z.org#statistics");
-
-		// Research Command
-		defaultSet.put("command.research.arguments", "&4Usage: /setresearch <addreward [point cost]/add [point value]/remove>");
-		defaultSet.put("command.research.reward.added", "&ePlayers can now research %s with %s research points.");
-		defaultSet.put("command.research.added", "&ePlayers can now do research with %s for %s research points.");
-		defaultSet.put("command.research.removed", "&ePlayers can no longer research %s.");
-		defaultSet.put("command.research.item", "&eYou must be holding the item you wish to add/remove from research.");
-		defaultSet.put("command.research.item_exists", "&4That item is already researchable.");
-		defaultSet.put("command.research.item_no_exists", "&4That item isn't researchable.");
-
-		// Setlobby Command
-		defaultSet.put("command.setlobby.requires_cuboid", "&4You must make a &ocuboid&r&4 selection with WorldEdit.");
-		defaultSet.put("command.setlobby.updated", "&2The lobby region has been updated.");
-
-		// Rank Command
-		defaultSet.put("command.setrank.success", "&eYou have successfully updated the player's rank.");
-		defaultSet.put("command.setrank.failure",
-				"&4You must specify the name of a player that has played before and a rank value greater or equal to 0.");
-		defaultSet.put("command.saverank.requires_number", "&4You must specify a rank number to save for.");
-		defaultSet.put("command.saverank.requires_prefix", "&4You must specify a prefix to set.");
-		defaultSet.put("command.saverank.saved", "&eThe chat prefix for rank number %s has been set to %s.");
-
-		// Spawnpoint Command
-		defaultSet.put("command.addspawn.added", "&eYour location has been added to the spawnpoints.");
-		defaultSet.put("command.addspawn.already_exists", "&4This location is already a spawnpoint.");
-		defaultSet.put("command.removespawn.removed", "&eThe spawnpoint has been removed.");
-		defaultSet.put("command.removespawn.unable_to_remove", "&4The number you specified is out of range.");
-		defaultSet.put("command.removespawn.requires_number",
-				"&4You must specify a spawnpoint number to remove. See numbers using /spawnpoints.");
-
-		// Kit
-		defaultSet.put("command.savekit.requires_number", "&4You must specify a rank number to save for.");
-		defaultSet.put("command.savekit.saved", "&eThe starting kit for rank %s has been saved as your current inventory contents.");
-
-		// Clan
-		defaultSet.put("clan.name.too_long", "&4Clan names must be less than 20 characters.");
-		defaultSet.put("clan.joined", "Your join request to '&e%s&r' was accepted.");
-		defaultSet.put("clan.notjoined", "&4You cannot join clans.");
-		defaultSet.put("clan.joining", "Sent request to join clan.");
-		defaultSet.put("command.clan.leave", "You are no longer in a clan.");
-		defaultSet.put("command.clan.not_in", "You are not in a clan.");
-		defaultSet.put("command.clan.in", "You are in '&e%s&r' (%s online / %s total).");
-
-		// Friends
-		defaultSet.put("command.friend.requires_name", "&4You must specify a name to friend.");
-		defaultSet.put("command.friend.non_exist", "&4%s has never played before.");
-		defaultSet.put("command.friend.empty", "&4You have no friends.");
-		defaultSet.put("friend.added", "&e%s &9has been added to your friends list.");
-		defaultSet.put("friend.removed", "&e%s &9has been removed from your friends list.");
-
-		loadPirate();
-		loadTurkish();
-	}
-
-	/**
 	 * Load all language for the default PIRATE configuration.
 	 */
 	private static void loadPirate() {
@@ -540,5 +305,238 @@ public class Locales {
 		set.put("spawn.zombie",
 				"Artik bir &2zombisin&r! Zombiyken obur zombiler sana saldirmayacaktir. Asla susamassin veya kanamazsin ancak canlanma kitin yoktur ve yasayanlara karsi dusmansin!");
 
+	}
+
+	/**
+	 * Load all the values for the default ENGLISH configuration. Non-english
+	 * files will still get english as a default unless they are hardcoded in
+	 * too.
+	 */
+	public static void loadDefault() {
+		// Chest commands
+		defaultSet.put("loot.set.arguments", "&4Please specify the name of the lootset.");
+		defaultSet.put("loot.set.percent", "Enter the spawn chance percent (0-100)");
+		defaultSet
+				.put("loot.set.info",
+						"&ePlace ONE item (with proper stack size) into the inventory that opens above. Once you close the inventory, enter the percent chance of spawning the item. Type anything to continue.");
+		defaultSet.put("chest.get.click", "&eRight-click the chest you want to get.");
+		defaultSet.put("chest.get.nonchest", "&4That isn't a chest.");
+		defaultSet.put("chest.get.typeis", "&eThat chest has the loot table: %s");
+		defaultSet.put("chest.set.click", "&eRight-click the chest you want to set.");
+		defaultSet.put("chest.set.begin", "&eStarting MyZ Chest Log. This will cause some lag and take awhile.");
+		defaultSet.put("chest.set.nonchest", "&4That isn't a chest.");
+		defaultSet.put("chest.set.typeis", "&eThat chest now has the loot table: %s");
+		defaultSet.put("chest.set.coordinate1", "&eRight-click one corner of the area you want scanned.");
+		defaultSet.put("chest.set.coordinate2", "&eRight-click the other corner of the area you want scanned.");
+		defaultSet.put("chest.set.initialize",
+				"&eInitializing a scan on the selected area. Run another scan concurrently at your own peril.");
+
+		// NPC names
+		unSet.put("npc_names.archer.friendly", new ArrayList<String>(Arrays.asList("Robin Hood", "Jeremy", "Ramses")));
+		unSet.put("npc_names.archer.enemy", new ArrayList<String>(Arrays.asList("Evil Bob", "Stephen", "Monte")));
+		unSet.put("npc_names.swordsman.friendly", new ArrayList<String>(Arrays.asList("Knight Phil", "MrTeePee", "Isocrates")));
+		unSet.put("npc_names.swordsman.enemy", new ArrayList<String>(Arrays.asList("Amadeus", "Jason", "Clayton")));
+		unSet.put("npc_names.wanderer.friendly", new ArrayList<String>(Arrays.asList("Frederico", "Arthur", "Virgil")));
+		unSet.put("npc_names.wanderer.enemy", new ArrayList<String>(Arrays.asList("Osborne", "Alastar", "Teo")));
+
+		// Science
+		unSet.put("science_gui", "Science Centre - %s pts.");
+		defaultSet.put("gui.purchased", "You now have &e%s&r points.");
+		defaultSet.put("gui.afford", "You don't know enough to use that.");
+		defaultSet.put("gui.next_page", "Next Page");
+		defaultSet.put("gui.previous_page", "Previous Page");
+		defaultSet.put("gui.cost", "%s Research Points");
+		defaultSet.put("research.fail", "&eThe Science Gods refuse your offering.");
+		defaultSet.put("research.success", "&eYou gain a better understanding of the disease and %s research points.");
+		defaultSet.put("research.success-short", "&e+%s research points!");
+		defaultSet.put("research.rank", "&eThe Science Gods will not hear you. You must be ranked on this server to do research.");
+
+		// Chat
+		unSet.put("radio_name", "[&8Radio - &7%s.0&8 Hz&f]");
+		unSet.put("radio_color_override", "&2");
+		defaultSet.put("private.to_prefix", "&7To %s:");
+		defaultSet.put("private.from_prefix", "&7From %s:");
+		defaultSet.put("private.clan_prefix", "&8Clan chat:");
+		defaultSet.put("private.many_players", "&4More than one player was found.");
+		defaultSet.put("private.no_player", "&4The player could not be found.");
+
+		// Special Events
+		defaultSet.put("damage.bleed_begin", "&4Ouch! I think I'm bleeding.");
+		defaultSet.put("damage.bleed_end", "That ought to stop the bleeding.");
+		defaultSet.put("damage.leg_break", "&4Oof! That was a far fall!");
+		defaultSet.put("damage.leg_fix", "That's more like it.");
+		defaultSet.put("damage.poison_begin", "&5Wh&ko&r&da, &5&kI &1d&kon&r&3't &kF&r&afeel &4so &kg&r&6oo&cd...");
+		defaultSet.put("damage.poison_end", "Ah, much better!");
+		defaultSet.put("damage.headshot", "&eHeadshot! 2x damage.");
+		defaultSet.put("special.giant_summoned", "&eYou hear the ground shake. A giant is about to be summoned.");
+		defaultSet.put("special.giant_could_not_summon", "&eThere is not enough space here to summon a giant.");
+		defaultSet.put("special.giant_summon_permission",
+				"&4This is a donator-only feature. Donate today for the ability to spawn the fabled boss mobs.");
+
+		// Safe logout
+		defaultSet.put("safe_logout.beginning", "&2Safe logout will occur in:");
+		defaultSet.put("safe_logout.cancelled", "&4Safe logout cancelled due to movement.");
+
+		// Heal
+		defaultSet.put("heal.amount", "&ePlayer &2healed&e. You now have %s heals this life.");
+		defaultSet.put("heal.wait", "Please wait %s seconds before healing another player again.");
+		defaultSet.put("heal.waste", "&eWell that was a waste.");
+		unSet.put("heal.medkit.regeneration", "Regeneration");
+		unSet.put("heal.medkit.heal", "Heal");
+		unSet.put("heal.medkit.antiseptic", "Antiseptic");
+
+		// Kill
+		defaultSet.put("bandit.amount", "&ePlayer &4killed&e. You now have %s kills this life.");
+		defaultSet.put("zombie.kill_amount", "&eZombie down. %s this life.");
+		defaultSet.put("pigman.kill_amount", "&ePigman down. %s this life.");
+		defaultSet.put("giant.kill_amount", "&eGiant down. %s this life.");
+		defaultSet.put("player_npc_killed", "&e%s has been killed while combat logging.");
+		defaultSet.put("player_was_killed_npc", "&eYou were killed while combat logging.");
+		defaultSet.put("murdered", "&4MURDERED");
+
+		// Kick
+		defaultSet.put("kick.come_back", "&4Grab a drink. Come back in %s seconds.");
+		defaultSet.put("kick.safe_logout", "&eYou have been safely logged out.");
+		unSet.put("kick.recur", "&4Stop stressing. %s seconds to go.");
+
+		// Commands
+		defaultSet.put("command.base.help", "=== MyZ Help ===");
+
+		// Blocks Command
+		defaultSet.put("command.allowed.breakable", "&eYou can break:");
+		defaultSet.put("command.allowed.placeable", "&eYou can place:");
+		defaultSet.put("command.block.arguments", "&4Usage: /blockallow <place/destroy>");
+		defaultSet.put("command.block.place.arguments", "&4Usage: /blockallow place <add [seconds until despawn]/remove>");
+		defaultSet.put("command.block.destroy.arguments", "&4Usage: /blockallow destroy <add [seconds until respawn]/remove>");
+		defaultSet.put("command.block.destroy.add.help",
+				"&eNow break the block you want to whitelist with the item you want to allow breaking with.");
+		defaultSet.put("command.block.destroy.remove.help",
+				"&eNow break the block you want blacklist with the item that you can currently break with.");
+		defaultSet.put("command.block.place.add.help", "&eNow place the block you would like to whitelist.");
+		defaultSet.put("command.block.place.remove.help", "&eNow place the block you would like to blacklist.");
+		defaultSet.put("command.block.destroy.add.summary", "&ePlayers can now destroy %s blocks with %ss.");
+		defaultSet.put("command.block.destroy.remove.summary", "&ePlayers can no longer destroy %s blocks with %ss.");
+		defaultSet.put("command.block.place.add.summary", "&ePlayers can now place %s blocks.");
+		defaultSet.put("command.block.place.remove.summary", "&ePlayers can no longer place %s blocks.");
+		defaultSet.put("command.block.destroy.add.fail", "&ePlayers can already break %s blocks with %ss.");
+		defaultSet.put("command.block.destroy.remove.fail", "&ePlayers cannot destroy %s blocks with %ss.");
+		defaultSet.put("command.block.place.add.fail", "&ePlayers can already place %s blocks.");
+		defaultSet.put("command.block.place.remove.fail", "&ePlayers cannot place %s blocks.");
+
+		// Spawn
+		defaultSet.put("command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
+		defaultSet.put("command.spawn.unable_to_spawn", "&4Unable to spawn there. Please try again shortly.");
+		defaultSet.put("command.spawn.requires_rank",
+				"&4This is a donator-only feature. Donate today for the ability to spawn near your friends!");
+		defaultSet
+				.put("spawn.zombie",
+						"You are &2infected&r! As a zombie, you aren't targetted by other zombies. You never get thirsty or bleed but don't start with a spawn kit and are hunted by the living.");
+		defaultSet.put("ranks.spawnmessage.0", "You have spawned in the world, find food and water.");
+
+		// Stats Command
+		defaultSet.put("command.stats.header", "==== Statistics for &e%s&r ====");
+		defaultSet.put("command.stats.kills_header", "==== &eKILLS&r ====");
+		defaultSet.put("command.stats.kills", "Zombie: &e%s&r  Pigman: &e%s&r  Giant: &e%s&r  Player: &e%s");
+		defaultSet.put("command.stats.time_header", "==== &eTIME SURVIVED&r ====");
+		defaultSet.put("command.stats.time", "Total: &e%s minutes&r  This life: &e%s minutes");
+		defaultSet.put("command.stats.footer", "See complete stats at http://my-z.org#statistics");
+
+		// Research Command
+		defaultSet.put("command.research.arguments", "&4Usage: /setresearch <addreward [point cost]/add [point value]/remove>");
+		defaultSet.put("command.research.reward.added", "&ePlayers can now research %s with %s research points.");
+		defaultSet.put("command.research.added", "&ePlayers can now do research with %s for %s research points.");
+		defaultSet.put("command.research.removed", "&ePlayers can no longer research %s.");
+		defaultSet.put("command.research.item", "&eYou must be holding the item you wish to add/remove from research.");
+		defaultSet.put("command.research.item_exists", "&4That item is already researchable.");
+		defaultSet.put("command.research.item_no_exists", "&4That item isn't researchable.");
+
+		// Setlobby Command
+		defaultSet.put("command.setlobby.requires_cuboid", "&4You must make a &ocuboid&r&4 selection with WorldEdit.");
+		defaultSet.put("command.setlobby.updated", "&2The lobby region has been updated.");
+
+		// Rank Command
+		defaultSet.put("command.setrank.success", "&eYou have successfully updated the player's rank.");
+		defaultSet.put("command.setrank.failure",
+				"&4You must specify the name of a player that has played before and a rank value greater or equal to 0.");
+		defaultSet.put("command.saverank.requires_number", "&4You must specify a rank number to save for.");
+		defaultSet.put("command.saverank.requires_prefix", "&4You must specify a prefix to set.");
+		defaultSet.put("command.saverank.saved", "&eThe chat prefix for rank number %s has been set to %s.");
+
+		// Spawnpoint Command
+		defaultSet.put("command.addspawn.added", "&eYour location has been added to the spawnpoints.");
+		defaultSet.put("command.addspawn.already_exists", "&4This location is already a spawnpoint.");
+		defaultSet.put("command.removespawn.removed", "&eThe spawnpoint has been removed.");
+		defaultSet.put("command.removespawn.unable_to_remove", "&4The number you specified is out of range.");
+		defaultSet.put("command.removespawn.requires_number",
+				"&4You must specify a spawnpoint number to remove. See numbers using /spawnpoints.");
+
+		// Kit
+		defaultSet.put("command.savekit.requires_number", "&4You must specify a rank number to save for.");
+		defaultSet.put("command.savekit.saved", "&eThe starting kit for rank %s has been saved as your current inventory contents.");
+
+		// Clan
+		defaultSet.put("clan.name.too_long", "&4Clan names must be less than 20 characters.");
+		defaultSet.put("clan.joined", "Your join request to '&e%s&r' was accepted.");
+		defaultSet.put("clan.notjoined", "&4You cannot join clans.");
+		defaultSet.put("clan.joining", "Sent request to join clan.");
+		defaultSet.put("command.clan.leave", "You are no longer in a clan.");
+		defaultSet.put("command.clan.not_in", "You are not in a clan.");
+		defaultSet.put("command.clan.in", "You are in '&e%s&r' (%s online / %s total).");
+
+		// Friends
+		defaultSet.put("command.friend.requires_name", "&4You must specify a name to friend.");
+		defaultSet.put("command.friend.non_exist", "&4%s has never played before.");
+		defaultSet.put("command.friend.empty", "&4You have no friends.");
+		defaultSet.put("friend.added", "&e%s &9has been added to your friends list.");
+		defaultSet.put("friend.removed", "&e%s &9has been removed from your friends list.");
+
+		loadPirate();
+		loadTurkish();
+	}
+
+	/**
+	 * Make sure all locales have the appropriate mappings. Defaults
+	 * non-english, non-mapped ones to english.
+	 */
+	public static void save() {
+		if (defaultSet.isEmpty())
+			loadDefault();
+		List<String> codesCovered = new ArrayList<String>();
+
+		// Makes everything that doesn't have a default value english.
+		for (Localizer locale : Localizer.values()) {
+			if (codesCovered.contains(locale.getCode()))
+				continue;
+			FileConfiguration file = MyZ.instance.getLocalizableConfig(locale);
+			if (file != null) {
+				Map<String, Object> map;
+				switch (locale) {
+				case DEFAULT:
+					map = unSet;
+					break;
+				case PIRATE_SPEAK:
+					map = pirateSet;
+					break;
+				case TURKISH:
+					map = turkishSet;
+					break;
+				default:
+					map = defaultSet;
+					break;
+				}
+				for (String key : map.keySet())
+					if (!file.isSet(key))
+						file.set(key, map.get(key));
+
+				// Make sure we assign an english default to locales that aren't
+				// updated.
+				if (locale != Localizer.DEFAULT)
+					for (String key : defaultSet.keySet())
+						if (!file.isSet(key))
+							file.set(key, defaultSet.get(key));
+				codesCovered.add(locale.getCode());
+				MyZ.instance.saveLocalizableConfig(locale);
+			}
+		}
 	}
 }

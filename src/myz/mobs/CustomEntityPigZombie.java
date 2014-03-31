@@ -47,6 +47,21 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 		populateGoals();
 	}
 
+	public void addPather(Location to, float speed) {
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	}
+
+	@Override
+	public boolean canSpawn() {
+		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
+				&& !world.containsLiquid(boundingBox);
+	}
+
+	public void cleanPather(PathfinderGoal goal) {
+		populateGoals();
+		priority = 0;
+	}
+
 	public void populateGoals() {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
@@ -80,30 +95,6 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 		bA();
 	}
 
-	@Override
-	protected void aD() {
-		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.pigman.damage") * (isBaby() ? 0.75 : 1));
-	}
-
-	@Override
-	protected Entity findTarget() {
-		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
-
-		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
-	}
-
-	@Override
-	protected void bA() {
-		setEquipment(0, new ItemStack(Items.STONE_SWORD));
-	}
-
-	@Override
-	public boolean canSpawn() {
-		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
-				&& !world.containsLiquid(boundingBox);
-	}
-
 	public void see(Location location, int priority) {
 		if (priority < this.priority)
 			return;
@@ -115,12 +106,21 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 		}
 	}
 
-	public void addPather(Location to, float speed) {
-		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	@Override
+	protected void aD() {
+		super.aD();
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.pigman.damage") * (isBaby() ? 0.75 : 1));
 	}
 
-	public void cleanPather(PathfinderGoal goal) {
-		populateGoals();
-		priority = 0;
+	@Override
+	protected void bA() {
+		setEquipment(0, new ItemStack(Items.STONE_SWORD));
+	}
+
+	@Override
+	protected Entity findTarget() {
+		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+
+		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}
 }

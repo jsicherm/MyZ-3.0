@@ -46,31 +46,8 @@ public class NullNetServerHandler extends PlayerConnection {
 	}
 
 	@Override
-	public void disconnect(String s) {
-	}
+	public void a(double d0, double d1, double d2, float f, float f1) {
 
-	@Override
-	public void a(PacketPlayInWindowClick packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInTransaction packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInFlying packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInAbilities packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInSettings packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInCustomPayload packet) {
 	}
 
 	@Override
@@ -78,15 +55,15 @@ public class NullNetServerHandler extends PlayerConnection {
 	}
 
 	@Override
-	public void a(PacketPlayInTabComplete packet) {
+	public void a(IChatBaseComponent ichatbasecomponent) {
 	}
 
 	@Override
-	public void a(PacketPlayInKeepAlive packet) {
+	public void a(PacketPlayInAbilities packet) {
 	}
 
 	@Override
-	public void a(PacketPlayInUpdateSign packet) {
+	public void a(PacketPlayInArmAnimation packet) {
 	}
 
 	@Override
@@ -98,35 +75,7 @@ public class NullNetServerHandler extends PlayerConnection {
 	}
 
 	@Override
-	public void a(IChatBaseComponent ichatbasecomponent) {
-	}
-
-	@Override
-	public void a(PacketPlayInHeldItemSlot packet) {
-	}
-
-	@Override
 	public void a(PacketPlayInChat packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInEnchantItem packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInSetCreativeSlot packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInArmAnimation packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInEntityAction packet) {
-	}
-
-	@Override
-	public void a(PacketPlayInUseEntity packet) {
 	}
 
 	@Override
@@ -138,8 +87,59 @@ public class NullNetServerHandler extends PlayerConnection {
 	}
 
 	@Override
-	public void a(double d0, double d1, double d2, float f, float f1) {
+	public void a(PacketPlayInCustomPayload packet) {
+	}
 
+	@Override
+	public void a(PacketPlayInEnchantItem packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInEntityAction packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInFlying packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInHeldItemSlot packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInKeepAlive packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInSetCreativeSlot packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInSettings packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInTabComplete packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInTransaction packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInUpdateSign packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInUseEntity packet) {
+	}
+
+	@Override
+	public void a(PacketPlayInWindowClick packet) {
+	}
+
+	@Override
+	public void disconnect(String s) {
 	}
 
 	@Override

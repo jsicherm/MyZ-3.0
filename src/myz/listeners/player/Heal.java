@@ -4,7 +4,6 @@
 package myz.listeners.player;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,6 +13,7 @@ import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -40,7 +40,7 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onRightClick(PlayerInteractEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
 			return;
 		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK)
 			return;
@@ -123,7 +123,7 @@ public class Heal implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onRightClickOther(PlayerInteractEntityEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
 			return;
 		if (!(e.getRightClicked() instanceof Player))
 			return;

@@ -70,6 +70,41 @@ public class CustomEntityNPC extends EntitySkeleton {
 		populateGoals();
 	}
 
+	/**
+	 * Destroy our packet. Did someone say GARBAGE CLEANUP? Hopefully.
+	 */
+	private void destroySelf() {
+		final UUID uid = getBukkitEntity().getUniqueId();
+		int a = 0;
+
+		if (Utils.packets != null)
+			for (Object packet : Utils.packets.keySet())
+				if (Utils.packets.get(packet).getUUID().equals(uid)) {
+					Utils.packets.remove(packet);
+					try {
+						a = (Integer) Utils.getPrivateField(packet, "a");
+					} catch (Exception exc) {
+						Messenger.sendConsoleMessage("&4PacketPlayOutNamedEntitySpawn issue!");
+					}
+					break;
+				}
+
+		final int A = a;
+
+		// Send a destroy packet 3 seconds later (give entity time to do death
+		// animation).
+		if (MyZ.instance.isEnabled())
+			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
+				@Override
+				public void run() {
+					if (A == 0)
+						return;
+					PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(A);
+					Utils.distributePacket(getBukkitEntity().getWorld(), packet);
+				}
+			}, 60);
+	}
+
 	private void populateGoals() {
 		try {
 			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
@@ -152,19 +187,60 @@ public class CustomEntityNPC extends EntitySkeleton {
 		bA();
 	}
 
+	public void addPather(Location to, float speed) {
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
+	}
+
 	@Override
-	protected void aD() {
-		super.aD();
-		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.npc.damage"));
+	public boolean canSpawn() {
+		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
+				&& !world.containsLiquid(boundingBox);
+	}
+
+	public void cleanPather(PathfinderGoal goal) {
+		populateGoals();
+		priority = 0;
+	}
+
+	@Override
+	public void die() {
+		destroySelf();
+	}
+
+	@Override
+	public void die(DamageSource source) {
+		destroySelf();
+	}
+
+	@Override
+	public Item getLoot() {
+		return null;
 	}
 
 	public NPCType getType() {
 		return type;
 	}
 
+	public void see(Location location, int priority) {
+		if (priority < this.priority)
+			return;
+		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
+			setGoalTarget(null);
+			target = null;
+			double dub = (Double) Configuration.getConfig("mobs.npc.speed");
+			addPather(location, (float) dub);
+		}
+	}
+
 	@Override
-	protected String t() {
-		return "mob.villager.idle";
+	protected void a(int i, int j, int k, Block block) {
+		makeSound("step.grass", 0.15F, 1.0F);
+	}
+
+	@Override
+	protected void aD() {
+		super.aD();
+		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.npc.damage"));
 	}
 
 	@Override
@@ -175,68 +251,6 @@ public class CustomEntityNPC extends EntitySkeleton {
 	@Override
 	protected String aU() {
 		return "random.classic_hurt";
-	}
-
-	@Override
-	protected void a(int i, int j, int k, Block block) {
-		makeSound("step.grass", 0.15F, 1.0F);
-	}
-
-	@Override
-	protected ItemStack getRareDrop(int i) {
-		int r = random.nextInt(4);
-		ItemStack item;
-		Potion potion;
-		switch (type) {
-		case ENEMY_ARCHER:
-		case FRIEND_ARCHER:
-			switch (r) {
-			case 0:
-				return new ItemStack(Items.ARROW, random.nextInt(5) + 1);
-			case 1:
-				return new ItemStack(Items.CAKE, 1);
-			case 2:
-				return new ItemStack(Items.POTATO, 1);
-			case 3:
-				potion = new Potion(PotionType.INSTANT_HEAL);
-				return CraftItemStack.asNMSCopy(potion.toItemStack(1));
-			}
-			break;
-		case ENEMY_SWORDSMAN:
-		case FRIEND_SWORDSMAN:
-			switch (r) {
-			case 0:
-				return new ItemStack(Items.COOKIE, random.nextInt(5) + 1);
-			case 1:
-				item = new ItemStack(Items.STONE_SWORD, 1);
-				if (random.nextBoolean())
-					item.addEnchantment(Enchantment.DAMAGE_UNDEAD, 0);
-				return item;
-			case 2:
-				item = new ItemStack(Items.WOOD_SWORD, 1);
-				if (random.nextBoolean())
-					item.addEnchantment(Enchantment.DAMAGE_UNDEAD, 0);
-				return item;
-			case 3:
-				potion = new Potion(PotionType.INSTANT_HEAL);
-				return CraftItemStack.asNMSCopy(potion.toItemStack(1));
-			}
-			break;
-		case ENEMY_WANDERER:
-		case FRIEND_WANDERER:
-			switch (r) {
-			case 0:
-				return new ItemStack(Items.POTION, random.nextInt(2) + 1);
-			case 1:
-				return new ItemStack(Items.GLASS_BOTTLE, 1);
-			case 2:
-				return new ItemStack(Items.APPLE, 1);
-			case 3:
-				return new ItemStack(Items.BOWL, 1);
-			}
-			break;
-		}
-		return new ItemStack(Items.POTION, 1);
 	}
 
 	@Override
@@ -313,6 +327,10 @@ public class CustomEntityNPC extends EntitySkeleton {
 	}
 
 	@Override
+	protected void dropDeathLoot(boolean flag, int i) {
+	}
+
+	@Override
 	protected Entity findTarget() {
 		Entity entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
 
@@ -320,82 +338,64 @@ public class CustomEntityNPC extends EntitySkeleton {
 	}
 
 	@Override
-	public void die() {
-		destroySelf();
-	}
-
-	@Override
-	public void die(DamageSource source) {
-		destroySelf();
-	}
-
-	/**
-	 * Destroy our packet. Did someone say GARBAGE CLEANUP? Hopefully.
-	 */
-	private void destroySelf() {
-		final UUID uid = getBukkitEntity().getUniqueId();
-		int a = 0;
-
-		if (Utils.packets != null)
-			for (Object packet : Utils.packets.keySet())
-				if (Utils.packets.get(packet).getUUID().equals(uid)) {
-					Utils.packets.remove(packet);
-					try {
-						a = (Integer) Utils.getPrivateField(packet, "a");
-					} catch (Exception exc) {
-						Messenger.sendConsoleMessage("&4PacketPlayOutNamedEntitySpawn issue!");
-					}
-					break;
-				}
-
-		final int A = a;
-
-		// Send a destroy packet 3 seconds later (give entity time to do death
-		// animation).
-		if (MyZ.instance.isEnabled())
-			MyZ.instance.getServer().getScheduler().runTaskLaterAsynchronously(MyZ.instance, new Runnable() {
-				@Override
-				public void run() {
-					if (A == 0)
-						return;
-					PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(A);
-					Utils.distributePacket(getBukkitEntity().getWorld(), packet);
-				}
-			}, 60);
-	}
-
-	@Override
-	public Item getLoot() {
-		return null;
-	}
-
-	@Override
-	protected void dropDeathLoot(boolean flag, int i) {
-	}
-
-	@Override
-	public boolean canSpawn() {
-		return world.difficulty != EnumDifficulty.PEACEFUL && world.b(boundingBox) && world.getCubes(this, boundingBox).isEmpty()
-				&& !world.containsLiquid(boundingBox);
-	}
-
-	public void see(Location location, int priority) {
-		if (priority < this.priority)
-			return;
-		if (random.nextInt(priority + 1) >= 1 && getGoalTarget() == null || priority > 1) {
-			setGoalTarget(null);
-			target = null;
-			double dub = (Double) Configuration.getConfig("mobs.npc.speed");
-			addPather(location, (float) dub);
+	protected ItemStack getRareDrop(int i) {
+		int r = random.nextInt(4);
+		ItemStack item;
+		Potion potion;
+		switch (type) {
+		case ENEMY_ARCHER:
+		case FRIEND_ARCHER:
+			switch (r) {
+			case 0:
+				return new ItemStack(Items.ARROW, random.nextInt(5) + 1);
+			case 1:
+				return new ItemStack(Items.CAKE, 1);
+			case 2:
+				return new ItemStack(Items.POTATO, 1);
+			case 3:
+				potion = new Potion(PotionType.INSTANT_HEAL);
+				return CraftItemStack.asNMSCopy(potion.toItemStack(1));
+			}
+			break;
+		case ENEMY_SWORDSMAN:
+		case FRIEND_SWORDSMAN:
+			switch (r) {
+			case 0:
+				return new ItemStack(Items.COOKIE, random.nextInt(5) + 1);
+			case 1:
+				item = new ItemStack(Items.STONE_SWORD, 1);
+				if (random.nextBoolean())
+					item.addEnchantment(Enchantment.DAMAGE_UNDEAD, 0);
+				return item;
+			case 2:
+				item = new ItemStack(Items.WOOD_SWORD, 1);
+				if (random.nextBoolean())
+					item.addEnchantment(Enchantment.DAMAGE_UNDEAD, 0);
+				return item;
+			case 3:
+				potion = new Potion(PotionType.INSTANT_HEAL);
+				return CraftItemStack.asNMSCopy(potion.toItemStack(1));
+			}
+			break;
+		case ENEMY_WANDERER:
+		case FRIEND_WANDERER:
+			switch (r) {
+			case 0:
+				return new ItemStack(Items.POTION, random.nextInt(2) + 1);
+			case 1:
+				return new ItemStack(Items.GLASS_BOTTLE, 1);
+			case 2:
+				return new ItemStack(Items.APPLE, 1);
+			case 3:
+				return new ItemStack(Items.BOWL, 1);
+			}
+			break;
 		}
+		return new ItemStack(Items.POTION, 1);
 	}
 
-	public void addPather(Location to, float speed) {
-		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
-	}
-
-	public void cleanPather(PathfinderGoal goal) {
-		populateGoals();
-		priority = 0;
+	@Override
+	protected String t() {
+		return "mob.villager.idle";
 	}
 }

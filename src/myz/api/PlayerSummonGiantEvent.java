@@ -27,13 +27,12 @@ public class PlayerSummonGiantEvent extends Event implements Cancellable {
 		this.location = location;
 	}
 
-	/**
-	 * The player that summoned the Giant.
-	 * 
-	 * @return The player.
+	/* (non-Javadoc)
+	 * @see org.bukkit.event.Event#getHandlers()
 	 */
-	public Player getPlayer() {
-		return player;
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
 	}
 
 	/**
@@ -43,6 +42,15 @@ public class PlayerSummonGiantEvent extends Event implements Cancellable {
 	 */
 	public Location getLocation() {
 		return location;
+	}
+
+	/**
+	 * The player that summoned the Giant.
+	 * 
+	 * @return The player.
+	 */
+	public Player getPlayer() {
+		return player;
 	}
 
 	/* (non-Javadoc)
@@ -60,13 +68,5 @@ public class PlayerSummonGiantEvent extends Event implements Cancellable {
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.event.Event#getHandlers()
-	 */
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 }

@@ -31,11 +31,62 @@ public class FancyMessage {
 		messageParts.add(new MessagePart(firstPartText));
 	}
 
+	private MessagePart latest() {
+		return messageParts.get(messageParts.size() - 1);
+	}
+
+	private void onClick(final String name, final String data) {
+		final MessagePart latest = latest();
+		latest.clickActionName = name;
+		latest.clickActionData = data;
+	}
+
+	private void onHover(final String name, final String data) {
+		final MessagePart latest = latest();
+		latest.hoverActionName = name;
+		latest.hoverActionData = data;
+	}
+
+	public FancyMessage achievementTooltip(final String name) {
+		onHover("show_achievement", "achievement." + name);
+		return this;
+	}
+
 	public FancyMessage color(final ChatColor color) {
 		if (!color.isColor())
 			throw new IllegalArgumentException(color.name() + " is not a color");
 		latest().color = color;
 		return this;
+	}
+
+	public FancyMessage command(final String command) {
+		onClick("run_command", command);
+		return this;
+	}
+
+	public FancyMessage file(final String path) {
+		onClick("open_file", path);
+		return this;
+	}
+
+	public FancyMessage itemTooltip(final ItemStack itemStack) {
+		if (itemStack == null)
+			return this;
+		return itemTooltip(CraftItemStack.asNMSCopy(itemStack).save(new NBTTagCompound()).toString());
+	}
+
+	public FancyMessage itemTooltip(final String itemJSON) {
+		onHover("show_item", itemJSON);
+		return this;
+	}
+
+	public FancyMessage link(final String url) {
+		onClick("open_url", url);
+		return this;
+	}
+
+	public void send(Player player) {
+		((CraftPlayer) player).getHandle().playerConnection.sendPacket(new PacketPlayOutChat(ChatSerializer.a(toJSONString())));
 	}
 
 	public FancyMessage style(final ChatColor... styles) {
@@ -46,44 +97,8 @@ public class FancyMessage {
 		return this;
 	}
 
-	public FancyMessage file(final String path) {
-		onClick("open_file", path);
-		return this;
-	}
-
-	public FancyMessage link(final String url) {
-		onClick("open_url", url);
-		return this;
-	}
-
 	public FancyMessage suggest(final String command) {
 		onClick("suggest_command", command);
-		return this;
-	}
-
-	public FancyMessage command(final String command) {
-		onClick("run_command", command);
-		return this;
-	}
-
-	public FancyMessage achievementTooltip(final String name) {
-		onHover("show_achievement", "achievement." + name);
-		return this;
-	}
-
-	public FancyMessage itemTooltip(final String itemJSON) {
-		onHover("show_item", itemJSON);
-		return this;
-	}
-
-	public FancyMessage itemTooltip(final ItemStack itemStack) {
-		if (itemStack == null)
-			return this;
-		return itemTooltip(CraftItemStack.asNMSCopy(itemStack).save(new NBTTagCompound()).toString());
-	}
-
-	public FancyMessage tooltip(final String text) {
-		onHover("show_text", text);
 		return this;
 	}
 
@@ -109,24 +124,9 @@ public class FancyMessage {
 		return json.toString();
 	}
 
-	public void send(Player player) {
-		((CraftPlayer) player).getHandle().playerConnection.sendPacket(new PacketPlayOutChat(ChatSerializer.a(toJSONString())));
-	}
-
-	private MessagePart latest() {
-		return messageParts.get(messageParts.size() - 1);
-	}
-
-	private void onClick(final String name, final String data) {
-		final MessagePart latest = latest();
-		latest.clickActionName = name;
-		latest.clickActionData = data;
-	}
-
-	private void onHover(final String name, final String data) {
-		final MessagePart latest = latest();
-		latest.hoverActionName = name;
-		latest.hoverActionData = data;
+	public FancyMessage tooltip(final String text) {
+		onHover("show_text", text);
+		return this;
 	}
 
 }

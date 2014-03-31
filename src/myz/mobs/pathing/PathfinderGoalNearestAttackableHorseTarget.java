@@ -32,6 +32,41 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 
 	// private EntityLiving g;
 
+	class EntitySelectorNearestAttackableHorseTarget implements IEntitySelector {
+
+		final IEntitySelector c;
+
+		final PathfinderGoalNearestAttackableHorseTarget d;
+
+		EntitySelectorNearestAttackableHorseTarget(PathfinderGoalNearestAttackableHorseTarget pathfindergoalnearestattackabletarget,
+				IEntitySelector ientityselector) {
+			d = pathfindergoalnearestattackabletarget;
+			c = ientityselector;
+		}
+
+		@Override
+		public boolean a(Entity entity) {
+			if (!(entity instanceof EntityLiving) || entity == d.cc)
+				return false;
+
+			// Attack if we are an undead horse.
+			if (((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
+					|| ((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
+				return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
+
+			if (d.cc.getOwnerName() != null && !d.cc.getOwnerName().isEmpty()) {
+				if (!MyZ.instance.isBandit(MyZ.instance.getUID(d.cc.getOwnerName())))
+					return false;
+				if (entity instanceof EntityHuman)
+					if (d.cc.getOwnerName().equals(((EntityHuman) entity).getName())
+							|| MyZ.instance.isFriend(MyZ.instance.getUID(d.cc.getOwnerName()),
+									MyZ.instance.getUID(((EntityHuman) entity).getName())))
+						return false;
+			}
+			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
+		}
+	}
+
 	public PathfinderGoalNearestAttackableHorseTarget(EntityHorse EntityHorse, Class<? extends EntityLiving> oclass, int i, boolean flag) {
 		this(EntityHorse, oclass, i, flag, false);
 	}
@@ -73,40 +108,5 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 	@Override
 	public void c() {
 		super.c();
-	}
-
-	class EntitySelectorNearestAttackableHorseTarget implements IEntitySelector {
-
-		final IEntitySelector c;
-
-		final PathfinderGoalNearestAttackableHorseTarget d;
-
-		EntitySelectorNearestAttackableHorseTarget(PathfinderGoalNearestAttackableHorseTarget pathfindergoalnearestattackabletarget,
-				IEntitySelector ientityselector) {
-			d = pathfindergoalnearestattackabletarget;
-			c = ientityselector;
-		}
-
-		@Override
-		public boolean a(Entity entity) {
-			if (!(entity instanceof EntityLiving) || entity == d.cc)
-				return false;
-
-			// Attack if we are an undead horse.
-			if (((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
-					|| ((Horse) d.cc.getBukkitEntity()).getVariant() == Variant.SKELETON_HORSE)
-				return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
-
-			if (d.cc.getOwnerName() != null && !d.cc.getOwnerName().isEmpty()) {
-				if (!MyZ.instance.isBandit(MyZ.instance.getUID(d.cc.getOwnerName())))
-					return false;
-				if (entity instanceof EntityHuman)
-					if (d.cc.getOwnerName().equals(((EntityHuman) entity).getName())
-							|| MyZ.instance.isFriend(MyZ.instance.getUID(d.cc.getOwnerName()),
-									MyZ.instance.getUID(((EntityHuman) entity).getName())))
-						return false;
-			}
-			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
-		}
 	}
 }

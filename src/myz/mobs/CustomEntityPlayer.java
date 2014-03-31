@@ -61,61 +61,29 @@ public class CustomEntityPlayer extends EntityPlayer {
 		noDamageTicks = 1;
 	}
 
-	/**
-	 * Set this player's inventory contents.
-	 * 
-	 * @param inventory
-	 *            The list of items to set.
-	 */
-	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
-		inventoryItems = inventory;
-	}
+	public static CustomEntityPlayer newInstance(org.bukkit.entity.Player playerDuplicate) {
+		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
+		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, ((CraftPlayer) playerDuplicate)
+				.getHandle().getProfile(), new PlayerInteractManager(worldServer));
 
-	@Override
-	public void die(DamageSource source) {
-		Utils.playerNPCDied(this, getBukkitEntity().getWorld());
-		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
-		inventoryItems = null;
+		Location loc = playerDuplicate.getLocation();
+		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
 
-		EntityLiving entityliving = aX();
-		if (entityliving != null)
-			entityliving.b(this, bb);
-		this.a(StatisticList.v, 1);
-		dead = true;
-		getBukkitEntity().remove();
-	}
+		((Player) player.getBukkitEntity()).setItemInHand(playerDuplicate.getItemInHand());
+		((Player) player.getBukkitEntity()).setCustomName(playerDuplicate.getName());
+		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
+		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
+		player.getBukkitEntity().setGameMode(GameMode.SURVIVAL);
+		player.getBukkitEntity().setCanPickupItems(false);
 
-	@Override
-	public void die() {
-		Utils.playerNPCDied(this, getBukkitEntity().getWorld());
-		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
-		inventoryItems = null;
+		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
+		((Player) player.getBukkitEntity()).setMaxHealth(playerDuplicate.getMaxHealth());
+		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
+		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
 
-		EntityLiving entityliving = aX();
-		if (entityliving != null)
-			entityliving.b(this, bb);
-		this.a(StatisticList.v, 1);
-		dead = true;
-		getBukkitEntity().remove();
-	}
+		worldServer.addEntity(player, SpawnReason.CUSTOM);
 
-	@Override
-	public void h() {
-		// Taken from RemoteEntities#RemotePlayerEntity.java
-		yaw = az;
-		super.h();
-		this.e();
-
-		if (noDamageTicks > 0)
-			noDamageTicks--;
-
-		// Taken from Citizens2#EntityHumanNPC.java#129 - #138 - slightly
-		// modified.
-		if (Math.abs(motX) < 0.001F && Math.abs(motY) < 0.001F && Math.abs(motZ) < 0.001F)
-			motX = motY = motZ = 0;
-
-		// applyMovement();
-		// End Citizens
+		return player;
 	}
 
 	@Override
@@ -262,28 +230,60 @@ public class CustomEntityPlayer extends EntityPlayer {
 		}
 	}
 
-	public static CustomEntityPlayer newInstance(org.bukkit.entity.Player playerDuplicate) {
-		WorldServer worldServer = ((CraftWorld) playerDuplicate.getWorld()).getHandle();
-		CustomEntityPlayer player = new CustomEntityPlayer(worldServer.getMinecraftServer(), worldServer, ((CraftPlayer) playerDuplicate)
-				.getHandle().getProfile(), new PlayerInteractManager(worldServer));
+	@Override
+	public void die() {
+		Utils.playerNPCDied(this, getBukkitEntity().getWorld());
+		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
+		inventoryItems = null;
 
-		Location loc = playerDuplicate.getLocation();
-		player.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+		EntityLiving entityliving = aX();
+		if (entityliving != null)
+			entityliving.b(this, bb);
+		this.a(StatisticList.v, 1);
+		dead = true;
+		getBukkitEntity().remove();
+	}
 
-		((Player) player.getBukkitEntity()).setItemInHand(playerDuplicate.getItemInHand());
-		((Player) player.getBukkitEntity()).setCustomName(playerDuplicate.getName());
-		((Player) player.getBukkitEntity()).getEquipment().setArmorContents(playerDuplicate.getInventory().getArmorContents());
-		player.setInventory(new ArrayList<ItemStack>(Arrays.asList(playerDuplicate.getInventory().getContents())));
-		player.getBukkitEntity().setGameMode(GameMode.SURVIVAL);
-		player.getBukkitEntity().setCanPickupItems(false);
+	@Override
+	public void die(DamageSource source) {
+		Utils.playerNPCDied(this, getBukkitEntity().getWorld());
+		Utils.spawnPlayerZombie(getBukkitEntity(), inventoryItems);
+		inventoryItems = null;
 
-		((Player) player.getBukkitEntity()).setHealthScale(playerDuplicate.getHealthScale());
-		((Player) player.getBukkitEntity()).setMaxHealth(playerDuplicate.getMaxHealth());
-		((Player) player.getBukkitEntity()).setHealth(playerDuplicate.getHealth());
-		((Player) player.getBukkitEntity()).setRemoveWhenFarAway(false);
+		EntityLiving entityliving = aX();
+		if (entityliving != null)
+			entityliving.b(this, bb);
+		this.a(StatisticList.v, 1);
+		dead = true;
+		getBukkitEntity().remove();
+	}
 
-		worldServer.addEntity(player, SpawnReason.CUSTOM);
+	@Override
+	public void h() {
+		// Taken from RemoteEntities#RemotePlayerEntity.java
+		yaw = az;
+		super.h();
+		this.e();
 
-		return player;
+		if (noDamageTicks > 0)
+			noDamageTicks--;
+
+		// Taken from Citizens2#EntityHumanNPC.java#129 - #138 - slightly
+		// modified.
+		if (Math.abs(motX) < 0.001F && Math.abs(motY) < 0.001F && Math.abs(motZ) < 0.001F)
+			motX = motY = motZ = 0;
+
+		// applyMovement();
+		// End Citizens
+	}
+
+	/**
+	 * Set this player's inventory contents.
+	 * 
+	 * @param inventory
+	 *            The list of items to set.
+	 */
+	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
+		inventoryItems = inventory;
 	}
 }

@@ -41,20 +41,19 @@ public enum Localizer {
 	private String name;
 	private String code;
 
+	private static Field field;
+
 	private Localizer(String name, String code) {
 		this.name = name;
 		this.code = code;
 	}
 
-	public String getName() {
-		return name;
+	public static Localizer getByCode(String code) {
+		for (Localizer l : values())
+			if (l.getCode().equalsIgnoreCase(code))
+				return l;
+		return Localizer.ENGLISH;
 	}
-
-	public String getCode() {
-		return code;
-	}
-
-	private static Field field;
 
 	public static Localizer getLocale(Player inPlayer) {
 		try {
@@ -71,10 +70,11 @@ public enum Localizer {
 		}
 	}
 
-	public static Localizer getByCode(String code) {
-		for (Localizer l : values())
-			if (l.getCode().equalsIgnoreCase(code))
-				return l;
-		return Localizer.ENGLISH;
+	public String getCode() {
+		return code;
+	}
+
+	public String getName() {
+		return name;
 	}
 }

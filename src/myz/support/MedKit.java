@@ -72,55 +72,13 @@ public class MedKit {
 		createRecipe();
 	}
 
-	public static List<MedKit> getKits() {
-		return medkits;
-	}
-
 	public static void clearKits() {
 		medkits = null;
 		glow = null;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public String getConfigID() {
-		return configID;
-	}
-
-	public int getAntisepticRequired() {
-		return antiseptic;
-	}
-
-	public int getOintmentRequired() {
-		return ointment;
-	}
-
-	public ItemStack getInput() {
-		return input;
-	}
-
-	public ItemStack getOutput() {
-		return output;
-	}
-
-	public int getUID() {
-		return uid;
-	}
-
-	/**
-	 * Save this MedKit to the config.
-	 */
-	public void save() {
-		FileConfiguration config = MyZ.instance.getConfig();
-		config.set("heal.medkit.kit." + configID + ".name", name);
-		config.set("heal.medkit.kit." + configID + ".antiseptic_required", antiseptic);
-		config.set("heal.medkit.kit." + configID + ".ointment_required", ointment);
-		config.set("heal.medkit.kit." + configID + ".input", input);
-		config.set("heal.medkit.kit." + configID + ".output", output);
-		MyZ.instance.saveConfig();
-		Configuration.reload(false);
+	public static List<MedKit> getKits() {
+		return medkits;
 	}
 
 	/**
@@ -156,60 +114,25 @@ public class MedKit {
 	}
 
 	/**
-	 * Load and create the recipe for this medkit.
-	 */
-	public void createRecipe() {
-		ItemStack out = getTrueOutput();
-		Dye oint = new Dye();
-		oint.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.ointment_color")));
-		Dye anti = new Dye();
-		anti.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.antiseptic_color")));
-
-		ShapelessRecipe recipe = new ShapelessRecipe(out);
-		if (ointment > 0)
-			recipe.addIngredient(ointment, oint.toItemStack().getData());
-		if (antiseptic > 0)
-			recipe.addIngredient(antiseptic, anti.toItemStack().getData());
-		recipe.addIngredient(input.getData());
-
-		MyZ.instance.getServer().addRecipe(recipe);
-	}
-
-	/**
-	 * Get a true output item with the meta associated.
+	 * Register a custom enchantment for med-kits.
 	 * 
-	 * @return The ItemStack.
+	 * @return True if the EnchantmentWrapper could register the new
+	 *         enchantment.
 	 */
-	public ItemStack getTrueOutput() {
-		ItemStack out = output.clone();
-		ItemMeta meta = out.getItemMeta();
-		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-		meta.setLore(lore);
-		out.setItemMeta(meta);
-		out.setDurability((short) uid);
-		out.addEnchantment(glow, 1);
-		return out;
-	}
+	public static boolean registerNewEnchantment() {
+		try {
+			Field f = Enchantment.class.getDeclaredField("acceptingNew");
+			f.setAccessible(true);
+			f.set(null, true);
+			try {
+				Enchantment.registerEnchantment(glow);
+				return true;
+			} catch (IllegalArgumentException e) {
 
-	@Override
-	public String toString() {
-		String out = output.getType().toString().toLowerCase().replaceAll("_", " ");
-		String in = input.getType().toString().toLowerCase().replaceAll("_", " ");
-		return ChatColor.translateAlternateColorCodes('&', name) + ChatColor.RESET + " requires " + ointment + " ointment, " + antiseptic
-				+ " antiseptic and a" + (startsWithVowel(in) ? "n" : "") + " " + in + " and yields a" + (startsWithVowel(out) ? "n" : "")
-				+ " " + out + ".";
-	}
-
-	/**
-	 * Whether or not a specified word starts with a vowel (not including 'y').
-	 * 
-	 * @param word
-	 *            The String in question.
-	 * @return True if the word starts with an 'a', 'e', 'i', 'o', or 'u', false
-	 *         otherwise.
-	 */
-	private boolean startsWithVowel(String word) {
-		return word.startsWith("a") || word.startsWith("e") || word.startsWith("i") || word.startsWith("o") || word.startsWith("u");
+			}
+		} catch (Exception e) {
+		}
+		return false;
 	}
 
 	/**
@@ -246,24 +169,101 @@ public class MedKit {
 	}
 
 	/**
-	 * Register a custom enchantment for med-kits.
+	 * Whether or not a specified word starts with a vowel (not including 'y').
 	 * 
-	 * @return True if the EnchantmentWrapper could register the new
-	 *         enchantment.
+	 * @param word
+	 *            The String in question.
+	 * @return True if the word starts with an 'a', 'e', 'i', 'o', or 'u', false
+	 *         otherwise.
 	 */
-	public static boolean registerNewEnchantment() {
-		try {
-			Field f = Enchantment.class.getDeclaredField("acceptingNew");
-			f.setAccessible(true);
-			f.set(null, true);
-			try {
-				Enchantment.registerEnchantment(glow);
-				return true;
-			} catch (IllegalArgumentException e) {
+	private boolean startsWithVowel(String word) {
+		return word.startsWith("a") || word.startsWith("e") || word.startsWith("i") || word.startsWith("o") || word.startsWith("u");
+	}
 
-			}
-		} catch (Exception e) {
-		}
-		return false;
+	/**
+	 * Load and create the recipe for this medkit.
+	 */
+	public void createRecipe() {
+		ItemStack out = getTrueOutput();
+		Dye oint = new Dye();
+		oint.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.ointment_color")));
+		Dye anti = new Dye();
+		anti.setColor(DyeColor.valueOf((String) Configuration.getConfig("heal.medkit.antiseptic_color")));
+
+		ShapelessRecipe recipe = new ShapelessRecipe(out);
+		if (ointment > 0)
+			recipe.addIngredient(ointment, oint.toItemStack().getData());
+		if (antiseptic > 0)
+			recipe.addIngredient(antiseptic, anti.toItemStack().getData());
+		recipe.addIngredient(input.getData());
+
+		MyZ.instance.getServer().addRecipe(recipe);
+	}
+
+	public int getAntisepticRequired() {
+		return antiseptic;
+	}
+
+	public String getConfigID() {
+		return configID;
+	}
+
+	public ItemStack getInput() {
+		return input;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getOintmentRequired() {
+		return ointment;
+	}
+
+	public ItemStack getOutput() {
+		return output;
+	}
+
+	/**
+	 * Get a true output item with the meta associated.
+	 * 
+	 * @return The ItemStack.
+	 */
+	public ItemStack getTrueOutput() {
+		ItemStack out = output.clone();
+		ItemMeta meta = out.getItemMeta();
+		meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+		meta.setLore(lore);
+		out.setItemMeta(meta);
+		out.setDurability((short) uid);
+		out.addEnchantment(glow, 1);
+		return out;
+	}
+
+	public int getUID() {
+		return uid;
+	}
+
+	/**
+	 * Save this MedKit to the config.
+	 */
+	public void save() {
+		FileConfiguration config = MyZ.instance.getConfig();
+		config.set("heal.medkit.kit." + configID + ".name", name);
+		config.set("heal.medkit.kit." + configID + ".antiseptic_required", antiseptic);
+		config.set("heal.medkit.kit." + configID + ".ointment_required", ointment);
+		config.set("heal.medkit.kit." + configID + ".input", input);
+		config.set("heal.medkit.kit." + configID + ".output", output);
+		MyZ.instance.saveConfig();
+		Configuration.reload(false);
+	}
+
+	@Override
+	public String toString() {
+		String out = output.getType().toString().toLowerCase().replaceAll("_", " ");
+		String in = input.getType().toString().toLowerCase().replaceAll("_", " ");
+		return ChatColor.translateAlternateColorCodes('&', name) + ChatColor.RESET + " requires " + ointment + " ointment, " + antiseptic
+				+ " antiseptic and a" + (startsWithVowel(in) ? "n" : "") + " " + in + " and yields a" + (startsWithVowel(out) ? "n" : "")
+				+ " " + out + ".";
 	}
 }

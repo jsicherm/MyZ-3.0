@@ -3,12 +3,12 @@
  */
 package myz.listeners;
 
-import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
 import myz.mobs.support.EntityCreator;
 import myz.support.interfacing.Configuration;
+import myz.utilities.Validate;
 import myz.utilities.WGUtils;
 
 import org.bukkit.Location;
@@ -34,7 +34,7 @@ public class EntitySpawn implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
 		// MultiWorld support, yay!
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getLocation().getWorld().getName())) {
+		if (!Validate.inWorld(e.getEntity().getLocation())) {
 			if (e.getEntity().getMetadata("MyZ.bypass") != null && !e.getEntity().getMetadata("MyZ.bypass").isEmpty())
 				return;
 			switch (e.getEntityType()) {

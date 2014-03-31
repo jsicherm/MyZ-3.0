@@ -3,11 +3,11 @@
  */
 package myz.listeners.player;
 
-import java.util.List;
 import java.util.Random;
 
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -35,9 +35,22 @@ public class PlayerHurtEntity implements Listener {
 
 	private Random random = new Random();
 
+	/**
+	 * Whether or not a material is an axe material.
+	 * 
+	 * @param material
+	 *            The material to compare.
+	 * @return True if the material is a wooden, stone, gold, iron or diamond
+	 *         axe.
+	 */
+	private boolean isAxe(Material material) {
+		return material == Material.WOOD_AXE || material == Material.STONE_AXE || material == Material.GOLD_AXE
+				|| material == Material.IRON_AXE || material == Material.DIAMOND_AXE;
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageByEntityEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
+		if (!Validate.inWorld(e.getEntity().getLocation()))
 			return;
 		// Cancel damage inside spawn room.
 		if (Configuration.isInLobby(e.getDamager().getLocation()) && e.getEntityType() == EntityType.PLAYER)
@@ -85,18 +98,5 @@ public class PlayerHurtEntity implements Listener {
 		if (headshot)
 			Messenger.sendConfigMessage((Player) arrow.getShooter(), "damage.headshot");
 		return headshot;
-	}
-
-	/**
-	 * Whether or not a material is an axe material.
-	 * 
-	 * @param material
-	 *            The material to compare.
-	 * @return True if the material is a wooden, stone, gold, iron or diamond
-	 *         axe.
-	 */
-	private boolean isAxe(Material material) {
-		return material == Material.WOOD_AXE || material == Material.STONE_AXE || material == Material.GOLD_AXE
-				|| material == Material.IRON_AXE || material == Material.DIAMOND_AXE;
 	}
 }

@@ -62,27 +62,14 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 	}
 
 	@Override
-	protected Entity findTarget() {
-		if (getGoalTarget() != null)
-			return getGoalTarget();
-		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
-
-		if (entityhuman != null && this.o(entityhuman)) {
-			setGoalTarget(entityhuman);
-			return entityhuman;
-		}
-		return null;
+	protected void a(int i, int j, int k, Block block) {
+		makeSound("mob.zombie.step", 0.15F, 1.0F);
 	}
 
 	@Override
 	protected void aD() {
 		super.aD();
 		getAttributeInstance(GenericAttributes.e).setValue((Double) Configuration.getConfig("mobs.giant.damage"));
-	}
-
-	@Override
-	protected String t() {
-		return "mob.zombie.say";
 	}
 
 	@Override
@@ -96,7 +83,20 @@ public class CustomEntityGiantZombie extends EntityGiantZombie {
 	}
 
 	@Override
-	protected void a(int i, int j, int k, Block block) {
-		makeSound("mob.zombie.step", 0.15F, 1.0F);
+	protected Entity findTarget() {
+		if (getGoalTarget() != null)
+			return getGoalTarget();
+		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+
+		if (entityhuman != null && this.o(entityhuman)) {
+			setGoalTarget(entityhuman);
+			return entityhuman;
+		}
+		return null;
+	}
+
+	@Override
+	protected String t() {
+		return "mob.zombie.say";
 	}
 }

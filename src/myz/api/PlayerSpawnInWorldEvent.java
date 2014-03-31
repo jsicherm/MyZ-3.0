@@ -25,6 +25,14 @@ public class PlayerSpawnInWorldEvent extends Event implements Cancellable {
 		this.player = player;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.bukkit.event.Event#getHandlers()
+	 */
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
 	/**
 	 * The player that spawned in.
 	 * 
@@ -49,13 +57,5 @@ public class PlayerSpawnInWorldEvent extends Event implements Cancellable {
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.event.Event#getHandlers()
-	 */
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 }

@@ -102,6 +102,9 @@ permissions:
       MyZ.update: true
       MyZ.nokick: true
       MyZ.clan.*: true
+  MyZ.builder:
+    description: Ability to build and place everything.
+    default: false
   MyZ.spawn_giant:
     description: Spawn giants.
     default: op

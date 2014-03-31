@@ -31,6 +31,102 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 
 	public static Map<UUID, BlockFunction> blockChangers = new HashMap<UUID, BlockFunction>();
 
+	public static class BlockFunction {
+
+		private type function;;
+
+		private int respawn;
+
+		public static enum type {
+			PLACE_ADD, PLACE_REMOVE, DESTROY_ADD, DESTROY_REMOVE;
+		}
+
+		public BlockFunction(BlockFunction.type function, int respawn) {
+			this.function = function;
+			this.respawn = respawn;
+		}
+
+		/**
+		 * Add the function to the configuration once a player left-clicks a
+		 * block and remove them from the tracking list.
+		 * 
+		 * @param e
+		 *            The event.
+		 */
+		public void doOnHit(ItemStack hand, Block hit, Player player) {
+			boolean contains = Configuration.canBreak(null, hit, hand);
+			blockChangers.remove(player.getUniqueId());
+
+			String slug = "";
+			switch (function) {
+			case DESTROY_ADD:
+				if (contains)
+					slug = "add.fail";
+				else {
+					slug = "add.summary";
+					Configuration.addDestroy(hit, hand, respawn);
+				}
+				break;
+			case DESTROY_REMOVE:
+				if (!contains)
+					slug = "remove.fail";
+				else {
+					slug = "remove.summary";
+					Configuration.removeDestroy(hit, hand);
+				}
+				break;
+			default:
+				return;
+
+			}
+			String item = hand.getType().toString().toLowerCase().replaceAll("_", " ");
+			Messenger.sendMessage(
+					player,
+					Messenger.getConfigMessage(Localizer.getLocale(player), "command.block.destroy." + slug, hit.getType().toString()
+							.toLowerCase().replaceAll("_", " ")
+							+ (hit.getData() != (byte) 0 ? ":" + hit.getData() : ""), item == "air" ? "anything" : item));
+		}
+
+		/**
+		 * Add the function to the configuration once a player places a block
+		 * and remove them from the tracking list.
+		 * 
+		 * @param e
+		 *            The event.
+		 */
+		public void doOnPlace(Block placed, Player player) {
+			boolean contains = Configuration.canPlace(null, placed);
+			blockChangers.remove(player.getUniqueId());
+
+			String slug = "";
+			switch (function) {
+			case PLACE_ADD:
+				if (contains)
+					slug = "add.fail";
+				else {
+					slug = "add.summary";
+					Configuration.addPlace(placed, respawn);
+				}
+				break;
+			case PLACE_REMOVE:
+				if (!contains)
+					slug = "remove.fail";
+				else {
+					slug = "remove.summary";
+					Configuration.removePlace(placed);
+				}
+				break;
+			default:
+				return;
+			}
+			Messenger.sendMessage(
+					player,
+					Messenger.getConfigMessage(Localizer.getLocale(player), "command.block.place." + slug, placed.getType().toString()
+							.toLowerCase().replaceAll("_", " ")
+							+ (placed.getData() != (byte) 0 ? ":" + placed.getData() : "")));
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
@@ -86,101 +182,6 @@ public class BlockCommand implements CommandExecutor, TabCompleter {
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
-	}
-
-	public static class BlockFunction {
-
-		public static enum type {
-			PLACE_ADD, PLACE_REMOVE, DESTROY_ADD, DESTROY_REMOVE;
-		};
-
-		private type function;
-		private int respawn;
-
-		public BlockFunction(BlockFunction.type function, int respawn) {
-			this.function = function;
-			this.respawn = respawn;
-		}
-
-		/**
-		 * Add the function to the configuration once a player left-clicks a
-		 * block and remove them from the tracking list.
-		 * 
-		 * @param e
-		 *            The event.
-		 */
-		public void doOnHit(ItemStack hand, Block hit, Player player) {
-			boolean contains = Configuration.canBreak(hit, hand);
-			blockChangers.remove(player.getUniqueId());
-
-			String slug = "";
-			switch (function) {
-			case DESTROY_ADD:
-				if (contains)
-					slug = "add.fail";
-				else {
-					slug = "add.summary";
-					Configuration.addDestroy(hit, hand, respawn);
-				}
-				break;
-			case DESTROY_REMOVE:
-				if (!contains)
-					slug = "remove.fail";
-				else {
-					slug = "remove.summary";
-					Configuration.removeDestroy(hit, hand);
-				}
-				break;
-			default:
-				return;
-
-			}
-			String item = hand.getType().toString().toLowerCase().replaceAll("_", " ");
-			Messenger.sendMessage(
-					player,
-					Messenger.getConfigMessage(Localizer.getLocale(player), "command.block.destroy." + slug, hit.getType().toString()
-							.toLowerCase().replaceAll("_", " ")
-							+ (hit.getData() != (byte) 0 ? ":" + hit.getData() : ""), item == "air" ? "anything" : item));
-		}
-
-		/**
-		 * Add the function to the configuration once a player places a block
-		 * and remove them from the tracking list.
-		 * 
-		 * @param e
-		 *            The event.
-		 */
-		public void doOnPlace(Block placed, Player player) {
-			boolean contains = Configuration.canPlace(placed);
-			blockChangers.remove(player.getUniqueId());
-
-			String slug = "";
-			switch (function) {
-			case PLACE_ADD:
-				if (contains)
-					slug = "add.fail";
-				else {
-					slug = "add.summary";
-					Configuration.addPlace(placed, respawn);
-				}
-				break;
-			case PLACE_REMOVE:
-				if (!contains)
-					slug = "remove.fail";
-				else {
-					slug = "remove.summary";
-					Configuration.removePlace(placed);
-				}
-				break;
-			default:
-				return;
-			}
-			Messenger.sendMessage(
-					player,
-					Messenger.getConfigMessage(Localizer.getLocale(player), "command.block.place." + slug, placed.getType().toString()
-							.toLowerCase().replaceAll("_", " ")
-							+ (placed.getData() != (byte) 0 ? ":" + placed.getData() : "")));
-		}
 	}
 
 	@Override

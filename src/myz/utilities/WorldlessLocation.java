@@ -17,16 +17,16 @@ public class WorldlessLocation {
 	private final double x, y, z;
 	private final float pitch, yaw;
 
-	public WorldlessLocation(Location location) {
-		this(location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
-	}
-
 	public WorldlessLocation(double x, double y, double z, float pitch, float yaw) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.pitch = pitch;
 		this.yaw = yaw;
+	}
+
+	public WorldlessLocation(Location location) {
+		this(location.getX(), location.getY(), location.getZ(), location.getPitch(), location.getYaw());
 	}
 
 	public static WorldlessLocation fromString(String spawn) {
@@ -46,6 +46,10 @@ public class WorldlessLocation {
 		return new WorldlessLocation(x, y, z, pitch, yaw);
 	}
 
+	public float getPitch() {
+		return pitch;
+	}
+
 	public double getX() {
 		return x;
 	}
@@ -54,16 +58,12 @@ public class WorldlessLocation {
 		return y;
 	}
 
-	public double getZ() {
-		return z;
-	}
-
-	public float getPitch() {
-		return pitch;
-	}
-
 	public float getYaw() {
 		return yaw;
+	}
+
+	public double getZ() {
+		return z;
 	}
 
 	@Override

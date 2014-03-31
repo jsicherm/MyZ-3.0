@@ -3,13 +3,11 @@
  */
 package myz.listeners.player;
 
-import java.util.List;
-
 import myz.MyZ;
 import myz.api.PlayerSummonGiantEvent;
 import myz.mobs.CustomEntityGiantZombie;
-import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Material;
@@ -31,7 +29,7 @@ public class PlayerSummonGiant implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onSummon(final BlockPlaceEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
 			return;
 		if (e.getItemInHand() != null && e.getItemInHand().isSimilar(new ItemStack(Material.SKULL_ITEM, 1, (byte) 2))) {
 			if (!e.getPlayer().hasPermission("MyZ.spawn_giant")) {

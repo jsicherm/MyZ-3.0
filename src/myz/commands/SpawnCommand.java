@@ -3,11 +3,10 @@
  */
 package myz.commands;
 
-import java.util.List;
-
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -27,18 +26,15 @@ public class SpawnCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(((Player) sender).getWorld().getName()))
+			if (!Validate.inWorld(((Player) sender).getLocation()))
 				return true;
 			if (Configuration.isInLobby((Player) sender)) {
 				int spawnpoint = -1;
 				if (args.length != 0)
 					try {
 						spawnpoint = Integer.parseInt(args[0]);
-						if (spawnpoint <= 0)
-							spawnpoint = 1;
 						int numberOfSpawns = Configuration.getNumberOfSpawns();
-						if (spawnpoint > numberOfSpawns)
-							spawnpoint = numberOfSpawns;
+						spawnpoint = spawnpoint <= 0 ? 1 : spawnpoint > numberOfSpawns ? numberOfSpawns : spawnpoint;
 					} catch (NumberFormatException exc) {
 
 					}

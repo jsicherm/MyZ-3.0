@@ -3,9 +3,7 @@
  */
 package myz.listeners.player;
 
-import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import myz.MyZ;
@@ -15,9 +13,9 @@ import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Hologram;
 import myz.utilities.Utils;
+import myz.utilities.Validate;
 
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,65 +28,6 @@ import org.bukkit.inventory.ItemStack;
  * 
  */
 public class Chat implements Listener {
-
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	private void onChat(AsyncPlayerChatEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			return;
-
-		Player player = e.getPlayer();
-		String prefix = Configuration.getPrefixForPlayerRank(player);
-		int radio_frequency = -1;
-
-		// Apply the appropriate format to the message depending on radio state
-		// and rank prefix.
-		if (player.getItemInHand() != null && player.getItemInHand().isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO))) {
-			radio_frequency = player.getInventory().getHeldItemSlot() + 1;
-			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix(radio_frequency)) + " " + prefix
-					+ ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
-		}
-		if ((Boolean) Configuration.getConfig("chat.format"))
-			e.setFormat(prefix + e.getMessage());
-
-		// Cache and clear the recipients.
-		Set<Player> original_recipients = new HashSet<Player>(e.getRecipients());
-		e.getRecipients().clear();
-
-		// If we're talking in local, not radio, only include those near us.
-		if (radio_frequency == -1) {
-			if (didHandlePrivateChat(e)) {
-				if ((Boolean) Configuration.getConfig("chat.overhead")) {
-					Hologram hologram = new Hologram(e.getMessage());
-					hologram.setFollow(e.getPlayer());
-					hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-					hologram.follow();
-				}
-				return;
-			}
-			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
-				e.getRecipients().addAll(original_recipients);
-			else
-				for (Player player_in_range : Utils.getPlayersInRange(player.getLocation(),
-						(Integer) Configuration.getConfig(Configuration.CHAT_DISTANCE)))
-					e.getRecipients().add(player_in_range);
-		} else
-			// Add all players with the same radio equipped.
-			for (Player player_on_server : player.getServer().getOnlinePlayers())
-				if (player_on_server.getInventory().getItem(radio_frequency - 1) != null
-						&& player_on_server.getInventory().getItem(radio_frequency - 1)
-								.isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO)))
-					e.getRecipients().add(player_on_server);
-
-		if ((Boolean) Configuration.getConfig("chat.overhead")) {
-			Hologram hologram = new Hologram(e.getMessage());
-			hologram.setFollow(e.getPlayer());
-			hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-			hologram.follow();
-		}
-
-		// Make this player more visible to zombies.
-		PathingSupport.elevatePlayer(player, 10);
-	}
 
 	/**
 	 * Handle all @ chat to search for players with the specified name or name
@@ -161,5 +100,64 @@ public class Chat implements Listener {
 			}
 		}
 		return false;
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	private void onChat(AsyncPlayerChatEvent e) {
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
+			return;
+
+		Player player = e.getPlayer();
+		String prefix = Configuration.getPrefixForPlayerRank(player);
+		int radio_frequency = -1;
+
+		// Apply the appropriate format to the message depending on radio state
+		// and rank prefix.
+		if (player.getItemInHand() != null && player.getItemInHand().isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO))) {
+			radio_frequency = player.getInventory().getHeldItemSlot() + 1;
+			prefix = ChatColor.translateAlternateColorCodes('&', Configuration.getRadioPrefix(radio_frequency)) + " " + prefix
+					+ ChatColor.translateAlternateColorCodes('&', Configuration.getRadioColor());
+		}
+		if ((Boolean) Configuration.getConfig("chat.format"))
+			e.setFormat(prefix + e.getMessage());
+
+		// Cache and clear the recipients.
+		Set<Player> original_recipients = new HashSet<Player>(e.getRecipients());
+		e.getRecipients().clear();
+
+		// If we're talking in local, not radio, only include those near us.
+		if (radio_frequency == -1) {
+			if (didHandlePrivateChat(e)) {
+				if ((Boolean) Configuration.getConfig("chat.overhead")) {
+					Hologram hologram = new Hologram(e.getMessage());
+					hologram.setFollow(e.getPlayer());
+					hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
+					hologram.follow();
+				}
+				return;
+			}
+			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
+				e.getRecipients().addAll(original_recipients);
+			else
+				for (Player player_in_range : Utils.getPlayersInRange(player.getLocation(),
+						(Integer) Configuration.getConfig(Configuration.CHAT_DISTANCE)))
+					e.getRecipients().add(player_in_range);
+		} else
+			// Add all players with the same radio equipped.
+			for (Player player_on_server : player.getServer().getOnlinePlayers())
+				if (player_on_server.getInventory().getItem(radio_frequency - 1) != null
+						&& player_on_server.getInventory().getItem(radio_frequency - 1)
+								.isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO)))
+					e.getRecipients().add(player_on_server);
+
+		if ((Boolean) Configuration.getConfig("chat.overhead")) {
+			Hologram hologram = new Hologram(e.getMessage());
+			hologram.setFollow(e.getPlayer());
+			hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
+			hologram.follow();
+		}
+
+		// Make this player more visible to zombies.
+		PathingSupport.elevatePlayer(player, 10);
 	}
 }

@@ -28,21 +28,29 @@ public class PlayerFriendEvent extends Event implements Cancellable {
 	}
 
 	/**
-	 * The player that friended the other player.
-	 * 
-	 * @return The player.
-	 */
-	public Player getPlayer() {
-		return player;
-	}
-
-	/**
 	 * The player that was friended.
 	 * 
 	 * @return The player.
 	 */
 	public String getFriend() {
 		return friend;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.bukkit.event.Event#getHandlers()
+	 */
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
+	/**
+	 * The player that friended the other player.
+	 * 
+	 * @return The player.
+	 */
+	public Player getPlayer() {
+		return player;
 	}
 
 	/* (non-Javadoc)
@@ -60,13 +68,5 @@ public class PlayerFriendEvent extends Event implements Cancellable {
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.event.Event#getHandlers()
-	 */
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 }

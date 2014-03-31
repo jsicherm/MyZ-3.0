@@ -3,11 +3,10 @@
  */
 package myz.commands;
 
-import java.util.List;
-
 import myz.MyZ;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
+import myz.utilities.Validate;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -40,7 +39,7 @@ public class SetLobbyCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(((Player) sender).getWorld().getName()))
+			if (!Validate.inWorld(((Player) sender).getLocation()))
 				return true;
 			if (plugin != null && plugin.isEnabled()) {
 				Selection selection = plugin.getSelection((Player) sender);

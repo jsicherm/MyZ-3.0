@@ -26,32 +26,8 @@ public class NullEntityNetworkManager extends NetworkManager {
 		super(flag);
 	}
 
-	@Override
-	public void channelActive(ChannelHandlerContext channelhandlercontext) throws Exception {
-	}
-
-	@Override
-	public void a(EnumProtocol enumprotocol) {
-	}
-
-	@Override
-	public void channelInactive(ChannelHandlerContext channelhandlercontext) {
-	}
-
-	@Override
-	public void exceptionCaught(ChannelHandlerContext channelhandlercontext, Throwable throwable) {
-	}
-
-	@Override
-	protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) {
-	}
-
-	@Override
-	public void a(PacketListener packetlistener) {
-	}
-
-	@Override
-	public void handle(Packet packet, GenericFutureListener... agenericfuturelistener) {
+	static Channel a(NetworkManager networkmanager) {
+		return null;
 	}
 
 	@Override
@@ -59,12 +35,19 @@ public class NullEntityNetworkManager extends NetworkManager {
 	}
 
 	@Override
-	public SocketAddress getSocketAddress() {
-		return null;
+	public void a(EnumProtocol enumprotocol) {
 	}
 
 	@Override
 	public void a(IChatBaseComponent ichatbasecomponent) {
+	}
+
+	@Override
+	public void a(PacketListener packetlistener) {
+	}
+
+	@Override
+	public void a(SecretKey secretkey) {
 	}
 
 	@Override
@@ -73,7 +56,11 @@ public class NullEntityNetworkManager extends NetworkManager {
 	}
 
 	@Override
-	public void a(SecretKey secretkey) {
+	public void channelActive(ChannelHandlerContext channelhandlercontext) throws Exception {
+	}
+
+	@Override
+	public void channelInactive(ChannelHandlerContext channelhandlercontext) {
 	}
 
 	@Override
@@ -82,8 +69,7 @@ public class NullEntityNetworkManager extends NetworkManager {
 	}
 
 	@Override
-	public PacketListener getPacketListener() {
-		return null;
+	public void exceptionCaught(ChannelHandlerContext channelhandlercontext, Throwable throwable) {
 	}
 
 	@Override
@@ -96,10 +82,24 @@ public class NullEntityNetworkManager extends NetworkManager {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext channelhandlercontext, Object object) {
+	public PacketListener getPacketListener() {
+		return null;
 	}
 
-	static Channel a(NetworkManager networkmanager) {
+	@Override
+	public SocketAddress getSocketAddress() {
 		return null;
+	}
+
+	@Override
+	public void handle(Packet packet, GenericFutureListener... agenericfuturelistener) {
+	}
+
+	@Override
+	protected void a(ChannelHandlerContext channelhandlercontext, Packet packet) {
+	}
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext channelhandlercontext, Object object) {
 	}
 }

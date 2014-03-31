@@ -3,7 +3,6 @@
  */
 package myz.scheduling;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -41,6 +40,59 @@ public class aSync implements Runnable {
 	public aSync() {
 		isDisguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
+	}
+
+	/**
+	 * Get a list of online players synchronously.
+	 * 
+	 * @param world
+	 *            The name of the world to get players in.
+	 * @return The list of players.
+	 */
+	private List<Player> getSyncPlayers(final String world) {
+		return MyZ.instance.getServer().getWorld(world).getPlayers();
+	}
+
+	/**
+	 * Check if there are any blocks above the specified location. Searches from
+	 * this location's y to max build height.
+	 * 
+	 * @param loc
+	 *            The location.
+	 * @return False if there are any blocks above the given location.
+	 */
+	private boolean noBlocksAbove(Location loc) {
+		for (int y = loc.getBlockY(); y < loc.getBlockY() + 30; y++) {
+			Block b;
+			if ((b = loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ())) != null && b.getType() != Material.AIR)
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Force a sync check of the location surrounding the player to see if it's
+	 * liquidy around them.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @param isRaining
+	 *            Whether or not it's raining where they are.
+	 */
+	private void syncLiquidCheck(final Player player, final boolean isRaining) {
+		// MyZ.instance.getServer().getScheduler().runTask(MyZ.instance, new
+		// Runnable() {
+		// public void run() {
+		if (player.getLevel() < (Integer) Configuration.getConfig(Configuration.THIRST_MAX)
+				&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
+						&& noBlocksAbove(player.getLocation())))
+			if (ticks % (random.nextInt(2) + 1) == 0) {
+				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
+				if (!event.isCancelled())
+					MyZ.instance.setThirst(player, player.getLevel() + 1);
+			}
+		// }
+		// });
 	}
 
 	@Override
@@ -83,6 +135,7 @@ public class aSync implements Runnable {
 				player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
 
 				MyZ.instance.getServer().getScheduler().runTask(MyZ.instance, new Runnable() {
+					@Override
 					public void run() {
 						// Increase thirst level by swimming or by standing in
 						// the rain.
@@ -140,58 +193,5 @@ public class aSync implements Runnable {
 			if (ticks >= Integer.MAX_VALUE)
 				ticks = 0;
 		}
-	}
-
-	/**
-	 * Get a list of online players synchronously.
-	 * 
-	 * @param world
-	 *            The name of the world to get players in.
-	 * @return The list of players.
-	 */
-	private List<Player> getSyncPlayers(final String world) {
-		return MyZ.instance.getServer().getWorld(world).getPlayers();
-	}
-
-	/**
-	 * Force a sync check of the location surrounding the player to see if it's
-	 * liquidy around them.
-	 * 
-	 * @param player
-	 *            The player.
-	 * @param isRaining
-	 *            Whether or not it's raining where they are.
-	 */
-	private void syncLiquidCheck(final Player player, final boolean isRaining) {
-		// MyZ.instance.getServer().getScheduler().runTask(MyZ.instance, new
-		// Runnable() {
-		// public void run() {
-		if (player.getLevel() < (Integer) Configuration.getConfig(Configuration.THIRST_MAX)
-				&& (player.getLocation().getBlock().getRelative(BlockFace.UP).isLiquid() || isRaining
-						&& noBlocksAbove(player.getLocation())))
-			if (ticks % (random.nextInt(2) + 1) == 0) {
-				PlayerDrinkWaterEvent event = new PlayerDrinkWaterEvent(player);
-				if (!event.isCancelled())
-					MyZ.instance.setThirst(player, player.getLevel() + 1);
-			}
-		// }
-		// });
-	}
-
-	/**
-	 * Check if there are any blocks above the specified location. Searches from
-	 * this location's y to max build height.
-	 * 
-	 * @param loc
-	 *            The location.
-	 * @return False if there are any blocks above the given location.
-	 */
-	private boolean noBlocksAbove(Location loc) {
-		for (int y = loc.getBlockY(); y < loc.getBlockY() + 30; y++) {
-			Block b;
-			if ((b = loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ())) != null && b.getType() != Material.AIR)
-				return false;
-		}
-		return true;
 	}
 }

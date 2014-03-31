@@ -21,17 +21,27 @@ import org.bukkit.inventory.ItemStack;
 public class Messenger {
 
 	/**
-	 * Color a message and send it to a player.
+	 * Get a message out of the config and color it.
 	 * 
-	 * @param player
-	 *            The player.
-	 * @param uncolored_message
-	 *            The uncolored message.
+	 * @param locale
+	 *            The locale.
+	 * @param uncolored_config_message
+	 *            The uncolored config message.
+	 * @param variables
+	 *            Any applicable variables denoted by a %s.
+	 * @return The colored message with replaced variables.
 	 */
-	public static void sendMessage(CommandSender player, String uncolored_message) {
-		if (player instanceof Player)
-			uncolored_message = processForArguments((Player) player, uncolored_message);
-		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_message));
+	public static String getConfigMessage(Localizer locale, String uncolored_config_message, String... variables) {
+		String message = MyZ.instance.getLocalizableConfig(locale).getString(uncolored_config_message);
+		if (variables != null)
+			try {
+				message = String.format(message, variables);
+			} catch (Exception exc) {
+				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat: "
+						+ exc.getMessage());
+				message = message.replaceAll("%s", "");
+			}
+		return ChatColor.translateAlternateColorCodes('&', message);
 	}
 
 	/**
@@ -72,51 +82,14 @@ public class Messenger {
 	}
 
 	/**
-	 * Color a message and send it to all the players in a world.
+	 * Send a colored config message to the console.
 	 * 
-	 * @param inWorld
-	 *            The world.
-	 * @param uncolored_message
-	 *            The uncolored message.
+	 * @param uncolored_config_message
+	 *            The uncolored config message.
 	 */
-	public static void sendMessage(World inWorld, String uncolored_message) {
-		for (Player player : inWorld.getPlayers())
-			sendMessage(player, uncolored_message);
-	}
-
-	/**
-	 * Send a FancyMessage death formatted to a world of players. Localizes too.
-	 * 
-	 * @param playerFor
-	 *            The murderer.
-	 * @param typeFor
-	 *            The murdered.
-	 */
-	public static void sendFancyDeathMessage(Player playerFor, Player typeFor) {
-		ItemStack pH = playerFor.getItemInHand();
-		ItemStack tH = typeFor.getItemInHand();
-
-		for (Player player : playerFor.getWorld().getPlayers())
-			new FancyMessage(Configuration.getPrefixForPlayerRank(playerFor)).itemTooltip(pH)
-					.then(" " + Messenger.getConfigMessage(Localizer.getLocale(player), "murdered") + " ")
-					.then(Configuration.getPrefixForPlayerRank(typeFor)).itemTooltip(tH);
-	}
-
-	/**
-	 * Color a message and send it to all the players in a world. Provides
-	 * ability to specify a string variable and still allow for locale.
-	 * 
-	 * @param inWorld
-	 *            The world.
-	 * @param uncolored_message
-	 *            The uncolored message.
-	 * @param variable
-	 *            A string variable.
-	 */
-	public static void sendMessage(World inWorld, String uncolored_config_message, String variable) {
-		for (Player player : inWorld.getPlayers())
-			if (player != null)
-				sendConfigMessage(player, getConfigMessage(Localizer.getLocale(player), uncolored_config_message, variable));
+	public static void sendConfigConsoleMessage(String uncolored_config_message) {
+		sendConsoleMessage(ChatColor.translateAlternateColorCodes('&',
+				MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getString(uncolored_config_message)));
 	}
 
 	/**
@@ -158,37 +131,64 @@ public class Messenger {
 	}
 
 	/**
-	 * Send a colored config message to the console.
+	 * Send a FancyMessage death formatted to a world of players. Localizes too.
 	 * 
-	 * @param uncolored_config_message
-	 *            The uncolored config message.
+	 * @param playerFor
+	 *            The murderer.
+	 * @param typeFor
+	 *            The murdered.
 	 */
-	public static void sendConfigConsoleMessage(String uncolored_config_message) {
-		sendConsoleMessage(ChatColor.translateAlternateColorCodes('&',
-				MyZ.instance.getLocalizableConfig(Localizer.ENGLISH).getString(uncolored_config_message)));
+	public static void sendFancyDeathMessage(Player playerFor, Player typeFor) {
+		ItemStack pH = playerFor.getItemInHand();
+		ItemStack tH = typeFor.getItemInHand();
+
+		for (Player player : playerFor.getWorld().getPlayers())
+			new FancyMessage(Configuration.getPrefixForPlayerRank(playerFor)).itemTooltip(pH)
+					.then(" " + Messenger.getConfigMessage(Localizer.getLocale(player), "murdered") + " ")
+					.then(Configuration.getPrefixForPlayerRank(typeFor)).itemTooltip(tH);
 	}
 
 	/**
-	 * Get a message out of the config and color it.
+	 * Color a message and send it to a player.
 	 * 
-	 * @param locale
-	 *            The locale.
-	 * @param uncolored_config_message
-	 *            The uncolored config message.
-	 * @param variables
-	 *            Any applicable variables denoted by a %s.
-	 * @return The colored message with replaced variables.
+	 * @param player
+	 *            The player.
+	 * @param uncolored_message
+	 *            The uncolored message.
 	 */
-	public static String getConfigMessage(Localizer locale, String uncolored_config_message, String... variables) {
-		String message = MyZ.instance.getLocalizableConfig(locale).getString(uncolored_config_message);
-		if (variables != null)
-			try {
-				message = String.format(message, variables);
-			} catch (Exception exc) {
-				sendConsoleMessage(ChatColor.RED + message + " must have the correct number of variables (%s). Please reformat: "
-						+ exc.getMessage());
-				message = message.replaceAll("%s", "");
-			}
-		return ChatColor.translateAlternateColorCodes('&', message);
+	public static void sendMessage(CommandSender player, String uncolored_message) {
+		if (player instanceof Player)
+			uncolored_message = processForArguments((Player) player, uncolored_message);
+		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_message));
+	}
+
+	/**
+	 * Color a message and send it to all the players in a world.
+	 * 
+	 * @param inWorld
+	 *            The world.
+	 * @param uncolored_message
+	 *            The uncolored message.
+	 */
+	public static void sendMessage(World inWorld, String uncolored_message) {
+		for (Player player : inWorld.getPlayers())
+			sendMessage(player, uncolored_message);
+	}
+
+	/**
+	 * Color a message and send it to all the players in a world. Provides
+	 * ability to specify a string variable and still allow for locale.
+	 * 
+	 * @param inWorld
+	 *            The world.
+	 * @param uncolored_message
+	 *            The uncolored message.
+	 * @param variable
+	 *            A string variable.
+	 */
+	public static void sendMessage(World inWorld, String uncolored_config_message, String variable) {
+		for (Player player : inWorld.getPlayers())
+			if (player != null)
+				sendConfigMessage(player, getConfigMessage(Localizer.getLocale(player), uncolored_config_message, variable));
 	}
 }

@@ -3,9 +3,7 @@
  */
 package myz.listeners;
 
-import java.util.List;
-
-import myz.support.interfacing.Configuration;
+import myz.utilities.Validate;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
@@ -23,7 +21,7 @@ public class CancelZombieDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onBurnInSun(EntityCombustEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
+		if (!Validate.inWorld(e.getEntity().getLocation()))
 			return;
 		if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.PIG_ZOMBIE || e.getEntityType() == EntityType.GIANT
 				|| e.getEntityType() == EntityType.SKELETON)
@@ -32,7 +30,7 @@ public class CancelZombieDamage implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onTakeFallDamage(EntityDamageEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getEntity().getWorld().getName()))
+		if (!Validate.inWorld(e.getEntity().getLocation()))
 			return;
 		if (e.getCause() == DamageCause.FALL
 				&& (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.PIG_ZOMBIE || e.getEntityType() == EntityType.GIANT))

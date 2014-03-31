@@ -57,6 +57,36 @@ public class EntityCreator {
 	private static final Random random = new Random();
 
 	/**
+	 * Get a random name for an NPC.
+	 * 
+	 * @return The name.
+	 */
+	private static String getRandomName(NPCType type) {
+		List<String> possibilities = null;
+		switch (type) {
+		case ENEMY_ARCHER:
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.archer.enemy");
+			break;
+		case ENEMY_SWORDSMAN:
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.swordsman.enemy");
+			break;
+		case ENEMY_WANDERER:
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.wanderer.enemy");
+			break;
+		case FRIEND_ARCHER:
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.archer.friendly");
+			break;
+		case FRIEND_SWORDSMAN:
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.swordsman.friendly");
+			break;
+		default:
+			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.wanderer.friendly");
+			break;
+		}
+		return possibilities == null ? "Notch" : possibilities.get(random.nextInt(possibilities.size() == 0 ? 1 : possibilities.size()));
+	}
+
+	/**
 	 * Create an entity using NMS in order to bypass custom entity creation.
 	 * 
 	 * @param inLocation
@@ -219,36 +249,6 @@ public class EntityCreator {
 			((Skeleton) npc.getBukkitEntity()).getEquipment().setHelmetDropChance(1);
 			((Skeleton) npc.getBukkitEntity()).getEquipment().setItemInHandDropChance(1);
 		}
-	}
-
-	/**
-	 * Get a random name for an NPC.
-	 * 
-	 * @return The name.
-	 */
-	private static String getRandomName(NPCType type) {
-		List<String> possibilities = null;
-		switch (type) {
-		case ENEMY_ARCHER:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.archer.enemy");
-			break;
-		case ENEMY_SWORDSMAN:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.swordsman.enemy");
-			break;
-		case ENEMY_WANDERER:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.wanderer.enemy");
-			break;
-		case FRIEND_ARCHER:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.archer.friendly");
-			break;
-		case FRIEND_SWORDSMAN:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.swordsman.friendly");
-			break;
-		default:
-			possibilities = MyZ.instance.getLocalizableConfig(Localizer.DEFAULT).getStringList("npc_names.wanderer.friendly");
-			break;
-		}
-		return possibilities == null ? "Notch" : possibilities.get(random.nextInt(possibilities.size() == 0 ? 1 : possibilities.size()));
 	}
 
 	/**

@@ -72,68 +72,24 @@ public class PlayerData {
 	}
 
 	/**
-	 * @see getDataFor(String player)
+	 * @see playerDataExists(String player)
 	 */
-	public static PlayerData getDataFor(Player player) {
-		return getDataFor(player.getUniqueId());
+	private static boolean playerDataExists(Player player) {
+		return playerDataExists(player.getUniqueId());
 	}
 
 	/**
-	 * Update a primitive data type to a new version.
-	 * 
-	 * @param oldData
-	 *            The old FileConfiguration storing the data.
-	 */
-	public static void updateData(FileConfiguration oldData) {
-		for (String key : oldData.getKeys(false)) {
-			File newFile = new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + key + ".yml");
-			if (!newFile.exists())
-				try {
-					newFile.createNewFile();
-				} catch (Exception e) {
-					Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
-				}
-			else
-				continue;
-
-			FileConfiguration newData = YamlConfiguration.loadConfiguration(newFile);
-			for (String valueKey : oldData.getConfigurationSection(key).getValues(false).keySet())
-				newData.set(valueKey, oldData.getConfigurationSection(key).get(valueKey));
-			try {
-				newData.save(newFile);
-			} catch (Exception e) {
-				Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * The PlayerData stored for the given player by name.
+	 * Whether or not the data entry exists for the given player.
 	 * 
 	 * @param player
-	 *            The player's name in question.
-	 * @return The PlayerData stored or null if no data is stored.
+	 *            The player in question.
+	 * @return True if the entry exists, false otherwise.
 	 */
-	public static PlayerData getDataFor(UUID player) {
+	private static boolean playerDataExists(UUID player) {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
-			return null;
-		if (!playerDataExists(player))
-			return null;
-		FileConfiguration section = MyZ.instance.getPlayerDataConfig(player);
-		List<String> stringFriends = section.getStringList("friends");
-		List<UUID> friends = new ArrayList<UUID>();
-		for (String s : stringFriends)
-			friends.add(MyZ.instance.getUID(s));
-		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie.kills"), section.getInt("pigman.kills"),
-				section.getInt("giant.kills"), section.getInt("player.kills_life"), section.getInt("zombie.kills_life"),
-				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("deaths"), section.getInt("rank"),
-				section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"), section.getBoolean("wasKilledNPC"),
-				section.getLong("timeOfKickban"), friends, section.getInt("heals_life"), section.getInt("thirst"),
-				section.getString("clan"), section.getInt("minutes.played"), section.getInt("minutes.played_life"),
-				section.getInt("minutes.played_life_record"), section.getInt("player.kills_life_record"),
-				section.getInt("zombie.kills_life_record"), section.getInt("pigman.kills_life_record"),
-				section.getInt("giant.kills_life_record"), section.getInt("research"), section.getBoolean("zombie"),
-				section.getBoolean("legBroken"));
+			return false;
+		FileConfiguration config = MyZ.instance.getPlayerDataConfig(player);
+		return config != null;
 	}
 
 	/**
@@ -249,24 +205,394 @@ public class PlayerData {
 	}
 
 	/**
-	 * @see playerDataExists(String player)
+	 * @see getDataFor(String player)
 	 */
-	private static boolean playerDataExists(Player player) {
-		return playerDataExists(player.getUniqueId());
+	public static PlayerData getDataFor(Player player) {
+		return getDataFor(player.getUniqueId());
 	}
 
 	/**
-	 * Whether or not the data entry exists for the given player.
+	 * The PlayerData stored for the given player by name.
 	 * 
 	 * @param player
-	 *            The player in question.
-	 * @return True if the entry exists, false otherwise.
+	 *            The player's name in question.
+	 * @return The PlayerData stored or null if no data is stored.
 	 */
-	private static boolean playerDataExists(UUID player) {
+	public static PlayerData getDataFor(UUID player) {
 		if (!(Boolean) Configuration.getConfig(Configuration.DATASTORAGE))
-			return false;
-		FileConfiguration config = MyZ.instance.getPlayerDataConfig(player);
-		return config != null;
+			return null;
+		if (!playerDataExists(player))
+			return null;
+		FileConfiguration section = MyZ.instance.getPlayerDataConfig(player);
+		List<String> stringFriends = section.getStringList("friends");
+		List<UUID> friends = new ArrayList<UUID>();
+		for (String s : stringFriends)
+			friends.add(MyZ.instance.getUID(s));
+		return new PlayerData(player, section.getInt("player_kills"), section.getInt("zombie.kills"), section.getInt("pigman.kills"),
+				section.getInt("giant.kills"), section.getInt("player.kills_life"), section.getInt("zombie.kills_life"),
+				section.getInt("pigman.kills_life"), section.getInt("giant.kills_life"), section.getInt("deaths"), section.getInt("rank"),
+				section.getBoolean("isBleeding"), section.getBoolean("isPoisoned"), section.getBoolean("wasKilledNPC"),
+				section.getLong("timeOfKickban"), friends, section.getInt("heals_life"), section.getInt("thirst"),
+				section.getString("clan"), section.getInt("minutes.played"), section.getInt("minutes.played_life"),
+				section.getInt("minutes.played_life_record"), section.getInt("player.kills_life_record"),
+				section.getInt("zombie.kills_life_record"), section.getInt("pigman.kills_life_record"),
+				section.getInt("giant.kills_life_record"), section.getInt("research"), section.getBoolean("zombie"),
+				section.getBoolean("legBroken"));
+	}
+
+	/**
+	 * Update a primitive data type to a new version.
+	 * 
+	 * @param oldData
+	 *            The old FileConfiguration storing the data.
+	 */
+	public static void updateData(FileConfiguration oldData) {
+		for (String key : oldData.getKeys(false)) {
+			File newFile = new File(MyZ.instance.getDataFolder() + File.separator + "data" + File.separator + key + ".yml");
+			if (!newFile.exists())
+				try {
+					newFile.createNewFile();
+				} catch (Exception e) {
+					Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
+				}
+			else
+				continue;
+
+			FileConfiguration newData = YamlConfiguration.loadConfiguration(newFile);
+			for (String valueKey : oldData.getConfigurationSection(key).getValues(false).keySet())
+				newData.set(valueKey, oldData.getConfigurationSection(key).get(valueKey));
+			try {
+				newData.save(newFile);
+			} catch (Exception e) {
+				Messenger.sendConsoleMessage("&4Unable to update PlayerData: " + e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * Add a friend to the friend list.
+	 * 
+	 * @param name
+	 *            The friend's name.
+	 */
+	public void addFriend(UUID name) {
+		friends.add(name);
+		save();
+	}
+
+	/**
+	 * @return the clan
+	 */
+	public String getClan() {
+		return clan;
+	}
+
+	/**
+	 * @return the deaths
+	 */
+	public int getDeaths() {
+		return deaths;
+	}
+
+	/**
+	 * @return The player's friends.
+	 */
+	public List<UUID> getFriends() {
+		return new ArrayList<UUID>(friends);
+	}
+
+	/**
+	 * @return the giant_kills
+	 */
+	public int getGiantKills() {
+		return giant_kills;
+	}
+
+	/**
+	 * @return the giant_kills_life
+	 */
+	public int getGiantKillsLife() {
+		return giant_kills_life;
+	}
+
+	/**
+	 * @return the giant_kills_life_record
+	 */
+	public int getGiantKillsLifeRecord() {
+		return giant_kills_life_record;
+	}
+
+	/**
+	 * @return the heals_life
+	 */
+	public int getHealsLife() {
+		return heals_life;
+	}
+
+	/**
+	 * @return the minutes_alive
+	 */
+	public long getMinutesAlive() {
+		return minutes_alive;
+	}
+
+	/**
+	 * @return the minutes_alive_life
+	 */
+	public int getMinutesAliveLife() {
+		return minutes_alive_life;
+	}
+
+	/**
+	 * @return the minutes_alive_life_record
+	 */
+	public int getMinutesAliveLifeRecord() {
+		return minutes_alive_life_record;
+	}
+
+	/**
+	 * @return The number of players in the same clan as this player.
+	 */
+	public int getNumberInClan() {
+		if (!inClan())
+			return 0;
+		List<UUID> playersInClan = new ArrayList<UUID>();
+		playersInClan.add(uid);
+		PlayerData data;
+		for (UUID player : MyZ.instance.lookupPlayers().keySet()) {
+			if (playersInClan.contains(player))
+				continue;
+			data = getDataFor(player);
+			if (data != null)
+				if (data.inClan() && data.getClan().equals(getClan()))
+					playersInClan.add(player);
+		}
+		return playersInClan.size();
+	}
+
+	/**
+	 * @return All the online players in the same clan as this player.
+	 */
+	public List<Player> getOnlinePlayersInClan() {
+		List<Player> playersInClan = new ArrayList<Player>();
+		if (!inClan())
+			return playersInClan;
+		playersInClan.add(MyZ.instance.getPlayer(uid));
+		PlayerData data;
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (playersInClan.contains(player.getUniqueId()))
+				continue;
+			data = getDataFor(player.getUniqueId());
+			if (data != null)
+				if (data.inClan() && data.getClan().equals(getClan()))
+					playersInClan.add(player);
+		}
+		return playersInClan;
+	}
+
+	/**
+	 * @return the pigman_kills
+	 */
+	public int getPigmanKills() {
+		return pigman_kills;
+	}
+
+	/**
+	 * @return the pigman_kills_life
+	 */
+	public int getPigmanKillsLife() {
+		return pigman_kills_life;
+	}
+
+	/**
+	 * @return the pigman_kills_life_record
+	 */
+	public int getPigmanKillsLifeRecord() {
+		return pigman_kills_life_record;
+	}
+
+	/**
+	 * @return the player_kills
+	 */
+	public int getPlayerKills() {
+		return player_kills;
+	}
+
+	/**
+	 * @return the player_kills_life
+	 */
+	public int getPlayerKillsLife() {
+		return player_kills_life;
+	}
+
+	/**
+	 * @return the player_kills_life_record
+	 */
+	public int getPlayerKillsLifeRecord() {
+		return player_kills_life_record;
+	}
+
+	/**
+	 * @return the rank
+	 */
+	public int getRank() {
+		int rank = 0;
+		if (MyZ.vault) {
+			Player p = MyZ.instance.getPlayer(uid);
+			if (p == null)
+				return this.rank;
+			if (p.isOp())
+				return 100;
+			for (int i = 0; i <= 100; i++)
+				if (p.hasPermission("MyZ.rank." + i))
+					rank = i;
+			if (rank < this.rank) {
+				if (MyZ.vault)
+					VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + this.rank);
+				return this.rank;
+			} else if (rank > this.rank) {
+				this.rank = rank;
+				save();
+			}
+		} else
+			rank = this.rank;
+		return rank;
+	}
+
+	/**
+	 * @return the research
+	 */
+	public int getResearchPoints() {
+		return research;
+	}
+
+	/**
+	 * @return the thirst
+	 */
+	public int getThirst() {
+		return thirst;
+	}
+
+	/**
+	 * @return the timeOfKickban
+	 */
+	public long getTimeOfKickban() {
+		return timeOfKickban;
+	}
+
+	/**
+	 * @return the uid
+	 */
+	public UUID getUID() {
+		return uid;
+	}
+
+	/**
+	 * @return the zombie_kills
+	 */
+	public int getZombieKills() {
+		return zombie_kills;
+	}
+
+	/**
+	 * @return the zombie_kills_life
+	 */
+	public int getZombieKillsLife() {
+		return zombie_kills_life;
+	}
+
+	/**
+	 * @return the zombie_kills_life_record
+	 */
+	public int getZombieKillsLifeRecord() {
+		return zombie_kills_life_record;
+	}
+
+	/**
+	 * @return True if this player is in a clan, false otherwise.
+	 */
+	public boolean inClan() {
+		return clan != null && !clan.isEmpty();
+	}
+
+	/**
+	 * Whether or not this player is a bandit.
+	 * 
+	 * @return True if the player is a bandit, false otherwise.
+	 */
+	public boolean isBandit() {
+		return player_kills_life >= (Integer) Configuration.getConfig(Configuration.BANDIT);
+	}
+
+	/**
+	 * @return the isBleeding
+	 */
+	public boolean isBleeding() {
+		return isBleeding;
+	}
+
+	/**
+	 * Whether or not the given player is a friend of the player.
+	 * 
+	 * @see isFriend(String name)
+	 * 
+	 * @param player
+	 *            The player.
+	 * @return True if the friends list contains the player's name.
+	 */
+	public boolean isFriend(Player player) {
+		return isFriend(player.getUniqueId());
+	}
+
+	/**
+	 * Whether or not the given player is a friend of our player.
+	 * 
+	 * @param name
+	 * @return True if friends contains @param name.
+	 */
+	public boolean isFriend(UUID name) {
+		return friends.contains(name);
+	}
+
+	/**
+	 * Whether or not this player is a healer.
+	 * 
+	 * @return True if the player is a healer, false otherwise.
+	 */
+	public boolean isHealer() {
+		return player_kills_life >= (Integer) Configuration.getConfig(Configuration.HEALER);
+	}
+
+	/**
+	 * @return the isBrokenLeg
+	 */
+	public boolean isLegBroken() {
+		return isBrokenLeg;
+	}
+
+	/**
+	 * @return the isPoisoned
+	 */
+	public boolean isPoisoned() {
+		return isPoisoned;
+	}
+
+	/**
+	 * @return the isZombie
+	 */
+	public boolean isZombie() {
+		return isZombie;
+	}
+
+	/**
+	 * Remove a friend from the friend list.
+	 * 
+	 * @param name
+	 *            The friend's name.
+	 */
+	public void removeFriend(UUID name) {
+		friends.remove(name);
+		save();
 	}
 
 	/**
@@ -320,135 +646,21 @@ public class PlayerData {
 	}
 
 	/**
-	 * @return the uid
+	 * @param isBleeding
+	 *            the isBleeding to set
 	 */
-	public UUID getUID() {
-		return uid;
-	}
-
-	/**
-	 * @return the clan
-	 */
-	public String getClan() {
-		return clan;
-	}
-
-	/**
-	 * @return True if this player is in a clan, false otherwise.
-	 */
-	public boolean inClan() {
-		return clan != null && !clan.isEmpty();
-	}
-
-	/**
-	 * @return The number of players in the same clan as this player.
-	 */
-	public int getNumberInClan() {
-		if (!inClan())
-			return 0;
-		List<UUID> playersInClan = new ArrayList<UUID>();
-		playersInClan.add(uid);
-		PlayerData data;
-		for (UUID player : MyZ.instance.lookupPlayers().keySet()) {
-			if (playersInClan.contains(player))
-				continue;
-			data = getDataFor(player);
-			if (data != null)
-				if (data.inClan() && data.getClan().equals(getClan()))
-					playersInClan.add(player);
-		}
-		return playersInClan.size();
-	}
-
-	/**
-	 * @return All the online players in the same clan as this player.
-	 */
-	public List<Player> getOnlinePlayersInClan() {
-		List<Player> playersInClan = new ArrayList<Player>();
-		if (!inClan())
-			return playersInClan;
-		playersInClan.add(MyZ.instance.getPlayer(uid));
-		PlayerData data;
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getUniqueId()))
-				continue;
-			data = getDataFor(player.getUniqueId());
-			if (data != null)
-				if (data.inClan() && data.getClan().equals(getClan()))
-					playersInClan.add(player);
-		}
-		return playersInClan;
-	}
-
-	/**
-	 * @return the player_kills
-	 */
-	public int getPlayerKills() {
-		return player_kills;
-	}
-
-	/**
-	 * @param player_kills
-	 *            the player_kills to set
-	 */
-	public void setPlayerKills(int player_kills) {
-		this.player_kills = player_kills;
+	public void setBleeding(boolean isBleeding) {
+		this.isBleeding = isBleeding;
 		save();
 	}
 
 	/**
-	 * @return the zombie_kills
+	 * @param clan
+	 *            the clan to set
 	 */
-	public int getZombieKills() {
-		return zombie_kills;
-	}
-
-	/**
-	 * @param zombie_kills
-	 *            the zombie_kills to set
-	 */
-	public void setZombieKills(int zombie_kills) {
-		this.zombie_kills = zombie_kills;
+	public void setClan(String clan) {
+		this.clan = clan;
 		save();
-	}
-
-	/**
-	 * @return the pigman_kills
-	 */
-	public int getPigmanKills() {
-		return pigman_kills;
-	}
-
-	/**
-	 * @param pigman_kills
-	 *            the pigman_kills to set
-	 */
-	public void setPigmanKills(int pigman_kills) {
-		this.pigman_kills = pigman_kills;
-		save();
-	}
-
-	/**
-	 * @return the giant_kills
-	 */
-	public int getGiantKills() {
-		return giant_kills;
-	}
-
-	/**
-	 * @param giant_kills
-	 *            the giant_kills to set
-	 */
-	public void setGiantKills(int giant_kills) {
-		this.giant_kills = giant_kills;
-		save();
-	}
-
-	/**
-	 * @return the deaths
-	 */
-	public int getDeaths() {
-		return deaths;
 	}
 
 	/**
@@ -461,30 +673,138 @@ public class PlayerData {
 	}
 
 	/**
-	 * @return the rank
+	 * @param giant_kills
+	 *            the giant_kills to set
 	 */
-	public int getRank() {
-		int rank = 0;
-		if (MyZ.vault) {
-			Player p = MyZ.instance.getPlayer(uid);
-			if (p == null)
-				return this.rank;
-			if (p.isOp())
-				return 100;
-			for (int i = 0; i <= 100; i++)
-				if (p.hasPermission("MyZ.rank." + i))
-					rank = i;
-			if (rank < this.rank) {
-				if (MyZ.vault)
-					VaultUtils.permission.playerAdd((String) null, p.getName(), "MyZ.rank." + this.rank);
-				return this.rank;
-			} else if (rank > this.rank) {
-				this.rank = rank;
-				save();
-			}
-		} else
-			rank = this.rank;
-		return rank;
+	public void setGiantKills(int giant_kills) {
+		this.giant_kills = giant_kills;
+		save();
+	}
+
+	/**
+	 * @param giant_kills_life
+	 *            the giant_kills_life to set
+	 */
+	public void setGiantKillsLife(int giant_kills_life) {
+		this.giant_kills_life = giant_kills_life;
+		save();
+	}
+
+	/**
+	 * @param giant_kills_life_record
+	 *            the pigman_kills_life_record to set
+	 */
+	public void setGiantKillsLifeRecord(int giant_kills_life_record) {
+		this.giant_kills_life_record = giant_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @param heals_life
+	 *            the heals_life to set
+	 */
+	public void setHealsLife(int heals_life) {
+		this.heals_life = heals_life;
+		save();
+	}
+
+	/**
+	 * @param isLegBroken
+	 *            the isBrokenLeg to set
+	 */
+	public void setLegBroken(boolean isLegBroken) {
+		isBrokenLeg = isLegBroken;
+		save();
+	}
+
+	/**
+	 * @param minutes_alive
+	 *            the minutes_alive to set.
+	 */
+	public void setMinutesAlive(long minutes_alive) {
+		this.minutes_alive = minutes_alive;
+		save();
+	}
+
+	/**
+	 * @param minutes_alive_life
+	 *            the minutes_alive_life to set.
+	 */
+	public void setMinutesAliveLife(int minutes_alive_life) {
+		this.minutes_alive_life = minutes_alive_life;
+		save();
+	}
+
+	/**
+	 * @param minutes_alive_life_record
+	 *            the minutes_alive_life_record to set
+	 */
+	public void setMinutesAliveLifeRecord(int minutes_alive_life_record) {
+		this.minutes_alive_life_record = minutes_alive_life_record;
+		save();
+	}
+
+	/**
+	 * @param pigman_kills
+	 *            the pigman_kills to set
+	 */
+	public void setPigmanKills(int pigman_kills) {
+		this.pigman_kills = pigman_kills;
+		save();
+	}
+
+	/**
+	 * @param pigman_kills_life
+	 *            the pigman_kills_life to set
+	 */
+	public void setPigmanKillsLife(int pigman_kills_life) {
+		this.pigman_kills_life = pigman_kills_life;
+		save();
+	}
+
+	/**
+	 * @param pigman_kills_life_record
+	 *            the pigman_kills_life_record to set
+	 */
+	public void setPigmanKillsLifeRecord(int pigman_kills_life_record) {
+		this.pigman_kills_life_record = pigman_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @param player_kills
+	 *            the player_kills to set
+	 */
+	public void setPlayerKills(int player_kills) {
+		this.player_kills = player_kills;
+		save();
+	}
+
+	/**
+	 * @param player_kills_life
+	 *            the player_kills_life to set
+	 */
+	public void setPlayerKillsLife(int player_kills_life) {
+		this.player_kills_life = player_kills_life;
+		save();
+	}
+
+	/**
+	 * @param player_kills_life_record
+	 *            the player_kills_life_record to set
+	 */
+	public void setPlayerKillsLifeRecord(int player_kills_life_record) {
+		this.player_kills_life_record = player_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @param isPoisoned
+	 *            the isPoisoned to set
+	 */
+	public void setPoisoned(boolean isPoisoned) {
+		this.isPoisoned = isPoisoned;
+		save();
 	}
 
 	/**
@@ -504,142 +824,12 @@ public class PlayerData {
 	}
 
 	/**
-	 * @return the isBleeding
+	 * @param research
+	 *            the research to set
 	 */
-	public boolean isBleeding() {
-		return isBleeding;
-	}
-
-	/**
-	 * @param isBleeding
-	 *            the isBleeding to set
-	 */
-	public void setBleeding(boolean isBleeding) {
-		this.isBleeding = isBleeding;
+	public void setResearchPoints(int research) {
+		this.research = research;
 		save();
-	}
-
-	/**
-	 * @return the isPoisoned
-	 */
-	public boolean isPoisoned() {
-		return isPoisoned;
-	}
-
-	/**
-	 * @param isPoisoned
-	 *            the isPoisoned to set
-	 */
-	public void setPoisoned(boolean isPoisoned) {
-		this.isPoisoned = isPoisoned;
-		save();
-	}
-
-	/**
-	 * @return the wasKilledNPC
-	 */
-	public boolean wasKilledNPC() {
-		return wasKilledNPC;
-	}
-
-	/**
-	 * @param wasKilledNPC
-	 *            the wasKilledNPC to set
-	 */
-	public void setWasKilledNPC(boolean wasKilledNPC) {
-		isPoisoned = wasKilledNPC;
-		save();
-	}
-
-	/**
-	 * @return the timeOfKickban
-	 */
-	public long getTimeOfKickban() {
-		return timeOfKickban;
-	}
-
-	/**
-	 * @param timeOfKickban
-	 *            the timeOfKickban to set
-	 */
-	public void setTimeOfKickban(long timeOfKickban) {
-		this.timeOfKickban = timeOfKickban;
-		save();
-	}
-
-	/**
-	 * @return The player's friends.
-	 */
-	public List<UUID> getFriends() {
-		return new ArrayList<UUID>(friends);
-	}
-
-	/**
-	 * Whether or not the given player is a friend of the player.
-	 * 
-	 * @see isFriend(String name)
-	 * 
-	 * @param player
-	 *            The player.
-	 * @return True if the friends list contains the player's name.
-	 */
-	public boolean isFriend(Player player) {
-		return isFriend(player.getUniqueId());
-	}
-
-	/**
-	 * Whether or not the given player is a friend of our player.
-	 * 
-	 * @param name
-	 * @return True if friends contains @param name.
-	 */
-	public boolean isFriend(UUID name) {
-		return friends.contains(name);
-	}
-
-	/**
-	 * Add a friend to the friend list.
-	 * 
-	 * @param name
-	 *            The friend's name.
-	 */
-	public void addFriend(UUID name) {
-		friends.add(name);
-		save();
-	}
-
-	/**
-	 * Remove a friend from the friend list.
-	 * 
-	 * @param name
-	 *            The friend's name.
-	 */
-	public void removeFriend(UUID name) {
-		friends.remove(name);
-		save();
-	}
-
-	/**
-	 * @return the player_kills_life
-	 */
-	public int getPlayerKillsLife() {
-		return player_kills_life;
-	}
-
-	/**
-	 * @param player_kills_life
-	 *            the player_kills_life to set
-	 */
-	public void setPlayerKillsLife(int player_kills_life) {
-		this.player_kills_life = player_kills_life;
-		save();
-	}
-
-	/**
-	 * @return the zombie_kills_life
-	 */
-	public int getZombieKillsLife() {
-		return zombie_kills_life;
 	}
 
 	/**
@@ -652,220 +842,21 @@ public class PlayerData {
 	}
 
 	/**
-	 * @return the thirst
+	 * @param timeOfKickban
+	 *            the timeOfKickban to set
 	 */
-	public int getThirst() {
-		return thirst;
-	}
-
-	/**
-	 * @param zombie_kills_life
-	 *            the zombie_kills_life to set
-	 */
-	public void setZombieKillsLife(int zombie_kills_life) {
-		this.zombie_kills_life = zombie_kills_life;
+	public void setTimeOfKickban(long timeOfKickban) {
+		this.timeOfKickban = timeOfKickban;
 		save();
 	}
 
 	/**
-	 * @return the player_kills_life_record
+	 * @param wasKilledNPC
+	 *            the wasKilledNPC to set
 	 */
-	public int getPlayerKillsLifeRecord() {
-		return player_kills_life_record;
-	}
-
-	/**
-	 * @param player_kills_life_record
-	 *            the player_kills_life_record to set
-	 */
-	public void setPlayerKillsLifeRecord(int player_kills_life_record) {
-		this.player_kills_life_record = player_kills_life_record;
+	public void setWasKilledNPC(boolean wasKilledNPC) {
+		isPoisoned = wasKilledNPC;
 		save();
-	}
-
-	/**
-	 * @return the zombie_kills_life_record
-	 */
-	public int getZombieKillsLifeRecord() {
-		return zombie_kills_life_record;
-	}
-
-	/**
-	 * @param zombie_kills_life_record
-	 *            the zombie_kills_life_record to set
-	 */
-	public void setZombieKillsLifeRecord(int zombie_kills_life_record) {
-		this.zombie_kills_life_record = zombie_kills_life_record;
-		save();
-	}
-
-	/**
-	 * @return the pigman_kills_life_record
-	 */
-	public int getPigmanKillsLifeRecord() {
-		return pigman_kills_life_record;
-	}
-
-	/**
-	 * @param pigman_kills_life_record
-	 *            the pigman_kills_life_record to set
-	 */
-	public void setPigmanKillsLifeRecord(int pigman_kills_life_record) {
-		this.pigman_kills_life_record = pigman_kills_life_record;
-		save();
-	}
-
-	/**
-	 * @return the giant_kills_life_record
-	 */
-	public int getGiantKillsLifeRecord() {
-		return giant_kills_life_record;
-	}
-
-	/**
-	 * @param giant_kills_life_record
-	 *            the pigman_kills_life_record to set
-	 */
-	public void setGiantKillsLifeRecord(int giant_kills_life_record) {
-		this.giant_kills_life_record = giant_kills_life_record;
-		save();
-	}
-
-	/**
-	 * @return the pigman_kills_life
-	 */
-	public int getPigmanKillsLife() {
-		return pigman_kills_life;
-	}
-
-	/**
-	 * @param pigman_kills_life
-	 *            the pigman_kills_life to set
-	 */
-	public void setPigmanKillsLife(int pigman_kills_life) {
-		this.pigman_kills_life = pigman_kills_life;
-		save();
-	}
-
-	/**
-	 * @return the giant_kills_life
-	 */
-	public int getGiantKillsLife() {
-		return giant_kills_life;
-	}
-
-	/**
-	 * @param giant_kills_life
-	 *            the giant_kills_life to set
-	 */
-	public void setGiantKillsLife(int giant_kills_life) {
-		this.giant_kills_life = giant_kills_life;
-		save();
-	}
-
-	/**
-	 * @return the heals_life
-	 */
-	public int getHealsLife() {
-		return heals_life;
-	}
-
-	/**
-	 * @param heals_life
-	 *            the heals_life to set
-	 */
-	public void setHealsLife(int heals_life) {
-		this.heals_life = heals_life;
-		save();
-	}
-
-	/**
-	 * @return the minutes_alive
-	 */
-	public long getMinutesAlive() {
-		return minutes_alive;
-	}
-
-	/**
-	 * @param minutes_alive
-	 *            the minutes_alive to set.
-	 */
-	public void setMinutesAlive(long minutes_alive) {
-		this.minutes_alive = minutes_alive;
-		save();
-	}
-
-	/**
-	 * @return the minutes_alive_life
-	 */
-	public int getMinutesAliveLife() {
-		return minutes_alive_life;
-	}
-
-	/**
-	 * @param minutes_alive_life
-	 *            the minutes_alive_life to set.
-	 */
-	public void setMinutesAliveLife(int minutes_alive_life) {
-		this.minutes_alive_life = minutes_alive_life;
-		save();
-	}
-
-	/**
-	 * @return the minutes_alive_life_record
-	 */
-	public int getMinutesAliveLifeRecord() {
-		return minutes_alive_life_record;
-	}
-
-	/**
-	 * @param minutes_alive_life_record
-	 *            the minutes_alive_life_record to set
-	 */
-	public void setMinutesAliveLifeRecord(int minutes_alive_life_record) {
-		this.minutes_alive_life_record = minutes_alive_life_record;
-		save();
-	}
-
-	/**
-	 * @param clan
-	 *            the clan to set
-	 */
-	public void setClan(String clan) {
-		this.clan = clan;
-		save();
-	}
-
-	/**
-	 * Whether or not this player is a bandit.
-	 * 
-	 * @return True if the player is a bandit, false otherwise.
-	 */
-	public boolean isBandit() {
-		return player_kills_life >= (Integer) Configuration.getConfig(Configuration.BANDIT);
-	}
-
-	/**
-	 * Whether or not this player is a healer.
-	 * 
-	 * @return True if the player is a healer, false otherwise.
-	 */
-	public boolean isHealer() {
-		return player_kills_life >= (Integer) Configuration.getConfig(Configuration.HEALER);
-	}
-
-	/**
-	 * @return the research
-	 */
-	public int getResearchPoints() {
-		return research;
-	}
-
-	/**
-	 * @return the isZombie
-	 */
-	public boolean isZombie() {
-		return isZombie;
 	}
 
 	/**
@@ -878,27 +869,36 @@ public class PlayerData {
 	}
 
 	/**
-	 * @return the isBrokenLeg
+	 * @param zombie_kills
+	 *            the zombie_kills to set
 	 */
-	public boolean isLegBroken() {
-		return isBrokenLeg;
-	}
-
-	/**
-	 * @param isLegBroken
-	 *            the isBrokenLeg to set
-	 */
-	public void setLegBroken(boolean isLegBroken) {
-		isBrokenLeg = isLegBroken;
+	public void setZombieKills(int zombie_kills) {
+		this.zombie_kills = zombie_kills;
 		save();
 	}
 
 	/**
-	 * @param research
-	 *            the research to set
+	 * @param zombie_kills_life
+	 *            the zombie_kills_life to set
 	 */
-	public void setResearchPoints(int research) {
-		this.research = research;
+	public void setZombieKillsLife(int zombie_kills_life) {
+		this.zombie_kills_life = zombie_kills_life;
 		save();
+	}
+
+	/**
+	 * @param zombie_kills_life_record
+	 *            the zombie_kills_life_record to set
+	 */
+	public void setZombieKillsLifeRecord(int zombie_kills_life_record) {
+		this.zombie_kills_life_record = zombie_kills_life_record;
+		save();
+	}
+
+	/**
+	 * @return the wasKilledNPC
+	 */
+	public boolean wasKilledNPC() {
+		return wasKilledNPC;
 	}
 }

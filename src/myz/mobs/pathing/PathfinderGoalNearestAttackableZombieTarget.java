@@ -28,6 +28,29 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 
 	// private EntityLiving g;
 
+	class EntitySelectorNearestAttackableZombieTarget implements IEntitySelector {
+
+		final IEntitySelector c;
+
+		final PathfinderGoalNearestAttackableZombieTarget d;
+
+		EntitySelectorNearestAttackableZombieTarget(PathfinderGoalNearestAttackableZombieTarget pathfindergoalnearestattackabletarget,
+				IEntitySelector ientityselector) {
+			d = pathfindergoalnearestattackabletarget;
+			c = ientityselector;
+		}
+
+		@Override
+		public boolean a(Entity entity) {
+			if (!(entity instanceof EntityLiving))
+				return false;
+			Entity target = PathingSupport.findNearbyVulnerablePlayer(d.cc);
+			if (target != null && target.equals(entity) || !(target instanceof EntityHuman))
+				return true;
+			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
+		}
+	}
+
 	public PathfinderGoalNearestAttackableZombieTarget(EntityCreature creature, Class<? extends EntityLiving> oclass, int i, boolean flag) {
 		this(creature, oclass, i, flag, false);
 	}
@@ -69,28 +92,5 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 	@Override
 	public void c() {
 		super.c();
-	}
-
-	class EntitySelectorNearestAttackableZombieTarget implements IEntitySelector {
-
-		final IEntitySelector c;
-
-		final PathfinderGoalNearestAttackableZombieTarget d;
-
-		EntitySelectorNearestAttackableZombieTarget(PathfinderGoalNearestAttackableZombieTarget pathfindergoalnearestattackabletarget,
-				IEntitySelector ientityselector) {
-			d = pathfindergoalnearestattackabletarget;
-			c = ientityselector;
-		}
-
-		@Override
-		public boolean a(Entity entity) {
-			if (!(entity instanceof EntityLiving))
-				return false;
-			Entity target = PathingSupport.findNearbyVulnerablePlayer(d.cc);
-			if (target != null && target.equals(entity) || !(target instanceof EntityHuman))
-				return true;
-			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);
-		}
 	}
 }

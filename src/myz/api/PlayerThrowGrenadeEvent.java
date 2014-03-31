@@ -29,21 +29,29 @@ public class PlayerThrowGrenadeEvent extends Event implements Cancellable {
 	}
 
 	/**
-	 * The player that threw the grenade.
-	 * 
-	 * @return The player.
-	 */
-	public Player getPlayer() {
-		return player;
-	}
-
-	/**
 	 * The ender pearl that represents the grenade.
 	 * 
 	 * @return The ender pearl.
 	 */
 	public EnderPearl getGrenade() {
 		return grenade;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.bukkit.event.Event#getHandlers()
+	 */
+	@Override
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
+	/**
+	 * The player that threw the grenade.
+	 * 
+	 * @return The player.
+	 */
+	public Player getPlayer() {
+		return player;
 	}
 
 	/* (non-Javadoc)
@@ -61,13 +69,5 @@ public class PlayerThrowGrenadeEvent extends Event implements Cancellable {
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
 
-	}
-
-	/* (non-Javadoc)
-	 * @see org.bukkit.event.Event#getHandlers()
-	 */
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
 	}
 }

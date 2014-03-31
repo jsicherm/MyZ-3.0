@@ -31,30 +31,6 @@ public class PathingSupport {
 	private static Map<UUID, Double> visibility_override = new HashMap<UUID, Double>();
 	private static Field field, field2;
 
-	public static Field getField() throws NoSuchFieldException, SecurityException {
-		if (field == null) {
-			field = PathfinderGoalSelector.class.getDeclaredField("b");
-			field.setAccessible(true);
-		}
-		return field;
-	}
-
-	public static Field getSecondField() throws NoSuchFieldException, SecurityException {
-		if (field2 == null) {
-			field2 = PathfinderGoalSelector.class.getDeclaredField("c");
-			field2.setAccessible(true);
-		}
-		return field2;
-	}
-
-	/**
-	 * @see findNearbyVulnerablePlayer(Entity entity, double x, double y, double
-	 *      z)
-	 */
-	public static EntityHuman findNearbyVulnerablePlayer(Entity entity) {
-		return findNearbyVulnerablePlayer(entity, entity.locX, entity.locY, entity.locZ);
-	}
-
 	/**
 	 * A modified version of NMS findNearbyVulnerablePlayer(double d1, double
 	 * d2, double d3, double d0) Returns the nearest player to the location,
@@ -120,6 +96,13 @@ public class PathingSupport {
 	 */
 	public static void elevatePlayer(Player player, double visibility) {
 		visibility_override.put(player.getUniqueId(), visibility);
+	}
+
+	/**
+	 * @see experienceBarVisibility(Player player, boolean isAmplified).
+	 */
+	public static double experienceBarVisibility(Player player) {
+		return experienceBarVisibility(player, false);
 	}
 
 	/**
@@ -193,9 +176,26 @@ public class PathingSupport {
 	}
 
 	/**
-	 * @see experienceBarVisibility(Player player, boolean isAmplified).
+	 * @see findNearbyVulnerablePlayer(Entity entity, double x, double y, double
+	 *      z)
 	 */
-	public static double experienceBarVisibility(Player player) {
-		return experienceBarVisibility(player, false);
+	public static EntityHuman findNearbyVulnerablePlayer(Entity entity) {
+		return findNearbyVulnerablePlayer(entity, entity.locX, entity.locY, entity.locZ);
+	}
+
+	public static Field getField() throws NoSuchFieldException, SecurityException {
+		if (field == null) {
+			field = PathfinderGoalSelector.class.getDeclaredField("b");
+			field.setAccessible(true);
+		}
+		return field;
+	}
+
+	public static Field getSecondField() throws NoSuchFieldException, SecurityException {
+		if (field2 == null) {
+			field2 = PathfinderGoalSelector.class.getDeclaredField("c");
+			field2.setAccessible(true);
+		}
+		return field2;
 	}
 }

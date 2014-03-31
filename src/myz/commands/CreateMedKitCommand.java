@@ -26,6 +26,45 @@ public class CreateMedKitCommand implements CommandExecutor {
 
 	private Map<UUID, UnfinishedMedKit> kitCreators = new HashMap<UUID, UnfinishedMedKit>();
 
+	public static class UnfinishedMedKit {
+
+		private String configID, name;
+		private int ointment = -1, antiseptic = -1;
+		private ItemStack input, output;
+
+		public UnfinishedMedKit(String configID) {
+			this.configID = configID;
+		}
+
+		public int getAntiseptic() {
+			return antiseptic;
+		}
+
+		public String getConfigID() {
+			return configID;
+		}
+
+		public ItemStack getInput() {
+			return input;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public int getOintment() {
+			return ointment;
+		}
+
+		public ItemStack getOutput() {
+			return output;
+		}
+
+		public MedKit toMedKit() {
+			return new MedKit(configID, name, antiseptic, ointment, input, output);
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
@@ -92,44 +131,5 @@ public class CreateMedKitCommand implements CommandExecutor {
 		} else
 			Messenger.sendConsoleMessage(ChatColor.RED + "That is a player-only command.");
 		return true;
-	}
-
-	public static class UnfinishedMedKit {
-
-		private String configID, name;
-		private int ointment = -1, antiseptic = -1;
-		private ItemStack input, output;
-
-		public UnfinishedMedKit(String configID) {
-			this.configID = configID;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getConfigID() {
-			return configID;
-		}
-
-		public int getOintment() {
-			return ointment;
-		}
-
-		public int getAntiseptic() {
-			return antiseptic;
-		}
-
-		public ItemStack getInput() {
-			return input;
-		}
-
-		public ItemStack getOutput() {
-			return output;
-		}
-
-		public MedKit toMedKit() {
-			return new MedKit(configID, name, antiseptic, ointment, input, output);
-		}
 	}
 }

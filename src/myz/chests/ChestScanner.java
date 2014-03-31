@@ -70,211 +70,18 @@ public class ChestScanner implements Listener {
 		}
 	}
 
-	/**
-	 * Start the chest scanning process for a player.
-	 * 
-	 * @param playerFor
-	 *            The player to initialize for.
-	 */
-	public static void initialize(Player playerFor, String[] args) {
-		Set<String> lootsets = Configuration.getLootsets();
-		List<String> loot = new ArrayList<String>();
-		for (String s : args)
-			if (containsIgnoreCase(lootsets, s))
-				loot.add(s);
-		scanners.put(playerFor.getUniqueId(), new MaxMin(loot));
-		Messenger.sendConfigMessage(playerFor, "chest.set.begin");
-		Messenger.sendConfigMessage(playerFor, "chest.set.coordinate1");
-	}
+	private static class MaxMin {
+		private int x1 = Integer.MAX_VALUE, z1 = Integer.MAX_VALUE, x2 = Integer.MAX_VALUE, z2 = Integer.MAX_VALUE;
 
-	private static boolean containsIgnoreCase(Collection<String> l, String s) {
-		for (String x : l)
-			if (x.equalsIgnoreCase(s))
-				return true;
-		return false;
-	}
+		private final List<String> lootsets;
 
-	/**
-	 * Add a player to the list of lootset creators.
-	 * 
-	 * @param player
-	 *            The player.
-	 * @param lootset
-	 *            The name of the lootset.
-	 */
-	public static void addLooter(Player player, String lootset) {
-		looters.put(player.getUniqueId(), lootset);
-		Messenger.sendConfigMessage(player, "loot.set.info");
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	private void onChat(AsyncPlayerChatEvent e) {
-		if (looters.containsKey(e.getPlayer().getUniqueId())) {
-			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
-			lootCreators.put(e.getPlayer().getUniqueId(), new LootsetCreate(looters.get(e.getPlayer().getUniqueId())));
-			looters.remove(e.getPlayer().getUniqueId());
-			e.setCancelled(true);
-		} else if (lootCreators.containsKey(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-			int percent = 0;
-			try {
-				percent = Integer.parseInt(e.getMessage().replaceAll("%", ""));
-				if (percent > 100)
-					percent = 100;
-			} catch (Exception exc) {
-			}
-			Messenger.sendMessage(e.getPlayer(), "&e" + Utils.getNameOf(lootCreators.get(e.getPlayer().getUniqueId()).newest) + ": &a"
-					+ percent + "%");
-			lootCreators.get(e.getPlayer().getUniqueId()).spawnable.put(lootCreators.get(e.getPlayer().getUniqueId()).newest, percent);
-			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
+		public MaxMin(List<String> lootsets) {
+			this.lootsets = lootsets;
 		}
-	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	private void onPlaceChest(BlockPlaceEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			return;
-
-		if (e.getBlock().getType() == Material.CHEST && ChestManager.isMyZChest(e.getBlock().getLocation())) {
-			ChestManager.respawn(e.getBlock().getLocation(), true);
+		public boolean hasSetCoord1() {
+			return x1 != Integer.MAX_VALUE;
 		}
-	}
-
-	/**
-	 * Replace named objects in the inventory with their medkit equivalent.
-	 * 
-	 * @param inventory
-	 *            The Inventory.
-	 * @param trueInventory
-	 *            Whether or not to use the inventory provided (player
-	 *            inventory) or the inventory of the player holding the given
-	 *            inventory.
-	 */
-	private void replaceMedkits(Inventory inventory, boolean trueInventory) {
-		if (inventory.getHolder() instanceof Player || trueInventory) {
-			inventory = trueInventory ? inventory : ((Player) inventory.getHolder()).getInventory();
-			ItemStack[] contents = inventory.getContents();
-			int spot = 0;
-			for (ItemStack i : contents) {
-				MedKit kit;
-				if (i != null && (kit = MedKit.getRawMedKitFor(i)) != null)
-					inventory.setItem(spot, kit.getTrueOutput());
-				spot++;
-			}
-		}
-	}
-
-	@EventHandler
-	private void onInventoryOpen(InventoryOpenEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			return;
-
-		replaceMedkits(e.getInventory(), true);
-	}
-
-	@EventHandler
-	private void onInventoryClose(InventoryCloseEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			return;
-
-		replaceMedkits(e.getInventory(), false);
-
-		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9
-				&& lootCreators.containsKey(e.getPlayer().getUniqueId())) {
-			LootsetCreate lootset = lootCreators.get(e.getPlayer().getUniqueId());
-			for (ItemStack item : e.getInventory().getContents())
-				if (item != null) {
-					lootset.newest = item;
-					Messenger.sendConfigMessage((Player) e.getPlayer(), "loot.set.percent");
-					return;
-				}
-
-			Configuration.setLootset(lootset.name, lootset.spawnable);
-			for (ItemStack item : lootset.spawnable.keySet())
-				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
-			lootCreators.remove(e.getPlayer().getUniqueId());
-		} else if (e.getInventory().getType() == InventoryType.CHEST && e.getInventory().getHolder() != null
-				&& e.getInventory().getHolder() instanceof org.bukkit.block.Chest
-				&& ChestManager.isMyZChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation())) {
-			ResearchItem.research((Player) e.getPlayer(), (Integer) Configuration.getConfig("chest.research-reward"),
-					((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation(), "research.success-short");
-
-			if ((Boolean) Configuration.getConfig("chest.break.on_close"))
-				ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
-		}
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	private void onClick(PlayerInteractEvent e) {
-		if (scanners.containsKey(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-			MaxMin mm = scanners.get(e.getPlayer().getUniqueId());
-			if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
-				if (!mm.hasSetCoord1()) {
-					mm.x1 = e.getClickedBlock().getX();
-					mm.z1 = e.getClickedBlock().getZ();
-					Messenger.sendConfigMessage(e.getPlayer(), "chest.set.coordinate2");
-				} else {
-					mm.x2 = e.getClickedBlock().getX();
-					mm.z2 = e.getClickedBlock().getZ();
-					scanners.remove(e.getPlayer().getUniqueId());
-					beginScanning(e.getPlayer(), mm);
-				}
-		} else if (setters.containsKey(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-			Location inLoc = e.getClickedBlock().getLocation();
-			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
-			if (e.getClickedBlock().getType() != Material.CHEST) {
-				Messenger.sendConfigMessage(e.getPlayer(), "chest.set.nonchest");
-				setters.remove(e.getPlayer().getUniqueId());
-				return;
-			}
-			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
-			location += "," + chestObject.getFacing().toString();
-
-			Configuration.setChest(location, setters.get(e.getPlayer().getUniqueId()));
-			String slug = "&4N/A";
-			if (setters.get(e.getPlayer().getUniqueId()) != null) {
-				slug = setters.get(e.getPlayer().getUniqueId());
-
-				nameChest(e.getClickedBlock(), slug);
-			}
-			ChestManager.respawn(inLoc, true);
-			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.set.typeis", slug));
-			setters.remove(e.getPlayer().getUniqueId());
-		} else if (getters.contains(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-			getters.remove(e.getPlayer().getUniqueId());
-			Location inLoc = e.getClickedBlock().getLocation();
-			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
-			if (e.getClickedBlock().getType() != Material.CHEST) {
-				Messenger.sendConfigMessage(e.getPlayer(), "chest.get.nonchest");
-				return;
-			}
-			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
-			location += "," + chestObject.getFacing().toString();
-			String slug = "&4N/A";
-			if (Configuration.getChests().containsKey(location)) {
-				slug = Configuration.getChests().get(location);
-				if (slug == null)
-					slug = "&4N/A";
-			}
-			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.get.typeis", slug));
-		}
-	}
-
-	/**
-	 * Start the scanning.
-	 * 
-	 * @param playerFor
-	 *            The player to report to.
-	 * @param maxmin
-	 *            The MaxMin underlying class.
-	 */
-	private void beginScanning(Player playerFor, final MaxMin maxmin) {
-		Messenger.sendConfigMessage(playerFor, "chest.set.initialize");
-		ScannerRunnable sr = new ScannerRunnable(maxmin, playerFor, maxmin.lootsets);
-		sr.task = MyZ.instance.getServer().getScheduler().runTaskTimer(MyZ.instance, sr, 0L, 2L);
 	}
 
 	public class ScannerRunnable implements Runnable {
@@ -353,6 +160,51 @@ public class ChestScanner implements Listener {
 		}
 	}
 
+	private static boolean containsIgnoreCase(Collection<String> l, String s) {
+		for (String x : l)
+			if (x.equalsIgnoreCase(s))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Add a player to the list of lootset creators.
+	 * 
+	 * @param player
+	 *            The player.
+	 * @param lootset
+	 *            The name of the lootset.
+	 */
+	public static void addLooter(Player player, String lootset) {
+		looters.put(player.getUniqueId(), lootset);
+		Messenger.sendConfigMessage(player, "loot.set.info");
+	}
+
+	/**
+	 * Start the chest scanning process for a player.
+	 * 
+	 * @param playerFor
+	 *            The player to initialize for.
+	 */
+	public static void initialize(Player playerFor, String[] args) {
+		Set<String> lootsets = Configuration.getLootsets();
+		List<String> loot = new ArrayList<String>();
+		for (String s : args)
+			if (containsIgnoreCase(lootsets, s))
+				loot.add(s);
+		scanners.put(playerFor.getUniqueId(), new MaxMin(loot));
+		Messenger.sendConfigMessage(playerFor, "chest.set.begin");
+		Messenger.sendConfigMessage(playerFor, "chest.set.coordinate1");
+	}
+
+	/**
+	 * Give a chest a name!
+	 * 
+	 * @param block
+	 *            The block that the chest is in.
+	 * @param slug
+	 *            The name of the chest.
+	 */
 	public static void nameChest(Block block, String slug) {
 		try {
 			Class<?> craftchest = Class.forName("org.bukkit.craftbukkit." + NMSUtils.version + ".block.CraftChest");
@@ -369,17 +221,172 @@ public class ChestScanner implements Listener {
 		}
 	}
 
-	private static class MaxMin {
-		private int x1 = Integer.MAX_VALUE, z1 = Integer.MAX_VALUE, x2 = Integer.MAX_VALUE, z2 = Integer.MAX_VALUE;
+	/**
+	 * Start the scanning.
+	 * 
+	 * @param playerFor
+	 *            The player to report to.
+	 * @param maxmin
+	 *            The MaxMin underlying class.
+	 */
+	private void beginScanning(Player playerFor, final MaxMin maxmin) {
+		Messenger.sendConfigMessage(playerFor, "chest.set.initialize");
+		ScannerRunnable sr = new ScannerRunnable(maxmin, playerFor, maxmin.lootsets);
+		sr.task = MyZ.instance.getServer().getScheduler().runTaskTimer(MyZ.instance, sr, 0L, 2L);
+	}
 
-		private final List<String> lootsets;
-
-		public MaxMin(List<String> lootsets) {
-			this.lootsets = lootsets;
+	@EventHandler(priority = EventPriority.LOWEST)
+	private void onChat(AsyncPlayerChatEvent e) {
+		if (looters.containsKey(e.getPlayer().getUniqueId())) {
+			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
+			lootCreators.put(e.getPlayer().getUniqueId(), new LootsetCreate(looters.get(e.getPlayer().getUniqueId())));
+			looters.remove(e.getPlayer().getUniqueId());
+			e.setCancelled(true);
+		} else if (lootCreators.containsKey(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			int percent = 0;
+			try {
+				percent = Integer.parseInt(e.getMessage().replaceAll("%", ""));
+				if (percent > 100)
+					percent = 100;
+			} catch (Exception exc) {
+			}
+			Messenger.sendMessage(e.getPlayer(), "&e" + Utils.getNameOf(lootCreators.get(e.getPlayer().getUniqueId()).newest) + ": &a"
+					+ percent + "%");
+			lootCreators.get(e.getPlayer().getUniqueId()).spawnable.put(lootCreators.get(e.getPlayer().getUniqueId()).newest, percent);
+			e.getPlayer().openInventory(Bukkit.createInventory(null, 9, "Lootset Creator"));
 		}
+	}
 
-		public boolean hasSetCoord1() {
-			return x1 != Integer.MAX_VALUE;
+	@EventHandler(priority = EventPriority.LOWEST)
+	private void onClick(PlayerInteractEvent e) {
+		if (scanners.containsKey(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			MaxMin mm = scanners.get(e.getPlayer().getUniqueId());
+			if (e.getAction() == Action.RIGHT_CLICK_BLOCK)
+				if (!mm.hasSetCoord1()) {
+					mm.x1 = e.getClickedBlock().getX();
+					mm.z1 = e.getClickedBlock().getZ();
+					Messenger.sendConfigMessage(e.getPlayer(), "chest.set.coordinate2");
+				} else {
+					mm.x2 = e.getClickedBlock().getX();
+					mm.z2 = e.getClickedBlock().getZ();
+					scanners.remove(e.getPlayer().getUniqueId());
+					beginScanning(e.getPlayer(), mm);
+				}
+		} else if (setters.containsKey(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			Location inLoc = e.getClickedBlock().getLocation();
+			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
+			if (e.getClickedBlock().getType() != Material.CHEST) {
+				Messenger.sendConfigMessage(e.getPlayer(), "chest.set.nonchest");
+				setters.remove(e.getPlayer().getUniqueId());
+				return;
+			}
+			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
+			location += "," + chestObject.getFacing().toString();
+
+			Configuration.setChest(location, setters.get(e.getPlayer().getUniqueId()));
+			String slug = "&4N/A";
+			if (setters.get(e.getPlayer().getUniqueId()) != null) {
+				slug = setters.get(e.getPlayer().getUniqueId());
+
+				nameChest(e.getClickedBlock(), slug);
+			}
+			ChestManager.respawn(inLoc, true);
+			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.set.typeis", slug));
+			setters.remove(e.getPlayer().getUniqueId());
+		} else if (getters.contains(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			getters.remove(e.getPlayer().getUniqueId());
+			Location inLoc = e.getClickedBlock().getLocation();
+			String location = inLoc.getWorld().getName() + "," + inLoc.getBlockX() + "," + inLoc.getBlockY() + "," + inLoc.getBlockZ();
+			if (e.getClickedBlock().getType() != Material.CHEST) {
+				Messenger.sendConfigMessage(e.getPlayer(), "chest.get.nonchest");
+				return;
+			}
+			Chest chestObject = (Chest) inLoc.getBlock().getState().getData();
+			location += "," + chestObject.getFacing().toString();
+			String slug = "&4N/A";
+			if (Configuration.getChests().containsKey(location)) {
+				slug = Configuration.getChests().get(location);
+				if (slug == null)
+					slug = "&4N/A";
+			}
+			Messenger.sendMessage(e.getPlayer(), Messenger.getConfigMessage(Localizer.getLocale(e.getPlayer()), "chest.get.typeis", slug));
+		}
+	}
+
+	@EventHandler
+	private void onInventoryClose(InventoryCloseEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
+		replaceMedkits(e.getInventory(), false);
+
+		if (e.getInventory().getName().equals("Lootset Creator") && e.getInventory().getSize() == 9
+				&& lootCreators.containsKey(e.getPlayer().getUniqueId())) {
+			LootsetCreate lootset = lootCreators.get(e.getPlayer().getUniqueId());
+			for (ItemStack item : e.getInventory().getContents())
+				if (item != null) {
+					lootset.newest = item;
+					Messenger.sendConfigMessage((Player) e.getPlayer(), "loot.set.percent");
+					return;
+				}
+
+			Configuration.setLootset(lootset.name, lootset.spawnable);
+			for (ItemStack item : lootset.spawnable.keySet())
+				Messenger.sendMessage((Player) e.getPlayer(), "&e" + Utils.getNameOf(item) + ": &a" + lootset.spawnable.get(item) + "%");
+			lootCreators.remove(e.getPlayer().getUniqueId());
+		} else if (e.getInventory().getType() == InventoryType.CHEST && e.getInventory().getHolder() != null
+				&& e.getInventory().getHolder() instanceof org.bukkit.block.Chest
+				&& ChestManager.isMyZChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation())) {
+			ResearchItem.research((Player) e.getPlayer(), (Integer) Configuration.getConfig("chest.research-reward"),
+					((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock().getLocation(), "research.success-short");
+
+			if ((Boolean) Configuration.getConfig("chest.break.on_close"))
+				ChestManager.breakChest(((org.bukkit.block.Chest) e.getInventory().getHolder()).getBlock());
+		}
+	}
+
+	@EventHandler
+	private void onInventoryOpen(InventoryOpenEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
+		replaceMedkits(e.getInventory(), true);
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	private void onPlaceChest(BlockPlaceEvent e) {
+		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
+			return;
+
+		if (e.getBlock().getType() == Material.CHEST && ChestManager.isMyZChest(e.getBlock().getLocation()))
+			ChestManager.respawn(e.getBlock().getLocation(), true);
+	}
+
+	/**
+	 * Replace named objects in the inventory with their medkit equivalent.
+	 * 
+	 * @param inventory
+	 *            The Inventory.
+	 * @param trueInventory
+	 *            Whether or not to use the inventory provided (player
+	 *            inventory) or the inventory of the player holding the given
+	 *            inventory.
+	 */
+	private void replaceMedkits(Inventory inventory, boolean trueInventory) {
+		if (inventory.getHolder() instanceof Player || trueInventory) {
+			inventory = trueInventory ? inventory : ((Player) inventory.getHolder()).getInventory();
+			ItemStack[] contents = inventory.getContents();
+			int spot = 0;
+			for (ItemStack i : contents) {
+				MedKit kit;
+				if (i != null && (kit = MedKit.getRawMedKitFor(i)) != null)
+					inventory.setItem(spot, kit.getTrueOutput());
+				spot++;
+			}
 		}
 	}
 }

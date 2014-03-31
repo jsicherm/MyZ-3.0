@@ -39,6 +39,39 @@ public class Hologram {
 	private boolean showing = false;
 	private Player following;
 
+	private class HologramRunnable extends BukkitRunnable {
+		int ticks = 0;
+		BukkitTask task;
+		List<Player> players;
+		Hologram holo;
+
+		public HologramRunnable(Hologram holo, Player... players) {
+			this.players = new ArrayList<Player>(Arrays.asList(players));
+			this.players.remove(following);
+			this.holo = holo;
+		}
+
+		@Override
+		public void run() {
+			ticks++;
+			if (holo.showing && holo.following != null && holo.following.isOnline() && !holo.following.isDead()) {
+				Location l = holo.following.getLocation();
+				for (int id : holo.entities.keySet()) {
+					PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(id, (int) (l.getX() * 32),
+							(int) ((l.getY() + holo.entities.get(id)) * 32) + 30, (int) (l.getZ() * 32), (byte) 0, (byte) 0);
+					for (Player p : players)
+						((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+				}
+			}
+			if (ticks >= (Integer) Configuration.getConfig("hologram.showtime") * 20 || !holo.showing) {
+				holograms.remove(holo);
+				following = null;
+				destroy();
+				task.cancel();
+			}
+		}
+	}
+
 	public Hologram(String... lines) {
 		this.lines.addAll(Arrays.asList(lines));
 	}
@@ -48,43 +81,8 @@ public class Hologram {
 			h.destroy();
 	}
 
-	public void show(Location loc, Player... p) {
-		if (showing)
-			return;
-
-		if ((Boolean) Configuration.getConfig("hologram.enabled")) {
-			showing = true;
-			Location first = loc.clone().add(0, lines.size() / 2 * distance, 0);
-			for (int i = 0; i < lines.size(); i++) {
-				entities.putAll(showLine(first.clone(), lines.get(i), p));
-				first.subtract(0, distance, 0);
-			}
-
-			HologramRunnable runnable = new HologramRunnable(this, p);
-			runnable.task = MyZ.instance.getServer().getScheduler().runTaskTimerAsynchronously(MyZ.instance, runnable, 0, 1);
-		} else
-			for (Player ps : p)
-				for (String s : lines)
-					Messenger.sendMessage(ps, s);
-	}
-
-	public void destroy() {
-		if (!showing)
-			return;
-
-		int[] ints = toInt(entities.keySet());
-		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(ints);
-		for (Player player : Bukkit.getOnlinePlayers())
-			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+	private void interrupt() {
 		showing = false;
-	}
-
-	private int[] toInt(Set<Integer> set) {
-		int[] a = new int[set.size()];
-		int i = 0;
-		for (Integer val : set)
-			a[i++] = val;
-		return a;
 	}
 
 	private Map<Integer, Integer> showLine(final Location loc, final String text, final Player... p) {
@@ -120,8 +118,23 @@ public class Hologram {
 		return map;
 	}
 
-	public void setFollow(Player p) {
-		following = p;
+	private int[] toInt(Set<Integer> set) {
+		int[] a = new int[set.size()];
+		int i = 0;
+		for (Integer val : set)
+			a[i++] = val;
+		return a;
+	}
+
+	public void destroy() {
+		if (!showing)
+			return;
+
+		int[] ints = toInt(entities.keySet());
+		PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(ints);
+		for (Player player : Bukkit.getOnlinePlayers())
+			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		showing = false;
 	}
 
 	public void follow() {
@@ -133,40 +146,27 @@ public class Hologram {
 		holograms.add(this);
 	}
 
-	private void interrupt() {
-		showing = false;
+	public void setFollow(Player p) {
+		following = p;
 	}
 
-	private class HologramRunnable extends BukkitRunnable {
-		int ticks = 0;
-		BukkitTask task;
-		List<Player> players;
-		Hologram holo;
+	public void show(Location loc, Player... p) {
+		if (showing)
+			return;
 
-		public HologramRunnable(Hologram holo, Player... players) {
-			this.players = new ArrayList<Player>(Arrays.asList(players));
-			this.players.remove(following);
-			this.holo = holo;
-		}
+		if ((Boolean) Configuration.getConfig("hologram.enabled")) {
+			showing = true;
+			Location first = loc.clone().add(0, lines.size() / 2 * distance, 0);
+			for (int i = 0; i < lines.size(); i++) {
+				entities.putAll(showLine(first.clone(), lines.get(i), p));
+				first.subtract(0, distance, 0);
+			}
 
-		@Override
-		public void run() {
-			ticks++;
-			if (holo.showing && holo.following != null && holo.following.isOnline() && !holo.following.isDead()) {
-				Location l = holo.following.getLocation();
-				for (int id : holo.entities.keySet()) {
-					PacketPlayOutEntityTeleport packet = new PacketPlayOutEntityTeleport(id, (int) (l.getX() * 32),
-							(int) ((l.getY() + holo.entities.get(id)) * 32) + 30, (int) (l.getZ() * 32), (byte) 0, (byte) 0);
-					for (Player p : players)
-						((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-				}
-			}
-			if (ticks >= (Integer) Configuration.getConfig("hologram.showtime") * 20 || !holo.showing) {
-				holograms.remove(holo);
-				following = null;
-				destroy();
-				task.cancel();
-			}
-		}
+			HologramRunnable runnable = new HologramRunnable(this, p);
+			runnable.task = MyZ.instance.getServer().getScheduler().runTaskTimerAsynchronously(MyZ.instance, runnable, 0, 1);
+		} else
+			for (Player ps : p)
+				for (String s : lines)
+					Messenger.sendMessage(ps, s);
 	}
 }

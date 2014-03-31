@@ -5,7 +5,6 @@ package myz.listeners.player;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -17,6 +16,7 @@ import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Hologram;
 import myz.utilities.Utils;
+import myz.utilities.Validate;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -38,50 +38,44 @@ public class ResearchItem implements Listener {
 
 	private Map<UUID, UUID> lastDropped = new HashMap<UUID, UUID>();
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	private void onDrop(PlayerDropItemEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getPlayer().getWorld().getName()))
-			return;
-		lastDropped.put(e.getPlayer().getUniqueId(), e.getItemDrop().getUniqueId());
+	/**
+	 * Check to see if a player has to get an increased rank. If so, increase
+	 * their rank.
+	 * 
+	 * @param Player
+	 *            The player.
+	 * @param before
+	 *            The points before a research.
+	 * @param after
+	 *            The points after a research.
+	 * @param rank
+	 *            The players current rank.
+	 */
+	private static void checkRankIncrease(Player player, int before, int after, int rank) {
+		// TODO
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	private void onEnterHopper(InventoryPickupItemEvent e) {
-		if (!((List<String>) Configuration.getConfig(Configuration.WORLDS)).contains(e.getItem().getWorld().getName()))
-			return;
-		if (e.getInventory().getType() == InventoryType.HOPPER)
-			if (lastDropped.containsValue(e.getItem().getUniqueId()))
-				for (UUID entry : lastDropped.keySet())
-					if (lastDropped.get(entry).equals(e.getItem().getUniqueId())) {
-						lastDropped.remove(entry);
-						Player player = MyZ.instance.getPlayer(entry);
-						e.setCancelled(true);
-						if (player != null) {
-							PlayerData data = PlayerData.getDataFor(player);
-							int rank = 0;
-							if (data != null)
-								rank = data.getRank();
-							if (MyZ.instance.getSQLManager().isConnected())
-								rank = MyZ.instance.getSQLManager().getInt(entry, "rank");
-
-							if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH))
-								Messenger.sendConfigMessage(player, "research.rank");
-							FileConfiguration config = MyZ.instance.getResearchConfig();
-							for (String key : config.getConfigurationSection("item").getKeys(false))
-								if (config.getItemStack("item." + key + ".item").equals(e.getItem().getItemStack())) {
-									e.getItem().remove();
-									int points = config.getInt("item." + key + ".value");
-									research(player, points, ((org.bukkit.block.Hopper) e.getInventory().getHolder()).getLocation(),
-											"research.success");
-									return;
-								}
-							Messenger.sendConfigMessage(player, "research.fail");
-							e.getItem().teleport(player);
-							e.getItem().setPickupDelay(0);
-
-						} else
-							e.getItem().remove();
-					}
+	/**
+	 * This method is the same as ItemStack.equals but does not consider lore.
+	 * 
+	 * @param stack
+	 *            The first ItemStack.
+	 * @param stack1
+	 *            The ItemStack to compare to.
+	 * @return True if both ItemStacks are equal, apart from lore.
+	 */
+	private static boolean isSimilar(ItemStack stack, ItemStack stack1) {
+		if (stack1.getType() == stack.getType() && stack1.getAmount() == stack.getAmount()
+				&& stack1.getDurability() == stack.getDurability()) {
+			ItemMeta one = stack1.getItemMeta();
+			ItemMeta two = stack.getItemMeta();
+			if (one == null && two == null)
+				return true;
+			if (one != null && two != null)
+				return one.getEnchants().equals(two.getEnchants())
+						&& (one.getDisplayName() != null ? one.getDisplayName().equals(two.getDisplayName()) : two.getDisplayName() == null);
+		}
+		return false;
 	}
 
 	/**
@@ -132,23 +126,6 @@ public class ResearchItem implements Listener {
 			hologram.show(location.clone().subtract(0, Hologram.distance, 0), player);
 		}
 		return true;
-	}
-
-	/**
-	 * Check to see if a player has to get an increased rank. If so, increase
-	 * their rank.
-	 * 
-	 * @param Player
-	 *            The player.
-	 * @param before
-	 *            The points before a research.
-	 * @param after
-	 *            The points after a research.
-	 * @param rank
-	 *            The players current rank.
-	 */
-	private static void checkRankIncrease(Player player, int before, int after, int rank) {
-		// TODO
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -207,26 +184,49 @@ public class ResearchItem implements Listener {
 		}
 	}
 
-	/**
-	 * This method is the same as ItemStack.equals but does not consider lore.
-	 * 
-	 * @param stack
-	 *            The first ItemStack.
-	 * @param stack1
-	 *            The ItemStack to compare to.
-	 * @return True if both ItemStacks are equal, apart from lore.
-	 */
-	private static boolean isSimilar(ItemStack stack, ItemStack stack1) {
-		if (stack1.getType() == stack.getType() && stack1.getAmount() == stack.getAmount()
-				&& stack1.getDurability() == stack.getDurability()) {
-			ItemMeta one = stack1.getItemMeta();
-			ItemMeta two = stack.getItemMeta();
-			if (one == null && two == null)
-				return true;
-			if (one != null && two != null)
-				return one.getEnchants().equals(two.getEnchants())
-						&& (one.getDisplayName() != null ? one.getDisplayName().equals(two.getDisplayName()) : two.getDisplayName() == null);
-		}
-		return false;
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	private void onDrop(PlayerDropItemEvent e) {
+		if (!Validate.inWorld(e.getPlayer().getLocation()))
+			return;
+		lastDropped.put(e.getPlayer().getUniqueId(), e.getItemDrop().getUniqueId());
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	private void onEnterHopper(InventoryPickupItemEvent e) {
+		if (!Validate.inWorld(e.getItem().getLocation()))
+			return;
+		if (e.getInventory().getType() == InventoryType.HOPPER)
+			if (lastDropped.containsValue(e.getItem().getUniqueId()))
+				for (UUID entry : lastDropped.keySet())
+					if (lastDropped.get(entry).equals(e.getItem().getUniqueId())) {
+						lastDropped.remove(entry);
+						Player player = MyZ.instance.getPlayer(entry);
+						e.setCancelled(true);
+						if (player != null) {
+							PlayerData data = PlayerData.getDataFor(player);
+							int rank = 0;
+							if (data != null)
+								rank = data.getRank();
+							if (MyZ.instance.getSQLManager().isConnected())
+								rank = MyZ.instance.getSQLManager().getInt(entry, "rank");
+
+							if (rank < (Integer) Configuration.getConfig(Configuration.RANKED_RESEARCH))
+								Messenger.sendConfigMessage(player, "research.rank");
+							FileConfiguration config = MyZ.instance.getResearchConfig();
+							for (String key : config.getConfigurationSection("item").getKeys(false))
+								if (config.getItemStack("item." + key + ".item").equals(e.getItem().getItemStack())) {
+									e.getItem().remove();
+									int points = config.getInt("item." + key + ".value");
+									research(player, points, ((org.bukkit.block.Hopper) e.getInventory().getHolder()).getLocation(),
+											"research.success");
+									return;
+								}
+							Messenger.sendConfigMessage(player, "research.fail");
+							e.getItem().teleport(player);
+							e.getItem().setPickupDelay(0);
+
+						} else
+							e.getItem().remove();
+					}
 	}
 }
