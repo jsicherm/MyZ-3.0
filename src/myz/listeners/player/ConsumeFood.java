@@ -30,7 +30,7 @@ import org.bukkit.potion.PotionEffect;
  */
 public class ConsumeFood implements Listener {
 
-	private Random random = new Random();
+	private static final Random random = new Random();
 
 	/**
 	 * Get a list of all the current Minecraft food types by Material.

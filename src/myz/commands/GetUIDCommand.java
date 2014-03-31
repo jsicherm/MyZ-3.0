@@ -3,7 +3,10 @@
  */
 package myz.commands;
 
+import java.util.Random;
+
 import myz.MyZ;
+import myz.utilities.NMSUtils;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,14 +18,27 @@ import org.bukkit.command.CommandSender;
  */
 public class GetUIDCommand implements CommandExecutor {
 
+	private static final Random random = new Random();
+
 	private String getUID() {
-		String id = MyZ.instance.getServer().getServerId().isEmpty() ? "d38" : MyZ.instance.getServer().getServerId()
-				.substring(0, MyZ.instance.getServer().getServerId().length() / 3).replaceAll("a", "5").replaceAll("r", "!");
-		id += MyZ.instance.getServer().getVersion().isEmpty() ? "g84T" : MyZ.instance.getServer().getVersion()
-				.substring(0, MyZ.instance.getServer().getVersion().length() / 4).toLowerCase().replaceAll("bukkit", "b77")
-				.replaceAll("-", "G");
-		id += MyZ.instance.getServer().getIp().replaceAll("1", "a").replaceAll("2", "b").replaceAll("9", "c").replaceAll(".", "9");
-		id += "__fj38";
+		String id = "";
+		id += MyZ.instance.getDescription().getVersion().replaceAll(".", "&").replaceFirst("3", "MZ");
+		id += "@";
+		String s = MyZ.instance.getServer().getIp().replaceAll(".", String.valueOf(Character.toChars(random.nextInt(5) + 10 + 96)[0]));
+		for (int i = 1; i <= 9; i++) {
+			s = s.replaceAll(i + "", String.valueOf(Character.toChars(i + 96)[0]));
+		}
+		id += s;
+		id += ">";
+		id += MyZ.instance.getServer().getOnlineMode() ? "y" : "n";
+		id += "<";
+		id += NMSUtils.version;
+		id += "MrTeePee-wuz-here";
+		// ID will look something like the following:
+		// MZ&0&81@abgz0k0a>n<v1_7_R1MrTeePee-wuz-here
+
+		// MyZ version @ string representation of IP with random high-char
+		// delimiters > online ? y : n < Bukkit version Easy identifier.
 		return id;
 	}
 

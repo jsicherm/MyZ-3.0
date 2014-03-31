@@ -272,8 +272,6 @@ public class CustomEntityPlayer extends EntityPlayer {
 		// modified.
 		if (Math.abs(motX) < 0.001F && Math.abs(motY) < 0.001F && Math.abs(motZ) < 0.001F)
 			motX = motY = motZ = 0;
-
-		// applyMovement();
 		// End Citizens
 	}
 

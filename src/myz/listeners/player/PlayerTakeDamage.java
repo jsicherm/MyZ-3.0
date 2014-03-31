@@ -23,7 +23,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
  */
 public class PlayerTakeDamage implements Listener {
 
-	private Random random = new Random();
+	private static final Random random = new Random();
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onDamage(EntityDamageEvent e) {

@@ -16,7 +16,6 @@ commands:
   blockallow:
     description: Allow breaking/placing of blocks.
     permission: MyZ.world_admin
-
   blocks:
     description: Block help.
   friend:

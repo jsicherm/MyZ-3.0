@@ -29,7 +29,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
  */
 public class EntitySpawn implements Listener {
 
-	private Random random = new Random();
+	private static final Random random = new Random();
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onSpawn(CreatureSpawnEvent e) {
@@ -132,7 +132,7 @@ public class EntitySpawn implements Listener {
 		// Undead and skeletal horses.
 		if (type == EntityType.HORSE) {
 			Horse horse = (Horse) e.getEntity();
-			switch (random.nextInt(10)) {
+			switch (random.nextInt(15)) {
 			case 0:
 			case 1:
 				horse.setVariant(Variant.UNDEAD_HORSE);

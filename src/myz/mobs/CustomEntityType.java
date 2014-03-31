@@ -46,7 +46,7 @@ public enum CustomEntityType {
 		this.customClass = customClass;
 	}
 
-	private static void a(Class paramClass, String paramString, int paramInt) {
+	private static void a(Class<?> paramClass, String paramString, int paramInt) {
 		try {
 			((Map) getPrivateStatic(EntityTypes.class, "c")).put(paramString, paramClass);
 			((Map) getPrivateStatic(EntityTypes.class, "d")).put(paramClass, paramString);
@@ -58,7 +58,7 @@ public enum CustomEntityType {
 		}
 	}
 
-	private static Object getPrivateStatic(Class clazz, String f) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
+	private static Object getPrivateStatic(Class<?> clazz, String f) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
 			IllegalAccessException {
 		Field field = clazz.getDeclaredField(f);
 		field.setAccessible(true);

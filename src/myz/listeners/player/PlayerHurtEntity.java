@@ -33,7 +33,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
  */
 public class PlayerHurtEntity implements Listener {
 
-	private Random random = new Random();
+	private static final Random random = new Random();
 
 	/**
 	 * Whether or not a material is an axe material.

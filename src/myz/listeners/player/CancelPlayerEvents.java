@@ -29,6 +29,16 @@ import org.bukkit.inventory.ItemStack;
  */
 public class CancelPlayerEvents implements Listener {
 
+	/**
+	 * Grapple an object or a player to a specific location.
+	 * 
+	 * @param puller
+	 *            The player grappling.
+	 * @param pulled
+	 *            The entity that is being pulled (usually the same player).
+	 * @param to
+	 *            The location to pull to.
+	 */
 	private void grapple(Player puller, Entity pulled, Location to) {
 		if (puller.equals(pulled))
 			Utils.pullTo(puller, to, false);
