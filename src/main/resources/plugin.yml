@@ -125,6 +125,9 @@ permissions:
   MyZ.clan.*:
     description: All things clan-related.
     default: op
+    children:
+      MyZ.clan.create: true
+      MyZ.clan.join: true
   MyZ.clan.create:
     description: Ability to create a clan.
     default: op

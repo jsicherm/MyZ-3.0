@@ -69,7 +69,7 @@ public class PlayerHurtEntity implements Listener {
 		// Do headshots and pulling
 		if (e.getCause() == DamageCause.PROJECTILE) {
 			Projectile projectile = (Projectile) e.getDamager();
-			if (wasHeadshot(projectile.getShooter(), projectile))
+			if (wasHeadshot(e.getEntity(), projectile))
 				e.setDamage(e.getDamage() * 2);
 		} else if (e.getCause() == DamageCause.ENTITY_ATTACK && e.getDamager() instanceof Player) {
 			Location otherLocation = e.getEntity().getLocation();
@@ -87,9 +87,33 @@ public class PlayerHurtEntity implements Listener {
 		}
 	}
 
+	/**
+	 * Whether or not a specific EntityType resembles a human.
+	 * 
+	 * @param type
+	 *            The EntityType.
+	 * @return True if the type is a player, zombie, pigman, skeleton or
+	 *         creeper.
+	 */
+	private boolean isHumanoid(EntityType type) {
+		return type == EntityType.PLAYER || type == EntityType.ZOMBIE || type == EntityType.PIG_ZOMBIE || type == EntityType.SKELETON
+				|| type == EntityType.CREEPER;
+	}
+
+	/**
+	 * Whether or not a shot was a headshot on a specified entity.
+	 * 
+	 * @param entity
+	 *            The Entity that was hit by the projectile.
+	 * @param arrow
+	 *            The projectile.
+	 * @return True if
+	 */
 	private boolean wasHeadshot(Entity entity, Projectile arrow) {
 		if (!(arrow instanceof Arrow) || !(arrow.getShooter() instanceof Player))
 			return false;
+
+		if (!isHumanoid(entity.getType())) { return false; }
 
 		double projectileY = arrow.getLocation().getY();
 		double entityY = entity.getLocation().getY();

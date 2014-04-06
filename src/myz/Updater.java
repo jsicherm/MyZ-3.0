@@ -122,6 +122,7 @@ public class Updater implements CommandExecutor, CommandSender {
 							hasUpdate = true;
 							Messenger.sendConsoleMessage("&aAn update was found for MyZ 3.0. If you wish to update from &e"
 									+ plugin.getDescription().getVersion() + "&a to &e" + newVersionName + "&a, use &e/update MyZ&a.");
+							Messenger.sendConsoleMessage("&eThe update is marked to be compatible with &a" + versionGameVersion + "&e.");
 						}
 		}
 	}
@@ -152,7 +153,7 @@ public class Updater implements CommandExecutor, CommandSender {
 		try {
 			url = new URL(Updater.HOST + Updater.QUERY + id);
 		} catch (final MalformedURLException e) {
-			Messenger.sendConsoleMessage("&4Unable to find MyZ on dev.bukkit");
+			Messenger.sendConsoleMessage("&4Unable to find MyZ on dev.bukkit.org");
 			e.printStackTrace();
 		}
 
@@ -204,7 +205,6 @@ public class Updater implements CommandExecutor, CommandSender {
 				Messenger.sendConsoleMessage("&4The updater could not contact dev.bukkit.org for updating.");
 				Messenger.sendConsoleMessage("&4The site may be experiencing temporary downtime.");
 			}
-			e.printStackTrace();
 			return false;
 		}
 	}

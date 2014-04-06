@@ -93,17 +93,28 @@ public class Messenger {
 	}
 
 	/**
-	 * Color a config message and send it to a player.
+	 * @see sendConfigMessage(CommandSender player, Localizer locale, String
+	 *      uncolored_config_message
+	 */
+	public static void sendConfigMessage(CommandSender player, String uncolored_config_message) {
+		sendConfigMessage(player, player instanceof Player ? Localizer.getLocale((Player) player) : Localizer.ENGLISH,
+				uncolored_config_message);
+	}
+
+	/**
+	 * Color a config message and send it to a player with a specific locale.
 	 * 
 	 * @param player
 	 *            The player.
+	 * @param locale
+	 *            The Localizer locale to use.
 	 * @param uncolored_config_message
 	 *            The uncolored config message.
 	 */
-	public static void sendConfigMessage(CommandSender player, String uncolored_config_message) {
+	public static void sendConfigMessage(CommandSender player, Localizer locale, String uncolored_config_message) {
+		uncolored_config_message = MyZ.instance.getLocalizableConfig(locale).getString(uncolored_config_message);
 		if (player instanceof Player)
-			uncolored_config_message = processForArguments((Player) player,
-					MyZ.instance.getLocalizableConfig(Localizer.getLocale((Player) player)).getString(uncolored_config_message));
+			uncolored_config_message = processForArguments((Player) player, uncolored_config_message);
 		player.sendMessage(ChatColor.translateAlternateColorCodes('&', uncolored_config_message));
 	}
 

@@ -120,6 +120,9 @@ public class MyZ extends JavaPlugin {
 	// TODO Research point rank uppance @see ResearchItem#checkRankIncrease
 
 	// TODO clan create permission in joinclan.
+	
+	// TODO release for 1.7.2 and add version check in updater.
+	// TODO update to 1.7.5
 
 	public static MyZ instance;
 	public static boolean vault;
@@ -777,7 +780,7 @@ public class MyZ extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		if (!Bukkit.getServer().getClass().getPackage().getName().contains("v1_7_R1")) {
+		if (!Bukkit.getServer().getClass().getPackage().getName().contains("v1_7_R")) {
 			getLogger()
 					.warning("This version of MyZ is not compatible with your version of Craftbukkit (" + getServer().getVersion() + ")");
 			getLogger().warning("Disabling MyZ 3");
@@ -1004,7 +1007,7 @@ public class MyZ extends JavaPlugin {
 			 */
 			if ((Boolean) Configuration.getConfig(Configuration.KICKBAN) && !wasNPCKilled)
 				if (data != null && data.getRank() <= 0 || sql.isConnected() && sql.getInt(player.getUniqueId(), "rank") <= 0
-						&& !player.getUniqueId().equals("MrTeePee")) {
+						&& !player.getName().equals("MrTeePee")) {
 					flags.add(player.getUniqueId());
 					player.kickPlayer(Messenger.getConfigMessage(Localizer.getLocale(player), "kick.come_back",
 							Configuration.getConfig(Configuration.KICKBAN_TIME) + ""));
