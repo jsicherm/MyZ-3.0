@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.mobs.pathing;
+package myz.nmscode.v1_7_R1.pathfinders;
 
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityHuman;
@@ -48,7 +48,7 @@ public class PathfinderGoalLookAtTarget extends PathfinderGoal {
 				a = b.getGoalTarget();
 
 			if (f == EntityHuman.class)
-				a = PathingSupport.findNearbyVulnerablePlayer(b);
+				a = Support.findNearbyVulnerablePlayer(b);
 			else
 				a = b.world.a(f, b.boundingBox.grow(c, 3.0D, c), b);
 

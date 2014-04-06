@@ -1,11 +1,12 @@
 /**
  * 
  */
-package myz.support.interfacing;
+package myz.nmscode.v1_7_R1.messages;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import myz.support.interfacing.MessagePart;
 import net.minecraft.server.v1_7_R1.ChatSerializer;
 import net.minecraft.server.v1_7_R1.NBTTagCompound;
 import net.minecraft.server.v1_7_R1.PacketPlayOutChat;

@@ -6,7 +6,7 @@ package myz.listeners.player;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.mobs.pathing.PathingSupport;
+import myz.nmscode.compat.PathUtils;
 import myz.support.interfacing.Configuration;
 import myz.utilities.Validate;
 
@@ -51,7 +51,7 @@ public class PlayerTakeDamage implements Listener {
 					&& (Double) Configuration.getConfig("damage.chance_of_breaking_leg") != 0.0)
 				switch (e.getCause()) {
 				case FALL:
-					PathingSupport.elevatePlayer((Player) e.getEntity(), 10);
+					PathUtils.elevate((Player)e.getEntity(), 10);
 					MyZ.instance.breakLeg((Player) e.getEntity());
 					break;
 				default:

@@ -100,8 +100,8 @@ public class Updater implements CommandExecutor, CommandSender {
 					if (versionCheck(versionName))
 						if (versionLink != null) {
 							try {
-								int version = Integer.parseInt(plugin.getDescription().getVersion().replaceAll(".", ""));
-								int nversion = Integer.parseInt(newVersionName.replaceAll(".", ""));
+								int version = Integer.parseInt(plugin.getDescription().getVersion().replaceAll("\\.", ""));
+								int nversion = Integer.parseInt(newVersionName.replaceAll("\\.", ""));
 								// x.x.xxx is the maximum version name slug I
 								// ever
 								// use.
@@ -110,6 +110,7 @@ public class Updater implements CommandExecutor, CommandSender {
 									version *= 10;
 								while (nversion < 10000)
 									nversion *= 10;
+
 								if (nversion < version) {
 									Messenger.sendConsoleMessage("&aYour version of MyZ is &eupstream&a. You're running &e"
 											+ plugin.getDescription().getVersion() + "&a but the latest release is &e" + newVersionName
@@ -117,7 +118,7 @@ public class Updater implements CommandExecutor, CommandSender {
 									return;
 								}
 							} catch (Exception exc) {
-								// Misformatted version. Silly me!
+								// Misformatted version name!
 							}
 							hasUpdate = true;
 							Messenger.sendConsoleMessage("&aAn update was found for MyZ 3.0. If you wish to update from &e"

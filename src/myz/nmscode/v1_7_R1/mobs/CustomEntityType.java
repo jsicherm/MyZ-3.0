@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.mobs;
+package myz.nmscode.v1_7_R1.mobs;
 
 import java.lang.reflect.Field;
 import java.util.List;

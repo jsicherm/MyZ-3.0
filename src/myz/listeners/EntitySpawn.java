@@ -6,7 +6,7 @@ package myz.listeners;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.mobs.support.EntityCreator;
+import myz.nmscode.compat.MobUtils;
 import myz.support.interfacing.Configuration;
 import myz.utilities.Validate;
 import myz.utilities.WGUtils;
@@ -42,7 +42,7 @@ public class EntitySpawn implements Listener {
 			case PIG_ZOMBIE:
 			case ZOMBIE:
 			case SKELETON:
-				EntityCreator.create(e.getLocation(), e.getEntityType(), e.getSpawnReason());
+				MobUtils.create(e.getLocation(), e.getEntityType(), e.getSpawnReason());
 				e.setCancelled(true);
 				return;
 			default:
@@ -60,14 +60,14 @@ public class EntitySpawn implements Listener {
 
 		// Override mooshroom spawns with giant spawns.
 		if (e.getSpawnReason() == SpawnReason.SPAWNER_EGG && e.getEntityType() == EntityType.MUSHROOM_COW) {
-			EntityCreator.create(e.getLocation(), EntityType.GIANT, SpawnReason.CUSTOM);
+			MobUtils.create(e.getLocation(), EntityType.GIANT, SpawnReason.CUSTOM);
 			e.setCancelled(true);
 			return;
 		}
 
 		// Override villager trades.
 		if (e.getEntityType() == EntityType.VILLAGER)
-			EntityCreator.overrideVillager(e.getEntity());
+			MobUtils.overrideVillager(e.getEntity());
 
 		// So rare.
 		if (type == EntityType.ZOMBIE && random.nextDouble() <= 0.1 && random.nextDouble() <= 0.1 && random.nextDouble() <= 0.1
@@ -75,7 +75,7 @@ public class EntitySpawn implements Listener {
 			e.setCancelled(true);
 			if (random.nextDouble() <= 0.9)
 				return;
-			EntityCreator.disguiseNPC(e.getLocation());
+			MobUtils.disguiseNPC(e.getLocation());
 			return;
 		}
 
@@ -124,7 +124,7 @@ public class EntitySpawn implements Listener {
 		// Make some natural pigmen spawn.
 		if (e.getLocation().getZ() <= (Integer) Configuration.getConfig("mobs.pigman.spawn_z") && type == EntityType.ZOMBIE
 				&& random.nextInt(20) == 1) {
-			EntityCreator.create(e.getLocation(), EntityType.PIG_ZOMBIE, SpawnReason.CUSTOM, true);
+			MobUtils.create(e.getLocation(), EntityType.PIG_ZOMBIE, SpawnReason.CUSTOM, true);
 			e.setCancelled(true);
 			return;
 		}

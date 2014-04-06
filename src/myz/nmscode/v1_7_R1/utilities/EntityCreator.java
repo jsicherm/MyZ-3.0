@@ -1,17 +1,17 @@
 /**
  * 
  */
-package myz.mobs.support;
+package myz.nmscode.v1_7_R1.utilities;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.mobs.CustomEntityGiantZombie;
-import myz.mobs.CustomEntityNPC;
-import myz.mobs.CustomEntityPigZombie;
 import myz.mobs.NPCType;
+import myz.nmscode.v1_7_R1.mobs.CustomEntityGiantZombie;
+import myz.nmscode.v1_7_R1.mobs.CustomEntityNPC;
+import myz.nmscode.v1_7_R1.mobs.CustomEntityPigZombie;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
@@ -185,7 +185,7 @@ public class EntityCreator {
 		case GIANT:
 			CustomEntityGiantZombie giant = new CustomEntityGiantZombie(world);
 			giant.setPosition(inLocation.getX(), inLocation.getY(), inLocation.getZ());
-			world.addEntity(giant, SpawnReason.CUSTOM);
+			world.addEntity(giant, reason);
 			break;
 		default:
 			break;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.mobs.pathing;
+package myz.nmscode.v1_7_R1.pathfinders;
 
 import myz.MyZ;
 import net.minecraft.server.v1_7_R1.EntityCreature;

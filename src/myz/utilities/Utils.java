@@ -13,8 +13,8 @@ import java.util.UUID;
 
 import myz.MyZ;
 import myz.api.PlayerFriendEvent;
-import myz.mobs.CustomEntityPlayer;
-import myz.mobs.CustomEntityZombie;
+import myz.nmscode.compat.CustomMob;
+import myz.nmscode.compat.MobUtils;
 import myz.scheduling.Sync;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
@@ -233,13 +233,13 @@ public class Utils {
 	 * @param world
 	 *            The World the player died in.
 	 */
-	public static void playerNPCDied(CustomEntityPlayer player, World world) {
-		MyZ.instance.getNPCs().remove(player);
-		PlayerData data = PlayerData.getDataFor(player.getBukkitEntity().getUniqueId());
+	public static void playerNPCDied(CustomMob player, World world) {
+		MobUtils.getNPCs().remove(player);
+		PlayerData data = PlayerData.getDataFor(player.getEntity().getUniqueId());
 		if (data != null)
 			data.setWasKilledNPC(true);
 		if (MyZ.instance.getSQLManager().isConnected())
-			MyZ.instance.getSQLManager().set(player.getBukkitEntity().getUniqueId(), "wasNPCKilled", true, true);
+			MyZ.instance.getSQLManager().set(player.getEntity().getUniqueId(), "wasNPCKilled", true, true);
 		Messenger.sendMessage(world, "player_npc_killed", player.getName());
 	}
 
@@ -525,16 +525,23 @@ public class Utils {
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 			@Override
 			public void run() {
-				final CustomEntityPlayer player = CustomEntityPlayer.newInstance(playerDuplicate);
+				final CustomMob player = MobUtils.newCustomPlayer(playerDuplicate);
 
-				player.world.players.remove(player);
-				MyZ.instance.getNPCs().add(player);
+				Class<?> clazz;
+				try {
+					clazz = Class.forName("net.minecraft.server." + NMSUtils.version + ".World");
+
+					List<?> playerlist = (List<?>) clazz.getField("players").get(clazz.cast(player.getWorld()));
+					playerlist.remove(player);
+				} catch (Exception exc) {
+				}
+				MobUtils.getNPCs().add(player);
 
 				MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 					@Override
 					public void run() {
-						MyZ.instance.getNPCs().remove(player);
-						player.getBukkitEntity().remove();
+						MobUtils.getNPCs().remove(player);
+						player.getEntity().remove();
 					}
 				}, (Integer) Configuration.getConfig(Configuration.LOGOUT_TIME) * 20L);
 			}
@@ -553,29 +560,30 @@ public class Utils {
 	public static void spawnPlayerZombie(Player player, List<ItemStack> inventory) {
 		ItemStack head = playerSkull(player.getName());
 
-		CustomEntityZombie zombie = CustomEntityZombie.newInstance(player);
+		CustomMob custommob = MobUtils.newCustomZombie(player);
+		Zombie zombie = (Zombie) custommob.getEntity();
 
 		zombie.setBaby(false);
 		zombie.setVillager(false);
-		((Zombie) zombie.getBukkitEntity()).setRemoveWhenFarAway(true);
+		zombie.setRemoveWhenFarAway(true);
 		zombie.setCustomName(player.getName());
-		((Zombie) zombie.getBukkitEntity()).setCanPickupItems(false);
+		zombie.setCanPickupItems(false);
 
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setHelmet(head);
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setHelmetDropChance(0f);
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setChestplate(player.getEquipment().getChestplate());
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setChestplateDropChance(1f);
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setLeggings(player.getEquipment().getLeggings());
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setLeggingsDropChance(1f);
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setBoots(player.getEquipment().getBoots());
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setBootsDropChance(1f);
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setItemInHand(player.getEquipment().getItemInHand());
-		((Zombie) zombie.getBukkitEntity()).getEquipment().setItemInHandDropChance(0f);
+		zombie.getEquipment().setHelmet(head);
+		zombie.getEquipment().setHelmetDropChance(0f);
+		zombie.getEquipment().setChestplate(player.getEquipment().getChestplate());
+		zombie.getEquipment().setChestplateDropChance(1f);
+		zombie.getEquipment().setLeggings(player.getEquipment().getLeggings());
+		zombie.getEquipment().setLeggingsDropChance(1f);
+		zombie.getEquipment().setBoots(player.getEquipment().getBoots());
+		zombie.getEquipment().setBootsDropChance(1f);
+		zombie.getEquipment().setItemInHand(player.getEquipment().getItemInHand());
+		zombie.getEquipment().setItemInHandDropChance(0f);
 
 		if (inventory == null)
 			inventory = new ArrayList<ItemStack>(Arrays.asList(player.getInventory().getContents()));
 		inventory.add(player.getEquipment().getHelmet());
-		zombie.setInventory(inventory);
+		custommob.setInventory(inventory);
 	}
 
 	/**

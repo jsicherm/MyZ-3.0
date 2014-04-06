@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.utilities;
+package myz.nmscode.v1_7_R1.messages;
 
 import java.util.ArrayList;
 import java.util.Arrays;

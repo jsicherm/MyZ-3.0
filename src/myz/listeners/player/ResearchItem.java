@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import myz.MyZ;
+import myz.nmscode.compat.MessageUtils;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
-import myz.utilities.Hologram;
 import myz.utilities.Utils;
 import myz.utilities.Validate;
 
@@ -122,8 +122,7 @@ public class ResearchItem implements Listener {
 			checkRankIncrease(player, before, after, rank);
 
 			String msg = Messenger.getConfigMessage(Localizer.getLocale(player), slug, points + "");
-			Hologram hologram = new Hologram(msg);
-			hologram.show(location.clone().subtract(0, Hologram.distance, 0), player);
+			MessageUtils.holographicDisplay(location.clone().subtract(0, MessageUtils.getHologramDistance(), 0), player, msg);
 		}
 		return true;
 	}

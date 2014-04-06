@@ -65,8 +65,9 @@ import myz.listeners.player.PlayerTakeDamage;
 import myz.listeners.player.ResearchItem;
 import myz.listeners.player.UndisguiseListener;
 import myz.listeners.player.Visibility;
-import myz.mobs.CustomEntityPlayer;
-import myz.mobs.CustomEntityType;
+import myz.nmscode.compat.Compat;
+import myz.nmscode.compat.MessageUtils;
+import myz.nmscode.compat.MobUtils;
 import myz.scheduling.Sync;
 import myz.scheduling.aSync;
 import myz.support.MedKit;
@@ -77,8 +78,8 @@ import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
 import myz.utilities.DisguiseUtils;
-import myz.utilities.Hologram;
 import myz.utilities.LibsDisguiseUtils;
+import myz.utilities.NMSUtils;
 import myz.utilities.Utils;
 import myz.utilities.Validate;
 import myz.utilities.VaultUtils;
@@ -120,8 +121,7 @@ public class MyZ extends JavaPlugin {
 	// TODO Research point rank uppance @see ResearchItem#checkRankIncrease
 
 	// TODO clan create permission in joinclan.
-	
-	// TODO release for 1.7.2 and add version check in updater.
+
 	// TODO update to 1.7.5
 
 	public static MyZ instance;
@@ -132,9 +132,10 @@ public class MyZ extends JavaPlugin {
 	private SQLManager sql;
 	private static final Random random = new Random();
 	public static boolean alertOps;
-	private List<CustomEntityPlayer> NPCs = new ArrayList<CustomEntityPlayer>();
 	private Map<UUID, FileConfiguration> playerdata = new HashMap<UUID, FileConfiguration>();
 	private List<UUID> flags = new ArrayList<UUID>();
+
+	public static Compat version;
 
 	/**
 	 * Load the blocks YAML file.
@@ -476,15 +477,6 @@ public class MyZ extends JavaPlugin {
 		return "Guest";
 	}
 
-	/**
-	 * Get the list of NPCs on the server.
-	 * 
-	 * @return The list of NPCs.
-	 */
-	public List<CustomEntityPlayer> getNPCs() {
-		return NPCs;
-	}
-
 	public Player getPlayer(UUID uid) {
 		for (Player p : Bukkit.getOnlinePlayers())
 			if (p.getUniqueId().equals(uid))
@@ -748,14 +740,13 @@ public class MyZ extends JavaPlugin {
 		// Remove all entities in all worlds as reloads will cause classloader
 		// issues to
 		// do with overriding the pathfinding and entity.
-		for (CustomEntityPlayer player : NPCs)
-			player.getBukkitEntity().remove();
+		MobUtils.removeCustomPlayers();
 		for (Player player : Bukkit.getOnlinePlayers())
 			removePlayer(player, false);
 		if (disguise)
 			for (Player player : getServer().getOnlinePlayers())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
-		NPCs.clear();
+		MobUtils.clearCustomPlayers();
 		for (String name : (List<String>) Configuration.getConfig(Configuration.WORLDS)) {
 			World world = Bukkit.getWorld(name);
 			if (world == null) {
@@ -770,22 +761,24 @@ public class MyZ extends JavaPlugin {
 					entity.remove();
 				}
 		}
-		// Attempt to clean up the custom classes.
-		CustomEntityType.unregisterEntities();
+		MobUtils.unregister();
 		if (Utils.packets != null)
 			Utils.packets.clear();
-		Hologram.removeAll();
+		MessageUtils.removeAllHolograms();
 		nullifyStatics();
 	}
 
 	@Override
 	public void onEnable() {
-		if (!Bukkit.getServer().getClass().getPackage().getName().contains("v1_7_R")) {
+		version = Compat.valueOf(NMSUtils.version);
+		if (version == null) {
 			getLogger()
 					.warning("This version of MyZ is not compatible with your version of Craftbukkit (" + getServer().getVersion() + ")");
-			getLogger().warning("Disabling MyZ 3");
+			getLogger().warning("Disabling MyZ.");
 			setEnabled(false);
 			return;
+		} else {
+			getLogger().info("Using hooks for " + version);
 		}
 
 		instance = this;
@@ -937,10 +930,7 @@ public class MyZ extends JavaPlugin {
 			}
 		}, 0L);
 
-		/*
-		 * Register our custom mobs.
-		 */
-		CustomEntityType.registerEntities();
+		MobUtils.register();
 
 		/*
 		 * Run Metrics.

@@ -1,11 +1,11 @@
 /**
  * 
  */
-package myz.mobs.pathing;
+package myz.nmscode.v1_7_R1.pathfinders;
 
-import myz.mobs.CustomEntityNPC;
-import myz.mobs.CustomEntityPigZombie;
-import myz.mobs.CustomEntityZombie;
+import myz.nmscode.v1_7_R1.mobs.CustomEntityNPC;
+import myz.nmscode.v1_7_R1.mobs.CustomEntityPigZombie;
+import myz.nmscode.v1_7_R1.mobs.CustomEntityZombie;
 import net.minecraft.server.v1_7_R1.EntityInsentient;
 import net.minecraft.server.v1_7_R1.PathfinderGoal;
 

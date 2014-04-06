@@ -1,13 +1,17 @@
 /**
  * 
  */
-package myz.mobs;
+package myz.nmscode.v1_7_R1.mobs;
 
-import myz.mobs.pathing.PathfinderGoalLookAtTarget;
-import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
-import myz.mobs.pathing.PathfinderGoalWalkTo;
-import myz.mobs.pathing.PathfinderGoalZombieAttack;
-import myz.mobs.pathing.PathingSupport;
+import java.util.List;
+import java.util.UUID;
+
+import myz.nmscode.compat.CustomMob;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalLookAtTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalNearestAttackableZombieTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalWalkTo;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalZombieAttack;
+import myz.nmscode.v1_7_R1.pathfinders.Support;
 import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.Entity;
 import net.minecraft.server.v1_7_R1.EntityHuman;
@@ -32,12 +36,13 @@ import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
+import org.bukkit.entity.LivingEntity;
 
 /**
  * @author Jordan
  * 
  */
-public class CustomEntityPigZombie extends EntityPigZombie {
+public class CustomEntityPigZombie extends EntityPigZombie implements CustomMob {
 
 	private int priority = 0;
 
@@ -45,6 +50,21 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 		super(world);
 
 		populateGoals();
+	}
+	
+	public LivingEntity getEntity() {
+		return (LivingEntity) getBukkitEntity();
+	}
+	
+	public UUID getUID() {
+		return getUniqueID();
+	}
+	
+	public Object getWorld() {
+		return world;
+	}
+
+	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 
 	public void addPather(Location to, float speed) {
@@ -64,10 +84,10 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 
 	public void populateGoals() {
 		try {
-			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -119,7 +139,7 @@ public class CustomEntityPigZombie extends EntityPigZombie {
 
 	@Override
 	protected Entity findTarget() {
-		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+		EntityHuman entityhuman = Support.findNearbyVulnerablePlayer(this);
 
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}

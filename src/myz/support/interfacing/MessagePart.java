@@ -11,18 +11,21 @@ import org.json.JSONWriter;
  * @author mkremins
  * 
  */
-final class MessagePart {
+public final class MessagePart {
 
-	ChatColor color = null;
-	ChatColor[] styles = null;
-	String clickActionName = null, clickActionData = null, hoverActionName = null, hoverActionData = null;
+	public ChatColor color = null;
+	public ChatColor[] styles = null;
+	public String clickActionName = null;
+	public String clickActionData = null;
+	public String hoverActionName = null;
+	public String hoverActionData = null;
 	final String text;
 
-	MessagePart(final String text) {
+	public MessagePart(final String text) {
 		this.text = text;
 	}
 
-	JSONWriter writeJson(final JSONWriter json) throws JSONException {
+	public JSONWriter writeJson(final JSONWriter json) throws JSONException {
 		json.object().key("text").value(text);
 		if (color != null)
 			json.key("color").value(color.name().toLowerCase());

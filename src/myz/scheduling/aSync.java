@@ -11,7 +11,7 @@ import myz.api.PlayerDrinkWaterEvent;
 import myz.api.PlayerTakeBleedingDamageEvent;
 import myz.api.PlayerTakePoisonDamageEvent;
 import myz.api.PlayerTakeWaterDamageEvent;
-import myz.mobs.pathing.PathingSupport;
+import myz.nmscode.v1_7_R1.pathfinders.Support;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
@@ -132,7 +132,7 @@ public class aSync implements Runnable {
 					if (myz.utilities.DisguiseUtils.isZombie(player))
 						continue;
 
-				player.setExp((float) PathingSupport.experienceBarVisibility(player) / 18);
+				player.setExp((float) Support.experienceBarVisibility(player) / 18);
 
 				MyZ.instance.getServer().getScheduler().runTask(MyZ.instance, new Runnable() {
 					@Override

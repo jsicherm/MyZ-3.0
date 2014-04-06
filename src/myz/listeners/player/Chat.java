@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import myz.MyZ;
-import myz.mobs.pathing.PathingSupport;
+import myz.nmscode.compat.MessageUtils;
+import myz.nmscode.compat.PathUtils;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
-import myz.utilities.Hologram;
 import myz.utilities.Utils;
 import myz.utilities.Validate;
 
@@ -129,10 +129,8 @@ public class Chat implements Listener {
 		if (radio_frequency == -1) {
 			if (didHandlePrivateChat(e)) {
 				if ((Boolean) Configuration.getConfig("chat.overhead")) {
-					Hologram hologram = new Hologram(e.getMessage());
-					hologram.setFollow(e.getPlayer());
-					hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-					hologram.follow();
+					MessageUtils.holographic(e.getMessage(), e.getPlayer(), e.getPlayer().getLocation(),
+							e.getRecipients().toArray(new Player[0]));
 				}
 				return;
 			}
@@ -151,13 +149,9 @@ public class Chat implements Listener {
 					e.getRecipients().add(player_on_server);
 
 		if ((Boolean) Configuration.getConfig("chat.overhead")) {
-			Hologram hologram = new Hologram(e.getMessage());
-			hologram.setFollow(e.getPlayer());
-			hologram.show(e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-			hologram.follow();
+			MessageUtils.holographic(e.getMessage(), e.getPlayer(), e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
 		}
 
-		// Make this player more visible to zombies.
-		PathingSupport.elevatePlayer(player, 10);
+		PathUtils.elevate(e.getPlayer(), 10);
 	}
 }

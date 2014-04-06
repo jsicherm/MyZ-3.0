@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.mobs.pathing;
+package myz.nmscode.v1_7_R1.pathfinders;
 
 import java.util.Collections;
 import java.util.List;

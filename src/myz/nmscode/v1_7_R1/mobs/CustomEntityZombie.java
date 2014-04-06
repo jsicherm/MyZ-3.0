@@ -1,16 +1,18 @@
 /**
  * 
  */
-package myz.mobs;
+package myz.nmscode.v1_7_R1.mobs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import myz.mobs.pathing.PathfinderGoalLookAtTarget;
-import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
-import myz.mobs.pathing.PathfinderGoalWalkTo;
-import myz.mobs.pathing.PathfinderGoalZombieAttack;
-import myz.mobs.pathing.PathingSupport;
+import myz.nmscode.compat.CustomMob;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalLookAtTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalNearestAttackableZombieTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalWalkTo;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalZombieAttack;
+import myz.nmscode.v1_7_R1.pathfinders.Support;
 import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.Entity;
@@ -40,6 +42,7 @@ import net.minecraft.server.v1_7_R1.World;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
@@ -47,7 +50,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
  * @author Jordan
  * 
  */
-public class CustomEntityZombie extends EntityZombie {
+public class CustomEntityZombie extends EntityZombie implements CustomMob {
 
 	protected List<org.bukkit.inventory.ItemStack> inventory = new ArrayList<org.bukkit.inventory.ItemStack>();
 	private int priority = 0;
@@ -56,6 +59,18 @@ public class CustomEntityZombie extends EntityZombie {
 		super(world);
 
 		populateGoals();
+	}
+	
+	public LivingEntity getEntity() {
+		return (LivingEntity) getBukkitEntity();
+	}
+	
+	public UUID getUID() {
+		return getUniqueID();
+	}
+	
+	public Object getWorld() {
+		return world;
 	}
 
 	public static CustomEntityZombie newInstance(Player player) {
@@ -77,10 +92,10 @@ public class CustomEntityZombie extends EntityZombie {
 
 	private void populateGoals() {
 		try {
-			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -223,7 +238,7 @@ public class CustomEntityZombie extends EntityZombie {
 
 	@Override
 	protected Entity findTarget() {
-		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+		EntityHuman entityhuman = Support.findNearbyVulnerablePlayer(this);
 
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}

@@ -1,17 +1,20 @@
 /**
  * 
  */
-package myz.mobs;
+package myz.nmscode.v1_7_R1.mobs;
 
+import java.util.List;
 import java.util.UUID;
 
 import myz.MyZ;
-import myz.mobs.pathing.PathfinderGoalFollow;
-import myz.mobs.pathing.PathfinderGoalLookAtTarget;
-import myz.mobs.pathing.PathfinderGoalNearestAttackableZombieTarget;
-import myz.mobs.pathing.PathfinderGoalWalkTo;
-import myz.mobs.pathing.PathfinderGoalZombieAttack;
-import myz.mobs.pathing.PathingSupport;
+import myz.mobs.NPCType;
+import myz.nmscode.compat.CustomMob;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalFollow;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalLookAtTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalNearestAttackableZombieTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalWalkTo;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalZombieAttack;
+import myz.nmscode.v1_7_R1.pathfinders.Support;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Utils;
@@ -44,6 +47,7 @@ import net.minecraft.server.v1_7_R1.World;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 
@@ -51,7 +55,7 @@ import org.bukkit.potion.PotionType;
  * @author Jordan
  * 
  */
-public class CustomEntityNPC extends EntitySkeleton {
+public class CustomEntityNPC extends EntitySkeleton implements CustomMob {
 
 	private final NPCType type;
 	private int priority = 0;
@@ -68,6 +72,21 @@ public class CustomEntityNPC extends EntitySkeleton {
 		this.type = type;
 
 		populateGoals();
+	}
+	
+	public LivingEntity getEntity() {
+		return (LivingEntity) getBukkitEntity();
+	}
+	
+	public UUID getUID() {
+		return getUniqueID();
+	}
+	
+	public Object getWorld() {
+		return world;
+	}
+
+	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 
 	/**
@@ -107,10 +126,10 @@ public class CustomEntityNPC extends EntitySkeleton {
 
 	private void populateGoals() {
 		try {
-			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -332,7 +351,7 @@ public class CustomEntityNPC extends EntitySkeleton {
 
 	@Override
 	protected Entity findTarget() {
-		Entity entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+		Entity entityhuman = Support.findNearbyVulnerablePlayer(this);
 
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}

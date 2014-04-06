@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.mobs.pathing;
+package myz.nmscode.v1_7_R1.pathfinders;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +44,7 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 		public boolean a(Entity entity) {
 			if (!(entity instanceof EntityLiving))
 				return false;
-			Entity target = PathingSupport.findNearbyVulnerablePlayer(d.cc);
+			Entity target = Support.findNearbyVulnerablePlayer(d.cc);
 			if (target != null && target.equals(entity) || !(target instanceof EntityHuman))
 				return true;
 			return c != null && !c.a(entity) ? false : d.a((EntityLiving) entity, false);

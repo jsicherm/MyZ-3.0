@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import myz.MyZ;
-import myz.mobs.CustomEntityPlayer;
+import myz.nmscode.compat.MobUtils;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
@@ -119,17 +119,7 @@ public class JoinQuit implements Listener {
 	private void playerJoin(Player player) {
 		MyZ.instance.addPlayer(player, false);
 
-		// Ensure our NPC doesn't remain on when we log in.
-		CustomEntityPlayer ourNPC = null;
-		for (CustomEntityPlayer npc : MyZ.instance.getNPCs())
-			if (npc.getUniqueID().equals(player.getUniqueId())) {
-				ourNPC = npc;
-				break;
-			}
-		if (ourNPC != null) {
-			ourNPC.getBukkitEntity().remove();
-			MyZ.instance.getNPCs().remove(ourNPC);
-		}
+		MobUtils.clearOurNPC(player);
 
 		PlayerData data = PlayerData.getDataFor(player);
 

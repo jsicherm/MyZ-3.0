@@ -1,13 +1,17 @@
 /**
  * 
  */
-package myz.mobs;
+package myz.nmscode.v1_7_R1.mobs;
+
+import java.util.List;
+import java.util.UUID;
 
 import myz.MyZ;
-import myz.mobs.pathing.PathfinderGoalLookAtTarget;
-import myz.mobs.pathing.PathfinderGoalNearestAttackableHorseTarget;
-import myz.mobs.pathing.PathfinderGoalZombieAttack;
-import myz.mobs.pathing.PathingSupport;
+import myz.nmscode.compat.CustomMob;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalLookAtTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalNearestAttackableHorseTarget;
+import myz.nmscode.v1_7_R1.pathfinders.PathfinderGoalZombieAttack;
+import myz.nmscode.v1_7_R1.pathfinders.Support;
 import myz.support.interfacing.Configuration;
 import net.minecraft.server.v1_7_R1.Block;
 import net.minecraft.server.v1_7_R1.Blocks;
@@ -41,13 +45,14 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
 import org.bukkit.entity.Horse;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Horse.Variant;
 
 /**
  * @author Jordan
  * 
  */
-public class CustomEntityHorse extends EntityHorse {
+public class CustomEntityHorse extends EntityHorse implements CustomMob {
 
 	private int bE, bF, bP;
 	private float bJ, bM, bL, bN, bK;
@@ -57,10 +62,10 @@ public class CustomEntityHorse extends EntityHorse {
 		super(world);
 
 		try {
-			PathingSupport.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
-			PathingSupport.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(goalSelector, new UnsafeList<PathfinderGoalSelector>());
+			Support.getSecondField().set(targetSelector, new UnsafeList<PathfinderGoalSelector>());
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
@@ -86,6 +91,21 @@ public class CustomEntityHorse extends EntityHorse {
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntityHuman.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntityVillager.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntitySkeleton.class, 0, true));
+	}
+	
+	public LivingEntity getEntity() {
+		return (LivingEntity) getBukkitEntity();
+	}
+	
+	public UUID getUID() {
+		return getUniqueID();
+	}
+	
+	public Object getWorld() {
+		return world;
+	}
+
+	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 
 	private void b(int i, boolean flag) {
@@ -535,7 +555,7 @@ public class CustomEntityHorse extends EntityHorse {
 		if ((getOwnerName() == null || getOwnerName().isEmpty()) && ((Horse) getBukkitEntity()).getVariant() != Variant.UNDEAD_HORSE
 				&& ((Horse) getBukkitEntity()).getVariant() != Variant.SKELETON_HORSE)
 			return null;
-		EntityHuman entityhuman = PathingSupport.findNearbyVulnerablePlayer(this);
+		EntityHuman entityhuman = Support.findNearbyVulnerablePlayer(this);
 
 		return entityhuman != null && this.o(entityhuman) ? entityhuman : null;
 	}

@@ -4,12 +4,10 @@
 package myz.listeners.player;
 
 import myz.MyZ;
+import myz.nmscode.compat.UtilUtils;
 import myz.utilities.Utils;
 import myz.utilities.Validate;
-import net.minecraft.server.v1_7_R1.EnumClientCommand;
-import net.minecraft.server.v1_7_R1.PacketPlayInClientCommand;
 
-import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -55,7 +53,7 @@ public class PlayerDeath implements Listener {
 		MyZ.instance.getServer().getScheduler().runTaskLater(MyZ.instance, new Runnable() {
 			@Override
 			public void run() {
-				revive(player);
+				UtilUtils.revive(player);
 			}
 		}, 15L);
 	}
@@ -72,19 +70,5 @@ public class PlayerDeath implements Listener {
 					MyZ.instance.putPlayerAtSpawn(e.getPlayer(), true, true);
 			}
 		}, 10L);
-	}
-
-	/**
-	 * Bypass the respawn screen and come back to life immediately.
-	 * 
-	 * @param p
-	 *            The player to respawn immediately.
-	 */
-	private void revive(Player p) {
-		if (!p.isDead())
-			return;
-		PacketPlayInClientCommand packet = new PacketPlayInClientCommand(EnumClientCommand.PERFORM_RESPAWN);
-		((CraftPlayer) p).getHandle().playerConnection.a(packet);
-		MyZ.instance.putPlayerAtSpawn(p, true, true);
 	}
 }

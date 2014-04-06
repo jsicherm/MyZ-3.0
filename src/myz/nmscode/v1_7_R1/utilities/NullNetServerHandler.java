@@ -1,7 +1,7 @@
 /**
  * 
  */
-package myz.mobs.support;
+package myz.nmscode.v1_7_R1.utilities;
 
 import net.minecraft.server.v1_7_R1.EntityPlayer;
 import net.minecraft.server.v1_7_R1.EnumProtocol;

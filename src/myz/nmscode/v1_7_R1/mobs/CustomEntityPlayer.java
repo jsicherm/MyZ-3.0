@@ -1,14 +1,16 @@
 /**
  * 
  */
-package myz.mobs;
+package myz.nmscode.v1_7_R1.mobs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
-import myz.mobs.support.NullEntityNetworkManager;
-import myz.mobs.support.NullNetServerHandler;
+import myz.nmscode.compat.CustomMob;
+import myz.nmscode.v1_7_R1.utilities.NullEntityNetworkManager;
+import myz.nmscode.v1_7_R1.utilities.NullNetServerHandler;
 import myz.utilities.Utils;
 import net.minecraft.server.v1_7_R1.DamageSource;
 import net.minecraft.server.v1_7_R1.Entity;
@@ -34,6 +36,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_7_R1.event.CraftEventFactory;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -43,7 +46,7 @@ import org.bukkit.inventory.ItemStack;
  * @author kumpelblase2
  * 
  */
-public class CustomEntityPlayer extends EntityPlayer {
+public class CustomEntityPlayer extends EntityPlayer implements CustomMob {
 
 	protected List<org.bukkit.inventory.ItemStack> inventoryItems = new ArrayList<org.bukkit.inventory.ItemStack>();
 
@@ -59,6 +62,14 @@ public class CustomEntityPlayer extends EntityPlayer {
 
 		iteminworldmanager.setGameMode(EnumGamemode.SURVIVAL);
 		noDamageTicks = 1;
+	}
+	
+	public LivingEntity getEntity() {
+		return (LivingEntity) getBukkitEntity();
+	}
+	
+	public UUID getUID() {
+		return getUniqueID();
 	}
 
 	public static CustomEntityPlayer newInstance(org.bukkit.entity.Player playerDuplicate) {

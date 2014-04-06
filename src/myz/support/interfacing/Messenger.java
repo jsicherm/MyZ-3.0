@@ -4,6 +4,7 @@
 package myz.support.interfacing;
 
 import myz.MyZ;
+import myz.nmscode.v1_7_R1.messages.FancyMessage;
 import myz.support.PlayerData;
 import myz.utilities.VaultUtils;
 

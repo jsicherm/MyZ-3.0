@@ -6,12 +6,12 @@ package myz.listeners.player;
 import java.util.Random;
 
 import myz.MyZ;
-import myz.mobs.support.EntityCreator;
+import myz.nmscode.compat.MessageUtils;
+import myz.nmscode.compat.MobUtils;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
-import myz.utilities.Hologram;
 import myz.utilities.Validate;
 
 import org.bukkit.Effect;
@@ -135,8 +135,7 @@ public class PlayerKillEntity implements Listener {
 		String message = slug == "" ? Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", "\n" + amount)
 				: Messenger.getConfigMessage(Localizer.getLocale(playerFor), slug + ".kill_amount", "\n" + amount);
 		String delimiter = message.contains(" \n") ? " \n" : "\n";
-		Hologram hologram = new Hologram(message.split(delimiter));
-		hologram.show(typeFor.getLocation(), playerFor);
+		MessageUtils.holographicDisplay(typeFor.getLocation(), playerFor, message.split(delimiter));
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -158,7 +157,7 @@ public class PlayerKillEntity implements Listener {
 					Location spawn = location.clone().add(random.nextInt(6) * random.nextInt(2) == 0 ? -1 : 1, 0,
 							random.nextInt(6) * random.nextInt(2) == 0 ? -1 : 1);
 					spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn) + 1);
-					EntityCreator.create(spawn, EntityType.PIG_ZOMBIE, SpawnReason.CUSTOM, true, true);
+					MobUtils.create(spawn, EntityType.PIG_ZOMBIE, SpawnReason.CUSTOM, true, true);
 					spawn.getWorld().playEffect(spawn, Effect.STEP_SOUND, 11);
 					spawn.getWorld().playEffect(spawn, Effect.STEP_SOUND, 11);
 					amount--;

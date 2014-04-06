@@ -5,14 +5,13 @@ package myz.listeners.player;
 
 import myz.MyZ;
 import myz.api.PlayerSummonGiantEvent;
-import myz.mobs.CustomEntityGiantZombie;
+import myz.nmscode.compat.MobUtils;
 import myz.support.interfacing.Messenger;
 import myz.utilities.Validate;
-import net.minecraft.server.v1_7_R1.World;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_7_R1.CraftWorld;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -54,10 +53,7 @@ public class PlayerSummonGiant implements Listener {
 					@Override
 					public void run() {
 						e.getBlockPlaced().setType(Material.AIR);
-						World world = ((CraftWorld) e.getBlockPlaced().getWorld()).getHandle();
-						CustomEntityGiantZombie zombie = new CustomEntityGiantZombie(world);
-						zombie.setPosition(e.getBlockPlaced().getX(), e.getBlockPlaced().getY(), e.getBlockPlaced().getZ());
-						world.addEntity(zombie, SpawnReason.NATURAL);
+						MobUtils.create(e.getBlockPlaced().getLocation(), EntityType.GIANT, SpawnReason.NATURAL);
 					}
 				}, 10 * 20L);
 			}
