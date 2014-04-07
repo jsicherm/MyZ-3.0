@@ -123,19 +123,23 @@ public class PlayerKillEntity implements Listener {
 					&& MyZ.instance.getServer().getPluginManager().getPlugin("TagAPI").isEnabled())
 				KittehTag.colorName(playerFor);
 			mobslug = "player";
+			slug = "notnull";
 			break;
 		default:
 			break;
 		}
 
 		if (mobslug != "")
-			ResearchItem.research(playerFor, (Integer) Configuration.getConfig("mobs." + mobslug + ".research-reward"),
-					typeFor.getLocation(), "research.success-short");
+			ResearchItem.research(playerFor, (Integer) Configuration.getConfig("mobs." + mobslug + ".research-reward"), typeFor
+					.getLocation(), "research.success-short");
 
-		String message = slug == "" ? Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", "\n" + amount)
-				: Messenger.getConfigMessage(Localizer.getLocale(playerFor), slug + ".kill_amount", "\n" + amount);
-		String delimiter = message.contains(" \n") ? " \n" : "\n";
-		MessageUtils.holographicDisplay(typeFor.getLocation(), playerFor, message.split(delimiter));
+		if (slug != "") {
+			String message = slug == "notnull" ? Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", "\n" + amount)
+					: Messenger.getConfigMessage(Localizer.getLocale(playerFor), slug + ".kill_amount", "\n" + amount);
+			String delimiter = message.contains(" \n") ? " \n" : "\n";
+			MessageUtils.holographicDisplay(typeFor.getLocation(), playerFor,
+					message.split(delimiter));
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

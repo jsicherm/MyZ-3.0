@@ -48,7 +48,7 @@ public class PlayerHurtEntity implements Listener {
 				|| material == Material.IRON_AXE || material == Material.DIAMOND_AXE;
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onDamage(EntityDamageByEntityEvent e) {
 		if (!Validate.inWorld(e.getEntity().getLocation()))
 			return;
@@ -80,10 +80,12 @@ public class PlayerHurtEntity implements Listener {
 				e.getDamager().setVelocity(otherLocation.toVector().subtract(playerLocation.toVector()).normalize().multiply(0.15));
 		}
 
-		// Bleeding effect (not PDE but for general EDE)
-		if ((Boolean) Configuration.getConfig("mobs.bleed") && e.getDamage() > 0) {
-			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
-			e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
+		if (!e.isCancelled()) {
+			// Bleeding effect (not PDE but for general EDE)
+			if ((Boolean) Configuration.getConfig("mobs.bleed") && e.getDamage() > 0) {
+				e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
+				e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
+			}
 		}
 	}
 

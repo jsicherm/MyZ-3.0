@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>myz.MyZ</groupId>
   <artifactId>MyZ</artifactId>
-  <version>3.0.8</version>
+  <version>3.1.1</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -86,7 +86,7 @@
     </repository>
     <repository>
       <id>md5-repo</id>
-      <url>http://repo.md-5.net/content/groups/public/</url>
+      <url>http://repo.md-5.net/content/groups/</url>
     </repository>
     <repository>
       <id>milkbowl-repo</id>
@@ -97,13 +97,19 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.7.2-R0.2</version>
+      <version>LATEST</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>craftbukkit</artifactId>
-      <version>1.7.2-R0.2</version>
+      <version>1.7.2-R0.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>public.org.bukkit</groupId>
+      <artifactId>craftbukkit</artifactId>
+      <version>1.7.5-R0.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -131,7 +137,7 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>LibsDisguises</groupId>
+      <groupId>public.LibsDisguises</groupId>
       <artifactId>LibsDisguises</artifactId>
       <version>LATEST</version>
       <scope>compile</scope>

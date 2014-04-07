@@ -712,7 +712,8 @@ public class SQLManager {
 			if (forcingaSync)
 				// Make sure we update our cached values when we set new ones.
 				doUpdateCache(name, field, value);
-			executeQuery("UPDATE playerdata SET " + field + " = " + value + " WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
+			executeQuery("UPDATE playerdata SET " + field + " = " + (value instanceof String ? "'" + value + "'" : value)
+					+ " WHERE username = '" + UUIDtoString(name) + "' LIMIT 1");
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL set command for " + UUIDtoString(name) + "." + field
 					+ ": " + e.getMessage());

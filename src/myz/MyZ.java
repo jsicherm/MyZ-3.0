@@ -770,7 +770,7 @@ public class MyZ extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		version = Compat.valueOf(NMSUtils.version);
+		version = Compat.fromString(NMSUtils.version);
 		if (version == null) {
 			getLogger()
 					.warning("This version of MyZ is not compatible with your version of Craftbukkit (" + getServer().getVersion() + ")");

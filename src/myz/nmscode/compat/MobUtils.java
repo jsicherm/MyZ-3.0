@@ -59,16 +59,22 @@ public class MobUtils {
 
 	public static void unregister() {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			CustomEntityType.unregisterEntities();
+			break;
+		case v1_7_5:
+			myz.nmscode.v1_7_R2.mobs.CustomEntityType.unregisterEntities();
 			break;
 		}
 	}
 
 	public static void register() {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			CustomEntityType.registerEntities();
+			break;
+		case v1_7_5:
+			myz.nmscode.v1_7_R2.mobs.CustomEntityType.registerEntities();
 			break;
 		}
 	}
@@ -83,40 +89,53 @@ public class MobUtils {
 
 	public static void create(Location location, EntityType type, SpawnReason reason, boolean a, boolean b) {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			EntityCreator.create(location, type, reason, a, b);
+			break;
+		case v1_7_5:
+			myz.nmscode.v1_7_R2.utilities.EntityCreator.create(location, type, reason, a, b);
 			break;
 		}
 	}
 
 	public static void overrideVillager(LivingEntity entity) {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			EntityCreator.overrideVillager(entity);
+			break;
+		case v1_7_5:
+			myz.nmscode.v1_7_R2.utilities.EntityCreator.overrideVillager(entity);
 			break;
 		}
 	}
 
 	public static void disguiseNPC(Location location) {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			EntityCreator.disguiseNPC(location);
+			break;
+		case v1_7_5:
+			myz.nmscode.v1_7_R2.utilities.EntityCreator.disguiseNPC(location);
 			break;
 		}
 	}
 
 	public static CustomMob newCustomPlayer(Player playerDuplicate) {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			return CustomEntityPlayer.newInstance(playerDuplicate);
+		case v1_7_5:
+			return myz.nmscode.v1_7_R2.mobs.CustomEntityPlayer.newInstance(playerDuplicate);
 		}
 		return null;
 	}
 
 	public static CustomMob newCustomZombie(Player player) {
 		switch (MyZ.version) {
-		case v1_7_R1:
+		case v1_7_2:
 			return CustomEntityZombie.newInstance(player);
+		case v1_7_5:
+			return myz.nmscode.v1_7_R2.mobs.CustomEntityZombie.newInstance(player);
 		}
 		return null;
 	}

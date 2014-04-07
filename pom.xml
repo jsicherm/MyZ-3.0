@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>myz.MyZ</groupId>
   <artifactId>MyZ</artifactId>
-  <version>3.0.8</version>
+  <version>3.1.1</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.authors>TeeePeee</project.authors>
@@ -35,7 +35,7 @@
     </repository>
     <repository>
       <id>md5-repo</id>
-      <url>http://repo.md-5.net/content/groups/public/</url>
+      <url>http://repo.md-5.net/content/groups/</url>
     </repository>
     <repository>
 	  <id>milkbowl-repo</id>
@@ -47,12 +47,17 @@
 	<dependency>
 	  <groupId>org.bukkit</groupId>
 	  <artifactId>bukkit</artifactId>
-	  <version>1.7.2-R0.2</version>
+	  <version>LATEST</version>
 	</dependency>
 	<dependency>
 	  <groupId>org.bukkit</groupId>
 	  <artifactId>craftbukkit</artifactId>
-	  <version>1.7.2-R0.2</version>
+	  <version>1.7.2-R0.1</version>
+	</dependency>
+	<dependency>
+	  <groupId>public.org.bukkit</groupId>
+	  <artifactId>craftbukkit</artifactId>
+	  <version>1.7.5-R0.1-SNAPSHOT</version>
 	</dependency>
 	<dependency>
 	  <groupId>com.sk89q</groupId>
@@ -81,7 +86,7 @@
       <version>5.0</version>
     </dependency>
     <dependency>
-      <groupId>LibsDisguises</groupId>
+      <groupId>public.LibsDisguises</groupId>
       <artifactId>LibsDisguises</artifactId>
       <version>LATEST</version>
     </dependency>
@@ -124,7 +129,6 @@
         <version>2.3.1</version>
         <configuration>
           <finalName>MyZ-3</finalName>
-          <outputDirectory>D:\Users\Jordan\Minecraft\Server\plugins</outputDirectory>
         </configuration>
       </plugin>
       <plugin>
