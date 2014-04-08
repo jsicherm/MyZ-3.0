@@ -5,6 +5,7 @@ package myz.nmscode.compat;
 
 import myz.MyZ;
 import myz.nmscode.v1_7_R1.pathfinders.Support;
+
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;

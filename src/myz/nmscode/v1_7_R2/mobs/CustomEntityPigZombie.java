@@ -51,19 +51,23 @@ public class CustomEntityPigZombie extends EntityPigZombie implements CustomMob 
 
 		populateGoals();
 	}
-	
+
+	@Override
 	public LivingEntity getEntity() {
 		return (LivingEntity) getBukkitEntity();
 	}
-	
+
+	@Override
 	public UUID getUID() {
 		return getUniqueID();
 	}
-	
+
+	@Override
 	public Object getWorld() {
 		return world;
 	}
 
+	@Override
 	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 

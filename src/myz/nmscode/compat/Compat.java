@@ -18,11 +18,10 @@ public enum Compat {
 	}
 
 	public static Compat fromString(String text) {
-		if (text != null) {
-			for (Compat c : Compat.values()) {
-				if (text.equalsIgnoreCase(c.s)) { return c; }
-			}
-		}
+		if (text != null)
+			for (Compat c : Compat.values())
+				if (text.equalsIgnoreCase(c.s))
+					return c;
 		return null;
 	}
 }

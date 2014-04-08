@@ -58,8 +58,8 @@ public enum CustomEntityType {
 		}
 	}
 
-	private static Object getPrivateStatic(Class<?> clazz, String f) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+	private static Object getPrivateStatic(Class<?> clazz, String f) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException {
 		Field field = clazz.getDeclaredField(f);
 		field.setAccessible(true);
 		return field.get(null);

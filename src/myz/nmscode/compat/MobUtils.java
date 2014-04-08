@@ -6,17 +6,17 @@ package myz.nmscode.compat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-
 import myz.MyZ;
 import myz.nmscode.v1_7_R1.mobs.CustomEntityPlayer;
 import myz.nmscode.v1_7_R1.mobs.CustomEntityType;
 import myz.nmscode.v1_7_R1.mobs.CustomEntityZombie;
 import myz.nmscode.v1_7_R1.utilities.EntityCreator;
+
+import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 /**
  * @author Jordan

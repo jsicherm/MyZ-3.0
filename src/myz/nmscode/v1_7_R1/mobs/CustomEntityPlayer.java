@@ -63,11 +63,13 @@ public class CustomEntityPlayer extends EntityPlayer implements CustomMob {
 		iteminworldmanager.setGameMode(EnumGamemode.SURVIVAL);
 		noDamageTicks = 1;
 	}
-	
+
+	@Override
 	public LivingEntity getEntity() {
-		return (LivingEntity) getBukkitEntity();
+		return getBukkitEntity();
 	}
-	
+
+	@Override
 	public UUID getUID() {
 		return getUniqueID();
 	}
@@ -292,6 +294,7 @@ public class CustomEntityPlayer extends EntityPlayer implements CustomMob {
 	 * @param inventory
 	 *            The list of items to set.
 	 */
+	@Override
 	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 		inventoryItems = inventory;
 	}

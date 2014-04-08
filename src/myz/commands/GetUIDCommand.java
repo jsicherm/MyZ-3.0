@@ -25,9 +25,8 @@ public class GetUIDCommand implements CommandExecutor {
 		id += MyZ.instance.getDescription().getVersion().replaceAll(".", "&").replaceFirst("3", "MZ");
 		id += "@";
 		String s = MyZ.instance.getServer().getIp().replaceAll(".", String.valueOf(Character.toChars(random.nextInt(5) + 10 + 96)[0]));
-		for (int i = 1; i <= 9; i++) {
+		for (int i = 1; i <= 9; i++)
 			s = s.replaceAll(i + "", String.valueOf(Character.toChars(i + 96)[0]));
-		}
 		id += s;
 		id += ">";
 		id += MyZ.instance.getServer().getOnlineMode() ? "y" : "n";

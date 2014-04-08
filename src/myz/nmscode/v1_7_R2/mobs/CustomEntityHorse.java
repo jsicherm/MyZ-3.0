@@ -44,8 +44,8 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_7_R2.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_7_R2.util.UnsafeList;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Horse.Variant;
+import org.bukkit.entity.LivingEntity;
 
 /**
  * @author Jordan
@@ -54,7 +54,7 @@ import org.bukkit.entity.Horse.Variant;
 public class CustomEntityHorse extends EntityHorse implements CustomMob {
 
 	private int bE, bF, bP;
-	private float bJ, bM, bL, bN, bK, bO;
+	private float bJ, bM, bL, bN, bK;
 	private boolean bI;
 
 	public CustomEntityHorse(World world) {
@@ -92,18 +92,22 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntitySkeleton.class, 0, true));
 	}
 
+	@Override
 	public LivingEntity getEntity() {
 		return (LivingEntity) getBukkitEntity();
 	}
 
+	@Override
 	public UUID getUID() {
 		return getUniqueID();
 	}
 
+	@Override
 	public Object getWorld() {
 		return world;
 	}
 
+	@Override
 	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 
@@ -153,7 +157,7 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 
 		if (itemstack != null && itemstack.getItem() == Items.MONSTER_EGG)
 			return super.a(entityhuman);
-		else if (!isTame() && this.cE())
+		else if (!isTame() && cE())
 			return false;
 		else if (isTame() && cb() && entityhuman.isSneaking()) {
 			this.g(entityhuman);
@@ -255,7 +259,7 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 				}
 
 				if (!isTame() && !flag) {
-					if (itemstack != null && itemstack.a(entityhuman, (EntityLiving) this))
+					if (itemstack != null && itemstack.a(entityhuman, this))
 						return true;
 
 					cJ();
@@ -283,7 +287,7 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 			}
 
 			if (cg() && passenger == null) {
-				if (itemstack != null && itemstack.a(entityhuman, (EntityLiving) this))
+				if (itemstack != null && itemstack.a(entityhuman, this))
 					return true;
 				else {
 					this.i(entityhuman);
@@ -325,69 +329,67 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 
 	@Override
 	public void e(float f, float f1) {
-		if (this.passenger != null && this.passenger instanceof EntityLiving && this.cu()) {
-			this.lastYaw = this.yaw = this.passenger.yaw;
-			this.pitch = this.passenger.pitch * 0.5F;
-			this.b(this.yaw, this.pitch);
-			this.aO = this.aM = this.yaw;
-			f = ((EntityLiving) this.passenger).bd * 0.5F;
-			f1 = ((EntityLiving) this.passenger).be;
+		if (passenger != null && passenger instanceof EntityLiving && cu()) {
+			lastYaw = yaw = passenger.yaw;
+			pitch = passenger.pitch * 0.5F;
+			this.b(yaw, pitch);
+			aO = aM = yaw;
+			f = ((EntityLiving) passenger).bd * 0.5F;
+			f1 = ((EntityLiving) passenger).be;
 			if (f1 <= 0.0F) {
 				f1 *= 0.25F;
-				this.bP = 0;
+				bP = 0;
 			}
 
-			if (this.onGround && this.bt == 0.0F && this.cn() && !this.bI) {
+			if (onGround && bt == 0.0F && cn() && !bI) {
 				f = 0.0F;
 				f1 = 0.0F;
 			}
 
-			if (this.bt > 0.0F && !this.cj() && this.onGround) {
-				this.motY = this.getJumpStrength() * (double) this.bt;
-				if (this.hasEffect(MobEffectList.JUMP)) {
-					this.motY += (double) ((float) (this.getEffect(MobEffectList.JUMP).getAmplifier() + 1) * 0.1F);
-				}
+			if (bt > 0.0F && !cj() && onGround) {
+				motY = getJumpStrength() * bt;
+				if (this.hasEffect(MobEffectList.JUMP))
+					motY += (getEffect(MobEffectList.JUMP).getAmplifier() + 1) * 0.1F;
 
 				this.j(true);
-				this.al = true;
+				al = true;
 				if (f1 > 0.0F) {
-					float f2 = MathHelper.sin(this.yaw * 3.1415927F / 180.0F);
-					float f3 = MathHelper.cos(this.yaw * 3.1415927F / 180.0F);
+					float f2 = MathHelper.sin(yaw * 3.1415927F / 180.0F);
+					float f3 = MathHelper.cos(yaw * 3.1415927F / 180.0F);
 
-					this.motX += (double) (-0.4F * f2 * this.bt);
-					this.motZ += (double) (0.4F * f3 * this.bt);
-					this.makeSound("mob.horse.jump", 0.4F, 1.0F);
+					motX += -0.4F * f2 * bt;
+					motZ += 0.4F * f3 * bt;
+					makeSound("mob.horse.jump", 0.4F, 1.0F);
 				}
 
-				this.bt = 0.0F;
+				bt = 0.0F;
 			}
 
-			this.W = 1.0F;
-			this.aQ = this.bk() * 0.1F;
-			if (!this.world.isStatic) {
-				this.i((float) this.getAttributeInstance(GenericAttributes.d).getValue());
+			W = 1.0F;
+			aQ = bk() * 0.1F;
+			if (!world.isStatic) {
+				this.i((float) getAttributeInstance(GenericAttributes.d).getValue());
 				super.e(f, f1);
 			}
 
-			if (this.onGround) {
-				this.bt = 0.0F;
+			if (onGround) {
+				bt = 0.0F;
 				this.j(false);
 			}
 
-			this.aE = this.aF;
-			double d0 = this.locX - this.lastX;
-			double d1 = this.locZ - this.lastZ;
+			aE = aF;
+			double d0 = locX - lastX;
+			double d1 = locZ - lastZ;
 			float f4 = MathHelper.sqrt(d0 * d0 + d1 * d1) * 4.0F;
 
-			if (f4 > 1.0F) {
+			if (f4 > 1.0F)
 				f4 = 1.0F;
-			}
 
-			this.aF += (f4 - this.aF) * 0.4F;
-			this.aG += this.aF;
+			aF += (f4 - aF) * 0.4F;
+			aG += aF;
 		} else {
-			this.W = 0.5F;
-			this.aQ = 0.02F;
+			W = 0.5F;
+			aQ = 0.02F;
 			super.e(f, f1);
 		}
 	}
@@ -407,77 +409,68 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 	@Override
 	public void h() {
 		super.h();
-		if (this.world.isStatic && this.datawatcher.a()) {
-			this.datawatcher.e();
-			this.cP();
+		if (world.isStatic && datawatcher.a()) {
+			datawatcher.e();
+			cP();
 		}
 
-		if (this.bE > 0 && ++this.bE > 30) {
-			this.bE = 0;
+		if (bE > 0 && ++bE > 30) {
+			bE = 0;
 			this.b(128, false);
 		}
 
-		if (!this.world.isStatic && this.bF > 0 && ++this.bF > 20) {
-			this.bF = 0;
+		if (!world.isStatic && bF > 0 && ++bF > 20) {
+			bF = 0;
 			this.p(false);
 		}
 
-		if (this.bp > 0 && ++this.bp > 8) {
-			this.bp = 0;
+		if (bp > 0 && ++bp > 8)
+			bp = 0;
+
+		if (bq > 0) {
+			++bq;
+			if (bq > 300)
+				bq = 0;
 		}
 
-		if (this.bq > 0) {
-			++this.bq;
-			if (this.bq > 300) {
-				this.bq = 0;
-			}
-		}
-
-		this.bK = this.bJ;
-		if (this.cm()) {
-			this.bJ += (1.0F - this.bJ) * 0.4F + 0.05F;
-			if (this.bJ > 1.0F) {
-				this.bJ = 1.0F;
-			}
+		bK = bJ;
+		if (cm()) {
+			bJ += (1.0F - bJ) * 0.4F + 0.05F;
+			if (bJ > 1.0F)
+				bJ = 1.0F;
 		} else {
-			this.bJ += (0.0F - this.bJ) * 0.4F - 0.05F;
-			if (this.bJ < 0.0F) {
-				this.bJ = 0.0F;
-			}
+			bJ += (0.0F - bJ) * 0.4F - 0.05F;
+			if (bJ < 0.0F)
+				bJ = 0.0F;
 		}
 
-		this.bM = this.bL;
-		if (this.cn()) {
-			this.bK = this.bJ = 0.0F;
-			this.bL += (1.0F - this.bL) * 0.4F + 0.05F;
-			if (this.bL > 1.0F) {
-				this.bL = 1.0F;
-			}
+		bM = bL;
+		if (cn()) {
+			bK = bJ = 0.0F;
+			bL += (1.0F - bL) * 0.4F + 0.05F;
+			if (bL > 1.0F)
+				bL = 1.0F;
 		} else {
-			this.bI = false;
-			this.bL += (0.8F * this.bL * this.bL * this.bL - this.bL) * 0.6F - 0.05F;
-			if (this.bL < 0.0F) {
-				this.bL = 0.0F;
-			}
+			bI = false;
+			bL += (0.8F * bL * bL * bL - bL) * 0.6F - 0.05F;
+			if (bL < 0.0F)
+				bL = 0.0F;
 		}
 
-		this.bO = this.bN;
-		if (this.x(128)) {
-			this.bN += (1.0F - this.bN) * 0.7F + 0.05F;
-			if (this.bN > 1.0F) {
-				this.bN = 1.0F;
-			}
+		if (x(128)) {
+			bN += (1.0F - bN) * 0.7F + 0.05F;
+			if (bN > 1.0F)
+				bN = 1.0F;
 		} else {
-			this.bN += (0.0F - this.bN) * 0.7F - 0.05F;
-			if (this.bN < 0.0F) {
-				this.bN = 0.0F;
-			}
+			bN += (0.0F - bN) * 0.7F - 0.05F;
+			if (bN < 0.0F)
+				bN = 0.0F;
 		}
 	}
 
 	private void cU() {
-		if (!this.world.isStatic) {
-			this.bF = 1;
+		if (!world.isStatic) {
+			bF = 1;
 			this.p(true);
 		}
 	}
@@ -503,28 +496,24 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 	protected void a(int i, int j, int k, Block block) {
 		StepSound stepsound = block.stepSound;
 
-		if (this.world.getType(i, j + 1, k) == Blocks.SNOW) {
+		if (world.getType(i, j + 1, k) == Blocks.SNOW)
 			stepsound = Blocks.SNOW.stepSound;
-		}
 
 		if (!block.getMaterial().isLiquid()) {
-			int l = this.getType();
+			int l = getType();
 
-			if (this.passenger != null && l != 1 && l != 2) {
-				++this.bP;
-				if (this.bP > 5 && this.bP % 3 == 0) {
-					this.makeSound("mob.horse.gallop", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-					if (l == 0 && this.random.nextInt(10) == 0) {
-						this.makeSound("mob.horse.breathe", stepsound.getVolume1() * 0.6F, stepsound.getVolume2());
-					}
-				} else if (this.bP <= 5) {
-					this.makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-				}
-			} else if (stepsound == Block.f) {
-				this.makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-			} else {
-				this.makeSound("mob.horse.soft", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
-			}
+			if (passenger != null && l != 1 && l != 2) {
+				++bP;
+				if (bP > 5 && bP % 3 == 0) {
+					makeSound("mob.horse.gallop", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+					if (l == 0 && random.nextInt(10) == 0)
+						makeSound("mob.horse.breathe", stepsound.getVolume1() * 0.6F, stepsound.getVolume2());
+				} else if (bP <= 5)
+					makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+			} else if (stepsound == Block.f)
+				makeSound("mob.horse.wood", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
+			else
+				makeSound("mob.horse.soft", stepsound.getVolume1() * 0.15F, stepsound.getVolume2());
 		}
 	}
 

@@ -23,7 +23,6 @@ import net.minecraft.server.v1_7_R2.DamageSource;
 import net.minecraft.server.v1_7_R2.Enchantment;
 import net.minecraft.server.v1_7_R2.Entity;
 import net.minecraft.server.v1_7_R2.EntityHuman;
-import net.minecraft.server.v1_7_R2.EntityInsentient;
 import net.minecraft.server.v1_7_R2.EntitySkeleton;
 import net.minecraft.server.v1_7_R2.EnumDifficulty;
 import net.minecraft.server.v1_7_R2.GenericAttributes;
@@ -75,18 +74,22 @@ public class CustomEntityNPC extends EntitySkeleton implements CustomMob {
 		populateGoals();
 	}
 
+	@Override
 	public LivingEntity getEntity() {
 		return (LivingEntity) getBukkitEntity();
 	}
 
+	@Override
 	public UUID getUID() {
 		return getUniqueID();
 	}
 
+	@Override
 	public Object getWorld() {
 		return world;
 	}
 
+	@Override
 	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 
@@ -208,7 +211,7 @@ public class CustomEntityNPC extends EntitySkeleton implements CustomMob {
 	}
 
 	public void addPather(Location to, float speed) {
-		goalSelector.a(4, new PathfinderGoalWalkTo((EntityInsentient) this, to, speed));
+		goalSelector.a(4, new PathfinderGoalWalkTo(this, to, speed));
 	}
 
 	@Override

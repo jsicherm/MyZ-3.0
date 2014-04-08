@@ -128,10 +128,9 @@ public class Chat implements Listener {
 		// If we're talking in local, not radio, only include those near us.
 		if (radio_frequency == -1) {
 			if (didHandlePrivateChat(e)) {
-				if ((Boolean) Configuration.getConfig("chat.overhead")) {
+				if ((Boolean) Configuration.getConfig("chat.overhead"))
 					MessageUtils.holographic(e.getMessage(), e.getPlayer(), e.getPlayer().getLocation(),
 							e.getRecipients().toArray(new Player[0]));
-				}
 				return;
 			}
 			if (!(Boolean) Configuration.getConfig(Configuration.CHAT_ENABLED))
@@ -148,9 +147,8 @@ public class Chat implements Listener {
 								.isSimilar((ItemStack) Configuration.getConfig(Configuration.RADIO)))
 					e.getRecipients().add(player_on_server);
 
-		if ((Boolean) Configuration.getConfig("chat.overhead")) {
+		if ((Boolean) Configuration.getConfig("chat.overhead"))
 			MessageUtils.holographic(e.getMessage(), e.getPlayer(), e.getPlayer().getLocation(), e.getRecipients().toArray(new Player[0]));
-		}
 
 		PathUtils.elevate(e.getPlayer(), 10);
 	}

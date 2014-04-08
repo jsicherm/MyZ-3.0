@@ -6,18 +6,18 @@ package myz.nmscode.v1_7_R2.pathfinders;
 import java.util.Collections;
 import java.util.List;
 
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Horse.Variant;
-
 import myz.MyZ;
+import net.minecraft.server.v1_7_R2.DistanceComparator;
+import net.minecraft.server.v1_7_R2.Entity;
+import net.minecraft.server.v1_7_R2.EntityCreature;
 import net.minecraft.server.v1_7_R2.EntityHorse;
 import net.minecraft.server.v1_7_R2.EntityHuman;
-import net.minecraft.server.v1_7_R2.Entity;
-import net.minecraft.server.v1_7_R2.DistanceComparator;
-import net.minecraft.server.v1_7_R2.EntityCreature;
 import net.minecraft.server.v1_7_R2.EntityLiving;
 import net.minecraft.server.v1_7_R2.IEntitySelector;
 import net.minecraft.server.v1_7_R2.PathfinderGoalTarget;
+
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Horse.Variant;
 
 /**
  * @author Jordan
@@ -40,10 +40,11 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 
 		EntitySelectorNearestAttackableHorseTarget(PathfinderGoalNearestAttackableHorseTarget pathfindergoalnearestattackabletarget,
 				IEntitySelector ientityselector) {
-			this.e = pathfindergoalnearestattackabletarget;
-			this.d = ientityselector;
+			e = pathfindergoalnearestattackabletarget;
+			d = ientityselector;
 		}
 
+		@Override
 		public boolean a(Entity entity) {
 			// Attack if we are an undead horse.
 			if (((Horse) e.creature.getBukkitEntity()).getVariant() == Variant.UNDEAD_HORSE
@@ -59,8 +60,8 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 									MyZ.instance.getUID(((EntityHuman) entity).getName())))
 						return false;
 			}
-			return !(entity instanceof EntityLiving) ? false : (this.d != null && !this.d.a(entity) ? false
-					: entity.isInvulnerable() ? false : this.e.a((EntityLiving) entity, false));
+			return !(entity instanceof EntityLiving) ? false : d != null && !d.a(entity) ? false : entity.isInvulnerable() ? false : e.a(
+					(EntityLiving) entity, false);
 		}
 	}
 
@@ -75,33 +76,35 @@ public class PathfinderGoalNearestAttackableHorseTarget extends PathfinderGoalTa
 	public PathfinderGoalNearestAttackableHorseTarget(EntityCreature entitycreature, Class oclass, int i, boolean flag, boolean flag1,
 			IEntitySelector ientityselector) {
 		super(entitycreature, flag, flag1);
-		this.creature = (EntityHorse) entitycreature;
-		this.a = oclass;
-		this.b = i;
-		this.e = new DistanceComparator(entitycreature);
+		creature = (EntityHorse) entitycreature;
+		a = oclass;
+		b = i;
+		e = new DistanceComparator(entitycreature);
 		this.a(1);
-		this.f = new EntitySelectorNearestAttackableHorseTarget(this, ientityselector);
+		f = new EntitySelectorNearestAttackableHorseTarget(this, ientityselector);
 	}
 
+	@Override
 	public boolean a() {
-		if (this.b > 0 && this.c.aH().nextInt(this.b) != 0) {
+		if (b > 0 && c.aH().nextInt(b) != 0)
 			return false;
-		} else {
-			double d0 = this.f();
-			List list = this.c.world.a(this.a, this.c.boundingBox.grow(d0, 4.0D, d0), this.f);
+		else {
+			double d0 = f();
+			List list = c.world.a(a, c.boundingBox.grow(d0, 4.0D, d0), f);
 
-			Collections.sort(list, this.e);
-			if (list.isEmpty()) {
+			Collections.sort(list, e);
+			if (list.isEmpty())
 				return false;
-			} else {
-				this.g = (EntityLiving) list.get(0);
+			else {
+				g = (EntityLiving) list.get(0);
 				return true;
 			}
 		}
 	}
 
+	@Override
 	public void c() {
-		this.c.setGoalTarget(this.g);
+		c.setGoalTarget(g);
 		super.c();
 	}
 }

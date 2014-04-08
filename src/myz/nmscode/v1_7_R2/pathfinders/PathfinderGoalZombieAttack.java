@@ -4,7 +4,6 @@
 package myz.nmscode.v1_7_R2.pathfinders;
 
 import myz.MyZ;
-import net.minecraft.server.v1_7_R2.Entity;
 import net.minecraft.server.v1_7_R2.EntityCreature;
 import net.minecraft.server.v1_7_R2.EntityLiving;
 import net.minecraft.server.v1_7_R2.MathHelper;
@@ -33,54 +32,59 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 
 	public PathfinderGoalZombieAttack(EntityCreature entitycreature, Class oclass, double d0, boolean flag) {
 		this(entitycreature, d0, flag);
-		this.g = oclass;
+		g = oclass;
 	}
 
 	public PathfinderGoalZombieAttack(EntityCreature entitycreature, double d0, boolean flag) {
-		this.b = entitycreature;
-		this.a = entitycreature.world;
-		this.d = d0;
-		this.e = flag;
+		b = entitycreature;
+		a = entitycreature.world;
+		d = d0;
+		e = flag;
 		this.a(3);
 	}
 
+	@Override
 	public boolean a() {
-		EntityLiving entityliving = this.b.getGoalTarget();
+		EntityLiving entityliving = b.getGoalTarget();
 
-		if (entityliving == null) {
+		if (entityliving == null)
 			return false;
-		} else if (!entityliving.isAlive() || entityliving.isInvulnerable()) {
+		else if (!entityliving.isAlive() || entityliving.isInvulnerable())
 			return false;
-		} else if (this.g != null && !this.g.isAssignableFrom(entityliving.getClass())) {
+		else if (g != null && !g.isAssignableFrom(entityliving.getClass()))
 			return false;
-		} else {
-			this.f = this.b.getNavigation().a(entityliving);
-			return this.f != null;
+		else {
+			f = b.getNavigation().a(entityliving);
+			return f != null;
 		}
 	}
 
+	@Override
 	public boolean b() {
-		EntityLiving entityliving = this.b.getGoalTarget();
+		EntityLiving entityliving = b.getGoalTarget();
 
-		return entityliving == null ? false : (!entityliving.isAlive() || entityliving.isInvulnerable() ? false : (!this.e ? !this.b
-				.getNavigation().g() : this.b.b(MathHelper.floor(entityliving.locX), MathHelper.floor(entityliving.locY),
-				MathHelper.floor(entityliving.locZ))));
+		return entityliving == null ? false : !entityliving.isAlive() || entityliving.isInvulnerable() ? false : !e ? !b.getNavigation()
+				.g() : b.b(MathHelper.floor(entityliving.locX), MathHelper.floor(entityliving.locY), MathHelper.floor(entityliving.locZ));
 	}
 
+	@Override
 	public void c() {
-		this.b.getNavigation().a(this.f, this.d);
-		this.h = 0;
+		b.getNavigation().a(f, d);
+		h = 0;
 	}
 
+	@Override
 	public void d() {
-		this.b.getNavigation().h();
+		b.getNavigation().h();
 	}
 
+	@Override
 	public void e() {
 		boolean disguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
 
-		if (b.getGoalTarget() == null) { return; }
+		if (b.getGoalTarget() == null)
+			return;
 
 		if (b.getGoalTarget().getBukkitEntity() instanceof Player && disguise
 				&& myz.utilities.DisguiseUtils.isZombie((Player) b.getGoalTarget().getBukkitEntity())) {
@@ -97,44 +101,39 @@ public class PathfinderGoalZombieAttack extends PathfinderGoal {
 			return;
 		}
 
-		EntityLiving entityliving = this.b.getGoalTarget();
+		EntityLiving entityliving = b.getGoalTarget();
 		if (entityliving.isInvulnerable()) {
 			b.setGoalTarget(null);
 			return;
 		}
 
-		this.b.getControllerLook().a(entityliving, 30.0F, 30.0F);
-		double d0 = this.b.e(entityliving.locX, entityliving.boundingBox.b, entityliving.locZ);
-		double d1 = (double) (this.b.width * 2.0F * this.b.width * 2.0F + entityliving.width);
+		b.getControllerLook().a(entityliving, 30.0F, 30.0F);
+		double d0 = b.e(entityliving.locX, entityliving.boundingBox.b, entityliving.locZ);
+		double d1 = b.width * 2.0F * b.width * 2.0F + entityliving.width;
 
-		--this.h;
-		if ((this.e || this.b.getEntitySenses().canSee(entityliving))
-				&& this.h <= 0
-				&& (this.i == 0.0D && this.j == 0.0D && this.k == 0.0D || entityliving.e(this.i, this.j, this.k) >= 1.0D || this.b.aH()
-						.nextFloat() < 0.05F)) {
-			this.i = entityliving.locX;
-			this.j = entityliving.boundingBox.b;
-			this.k = entityliving.locZ;
-			this.h = 4 + this.b.aH().nextInt(7);
-			if (d0 > 1024.0D) {
-				this.h += 10;
-			} else if (d0 > 256.0D) {
-				this.h += 5;
-			}
+		--h;
+		if ((e || b.getEntitySenses().canSee(entityliving)) && h <= 0
+				&& (i == 0.0D && j == 0.0D && k == 0.0D || entityliving.e(i, j, k) >= 1.0D || b.aH().nextFloat() < 0.05F)) {
+			i = entityliving.locX;
+			j = entityliving.boundingBox.b;
+			k = entityliving.locZ;
+			h = 4 + b.aH().nextInt(7);
+			if (d0 > 1024.0D)
+				h += 10;
+			else if (d0 > 256.0D)
+				h += 5;
 
-			if (!this.b.getNavigation().a((Entity) entityliving, this.d)) {
-				this.h += 15;
-			}
+			if (!b.getNavigation().a(entityliving, d))
+				h += 15;
 		}
 
-		this.c = Math.max(this.c - 1, 0);
-		if (d0 <= d1 && this.c <= 20) {
-			this.c = 20;
-			if (this.b.bd() != null) {
-				this.b.aZ();
-			}
+		c = Math.max(c - 1, 0);
+		if (d0 <= d1 && c <= 20) {
+			c = 20;
+			if (b.bd() != null)
+				b.aZ();
 
-			this.b.n(entityliving);
+			b.n(entityliving);
 		}
 	}
 }

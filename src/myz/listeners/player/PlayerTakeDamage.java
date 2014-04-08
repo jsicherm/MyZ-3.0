@@ -51,7 +51,7 @@ public class PlayerTakeDamage implements Listener {
 					&& (Double) Configuration.getConfig("damage.chance_of_breaking_leg") != 0.0)
 				switch (e.getCause()) {
 				case FALL:
-					PathUtils.elevate((Player)e.getEntity(), 10);
+					PathUtils.elevate((Player) e.getEntity(), 10);
 					MyZ.instance.breakLeg((Player) e.getEntity());
 					break;
 				default:

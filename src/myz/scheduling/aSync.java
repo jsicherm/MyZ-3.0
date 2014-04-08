@@ -12,7 +12,6 @@ import myz.api.PlayerTakeBleedingDamageEvent;
 import myz.api.PlayerTakePoisonDamageEvent;
 import myz.api.PlayerTakeWaterDamageEvent;
 import myz.nmscode.compat.PathUtils;
-import myz.nmscode.v1_7_R1.pathfinders.Support;
 import myz.support.PlayerData;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Messenger;
@@ -41,7 +40,7 @@ public class aSync implements Runnable {
 	public aSync() {
 		isDisguise = MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("DisguiseCraft").isEnabled();
-		
+
 		isDisguise2 = MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises") != null
 				&& MyZ.instance.getServer().getPluginManager().getPlugin("LibsDisguises").isEnabled();
 	}
@@ -135,7 +134,7 @@ public class aSync implements Runnable {
 				if (isDisguise)
 					if (myz.utilities.DisguiseUtils.isZombie(player))
 						continue;
-				
+
 				if (isDisguise2)
 					if (myz.utilities.LibsDisguiseUtils.isZombie(player))
 						continue;

@@ -19,7 +19,6 @@ import net.minecraft.server.v1_7_R2.EntityCreature;
 import net.minecraft.server.v1_7_R2.EntityHorse;
 import net.minecraft.server.v1_7_R2.EntityHuman;
 import net.minecraft.server.v1_7_R2.EntityInsentient;
-import net.minecraft.server.v1_7_R2.EntityLiving;
 import net.minecraft.server.v1_7_R2.PathfinderGoalSelector;
 import net.minecraft.server.v1_7_R2.World;
 
@@ -59,8 +58,8 @@ public class Support {
 	 */
 	private static EntityHuman findNearbyVulnerablePlayer(Entity entity, double x, double y, double z) {
 		if (entity instanceof EntityCreature && ((EntityCreature) entity).getGoalTarget() != null) {
-			if (((EntityCreature) entity).getGoalTarget() instanceof EntityHuman) { return (EntityHuman) ((EntityCreature) entity)
-					.getGoalTarget(); }
+			if (((EntityCreature) entity).getGoalTarget() instanceof EntityHuman)
+				return (EntityHuman) ((EntityCreature) entity).getGoalTarget();
 			return null;
 		}
 		World world = entity.world;

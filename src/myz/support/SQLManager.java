@@ -181,7 +181,8 @@ public class SQLManager {
 	 * Establish connection with MySQL.
 	 */
 	public void connect() {
-		if (connected) { return; }
+		if (connected)
+			return;
 		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
 
 		String url = "jdbc:mysql://" + hostname + ":" + port + "/" + database;

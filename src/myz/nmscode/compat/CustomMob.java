@@ -11,12 +11,12 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * @author Jordan
- *
+ * 
  */
 public interface CustomMob {
 
 	public LivingEntity getEntity();
-	
+
 	public UUID getUID();
 
 	public String getName();

@@ -80,13 +80,12 @@ public class PlayerHurtEntity implements Listener {
 				e.getDamager().setVelocity(otherLocation.toVector().subtract(playerLocation.toVector()).normalize().multiply(0.15));
 		}
 
-		if (!e.isCancelled()) {
+		if (!e.isCancelled())
 			// Bleeding effect (not PDE but for general EDE)
 			if ((Boolean) Configuration.getConfig("mobs.bleed") && e.getDamage() > 0) {
 				e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 				e.getEntity().getWorld().playEffect(e.getEntity().getLocation(), Effect.STEP_SOUND, 55);
 			}
-		}
 	}
 
 	/**
@@ -115,7 +114,8 @@ public class PlayerHurtEntity implements Listener {
 		if (!(arrow instanceof Arrow) || !(arrow.getShooter() instanceof Player))
 			return false;
 
-		if (!isHumanoid(entity.getType())) { return false; }
+		if (!isHumanoid(entity.getType()))
+			return false;
 
 		double projectileY = arrow.getLocation().getY();
 		double entityY = entity.getLocation().getY();

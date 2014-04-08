@@ -66,19 +66,23 @@ public class CustomEntityGiantZombie extends EntityGiantZombie implements Custom
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityHuman.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableZombieTarget(this, EntityVillager.class, 0, false));
 	}
-	
+
+	@Override
 	public LivingEntity getEntity() {
 		return (LivingEntity) getBukkitEntity();
 	}
-	
+
+	@Override
 	public UUID getUID() {
 		return getUniqueID();
 	}
-	
+
+	@Override
 	public Object getWorld() {
 		return world;
 	}
 
+	@Override
 	public void setInventory(List<ItemStack> inventory) {
 	}
 

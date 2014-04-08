@@ -130,15 +130,14 @@ public class PlayerKillEntity implements Listener {
 		}
 
 		if (mobslug != "")
-			ResearchItem.research(playerFor, (Integer) Configuration.getConfig("mobs." + mobslug + ".research-reward"), typeFor
-					.getLocation(), "research.success-short");
+			ResearchItem.research(playerFor, (Integer) Configuration.getConfig("mobs." + mobslug + ".research-reward"),
+					typeFor.getLocation(), "research.success-short");
 
 		if (slug != "") {
 			String message = slug == "notnull" ? Messenger.getConfigMessage(Localizer.getLocale(playerFor), "bandit.amount", "\n" + amount)
 					: Messenger.getConfigMessage(Localizer.getLocale(playerFor), slug + ".kill_amount", "\n" + amount);
 			String delimiter = message.contains(" \n") ? " \n" : "\n";
-			MessageUtils.holographicDisplay(typeFor.getLocation(), playerFor,
-					message.split(delimiter));
+			MessageUtils.holographicDisplay(typeFor.getLocation(), playerFor, message.split(delimiter));
 		}
 	}
 

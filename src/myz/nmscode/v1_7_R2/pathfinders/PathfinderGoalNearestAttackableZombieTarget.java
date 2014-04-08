@@ -6,11 +6,10 @@ package myz.nmscode.v1_7_R2.pathfinders;
 import java.util.Collections;
 import java.util.List;
 
-import myz.nmscode.v1_7_R2.pathfinders.Support;
-import net.minecraft.server.v1_7_R2.EntityHuman;
 import net.minecraft.server.v1_7_R2.DistanceComparator;
 import net.minecraft.server.v1_7_R2.Entity;
 import net.minecraft.server.v1_7_R2.EntityCreature;
+import net.minecraft.server.v1_7_R2.EntityHuman;
 import net.minecraft.server.v1_7_R2.EntityLiving;
 import net.minecraft.server.v1_7_R2.IEntitySelector;
 import net.minecraft.server.v1_7_R2.PathfinderGoalTarget;
@@ -36,17 +35,19 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 
 		EntitySelectorNearestAttackableZombieTarget(PathfinderGoalNearestAttackableZombieTarget pathfindergoalnearestattackabletarget,
 				IEntitySelector ientityselector) {
-			this.e = pathfindergoalnearestattackabletarget;
-			this.d = ientityselector;
+			e = pathfindergoalnearestattackabletarget;
+			d = ientityselector;
 		}
 
+		@Override
 		public boolean a(Entity entity) {
 			if (!(entity instanceof EntityLiving))
 				return false;
-			if (e.creature.getGoalTarget() != null && e.creature.getGoalTarget().equals(entity)) { return true; }
+			if (e.creature.getGoalTarget() != null && e.creature.getGoalTarget().equals(entity))
+				return true;
 
-			if (!(entity instanceof EntityLiving) ? false : (this.d != null && !this.d.a(entity) ? false : entity.isInvulnerable() ? false
-					: this.e.a((EntityLiving) entity, false))) {
+			if (!(entity instanceof EntityLiving) ? false : d != null && !d.a(entity) ? false : entity.isInvulnerable() ? false : e.a(
+					(EntityLiving) entity, false)) {
 				Entity target = Support.findNearbyVulnerablePlayer(e.creature);
 				if (target != null && target instanceof EntityLiving && !target.isInvulnerable() && target.equals(entity)
 						|| !(target instanceof EntityHuman)) {
@@ -70,33 +71,35 @@ public class PathfinderGoalNearestAttackableZombieTarget extends PathfinderGoalT
 	public PathfinderGoalNearestAttackableZombieTarget(EntityCreature entitycreature, Class oclass, int i, boolean flag, boolean flag1,
 			IEntitySelector ientityselector) {
 		super(entitycreature, flag, flag1);
-		this.creature = entitycreature;
-		this.a = oclass;
-		this.b = i;
-		this.e = new DistanceComparator(entitycreature);
+		creature = entitycreature;
+		a = oclass;
+		b = i;
+		e = new DistanceComparator(entitycreature);
 		this.a(1);
-		this.f = new EntitySelectorNearestAttackableZombieTarget(this, ientityselector);
+		f = new EntitySelectorNearestAttackableZombieTarget(this, ientityselector);
 	}
 
+	@Override
 	public boolean a() {
-		if (this.b > 0 && this.c.aH().nextInt(this.b) != 0) {
+		if (b > 0 && c.aH().nextInt(b) != 0)
 			return false;
-		} else {
-			double d0 = this.f();
-			List list = this.c.world.a(this.a, this.c.boundingBox.grow(d0, 4.0D, d0), this.f);
+		else {
+			double d0 = f();
+			List list = c.world.a(a, c.boundingBox.grow(d0, 4.0D, d0), f);
 
-			Collections.sort(list, this.e);
-			if (list.isEmpty()) {
+			Collections.sort(list, e);
+			if (list.isEmpty())
 				return false;
-			} else {
-				this.g = (EntityLiving) list.get(0);
+			else {
+				g = (EntityLiving) list.get(0);
 				return true;
 			}
 		}
 	}
 
+	@Override
 	public void c() {
-		this.c.setGoalTarget(this.g);
+		c.setGoalTarget(g);
 		super.c();
 	}
 }

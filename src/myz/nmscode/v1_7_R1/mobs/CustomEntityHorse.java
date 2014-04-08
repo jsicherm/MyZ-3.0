@@ -45,8 +45,8 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_7_R1.util.UnsafeList;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Horse.Variant;
+import org.bukkit.entity.LivingEntity;
 
 /**
  * @author Jordan
@@ -92,19 +92,23 @@ public class CustomEntityHorse extends EntityHorse implements CustomMob {
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntityVillager.class, 0, true));
 		targetSelector.a(2, new PathfinderGoalNearestAttackableHorseTarget(this, EntitySkeleton.class, 0, true));
 	}
-	
+
+	@Override
 	public LivingEntity getEntity() {
 		return (LivingEntity) getBukkitEntity();
 	}
-	
+
+	@Override
 	public UUID getUID() {
 		return getUniqueID();
 	}
-	
+
+	@Override
 	public Object getWorld() {
 		return world;
 	}
 
+	@Override
 	public void setInventory(List<org.bukkit.inventory.ItemStack> inventory) {
 	}
 

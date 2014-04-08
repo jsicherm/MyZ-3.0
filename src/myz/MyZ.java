@@ -22,6 +22,7 @@ import myz.chests.ChestScanner;
 import myz.commands.AddResearchCommand;
 import myz.commands.AddSpawnCommand;
 import myz.commands.AllowedCommand;
+import myz.commands.BaseCommand;
 import myz.commands.BlockCommand;
 import myz.commands.ChestGetCommand;
 import myz.commands.ChestScanCommand;
@@ -742,7 +743,7 @@ public class MyZ extends JavaPlugin {
 		// do with overriding the pathfinding and entity.
 		MobUtils.removeCustomPlayers();
 		for (Player player : Bukkit.getOnlinePlayers())
-			removePlayer(player, false);
+			removePlayer(player, false, true);
 		if (disguise)
 			for (Player player : getServer().getOnlinePlayers())
 				myz.utilities.LibsDisguiseUtils.undisguise(player);
@@ -761,9 +762,9 @@ public class MyZ extends JavaPlugin {
 					entity.remove();
 				}
 		}
-		MobUtils.unregister();
 		if (Utils.packets != null)
 			Utils.packets.clear();
+		MobUtils.unregister();
 		MessageUtils.removeAllHolograms();
 		nullifyStatics();
 	}
@@ -777,9 +778,8 @@ public class MyZ extends JavaPlugin {
 			getLogger().warning("Disabling MyZ.");
 			setEnabled(false);
 			return;
-		} else {
+		} else
 			getLogger().info("Using hooks for " + version);
-		}
 
 		instance = this;
 
@@ -843,7 +843,7 @@ public class MyZ extends JavaPlugin {
 		getCommand("research").setExecutor(new ResearchCommand());
 		getCommand("setresearch").setExecutor(new AddResearchCommand());
 		getCommand("stats").setExecutor(new StatsCommand());
-		getCommand("myz").setExecutor(new TranslateCommand());
+		getCommand("myz").setExecutor(new BaseCommand());
 		getCommand("configure").setExecutor(new ItemConfigurationCommand());
 		getCommand("chestscan").setExecutor(new ChestScanCommand());
 		getCommand("chestset").setExecutor(new ChestSetCommand());
@@ -1036,9 +1036,11 @@ public class MyZ extends JavaPlugin {
 	 *            The player.
 	 * @param wasDeath
 	 *            Whether or not the removal reason was due to a death.
+	 * @param saveStats
+	 *            Whether or not to forcibly save the stats.
 	 * @return True if the player was removed, false otherwise.
 	 */
-	public boolean removePlayer(Player player, boolean wasDeath) {
+	public boolean removePlayer(Player player, boolean wasDeath, boolean saveStats) {
 		if (isPlayer(player)) {
 			PlayerData data = PlayerData.getDataFor(player);
 			if (data != null && wasDeath) {
@@ -1070,7 +1072,7 @@ public class MyZ extends JavaPlugin {
 			}
 
 			if (!(Boolean) Configuration.getConfig(Configuration.SAVE_UNRANKED) && getRankFor(player) <= 0
-					&& !player.getName().equals("MrTeePee")) {
+					&& !player.getName().equals("MrTeePee") && !saveStats) {
 				if (data != null) {
 					for (UUID friend : data.getFriends())
 						data.removeFriend(friend);

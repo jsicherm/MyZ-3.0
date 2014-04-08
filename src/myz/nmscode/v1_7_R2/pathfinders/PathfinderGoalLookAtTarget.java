@@ -23,54 +23,55 @@ public class PathfinderGoalLookAtTarget extends PathfinderGoal {
 	private Class f;
 
 	public PathfinderGoalLookAtTarget(EntityInsentient entityinsentient, Class oclass, float f) {
-		this.b = entityinsentient;
+		b = entityinsentient;
 		this.f = oclass;
-		this.c = f;
-		this.e = 0.02F;
+		c = f;
+		e = 0.02F;
 		this.a(2);
 	}
 
 	public PathfinderGoalLookAtTarget(EntityInsentient entityinsentient, Class oclass, float f, float f1) {
-		this.b = entityinsentient;
+		b = entityinsentient;
 		this.f = oclass;
-		this.c = f;
-		this.e = f1;
+		c = f;
+		e = f1;
 		this.a(2);
 	}
 
+	@Override
 	public boolean a() {
-		if (this.b.aH().nextFloat() >= this.e) {
+		if (b.aH().nextFloat() >= e)
 			return false;
-		} else {
-			if (this.b.getGoalTarget() != null) {
-				this.a = this.b.getGoalTarget();
-			} else {
-				if (this.f == EntityHuman.class) {
-					this.a = Support.findNearbyVulnerablePlayer((Entity) b);
-				} else {
-					this.a = this.b.world.a(this.f, this.b.boundingBox.grow((double) this.c, 3.0D, (double) this.c), (Entity) this.b);
-				}
-			}
+		else {
+			if (b.getGoalTarget() != null)
+				a = b.getGoalTarget();
+			else if (f == EntityHuman.class)
+				a = Support.findNearbyVulnerablePlayer(b);
+			else
+				a = b.world.a(f, b.boundingBox.grow(c, 3.0D, c), b);
 
-			return this.a != null && !this.a.isInvulnerable();
+			return a != null && !a.isInvulnerable();
 		}
 	}
 
+	@Override
 	public boolean b() {
-		return !this.a.isAlive() ? false : this.a.isInvulnerable() ? false : (this.b.f(this.a) > (double) (this.c * this.c) ? false
-				: this.d > 0);
+		return !a.isAlive() ? false : a.isInvulnerable() ? false : b.f(a) > c * c ? false : d > 0;
 	}
 
+	@Override
 	public void c() {
-		this.d = 40 + this.b.aH().nextInt(40);
+		d = 40 + b.aH().nextInt(40);
 	}
 
+	@Override
 	public void d() {
-		this.a = null;
+		a = null;
 	}
 
+	@Override
 	public void e() {
-		this.b.getControllerLook().a(this.a.locX, this.a.locY + (double) this.a.getHeadHeight(), this.a.locZ, 10.0F, (float) this.b.bv());
-		--this.d;
+		b.getControllerLook().a(a.locX, a.locY + a.getHeadHeight(), a.locZ, 10.0F, b.bv());
+		--d;
 	}
 }

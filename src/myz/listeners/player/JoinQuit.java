@@ -58,7 +58,7 @@ public class JoinQuit implements Listener {
 
 	@EventHandler
 	private void onLeave(PlayerQuitEvent e) {
-		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()))) {
+		if (MyZ.instance.removePlayer(e.getPlayer(), MyZ.instance.getFlagged().contains(e.getPlayer().getUniqueId()), false)) {
 			e.setQuitMessage(null);
 
 			if (e.getPlayer().getVehicle() != null)
@@ -108,7 +108,7 @@ public class JoinQuit implements Listener {
 			if (!MyZ.instance.isPlayer(e.getPlayer()))
 				playerJoin(e.getPlayer());
 		} else
-			MyZ.instance.removePlayer(e.getPlayer(), false);
+			MyZ.instance.removePlayer(e.getPlayer(), false, false);
 	}
 
 	/**
