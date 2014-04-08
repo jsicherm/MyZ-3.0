@@ -762,10 +762,25 @@ public class MyZ extends JavaPlugin {
 					entity.remove();
 				}
 		}
-		if (Utils.packets != null)
-			Utils.packets.clear();
-		MobUtils.unregister();
-		MessageUtils.removeAllHolograms();
+		/*
+		 * These tend to throw ClassDef errors randomly.
+		 */
+		try {
+			if (Utils.packets != null)
+				Utils.packets.clear();
+		} catch (Exception exc) {
+
+		}
+		try {
+			MobUtils.unregister();
+		} catch (Exception exc) {
+
+		}
+		try {
+			MessageUtils.removeAllHolograms();
+		} catch (Exception exc) {
+
+		}
 		nullifyStatics();
 	}
 

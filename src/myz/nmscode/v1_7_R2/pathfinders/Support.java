@@ -196,11 +196,11 @@ public class Support {
 	private static void see(EntityInsentient entity, Location location, int priority) {
 		if (random.nextInt(priority + 1) >= 1 && entity.getGoalTarget() == null || priority > 1) {
 			entity.setGoalTarget(null);
-			if (entity.getBukkitEntity().getType() == EntityType.ZOMBIE)
+			if (entity.getBukkitEntity().getType() == EntityType.ZOMBIE && entity instanceof CustomEntityZombie)
 				((CustomEntityZombie) entity).see(location, priority);
-			else if (entity.getBukkitEntity().getType() == EntityType.PIG_ZOMBIE)
+			else if (entity.getBukkitEntity().getType() == EntityType.PIG_ZOMBIE && entity instanceof CustomEntityPigZombie)
 				((CustomEntityPigZombie) entity).see(location, priority);
-			else if (entity.getBukkitEntity().getType() == EntityType.SKELETON)
+			else if (entity.getBukkitEntity().getType() == EntityType.SKELETON && entity instanceof CustomEntityNPC)
 				((CustomEntityNPC) entity).see(location, priority);
 		}
 	}

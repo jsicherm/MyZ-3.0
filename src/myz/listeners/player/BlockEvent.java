@@ -182,9 +182,10 @@ public class BlockEvent implements Listener {
 		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
 			return;
 		boolean state = !Configuration.canPlace(e.getPlayer(), e.getBlock());
-		if (state && e.getPlayer().hasPermission("MyZ.world_admin"))
-			return;
+		if (state && e.getPlayer().hasPermission("MyZ.world_admin")) { return; }
 		state = Configuration.doPlace(e.getPlayer(), e.getBlock());
-		e.setCancelled(state);
+		if (!e.getPlayer().hasPermission("MyZ.world_admin")) {
+			e.setCancelled(state);
+		}
 	}
 }

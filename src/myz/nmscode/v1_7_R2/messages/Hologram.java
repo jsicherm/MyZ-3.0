@@ -127,7 +127,7 @@ public class Hologram {
 	}
 
 	public void destroy() {
-		if (!showing)
+		if (entities.isEmpty())
 			return;
 
 		int[] ints = toInt(entities.keySet());
