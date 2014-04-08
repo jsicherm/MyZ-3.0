@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import myz.MyZ;
 import myz.support.PlayerData;
+import myz.support.SQLManager;
 import myz.support.interfacing.Messenger;
 
 import org.bukkit.ChatColor;
@@ -40,7 +41,7 @@ public class FriendsCommand implements CommandExecutor {
 				}
 			else if (MyZ.instance.getSQLManager().isConnected())
 				for (String name : MyZ.instance.getSQLManager().getStringList(((Player) sender).getUniqueId(), "friends")) {
-					output += current + MyZ.instance.getName(UUID.fromString(name)) + ChatColor.WHITE + ", ";
+					output += current + MyZ.instance.getName(SQLManager.fromString(name)) + ChatColor.WHITE + ", ";
 					if (current == ChatColor.DARK_RED)
 						current = ChatColor.RED;
 					else

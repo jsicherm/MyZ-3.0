@@ -67,7 +67,12 @@ public class SQLManager {
 	}
 
 	public static UUID fromString(String uid) {
-		return UUID.fromString(uid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
+		try {
+			return UUID.fromString(uid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
+		} catch (Exception exc) {
+			Messenger.sendConsoleMessage("&4Unable to parse UUID: " + uid);
+		}
+		return null;
 	}
 
 	public static String UUIDtoString(UUID uid) {
@@ -163,8 +168,8 @@ public class SQLManager {
 		if (!isIn(player.getUniqueId()))
 			try {
 				cachedKeyValues.add(player.getUniqueId());
-				executeQuery("INSERT INTO playerdata (username, name) VALUES ('" + UUIDtoString(player.getUniqueId()) + "', '"
-						+ player.getName() + "')");
+				executeQuery("INSERT INTO playerdata (username, name, friends) VALUES ('" + UUIDtoString(player.getUniqueId()) + "', '"
+						+ player.getName() + "', '')");
 			} catch (Exception e) {
 				Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL add command: " + e.getMessage());
 				Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");
@@ -176,6 +181,7 @@ public class SQLManager {
 	 * Establish connection with MySQL.
 	 */
 	public void connect() {
+		if (connected) { return; }
 		Messenger.sendConsoleMessage(ChatColor.YELLOW + "Connecting to MySQL...");
 
 		String url = "jdbc:mysql://" + hostname + ":" + port + "/" + database;

@@ -57,7 +57,7 @@ public class Messenger {
 			return msg;
 		PlayerData data = PlayerData.getDataFor(player);
 		if (data != null) {
-			msg = msg.replaceAll("%CLAN%", data.getClan());
+			msg = msg.replaceAll("%CLAN%", data.getClan() == null ? "" : data.getClan());
 			msg = msg.replaceAll("%RANK%", "" + data.getRank());
 			msg = msg.replaceAll("%RESEARCH%", "" + data.getResearchPoints());
 		}

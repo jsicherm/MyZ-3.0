@@ -10,6 +10,7 @@ import java.util.UUID;
 import myz.MyZ;
 import myz.nmscode.compat.MobUtils;
 import myz.support.PlayerData;
+import myz.support.SQLManager;
 import myz.support.interfacing.Configuration;
 import myz.support.interfacing.Localizer;
 import myz.support.interfacing.Messenger;
@@ -135,8 +136,11 @@ public class JoinQuit implements Listener {
 				friends = data.getFriends();
 			if (MyZ.instance.getSQLManager().isConnected())
 				stringFriends = MyZ.instance.getSQLManager().getStringList(player.getUniqueId(), "friends");
-			for (String s : stringFriends)
-				friends.add(UUID.fromString(s));
+			for (String s : stringFriends) {
+				UUID t = SQLManager.fromString(s);
+				if (t != null)
+					friends.add(t);
+			}
 			for (UUID friend : friends) {
 				Player online_friend = MyZ.instance.getPlayer(friend);
 				if (online_friend != null)
