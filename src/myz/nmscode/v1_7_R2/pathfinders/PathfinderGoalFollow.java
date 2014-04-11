@@ -28,7 +28,7 @@ public class PathfinderGoalFollow extends PathfinderGoal {
 
 	@Override
 	public boolean a() {
-		List list = a.world.a(b.getClass(), a.boundingBox.grow(8.0D, 4.0D, 8.0D));
+		List list = a.world.a(EntityHuman.class, a.boundingBox.grow(8.0D, 4.0D, 8.0D));
 		EntityHuman entityanimal = null;
 		double d0 = Double.MAX_VALUE;
 		Iterator iterator = list.iterator();

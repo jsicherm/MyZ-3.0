@@ -123,7 +123,7 @@ public class MyZ extends JavaPlugin {
 
 	// TODO clan create permission in joinclan.
 
-	// TODO update to 1.7.5
+	// TODO async 51 concurrent
 
 	public static MyZ instance;
 	public static boolean vault;

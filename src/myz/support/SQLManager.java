@@ -66,11 +66,12 @@ public class SQLManager {
 		longcolumns.addAll(Arrays.asList("timeOfKickban", "minutes_alive"));
 	}
 
-	public static UUID fromString(String uid) {
+	public static UUID fromString(String uid, boolean buryException) {
 		try {
 			return UUID.fromString(uid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
 		} catch (Exception exc) {
-			Messenger.sendConsoleMessage("&4Unable to parse UUID: " + uid);
+			if (!buryException)
+				Messenger.sendConsoleMessage("&4Unable to parse UUID: " + uid);
 		}
 		return null;
 	}
@@ -404,7 +405,7 @@ public class SQLManager {
 			if (rs != null)
 				while (rs.next())
 					if (rs.getString("username") != null)
-						list.add(fromString(rs.getString("username")));
+						list.add(fromString(rs.getString("username"), false));
 		} catch (Exception e) {
 			Messenger.sendConsoleMessage(ChatColor.RED + "Unable to execute MySQL getkeys command: " + e.getMessage());
 			Messenger.sendConsoleMessage(ChatColor.RED + "Trying to reconnect");

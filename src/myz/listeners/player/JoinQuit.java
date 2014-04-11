@@ -84,6 +84,7 @@ public class JoinQuit implements Listener {
 	private void onPreJoin(AsyncPlayerPreLoginEvent e) {
 		if ((Boolean) Configuration.getConfig(Configuration.PRELOGIN)) {
 			UUID uid = MyZ.instance.getUID(e.getName());
+			if (uid == null) { return; }
 			PlayerData data = PlayerData.getDataFor(uid);
 			/*
 			 * Check if the player is still banned against the playerdata and sql.
@@ -137,7 +138,7 @@ public class JoinQuit implements Listener {
 			if (MyZ.instance.getSQLManager().isConnected())
 				stringFriends = MyZ.instance.getSQLManager().getStringList(player.getUniqueId(), "friends");
 			for (String s : stringFriends) {
-				UUID t = SQLManager.fromString(s);
+				UUID t = SQLManager.fromString(s, false);
 				if (t != null)
 					friends.add(t);
 			}

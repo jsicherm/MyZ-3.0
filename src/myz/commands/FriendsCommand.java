@@ -41,7 +41,11 @@ public class FriendsCommand implements CommandExecutor {
 				}
 			else if (MyZ.instance.getSQLManager().isConnected())
 				for (String name : MyZ.instance.getSQLManager().getStringList(((Player) sender).getUniqueId(), "friends")) {
-					output += current + MyZ.instance.getName(SQLManager.fromString(name)) + ChatColor.WHITE + ", ";
+					UUID uid = SQLManager.fromString(name, false);
+					if (uid == null) {
+						continue;
+					}
+					output += current + MyZ.instance.getName(uid) + ChatColor.WHITE + ", ";
 					if (current == ChatColor.DARK_RED)
 						current = ChatColor.RED;
 					else
