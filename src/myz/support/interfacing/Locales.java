@@ -22,6 +22,7 @@ public class Locales {
 	private static final Map<String, Object> defaultSet = new HashMap<String, Object>();
 	private static final Map<String, Object> pirateSet = new HashMap<String, Object>();
 	private static final Map<String, Object> turkishSet = new HashMap<String, Object>();
+	private static final Map<String, Object> spanishSet = new HashMap<String, Object>();
 	private static final Map<String, Object> unSet = new HashMap<String, Object>();
 
 	/**
@@ -304,7 +305,131 @@ public class Locales {
 		set.put("player_was_killed_npc", "&eCombat logginde oldun.");
 		set.put("spawn.zombie",
 				"Artik bir &2zombisin&r! Zombiyken obur zombiler sana saldirmayacaktir. Asla susamassin veya kanamazsin ancak canlanma kitin yoktur ve yasayanlara karsi dusmansin!");
+	}
 
+	private static void loadSpanish() {
+		Map<String, Object> set = spanishSet;
+
+		set.put("command.research.item_no_exists", "&4Ese item no es investigable.");
+		set.put("command.research.arguments", "&4Uso: /setresearch <addreward [point cost]/add [point value]/remove>");
+		set.put("command.research.added", "&eJugadores ahora pueden investigar %s con %s puntos de investigación.");
+		set.put("command.research.item", "&eDebes tener el item que deseas agregar/remover de la investigación.");
+		set.put("command.research.reward.added", "&eJugadores ahora pueden investigar %s con %s puntos de investigación.");
+		set.put("command.research.removed", "&eJugadores ya no pueden investigar %s.");
+		set.put("command.research.item_exists", "&4Este item ya es investigable.");
+		set.put("command.spawn.unable_to_spawn", "&4Imposible aparecer ahi. Porfavor intentalo en breve.");
+		set.put("command.spawn.requires_rank", "&4Esto es una opción de donador.");
+		set.put("command.spawn.too_far_from_lobby", "&4You are too far from the lobby.");
+		set.put("command.friend.non_exist", "&4%s nunca ha jugado.");
+		set.put("command.friend.requires_name", "&4Debes especificar el nombre de tu amigo.");
+		set.put("command.friend.empty", "&4No tienes amigos... :(");
+		set.put("command.stats.kills_header", "==== &eMuertes&r ====");
+		set.put("command.stats.footer", "Estadisticas completas en http://my-z.org#statistics");
+		set.put("command.stats.time", "Total: &e%s minutos&r  Esta vida: &e%s minutos");
+		set.put("command.stats.header", "==== Estadísticas de &e%s&r ====");
+		set.put("command.stats.time_header", "==== &eTIEMPO SOBREVIVIDO&r ====");
+		set.put("command.stats.kills", "Zombie: &e%s&r  Pigman: &e%s&r  Gigante: &e%s&r  Jugador: &e%s");
+		set.put("command.saverank.saved", "&eEl prefijo del numero de rank %s ha sido cambiado a %s.");
+		set.put("command.saverank.requires_number", "&4Debes especificar un numero de rank.");
+		set.put("command.saverank.requires_prefix", "&4Debes especificar un prefijo.");
+		set.put("command.block.destroy.remove.help",
+				"&eAhora rompe el bloque que quieres dejar en la lista negra con el item que puedes romperlo.");
+		set.put("command.block.destroy.remove.fail", "&eJugadores no pueden romper el bloque: %s con %ss.");
+		set.put("command.block.destroy.remove.summary", "&eJugadores ya no pueden romer el bloque: %s con %ss.");
+		set.put("command.block.destroy.add.summary", "&eJugadores ahora pueden romer el bloque: %s con %ss.");
+		set.put("command.block.destroy.add.fail", "&eYa se puede romper el bloque: %s con %ss.");
+		set.put("command.block.destroy.add.help",
+				"&eRompe el bloque que quieres agregar a la lista blanca con el item que dejaras romperlo.");
+		set.put("command.block.destroy.arguments", "&4Uso: /blockallow destroy <add [seconds until respawn]/remove>");
+		set.put("command.block.place.remove.help", "&ePon el bloque que quieres agregar a la lista negra.");
+		set.put("command.block.place.remove.summary", "&eYa no se puede poner el bloque: %s .");
+		set.put("command.block.place.remove.fail", "&eJugadores no pueden poner el bloque: %s .");
+		set.put("command.block.place.add.help", "&ePon el bloque que te gustaria agregar a la lista blanca.");
+		set.put("command.block.place.add.summary", "&ePlayers can now place %s blocks.");
+		set.put("command.block.place.add.fail", "&eYa se puede poner el bloque: %s .");
+		set.put("command.block.place.arguments", "&4Uso: /blockallow place <add [seconds until despawn]/remove>");
+		set.put("command.block.arguments", "&4Uso: /blockallow <place/destroy>");
+		set.put("command.setlobby.updated", "&2Region del lobby marcado.");
+		set.put("command.setlobby.requires_cuboid", "&4Debes hacer una selección &ocuboide&r&4 con WorldEdit.");
+		set.put("command.setrank.success", "&eHas actualizado el rango del jugador.");
+		set.put("command.setrank.failure",
+				"&4Debes especificar el nombre de un jugador que ha jugado anteriormente y un rango mayor o igual a 0.");
+		set.put("command.addspawn.added", "&eTu localizacion a sido agregado a los spawnpoints.");
+		set.put("command.addspawn.already_exists", "&4Este lugar ya es un spawnpoint.");
+		set.put("command.removespawn.requires_number",
+				"&4Especifica el spawnpoint (numero) para removerlo. Mira los numeros usando /spawnpoints.");
+		set.put("command.removespawn.unable_to_remove", "&4El numero especificado, esta fuera del rango.");
+		set.put("command.removespawn.removed", "&eSpawnPoint removido.");
+		set.put("command.base.help", "=== MyZ Ayuda ===");
+		set.put("command.savekit.saved", "&eEl kit inicial %s ha sido guardado con el contenido actual.");
+		set.put("command.savekit.requires_number", "&4Especifica un numero de rank donde guardar.");
+		set.put("command.clan.in", "Estas en el clan '&e%s&r' (%s online / %s total).");
+		set.put("command.clan.not_in", "No estas en un clan.");
+		set.put("command.clan.leave", "Ya no estas en un clan.");
+		set.put("command.allowed.breakable", "&ePuedes romper:");
+		set.put("command.allowed.placeable", "&ePuedes poner:");
+		set.put("damage.headshot", "&eHeadshot! x2 daño.");
+		set.put("damage.leg_break", "&4Oof! Eso fue una caida larga!");
+		set.put("damage.leg_fix", "Eso me gusta más.");
+		set.put("damage.poison_end", "Ah, mucho mejor!");
+		set.put("damage.bleed_end", "Eso debería detener el sangrado.");
+		set.put("damage.poison_begin", "&5No me siento bien...");
+		set.put("damage.bleed_begin", "&4Ouch! Estoy sangrando!.");
+		set.put("research.success-short", "&e+%s Puntos de investigación!");
+		set.put("research.fail", "&eLos dioses de la ciencia se rehusan a tu ofrecimiento.");
+		set.put("research.success", "&eHas ganado mejor entendimiento de la enfermedad y tienes %s puntos de investigación.");
+		set.put("research.rank", "&eLos dioses de la ciencia no te escucharan. Debes tener un mejor rank para investigar.");
+		set.put("clan.notjoined", "&4No te puedes unir a clanes.");
+		set.put("clan.name.too_long", "&4El nombre del clan debe ser menos a 20 carácteres.");
+		set.put("clan.joined", "Tu petición a unirte a '&e%s&r' fue aceptada.");
+		set.put("clan.joining", "Enviaste petición para unirte.");
+		set.put("loot.set.arguments", "&4Porfavor especifica el nombre del botín.");
+		set.put("loot.set.percent", "Pon el porcentaje de aparición (0-100)");
+		set.put("loot.set.info",
+				"&ePon UN item (con el tamaño del stack propicio) en el inventario que abrirá arriba. Cuando cierres el inventario, inserta el porcentaje de aparición del item. Tipea algo para continuar.");
+		set.put("friend.added", "&e%s &9fue agregado a la lista de tus amigos.");
+		set.put("friend.removed", "&e%s &9fue removido de la lista de amigos.");
+		set.put("gui.purchased", "Ahora tienes &e%s&r puntos.");
+		set.put("gui.cost", "%s Puntos de Investigación");
+		set.put("gui.previous_page", "Pagina anterior");
+		set.put("gui.next_page", "Siguiente página");
+		set.put("gui.afford", "No sabes lo suficiente para esto.");
+		set.put("zombie.kill_amount", "&eZombie caído. %s esta vida.");
+		set.put("murdered", "&4ASESINADO");
+		set.put("safe_logout.cancelled", "&4Desconecte Seguro cancelado por movimiento.");
+		set.put("safe_logout.beginning", "&2Desconecte Seguro ocurrirá en:");
+		set.put("chest.set.typeis", "&eEse cofre tiene ahora la tabla de botín: %s");
+		set.put("chest.set.begin", "&eEmpezando MyZ Log del cofre. Causará lag y tomara tiempo.");
+		set.put("chest.set.click", "&eClick derecho al cofre que quieres definir.");
+		set.put("chest.set.initialize",
+				"&eInicializando un scan en la area seleccionada. Realice un nuevo escaneado simultáneamente a su propio riesgo.");
+		set.put("chest.set.coordinate2", "&eClick-Derecho en la otra esquina del area a escanear.");
+		set.put("chest.set.coordinate1", "&eClick derecho en la esquina a escanear.");
+		set.put("chest.set.nonchest", "&4Esto no es un cofre.");
+		set.put("chest.get.typeis", "&eEse cofre tiene ahora la tabla de botín: %s");
+		set.put("chest.get.nonchest", "&4Eso no es un cofre.");
+		set.put("chest.get.click", "&eClick-Derecho en el chest que queires conseguir.");
+		set.put("private.to_prefix", "&7A %s:");
+		set.put("private.no_player", "&4El jugador no se encontró.");
+		set.put("private.many_players", "&4Más de un jugador fue encontrado.");
+		set.put("private.from_prefix", "&7De %s:");
+		set.put("private.clan_prefix", "&8Chat del clan:");
+		set.put("giant.kill_amount", "&eGigante abajo. %s esta vida.");
+		set.put("special.giant_summon_permission", "&4Esto es de donación.");
+		set.put("special.giant_could_not_summon", "&eNo hay suficiente espacio para hacer aparecer un gigante.");
+		set.put("special.giant_summoned", "&eEl suelo tiembla, un gigante aparecerá.");
+		set.put("heal.wait", "Por favor espera %s segundos antes de curar a otro jugador de nuevo.");
+		set.put("heal.waste", "&eEso fue un desperdicio.");
+		set.put("heal.amount", "&eJugador &2recuperado&e. Ahora tienes %s de vida.");
+		set.put("pigman.kill_amount", "&ePigman muerto. %s esta vida.");
+		set.put("kick.safe_logout", "&eHas sido desconectado con seguridad.");
+		set.put("kick.come_back", "&4Te han matado. Espera %s segundos para volver.");
+		set.put("bandit.amount", "&eJugador &4asesinado&e. Ahora tienes %s muertes esta vida.");
+		set.put("ranks.spawnmessage.0", "Has aparecido el mundo, rapido! busca agua y comida!.");
+		set.put("player_npc_killed", "&e%s ha sido asesinado por desconectarse en combate.");
+		set.put("player_was_killed_npc", "&eFuiste asesinado por desconectarte en combate.");
+		set.put("spawn.zombie",
+				"Estas &2infectado&r! Como zombie, no te atacarán otros zombies. Nunca te dara sed ni sangrarás pero no empezarás con un kit de spawn y seras cazado por la vida.");
 	}
 
 	/**
@@ -492,6 +617,7 @@ public class Locales {
 
 		loadPirate();
 		loadTurkish();
+		loadSpanish();
 	}
 
 	/**
