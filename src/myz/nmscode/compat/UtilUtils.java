@@ -22,6 +22,9 @@ public class UtilUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.utilities.NMSCodeUtils.revive(player);
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.utilities.NMSCodeUtils.revive(player);
+			break;
 		}
 	}
 }

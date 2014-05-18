@@ -123,8 +123,15 @@ public class MyZ extends JavaPlugin {
 
 	// TODO clan create permission in joinclan.
 
-	// TODO async 51 concurrent
-	// TODO research pagination
+	// async 51 concurrent
+	// research pagination
+	// add worldguard support for MyZ builder override.
+	// TODO startup (only with players online) causes unable to parse UUID
+	// message.
+	// TODO player join causes unable to parse UUID message.
+	// TODO zombie spawn functionality
+	// String += loops to StringBuilder loops.
+	// SIB compatibility
 
 	public static MyZ instance;
 	public static boolean vault;

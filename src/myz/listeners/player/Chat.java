@@ -110,7 +110,7 @@ public class Chat implements Listener {
 		Player player = e.getPlayer();
 		String prefix = Configuration.getPrefixForPlayerRank(player);
 		int radio_frequency = -1;
-		
+
 		e.setMessage(Messenger.processForArguments(player, e.getMessage()));
 		e.setMessage(e.getMessage().replaceAll("%", ""));
 
@@ -123,7 +123,7 @@ public class Chat implements Listener {
 		}
 		if ((Boolean) Configuration.getConfig("chat.format"))
 			e.setFormat(prefix + e.getMessage());
-		
+
 		// Cache and clear the recipients.
 		Set<Player> original_recipients = new HashSet<Player>(e.getRecipients());
 		e.getRecipients().clear();

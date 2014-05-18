@@ -28,9 +28,10 @@ public class JoinClanCommand implements CommandExecutor {
 		if (sender instanceof Player) {
 			if (args.length >= 1) {
 				String clan = "";
+				StringBuilder b = new StringBuilder(clan);
 				for (String arg : args)
-					clan += arg + " ";
-				clan = clan.trim();
+					b.append(arg + " ");
+				clan = b.toString().trim();
 				if (clan.length() >= 20) {
 					Messenger.sendConfigMessage(sender, "clan.name.too_long");
 					return true;

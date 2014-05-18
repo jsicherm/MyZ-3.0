@@ -30,10 +30,11 @@ public class FriendsCommand implements CommandExecutor {
 		if (sender instanceof Player) {
 			ChatColor current = ChatColor.DARK_RED;
 			String output = "";
+			StringBuilder b = new StringBuilder(output);
 			PlayerData data = PlayerData.getDataFor((Player) sender);
 			if (data != null)
 				for (UUID name : data.getFriends()) {
-					output += current + MyZ.instance.getName(name) + ChatColor.WHITE + ", ";
+					b.append(current + MyZ.instance.getName(name) + ChatColor.WHITE + ", ");
 					if (current == ChatColor.DARK_RED)
 						current = ChatColor.RED;
 					else
@@ -42,19 +43,18 @@ public class FriendsCommand implements CommandExecutor {
 			else if (MyZ.instance.getSQLManager().isConnected())
 				for (String name : MyZ.instance.getSQLManager().getStringList(((Player) sender).getUniqueId(), "friends")) {
 					UUID uid = SQLManager.fromString(name, false);
-					if (uid == null) {
+					if (uid == null)
 						continue;
-					}
-					output += current + MyZ.instance.getName(uid) + ChatColor.WHITE + ", ";
+					b.append(current + MyZ.instance.getName(uid) + ChatColor.WHITE + ", ");
 					if (current == ChatColor.DARK_RED)
 						current = ChatColor.RED;
 					else
 						current = ChatColor.DARK_RED;
 				}
-			if (output.length() >= 2)
-				output = output.substring(0, output.length() - 2);
-			if (!output.trim().isEmpty() && output != "" && output.trim() != "")
-				sender.sendMessage(output);
+			if (b.length() >= 2)
+				output = b.toString().substring(0, output.length() - 2);
+			if (!b.toString().trim().isEmpty() && b.toString() != "" && b.toString().trim() != "")
+				sender.sendMessage(b.toString());
 			else
 				Messenger.sendConfigMessage(sender, "command.friend.empty");
 		} else

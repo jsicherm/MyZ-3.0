@@ -18,9 +18,9 @@ public enum Localizer {
 	// Variants have been merged for sake of simplicity.
 	AFRIKAANS("Afrikaans", "af_ZA"), ARABIC("العربية", "ar_SA"), BULGARIAN("Българ�?ки", "bg_BG"), CATALAN("Català",
 			"ca_ES"), CZECH("Čeština", "cs_CZ"), CYMRAEG("Cymraeg", "cy_GB"), DANISH("Dansk", "da_DK"), GERMAN("Deutsch", "de_DE"), GREEK(
-			"Ελληνικά", "el_GR"), ENGLISH("English", "en_CA"), PIRATE_SPEAK("Pirate Speak", "en_PT"), ESPERANTO(
-			"Esperanto", "eo_EO"), SPANISH("Espanol", "es_ES"), ESTONIAN("Eesti", "et_EE"), EUSKARA("Euskara", "eu_ES"), FINNISH("Suomi",
-			"fi_FI"), TAGALOG("Tagalog", "fil_PH"), FRENCH("Francais", "fr_FR"), GAEILGE("Gaeilge", "ga_IE"), GALICIAN("Galego", "gl_ES"), HEBREW(
+			"Ελληνικά", "el_GR"), ENGLISH("English", "en_CA"), PIRATE_SPEAK("Pirate Speak", "en_PT"), ESPERANTO("Esperanto",
+			"eo_EO"), SPANISH("Espanol", "es_ES"), ESTONIAN("Eesti", "et_EE"), EUSKARA("Euskara", "eu_ES"), FINNISH("Suomi", "fi_FI"), TAGALOG(
+			"Tagalog", "fil_PH"), FRENCH("Francais", "fr_FR"), GAEILGE("Gaeilge", "ga_IE"), GALICIAN("Galego", "gl_ES"), HEBREW(
 			"עברית", "he_IL"), CROATIAN("Hrvatski", "hr_HR"), HUNGARIAN("Magyar", "hu_HU"), ARMENIAN("Հայերեն", "hy_AM"), BAHASA_INDONESIA(
 			"Bahasa Indonesia", "id_ID"), ICELANDIC("�?slenska", "is_IS"), ITALIAN("Italiano", "it_IT"), JAPANESE("日本語", "ja_JP"), GEORGIAN(
 			"ქ�?რთული", "ka_GE"), KOREAN("한국어", "ko_KR"), KERNEWEK("Kernewek", "kw_GB"), LINGUA_LATINA("Lingua latina",
@@ -33,7 +33,6 @@ public enum Localizer {
 			"Tiếng Việt", "vi_VI"), SIMPLIFIED_CHINESE("简体中文", "zh_CN"), TRADITIONAL_CHINESE("�?體中文", "zh_TW"), POLISH(
 			"Polski", "pl_PL"), DEFAULT("Default", "default");
 
-	private static final String[] englishVariants = new String[] { "en_AU", "en_GB", "fa_IR", "hi_IN", "ky_KG", "sk_SK" };
 	private static final String[] spanishVariants = new String[] { "es_AR", "es_MX", "es_UY", "es_VE" };
 	private static final String[] frenchVariants = new String[] { "fr_CA" };
 	private static final String[] norwegianVariants = new String[] { "no_NO", "nn_NO" };
@@ -52,15 +51,15 @@ public enum Localizer {
 		for (Localizer l : values())
 			if (l.getCode().equalsIgnoreCase(code))
 				return l;
-		for (String s : spanishVariants) {
-			if (s.equalsIgnoreCase(code)) { return Localizer.SPANISH; }
-		}
-		for (String s : frenchVariants) {
-			if (s.equalsIgnoreCase(code)) { return Localizer.FRENCH; }
-		}
-		for (String s : norwegianVariants) {
-			if (s.equalsIgnoreCase(code)) { return Localizer.NORWEGIAN; }
-		}
+		for (String s : spanishVariants)
+			if (s.equalsIgnoreCase(code))
+				return Localizer.SPANISH;
+		for (String s : frenchVariants)
+			if (s.equalsIgnoreCase(code))
+				return Localizer.FRENCH;
+		for (String s : norwegianVariants)
+			if (s.equalsIgnoreCase(code))
+				return Localizer.NORWEGIAN;
 		return Localizer.ENGLISH;
 	}
 

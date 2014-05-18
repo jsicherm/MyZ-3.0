@@ -23,6 +23,9 @@ public class MessageUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.messages.Hologram.removeAll();
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.messages.Hologram.removeAll();
+			break;
 		}
 	}
 
@@ -40,6 +43,12 @@ public class MessageUtils {
 			holo.show(location, array);
 			holo.follow();
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.messages.Hologram h = new myz.nmscode.v1_7_R3.messages.Hologram(message);
+			h.setFollow(player);
+			h.show(location, array);
+			h.follow();
+			break;
 		}
 	}
 
@@ -53,6 +62,10 @@ public class MessageUtils {
 			myz.nmscode.v1_7_R2.messages.Hologram holo = new myz.nmscode.v1_7_R2.messages.Hologram(msg);
 			holo.show(location, playerFor);
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.messages.Hologram h = new myz.nmscode.v1_7_R3.messages.Hologram(msg);
+			h.show(location, playerFor);
+			break;
 		}
 	}
 
@@ -62,6 +75,8 @@ public class MessageUtils {
 			return Hologram.distance;
 		case v1_7_5:
 			return myz.nmscode.v1_7_R2.messages.Hologram.distance;
+		case v1_7_9:
+			return myz.nmscode.v1_7_R3.messages.Hologram.distance;
 		}
 		return 0;
 	}

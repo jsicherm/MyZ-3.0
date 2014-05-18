@@ -3,8 +3,11 @@
  */
 package myz.scheduling;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import myz.MyZ;
 import myz.api.PlayerDrinkWaterEvent;
@@ -53,7 +56,17 @@ public class aSync implements Runnable {
 	 * @return The list of players.
 	 */
 	private List<Player> getSyncPlayers(final String world) {
-		return MyZ.instance.getServer().getWorld(world).getPlayers();
+		Future<List<Player>> f = MyZ.instance.getServer().getScheduler().callSyncMethod(MyZ.instance, new Callable<List<Player>>() {
+			@Override
+			public List<Player> call() throws Exception {
+				return MyZ.instance.getServer().getWorld(world).getPlayers();
+			}
+		});
+		try {
+			return f.get();
+		} catch (Exception exc) {
+			return new ArrayList<Player>();
+		}
 	}
 
 	/**

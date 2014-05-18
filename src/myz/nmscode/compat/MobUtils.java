@@ -65,6 +65,9 @@ public class MobUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.mobs.CustomEntityType.unregisterEntities();
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.mobs.CustomEntityType.unregisterEntities();
+			break;
 		}
 	}
 
@@ -75,6 +78,9 @@ public class MobUtils {
 			break;
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.mobs.CustomEntityType.registerEntities();
+			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.mobs.CustomEntityType.registerEntities();
 			break;
 		}
 	}
@@ -95,6 +101,9 @@ public class MobUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.utilities.EntityCreator.create(location, type, reason, a, b);
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.utilities.EntityCreator.create(location, type, reason, a, b);
+			break;
 		}
 	}
 
@@ -105,6 +114,9 @@ public class MobUtils {
 			break;
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.utilities.EntityCreator.overrideVillager(entity);
+			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.utilities.EntityCreator.overrideVillager(entity);
 			break;
 		}
 	}
@@ -117,6 +129,9 @@ public class MobUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.utilities.EntityCreator.disguiseNPC(location);
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.utilities.EntityCreator.disguiseNPC(location);
+			break;
 		}
 	}
 
@@ -126,6 +141,8 @@ public class MobUtils {
 			return CustomEntityPlayer.newInstance(playerDuplicate);
 		case v1_7_5:
 			return myz.nmscode.v1_7_R2.mobs.CustomEntityPlayer.newInstance(playerDuplicate);
+		case v1_7_9:
+			return myz.nmscode.v1_7_R3.mobs.CustomEntityPlayer.newInstance(playerDuplicate);
 		}
 		return null;
 	}
@@ -136,6 +153,8 @@ public class MobUtils {
 			return CustomEntityZombie.newInstance(player);
 		case v1_7_5:
 			return myz.nmscode.v1_7_R2.mobs.CustomEntityZombie.newInstance(player);
+		case v1_7_9:
+			return myz.nmscode.v1_7_R3.mobs.CustomEntityZombie.newInstance(player);
 		}
 		return null;
 	}

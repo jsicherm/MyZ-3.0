@@ -29,9 +29,10 @@ public class ChestSetCommand implements CommandExecutor, TabCompleter {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player) {
 			String lootset = "";
+			StringBuilder b = new StringBuilder(lootset);
 			for (String arg : args)
-				lootset += arg + " ";
-			lootset = lootset.trim();
+				b.append(arg + " ");
+			lootset = b.toString().trim();
 			ChestScanner.setters.put(((Player) sender).getUniqueId(), lootset.isEmpty() ? null : lootset);
 			Messenger.sendConfigMessage(sender, "chest.set.click");
 		}

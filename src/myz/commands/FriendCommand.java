@@ -32,9 +32,10 @@ public class FriendCommand implements CommandExecutor, TabCompleter {
 		if (sender instanceof Player) {
 			if (args.length != 0) {
 				String name = "";
+				StringBuilder b = new StringBuilder(name);
 				for (String partial : args)
-					name += partial + " ";
-				name = name.trim();
+					b.append(partial + " ");
+				name = b.toString().trim();
 				if (name.equals(((Player) sender).getName()))
 					return true;
 

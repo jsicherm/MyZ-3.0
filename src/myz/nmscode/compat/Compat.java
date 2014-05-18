@@ -9,7 +9,7 @@ package myz.nmscode.compat;
  */
 public enum Compat {
 
-	v1_7_2("v1_7_R1"), v1_7_5("v1_7_R2");
+	v1_7_2("v1_7_R1"), v1_7_5("v1_7_R2"), v1_7_9("v1_7_R3");
 
 	private final String s;
 

@@ -67,6 +67,8 @@ public class SQLManager {
 	}
 
 	public static UUID fromString(String uid, boolean buryException) {
+		if (uid.contains("-"))
+			return UUID.fromString(uid);
 		try {
 			return UUID.fromString(uid.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
 		} catch (Exception exc) {

@@ -29,6 +29,7 @@ public class SaveRankCommand implements CommandExecutor, TabCompleter {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		int rank = 0;
 		String prefix = "";
+		StringBuilder b = new StringBuilder(prefix);
 		if (args.length >= 2) {
 			try {
 				rank = Integer.parseInt(args[0]);
@@ -37,8 +38,8 @@ public class SaveRankCommand implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			for (int position = 1; position < args.length; position++)
-				prefix += args[position] + " ";
-			prefix = prefix.trim();
+				b.append(args[position] + " ");
+			prefix = b.toString().trim();
 		} else if (args.length == 1)
 			prefix = args[0];
 		else if (args.length == 0) {

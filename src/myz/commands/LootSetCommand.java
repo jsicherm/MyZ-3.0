@@ -28,9 +28,10 @@ public class LootSetCommand implements CommandExecutor {
 				return true;
 			}
 			String lootset = "";
+			StringBuilder b = new StringBuilder(lootset);
 			for (String arg : args)
-				lootset += arg + " ";
-			lootset = lootset.trim();
+				b.append(arg + " ");
+			lootset = b.toString().trim();
 			ChestScanner.addLooter((Player) sender, lootset);
 		}
 

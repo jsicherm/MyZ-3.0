@@ -33,11 +33,13 @@ public class StatsCommand implements CommandExecutor, TabCompleter {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (sender instanceof Player || args.length != 0) {
 			String name = sender.getName();
+			StringBuilder b = new StringBuilder(name);
 			if (args.length != 0) {
 				name = "";
+				b = new StringBuilder(name);
 				for (String word : args)
-					name += word + " ";
-				name = name.trim();
+					b.append(word + " ");
+				name = b.toString().trim();
 			}
 
 			UUID uid = MyZ.instance.getUID(name);

@@ -3,10 +3,14 @@
  */
 package myz.listeners.player;
 
+import java.lang.reflect.Field;
+
+import myz.MyZ;
 import myz.chests.ChestManager;
 import myz.commands.BlockCommand;
 import myz.support.Teleport;
 import myz.support.interfacing.Configuration;
+import myz.support.interfacing.Messenger;
 import myz.utilities.Validate;
 
 import org.bukkit.Location;
@@ -179,13 +183,33 @@ public class BlockEvent implements Listener {
 	private void onPlacement(BlockPlaceEvent e) {
 		if (!Validate.inWorld(e.getPlayer().getLocation()))
 			return;
-		if (e.getBlockPlaced().getType() == Material.ENDER_CHEST)
-			return;
+
 		boolean state = !Configuration.canPlace(e.getPlayer(), e.getBlock());
-		if (state && e.getPlayer().hasPermission("MyZ.world_admin")) { return; }
-		state = Configuration.doPlace(e.getPlayer(), e.getBlock());
-		if (!e.getPlayer().hasPermission("MyZ.world_admin")) {
-			e.setCancelled(state);
+		if (!state || !e.getPlayer().hasPermission("MyZ.world_admin")) {
+			state = Configuration.doPlace(e.getPlayer(), e.getBlock());
+			if (!e.getPlayer().hasPermission("MyZ.world_admin"))
+				e.setCancelled(state);
+		}
+
+		if (!e.isCancelled()) {
+			if (MyZ.instance.getServer().getPluginManager().getPlugin("StructureInABox") != null
+					&& MyZ.instance.getServer().getPluginManager().isPluginEnabled("StructureInABox")) {
+				Object plugin = MyZ.instance.getServer().getPluginManager().getPlugin("StructureInABox");
+
+				try {
+					Class<?> sib = Class.forName("org.samson.bukkit.plugins.structureinabox.StructureInABox");
+					Class<?> sibl = Class.forName("org.samson.bukkit.plugins.structureinabox.StructureInABoxEventListener");
+					Field f = sib.getDeclaredField("eventListener");
+					f.setAccessible(true);
+					Object o = f.get(sib.cast(plugin));
+					sibl.getMethod("onPlayerPlaceBlock", BlockPlaceEvent.class).invoke(sibl.cast(o), e);
+					if (e.isCancelled())
+						return;
+				} catch (Exception exc) {
+					Messenger.sendConsoleMessage("&4Unable to ensure compatibility with StructureInABox: ");
+					exc.printStackTrace();
+				}
+			}
 		}
 	}
 }

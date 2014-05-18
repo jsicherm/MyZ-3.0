@@ -17,6 +17,7 @@ import myz.listeners.player.ConsumeFood;
 import myz.scheduling.Sync;
 import myz.support.MedKit;
 import myz.utilities.SoulboundUtils;
+import myz.utilities.WGUtils;
 import myz.utilities.WorldlessLocation;
 
 import org.bukkit.Bukkit;
@@ -375,8 +376,17 @@ public class Configuration {
 		return false;
 	}
 
+	private static boolean builderCanBuild(Player p, Block block) {
+		if (p.hasPermission("MyZ.builder")) {
+			if (MyZ.instance.getServer().getPluginManager().isPluginEnabled("WorldGuard"))
+				return WGUtils.canBuild(p, block);
+			return true;
+		}
+		return false;
+	}
+
 	public static boolean canBreak(Player p, Block block, ItemStack with) {
-		if (p != null && p.hasPermission("MyZ.builder"))
+		if (p != null && builderCanBuild(p, block))
 			return true;
 		ItemStack compare = new ItemStack(block.getType());
 		compare.setDurability(block.getData());
@@ -389,7 +399,7 @@ public class Configuration {
 	}
 
 	public static boolean canPlace(Player p, Block block) {
-		if (p != null && p.hasPermission("MyZ.builder"))
+		if (p != null && builderCanBuild(p, block))
 			return true;
 		ItemStack compare = new ItemStack(block.getType());
 		compare.setDurability(block.getData());

@@ -408,11 +408,11 @@ public class Utils {
 			points = MyZ.instance.getSQLManager().getInt(player.getUniqueId(), "research");
 
 		// Create inventories and initial arrows.
-		ItemStack leftArrow = new ItemStack(Material.PISTON_EXTENSION);
+		ItemStack leftArrow = new ItemStack(Material.ENDER_PORTAL);
 		ItemMeta meta = leftArrow.getItemMeta();
 		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage(Localizer.getLocale(player), "gui.previous_page"));
 		leftArrow.setItemMeta(meta);
-		ItemStack rightArrow = new ItemStack(Material.PISTON_EXTENSION);
+		ItemStack rightArrow = new ItemStack(Material.ENDER_PORTAL);
 		meta = rightArrow.getItemMeta();
 		meta.setDisplayName(ChatColor.DARK_GRAY + Messenger.getConfigMessage(Localizer.getLocale(player), "gui.next_page"));
 		rightArrow.setItemMeta(meta);
@@ -420,8 +420,8 @@ public class Utils {
 		List<Inventory> inventories = new ArrayList<Inventory>();
 		Inventory gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.DEFAULT, "science_gui", points + "") + " (1)");
 		inventories.add(gui);
-		gui.setItem(0, leftArrow);
-		gui.setItem(8, rightArrow);
+		gui.setItem(0, leftArrow.clone());
+		gui.setItem(8, rightArrow.clone());
 
 		// Start loading items.
 		int position = 1;
@@ -443,20 +443,20 @@ public class Utils {
 						gui = Bukkit.createInventory(null, 9, Messenger.getConfigMessage(Localizer.DEFAULT, "science_gui", points + "")
 								+ " (" + page + ")");
 						inventories.add(gui);
-						gui.setItem(0, leftArrow);
-						gui.setItem(8, rightArrow);
+						gui.setItem(0, leftArrow.clone());
+						gui.setItem(8, rightArrow.clone());
 						position = 1;
 					}
 				}
 
 		// Show page.
-		if (page > inventories.size())
-			page = 1;
-		if (page < 1)
-			page = inventories.size();
-		page--;
-		if (inventories.get(page) != null)
-			player.openInventory(inventories.get(page));
+		if (pg > inventories.size())
+			pg = 1;
+		if (pg < 1)
+			pg = inventories.size();
+		pg--;
+		if (inventories.get(pg) != null)
+			player.openInventory(inventories.get(pg));
 	}
 
 	/**

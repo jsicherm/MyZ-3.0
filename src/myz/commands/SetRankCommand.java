@@ -33,6 +33,7 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 		if (args.length >= 2) {
 			int rank = -1;
 			String player = "";
+			StringBuilder b = new StringBuilder(player);
 			try {
 				rank = Integer.parseInt(args[args.length - 1]);
 			} catch (NumberFormatException exc) {
@@ -52,8 +53,8 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 			}
 
 			for (int i = 0; i < args.length - 1; i++)
-				player += args[i] + " ";
-			player = player.trim();
+				b.append(args[i] + " ");
+			player = b.toString().trim();
 
 			UUID uid = MyZ.instance.getUID(player);
 			if (uid == null) {

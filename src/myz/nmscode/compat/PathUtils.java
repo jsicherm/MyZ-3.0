@@ -24,6 +24,9 @@ public class PathUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.pathfinders.Support.elevatePlayer(player, priority);
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.pathfinders.Support.elevatePlayer(player, priority);
+			break;
 		}
 	}
 
@@ -35,6 +38,9 @@ public class PathUtils {
 		case v1_7_5:
 			myz.nmscode.v1_7_R2.pathfinders.Support.see(entity, location, priority);
 			break;
+		case v1_7_9:
+			myz.nmscode.v1_7_R3.pathfinders.Support.see(entity, location, priority);
+			break;
 		}
 	}
 
@@ -44,6 +50,8 @@ public class PathUtils {
 			return (float) Support.experienceBarVisibility(player) / 18;
 		case v1_7_5:
 			return (float) myz.nmscode.v1_7_R2.pathfinders.Support.experienceBarVisibility(player) / 18;
+		case v1_7_9:
+			return (float) myz.nmscode.v1_7_R3.pathfinders.Support.experienceBarVisibility(player) / 18;
 		}
 		return 0.0f;
 	}
