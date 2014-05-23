@@ -776,6 +776,7 @@ public class Locales {
 					break;
 				case FRENCH:
 					map = frenchSet;
+					break;
 				default:
 					map = defaultSet;
 					break;
