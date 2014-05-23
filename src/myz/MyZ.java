@@ -297,7 +297,7 @@ public class MyZ extends JavaPlugin {
 	 */
 	public void addFriend(Player friender, UUID friended) {
 		PlayerData data = PlayerData.getDataFor(friender);
-		if (data != null && !data.getFriends().contains(friended.toString())) {
+		if (data != null && !data.getFriends().contains(friended)) {
 			data.addFriend(friended);
 			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", getName(friended)));
 		}
@@ -635,7 +635,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isFriend(name);
 		if (sql.isConnected())
-			return sql.getStringList(player, "friends").contains(name);
+			return sql.getStringList(player, "friends").contains(name.toString());
 		// Theoretically impossible to get to this case.
 		return false;
 	}
@@ -1038,7 +1038,7 @@ public class MyZ extends JavaPlugin {
 	 */
 	public void removeFriend(Player unfriender, UUID unfriended) {
 		PlayerData data = PlayerData.getDataFor(unfriender);
-		if (data != null && data.getFriends().contains(unfriended.toString())) {
+		if (data != null && data.getFriends().contains(unfriended)) {
 			data.removeFriend(unfriended);
 			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", getName(unfriended)));
 		}
