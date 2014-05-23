@@ -380,7 +380,7 @@ public class PlayerData {
 		playersInClan.add(MyZ.instance.getPlayer(uid));
 		PlayerData data;
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (playersInClan.contains(player.getUniqueId()))
+			if (playersInClan.contains(player))
 				continue;
 			data = getDataFor(player.getUniqueId());
 			if (data != null)
