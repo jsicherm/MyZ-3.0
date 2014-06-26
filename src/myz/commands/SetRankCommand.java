@@ -66,8 +66,10 @@ public class SetRankCommand implements CommandExecutor, TabCompleter {
 			}
 
 			PlayerData data = PlayerData.getDataFor(uid);
-			if (data != null)
+			if (data != null) {
 				data.setRank(rank);
+				data.save();
+			}
 			if (MyZ.instance.getSQLManager().isConnected())
 				MyZ.instance.getSQLManager().set(uid, "rank", rank, true);
 			if (sender instanceof Player)

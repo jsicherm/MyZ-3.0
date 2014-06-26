@@ -58,6 +58,8 @@ public class ChestManager {
 	 *         listing doesn't exist in the config.
 	 */
 	private static BlockFace doesExist(Location location) {
+		if (MyZ.instance.getChestsConfig() == null || location == null) { return null; }
+
 		// Look for set directions.
 		BlockFace[] values = new BlockFace[] { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 		for (BlockFace slug : values)

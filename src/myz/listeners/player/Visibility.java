@@ -46,7 +46,7 @@ public class Visibility implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	private void onExplodeBlocks(EntityExplodeEvent e) {
-		if (!Validate.inWorld(e.getLocation()))
+		if (!Validate.inWorld(e.getLocation()) || !(Boolean) Configuration.getConfig("tnt.prevent_block_damage"))
 			return;
 		List<Block> explodedBlocks = new ArrayList<Block>();
 

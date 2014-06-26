@@ -52,10 +52,7 @@ Example:
 What's left?
 ============
 
-So far, here are the base features that haven't yet been added.
-
 - [ ] Clan system rewrite
-- [ ] Grave digging
 
 Known Caveats
 =============

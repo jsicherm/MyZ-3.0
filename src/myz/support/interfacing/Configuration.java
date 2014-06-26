@@ -195,6 +195,8 @@ public class Configuration {
 
 		configEntries.put(PRELOGIN, true);
 
+		configEntries.put("tnt.prevent_block_damage", true);
+
 		configEntries.put("mobs.player.research-reward", 1);
 		configEntries.put("mobs.zombie.damage", 2.0);
 		configEntries.put("mobs.zombie.speed", 1.2);

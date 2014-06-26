@@ -114,24 +114,12 @@ public class MyZ extends JavaPlugin {
 	// TODO configurable death loot (?)
 
 	// TODO use construction parts to create clans. Builder is clan owner.
-	// Requires Build-in-a-box.
 
-	// TODO grave-digging
 	// TODO @ chat not showing name (?)
 
 	// TODO Research point rank uppance @see ResearchItem#checkRankIncrease
-
 	// TODO clan create permission in joinclan.
-
-	// async 51 concurrent
-	// research pagination
-	// add worldguard support for MyZ builder override.
-	// TODO startup (only with players online) causes unable to parse UUID
-	// message.
-	// TODO player join causes unable to parse UUID message.
 	// TODO zombie spawn functionality
-	// String += loops to StringBuilder loops.
-	// SIB compatibility
 
 	public static MyZ instance;
 	public static boolean vault;
@@ -297,7 +285,7 @@ public class MyZ extends JavaPlugin {
 	 */
 	public void addFriend(Player friender, UUID friended) {
 		PlayerData data = PlayerData.getDataFor(friender);
-		if (data != null && !data.getFriends().contains(friended.toString())) {
+		if (data != null && !data.getFriends().contains(friended)) {
 			data.addFriend(friended);
 			friender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(friender), "friend.added", getName(friended)));
 		}
@@ -635,7 +623,7 @@ public class MyZ extends JavaPlugin {
 		if (data != null)
 			return data.isFriend(name);
 		if (sql.isConnected())
-			return sql.getStringList(player, "friends").contains(name);
+			return sql.getStringList(player, "friends").contains(name.toString());
 		// Theoretically impossible to get to this case.
 		return false;
 	}
@@ -915,14 +903,15 @@ public class MyZ extends JavaPlugin {
 			@Override
 			public void run() {
 				sql.connect();
-				if (!sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
+				if (!sql.isConnected()/* && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)*/) {
 					Messenger.sendConsoleMessage(ChatColor.GREEN + "Using PlayerData for this session.");
 					alertOps = true;
 					Messenger.sendConsoleMessage(ChatColor.YELLOW + "Visit http://my-z.org/request.php to get a free MyZ MySQL database.");
-					Configuration.saveConfig(Configuration.DATASTORAGE, true, false);
-				} else if (sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE)) {
+					Configuration.saveConfig(Configuration.DATASTORAGE, true, true);
+					// Datastorage is a rather extranneous field as it will use it no matter the condition set (if mySQL cannot be reached).
+				} else/* if (sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE))*/{
 					Messenger.sendConsoleMessage(ChatColor.GREEN + "Using MySQL for this session.");
-					Configuration.saveConfig(Configuration.DATASTORAGE, false, false);
+					//Configuration.saveConfig(Configuration.DATASTORAGE, false, false);
 				}
 
 				/*
@@ -1038,7 +1027,7 @@ public class MyZ extends JavaPlugin {
 	 */
 	public void removeFriend(Player unfriender, UUID unfriended) {
 		PlayerData data = PlayerData.getDataFor(unfriender);
-		if (data != null && data.getFriends().contains(unfriended.toString())) {
+		if (data != null && data.getFriends().contains(unfriended)) {
 			data.removeFriend(unfriended);
 			unfriender.sendMessage(Messenger.getConfigMessage(Localizer.getLocale(unfriender), "friend.removed", getName(unfriended)));
 		}

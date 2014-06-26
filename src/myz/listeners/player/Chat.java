@@ -3,6 +3,7 @@
  */
 package myz.listeners.player;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class Chat implements Listener {
 			for (int i = 1; i < words.length; i++)
 				finalMessage += " " + words[i];
 			String queriedName = words[0].toLowerCase().substring(1, words[0].length());
-			Player[] onlinePlayers = player.getServer().getOnlinePlayers();
+			Collection<? extends Player> onlinePlayers = player.getServer().getOnlinePlayers();
 
 			for (Player testPlayer : onlinePlayers)
 				if (testPlayer != player)
@@ -85,7 +86,7 @@ public class Chat implements Listener {
 			if (data != null) {
 				if ((Boolean) Configuration.getConfig("chat.format"))
 					e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
-							+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
+							+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().substring(1));
 				e.getRecipients().clear();
 				e.getRecipients().addAll(data.getOnlinePlayersInClan());
 				return true;
@@ -93,7 +94,7 @@ public class Chat implements Listener {
 			if (MyZ.instance.getSQLManager().isConnected()) {
 				if ((Boolean) Configuration.getConfig("chat.format"))
 					e.setFormat(MyZ.instance.getConfig().getString("localizable.private.clan_prefix") + " "
-							+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().replaceFirst(".", ""));
+							+ Configuration.getPrefixForPlayerRank(player) + ": " + e.getMessage().substring(1));
 				e.getRecipients().clear();
 				e.getRecipients().addAll(MyZ.instance.getSQLManager().getOnlinePlayersInClan(e.getPlayer().getUniqueId()));
 				return true;

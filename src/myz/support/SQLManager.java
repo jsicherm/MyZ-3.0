@@ -79,7 +79,7 @@ public class SQLManager {
 	}
 
 	public static String UUIDtoString(UUID uid) {
-		return uid.toString().replaceAll("-", "");
+		return uid == null ? "" : uid.toString().replaceAll("-", "");
 	}
 
 	/**
