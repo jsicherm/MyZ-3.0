@@ -3,7 +3,6 @@
  */
 package myz.listeners.player;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,9 +51,8 @@ public class Chat implements Listener {
 			for (int i = 1; i < words.length; i++)
 				finalMessage += " " + words[i];
 			String queriedName = words[0].toLowerCase().substring(1, words[0].length());
-			Collection<? extends Player> onlinePlayers = player.getServer().getOnlinePlayers();
 
-			for (Player testPlayer : onlinePlayers)
+			for (Player testPlayer : player.getServer().getOnlinePlayers())
 				if (testPlayer != player)
 					if (testPlayer.getName().toLowerCase().indexOf(queriedName) >= 0
 							|| testPlayer.getDisplayName().toLowerCase().indexOf(queriedName) >= 0) {

@@ -4,6 +4,7 @@
 package myz.support.interfacing;
 
 import myz.MyZ;
+import myz.nmscode.compat.MessageUtils;
 import myz.nmscode.v1_7_R1.messages.FancyMessage;
 import myz.support.PlayerData;
 import myz.utilities.VaultUtils;
@@ -157,9 +158,7 @@ public class Messenger {
 		ItemStack tH = typeFor.getItemInHand();
 
 		for (Player player : playerFor.getWorld().getPlayers())
-			new FancyMessage(Configuration.getPrefixForPlayerRank(playerFor)).itemTooltip(pH)
-					.then(" " + Messenger.getConfigMessage(Localizer.getLocale(player), "murdered") + " ")
-					.then(Configuration.getPrefixForPlayerRank(typeFor)).itemTooltip(tH);
+			MessageUtils.fancyDisplay(playerFor, player, typeFor, pH, tH);
 	}
 
 	/**

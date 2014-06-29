@@ -282,6 +282,7 @@ public class Configuration {
 		configEntries.put("blocks.destroy.0.with", new ItemStack(Material.ARROW));
 		configEntries.put("blocks.destroy.0.respawn", 3600);
 
+		spawnEntries.put("spawn.use_safespawn", false);
 		spawnEntries.put("spawn.safespawn_radius", 30);
 		spawnEntries.put("spawn.numbered_requires_rank", 2);
 		spawnEntries.put("spawn.potion_effects", Arrays.asList("CONFUSION,3,4", "BLINDNESS,1,3", "ABSORPTION,1,5"));

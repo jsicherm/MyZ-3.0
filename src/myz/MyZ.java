@@ -908,10 +908,13 @@ public class MyZ extends JavaPlugin {
 					alertOps = true;
 					Messenger.sendConsoleMessage(ChatColor.YELLOW + "Visit http://my-z.org/request.php to get a free MyZ MySQL database.");
 					Configuration.saveConfig(Configuration.DATASTORAGE, true, true);
-					// Datastorage is a rather extranneous field as it will use it no matter the condition set (if mySQL cannot be reached).
+					// Datastorage is a rather extranneous field as it will use
+					// it no matter the condition set (if mySQL cannot be
+					// reached).
 				} else/* if (sql.isConnected() && (Boolean) Configuration.getConfig(Configuration.DATASTORAGE))*/{
 					Messenger.sendConsoleMessage(ChatColor.GREEN + "Using MySQL for this session.");
-					//Configuration.saveConfig(Configuration.DATASTORAGE, false, false);
+					// Configuration.saveConfig(Configuration.DATASTORAGE,
+					// false, false);
 				}
 
 				/*
@@ -1305,8 +1308,9 @@ public class MyZ extends JavaPlugin {
 		/*
 		 * An enemy was nearby, stop the spawning.
 		 */
-		if (Utils.isCreatureNearby(player, spawn, (Integer) Configuration.getSpawn("spawn.safespawn_radius"))) {
-			if (withInitiallySpecifiedSpawnpoint || spawningAttempts >= 25)
+		if ((Boolean) Configuration.getSpawn("spawn.use_safespawn")
+				&& Utils.isCreatureNearby(player, spawn, (Integer) Configuration.getSpawn("spawn.safespawn_radius"))) {
+			if (withInitiallySpecifiedSpawnpoint || spawningAttempts >= 50)
 				Messenger.sendConfigMessage(player, "command.spawn.unable_to_spawn");
 			else
 				spawnPlayer(player, spawningAttempts + 1);
